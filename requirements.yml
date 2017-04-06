@@ -1,0 +1,6 @@
+---
+- src: CSC-IT-Center-for-Science.mariadb
+- src: cmprescott.xml
+- src: CSC-IT-Center-for-Science.jetty
+- src: CSC-IT-Center-for-Science.shibboleth-idp
+- src: CSC-IT-Center-for-Science.apache

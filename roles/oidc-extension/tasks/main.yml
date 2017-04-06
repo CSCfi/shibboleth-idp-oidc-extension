@@ -1,0 +1,22 @@
+---
+
+- name: Copy idp-oidc-extension-impl jar for bulding new idp.war
+  copy:
+    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/idp-oidc-extension-impl-0.5-SNAPSHOT.jar"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/idp-oidc-extension-impl-0.5-SNAPSHOT.jar"
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: no
+
+#add copy of basic set of dependencies
+
+- name: Build new idp.war
+  shell: source {{ environment_file }} && "{{ idp_home }}/bin/build.sh"
+  become_user: root
+
+- name: Restart shibboleth idp
+  service:
+    name: shibboleth-idp
+    state: restarted
+

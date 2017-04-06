@@ -1,0 +1,3 @@
+---
+#environment variables to source for building shibboleth idp package
+environment_file: /etc/default/shibboleth
