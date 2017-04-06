@@ -140,17 +140,10 @@ See LICENSE.txt file in the root directory of this repository for the copyright/
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
             </plugin>
-<!--
             <plugin>
                 <groupId>com.versioneye</groupId>
                 <artifactId>versioneye-maven-plugin</artifactId>
-                <configuration>
-                    <apiKey>${VERSIONEYE_API_KEY}</apiKey>
-                    <projectId>56efd997053a52000ac0d7e0</projectId>
-                    <updatePropertiesAfterCreate>false</updatePropertiesAfterCreate>
-                </configuration>
             </plugin>
--->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
