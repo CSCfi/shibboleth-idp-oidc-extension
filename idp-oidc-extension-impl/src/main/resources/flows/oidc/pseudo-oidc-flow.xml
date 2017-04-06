@@ -1,0 +1,300 @@
+<flow xmlns="http://www.springframework.org/schema/webflow"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd">
+
+
+	<action-state id="InitializeProfileRequestContext">
+		<evaluate expression="InitializeProfileRequestContext" />
+		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="DecodeMessage" />
+	</action-state>
+
+	<action-state id="DecodeMessage">
+		<!-- activating timer measurements and counters on associated objects. 
+			This may be usable step for us. Lower priority -->
+		<evaluate expression="PopulateMetricContext" />
+		<!-- Action that decodes an incoming request into oidc request message. 
+			Let's make atleast validations 3.1.2.2. Authentication Request Validation 
+			1,2 and 3... (point 4 later). We will make our own OIDCDecoder to handle 
+			the request. -->
+		<evaluate expression="DecodeMessage" />
+
+		<!-- Populate audit context This may be usable step for us. Lower priority -->
+		<evaluate expression="PostDecodePopulateAuditContext" />
+
+		<!-- Set protocol (Metadatalookup protocol) and role (OP). This may be 
+			usable step for us. Needs to be studied with next method. May require own 
+			OIDCProtocolAndRoleHandler -->
+		<evaluate expression="OIDCProtocolAndRole" />
+
+		<!-- Look for metadata of the rp and attach it to context. Requires own 
+			OIDCMetadataLookupHandler. Exact details are still open. -->
+		<evaluate expression="OIDCMetadataLookup" />
+
+		<!-- Initialize rp context based on rp. -->
+		<evaluate expression="InitializeRelyingPartyContexFromOIDCPeer" />
+
+		<!-- Resolve relying party configuration based on request and attach it 
+			to rp context. -->
+		<evaluate expression="SelectRelyingPartyConfiguration" />
+
+		<!-- Populate audit context again. -->
+		<evaluate expression="PostLookupPopulateAuditContext" />
+
+		<!-- Signature validation parameters. Study how much you can utilize of 
+			what is already offered by shibboleth. -->
+		<evaluate expression="PopulateSignatureValidationParameters" />
+
+		<!-- TLS validation parameters. Study how much you can utilize of what 
+			is already offered by shibboleth. backend feature-->
+		<evaluate expression="PopulateClientTLSValidationParameters" />
+
+		<!-- This is part of intercept control. We should want this. -->
+		<evaluate expression="PopulateInboundInterceptContext" />
+
+		<!-- Populate useragentcontext header to User-Agent. -->
+		<evaluate expression="PopulateUserAgentContext" />
+
+		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="CheckInboundInterceptContext" />
+	</action-state>
+
+	<!-- This is part of intercept control -->
+	<decision-state id="CheckInboundInterceptContext">
+		<if
+			test="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.ProfileInterceptorContext)).getAvailableFlows().isEmpty()"
+			then="OutboundContextsAndSecurityParameters" else="DoInboundInterceptSubflow" />
+	</decision-state>
+
+	<!-- This is part of intercept control -->
+	<subflow-state id="DoInboundInterceptSubflow" subflow="intercept">
+		<input name="calledAsSubflow" value="true" />
+		<transition on="proceed" to="OutboundContextsAndSecurityParameters" />
+	</subflow-state>
+
+	<action-state id="OutboundContextsAndSecurityParameters">
+		<!-- Set outbound msg context and related oidc conntextes to prc. -->
+		<evaluate expression="InitializeOutboundMessageContext" />
+
+		<!-- Initialize message channel context to defaults. If we are carrying 
+			this information this step seems usable as it is. -->
+		<evaluate expression="InitializeMessageChannelSecurityContext" />
+
+		<!-- Check from "metadata" that metadata contains the requested redirect 
+			uri for the flow used. Populate that information, otherwise a error is returned -->
+		<evaluate expression="PopulateFlowEndpointContexts" />
+
+		<!-- Populate information about response signing parameters and populate 
+			those to contextes, try to use the mechanisms used by shib currently as far 
+			as possible -->
+		<evaluate expression="PopulateResponseSignatureSigningParameters" />
+
+		<!-- Populate information about response encryption parameters and populate 
+			those to contextes, try to use the mechanisms used by shib currently as far 
+			as possible -->
+		<evaluate expression="PopulateEncryptionParameters" />
+
+		<!-- Populate information about request decryption parameters and populate 
+			those to contextes, try to use the mechanisms used by shib currently as far 
+			as possible -->
+		<evaluate expression="PopulateDecryptionParameters" />
+
+		<!-- Populate information about request verifications parameters and populate 
+			those to contextes, try to use the mechanisms used by shib currently as far 
+			as possible -->
+		<evaluate expression="PopulateSignatureVerificationParameters" />
+		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="ExtractSubject" />
+	</action-state>
+
+	<!-- Pull OIDC Subject if present and turn it into a principal name. -->
+
+	<!-- In OIDC it is possible to send parameters in request object (6.1. Passing 
+		a Request Object by Value). It is also possible to send claims parameters 
+		including id token in request itself (5.5. Requesting Claims using the "claims" 
+		Request Parameter). The outcome is that rp may send in signed (and encrypted) 
+		jwt information on who is the subject to be authenticated and what the claims 
+		(attributes) requested are. The information may also include what the values 
+		of those claims should be -->
+	<action-state id="ExtractSubject">
+		<!-- Verify signature of the jwt object if it exists -->
+		<evaluate expression="VerifyRequestObject" />
+		<!-- Decrypt jwt object -->
+		<evaluate expression="DecryptRequestObject" />
+		<!-- Validate request object follows specification -->
+		<!-- 6.1. Passing a Request Object by Value -->
+		<evaluate expression="ValidateRequestObject" />
+		<!-- Extract sub from id token -->
+		<evaluate expression="ExtractSubjectFromRequest" />
+		<!-- Extract claims from request. This information is needed in further 
+			processing, for instance when deciding if successfull response can be constructed. 
+			5.5. Requesting Claims using the "claims" Request Parameter -->
+		<evaluate expression="ExtractClaimsFromRequest" />
+		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="PopulateClientStorageLoadContext" />
+	</action-state>
+
+	<action-state id="PopulateClientStorageLoadContext">
+		<evaluate expression="PopulateClientStorageLoadContext" />
+		<evaluate expression="'proceed'" />
+
+		<transition on="proceed" to="ClientStorageLoad" />
+		<transition on="NoLoadNeeded" to="CheckInitialAuthentication" />
+	</action-state>
+
+	<subflow-state id="ClientStorageLoad" subflow="client-storage/read">
+		<input name="calledAsSubflow" value="true" />
+		<transition on="proceed" to="CheckInitialAuthentication" />
+	</subflow-state>
+
+	<decision-state id="CheckInitialAuthentication">
+		<if test="InitialAuthenticationFlag" then="PreInitialSetup" else="PostInitialSetup" />
+	</decision-state>
+
+	<action-state id="PreInitialSetup">
+		<!-- We have to initialize authentication context based on original authentication 
+			request. Prompt parameter may set isPassive on and max_age may set forceAuthn 
+			on. See 3.1.2.3. Authorization Server Authenticates End-User -->
+		<evaluate expression="InitializeAuthenticationContext" />
+		<evaluate expression="'proceed'" />
+
+		<transition on="proceed" to="DoInitialAuthenticationSubflow" />
+	</action-state>
+
+	<subflow-state id="DoInitialAuthenticationSubflow"
+		subflow="authn-initial">
+		<input name="calledAsSubflow" value="true" />
+		<transition on="proceed" to="PostInitialSetup" />
+	</subflow-state>
+
+	<action-state id="PostInitialSetup">
+		<!-- We have to initialize authentication context based on original authentication 
+			request. Prompt parameter may set isPassive on and max_age may set forceAuthn 
+			on. See 3.1.2.3. Authorization Server Authenticates End-User -->
+		<evaluate expression="InitializeAuthenticationContext" />
+		<!-- Set RequestedPrincipalContext based on acr parameter on original authentication 
+			request. -->
+		<evaluate expression="ProcessRequestedAuthnContext" />
+		<evaluate expression="'proceed'" />
+
+		<transition on="proceed" to="DoAuthenticationSubflow" />
+	</action-state>
+
+	<subflow-state id="DoAuthenticationSubflow" subflow="authn">
+		<input name="calledAsSubflow" value="true" />
+		<transition on="proceed" to="ResolveAttributes" />
+		<transition on="RestartAuthentication" to="PostInitialSetup" />
+	</subflow-state>
+
+	<decision-state id="ResolveAttributes">
+		<if test="ResolveAttributesPredicate.apply(opensamlProfileRequestContext)"
+			then="AttributeResolution" else="BuildResponse" />
+	</decision-state>
+
+	<action-state id="AttributeResolution">
+		<evaluate expression="ResolveAttributes" />
+		<evaluate expression="FilterAttributes" />
+		<evaluate expression="PopulatePostAuthnInterceptContext" />
+		<evaluate expression="'proceed'" />
+
+		<transition on="proceed" to="CheckPostAuthnInterceptContext" />
+	</action-state>
+
+	<decision-state id="CheckPostAuthnInterceptContext">
+		<if
+			test="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.ProfileInterceptorContext)).getAvailableFlows().isEmpty()"
+			then="BuildResponse" else="DoPostAuthnInterceptSubflow" />
+	</decision-state>
+
+	<subflow-state id="DoPostAuthnInterceptSubflow" subflow="intercept">
+		<input name="calledAsSubflow" value="true" />
+		<transition on="proceed" to="BuildResponse" />
+		<transition on="RestartAuthentication" to="PostInitialSetup" />
+	</subflow-state>
+
+	<action-state id="BuildResponse">
+		<!-- Build id token based on filtered attributes -->
+		<evaluate expression="BuildIDToken" />
+		<!-- Verify id token is such client is expecting based on requested claims 
+			in request object if such exists -->
+		<evaluate expression="VerifyIDToken" />
+		<!-- Build rest of the response -->
+		<evaluate expression="BuildResponse" />
+		<!-- Mimicing here saml2 flows -->
+		<evaluate expression="PostAssertionPopulateAuditContext" />
+		<!-- Mimicing here saml2 flows -->
+		<evaluate expression="UpdateSessionWithSPSession" />
+		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="EncryptAndSign" />
+	</action-state>
+
+
+	<action-state id="EncryptAndSign">
+		<!-- based on populated params token may be encrypted -->
+		<evaluate expression="EncryptIDToken" />
+		<!-- based on populated params token may be signed -->
+		<evaluate expression="SignIDToken" />
+		<evaluate expression="PostResponsePopulateAuditContext" />
+		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="PopulateClientStorageSaveContext" />
+	</action-state>
+
+	<!-- We may need to save client storage. -->
+	<action-state id="PopulateClientStorageSaveContext">
+		<evaluate expression="PopulateClientStorageSaveContext" />
+		<evaluate expression="'proceed'" />
+
+		<transition on="proceed" to="ClientStorageSave" />
+		<transition on="NoSaveNeeded" to="PopulateOutboundInterceptContext" />
+		<transition to="HandleErrorWithView" />
+	</action-state>
+
+	<subflow-state id="ClientStorageSave" subflow="client-storage/write">
+		<input name="calledAsSubflow" value="true" />
+		<transition on="proceed" to="PopulateOutboundInterceptContext" />
+		<transition to="HandleErrorWithView" />
+	</subflow-state>
+
+	<action-state id="PopulateOutboundInterceptContext">
+		<evaluate expression="PopulateOutboundInterceptContext" />
+		<evaluate expression="'proceed'" />
+
+		<transition on="proceed" to="CheckOutboundInterceptContext" />
+		<transition to="HandleErrorWithView" />
+	</action-state>
+
+	<decision-state id="CheckOutboundInterceptContext">
+		<if
+			test="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.ProfileInterceptorContext)).getAvailableFlows().isEmpty()"
+			then="HandleOutboundMessage" else="DoOutboundInterceptSubflow" />
+	</decision-state>
+
+	<subflow-state id="DoOutboundInterceptSubflow" subflow="intercept">
+		<input name="calledAsSubflow" value="true" />
+		<transition on="proceed" to="HandleOutboundMessage" />
+		<transition to="HandleErrorWithView" />
+	</subflow-state>
+
+	<action-state id="HandleOutboundMessage">
+		<!-- We form the response http uri -->
+		<evaluate expression="EncodeMessage" />
+		<evaluate expression="RecordResponseComplete" />
+		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="end" />
+		<transition to="HandleErrorWithView" />
+		<exception-handler bean="RethrowingFlowExecutionExceptionHandler" />
+	</action-state>
+
+	<!-- Splice in an additional step to write out the F-TICKS log entry on 
+		a successful completion. -->
+
+	<end-state id="end">
+		<on-entry>
+			<evaluate expression="WriteFTICKSLog" />
+		</on-entry>
+	</end-state>
+
+	<bean-import resource="oidc-beans.xml" />
+
+</flow>
+
