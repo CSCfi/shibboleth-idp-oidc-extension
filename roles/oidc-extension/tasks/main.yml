@@ -20,3 +20,15 @@
     name: shibboleth-idp
     state: restarted
 
+- template: src={{ playbook_dir }}/roles/oidc-extension/ldif/{{item}} dest=/tmp/{{item}}
+  with_items:
+    - "aci-{{ aci | regex_replace('(^.*)@(.*)$','\\1') }}.ldif"
+
+- set_fact:
+    acifile: "/tmp/aci-{{ aci | regex_replace('(^.*)@(.*)$','\\1') }}.ldif"
+  when: aci is defined
+
+- name: ACI | Add
+  shell: ldapmodify -x -D "{{ dirsrv_rootdn }}" -H ldap://localhost:389 -w {{ dirsrv_password }} -f {{ acifile }}
+  ignore_errors: yes
+  when: aci is defined
