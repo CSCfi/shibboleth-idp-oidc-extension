@@ -50,6 +50,11 @@ See LICENSE.txt file in the root directory of this repository for the copyright/
                 <artifactId>oauth2-oidc-sdk</artifactId>
                 <version>5.24.1</version>
             </dependency>
+            <dependency>
+               <groupId>net.shibboleth.idp</groupId>
+               <version>${shib.idp.version}</version>
+               <artifactId>idp-authn-api</artifactId>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
