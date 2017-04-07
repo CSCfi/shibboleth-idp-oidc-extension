@@ -1,5 +1,20 @@
 ---
 
+- name: Ensure "{{ idp_home }}/flows/oidc" dir exists
+  file: path="{{ idp_home }}/flows/oidc" state=directory
+
+- name: Copy oidc flow and beans
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: no
+  with_items:
+    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/oidc-flow.xml" }
+    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/oidc-beans.xml" }
+
 - name: Copy nimbus-jose-jwt jar for bulding new idp.war
   copy:
     src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/nimbus-jose-jwt-4.34.2.jar"
