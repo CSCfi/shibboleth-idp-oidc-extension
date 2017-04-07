@@ -1,5 +1,23 @@
 ---
 
+- name: Copy nimbus-jose-jwt jar for bulding new idp.war
+  copy:
+    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/nimbus-jose-jwt-4.34.2.jar"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/nimbus-jose-jwt-4.34.2.jar"
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: no
+
+- name: Copy oauth2-oidc-sdk jar for bulding new idp.war
+  copy:
+    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/oauth2-oidc-sdk-5.24.1.jar"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/oauth2-oidc-sdk-5.24.1.jar"
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: no
+
 - name: Copy idp-oidc-extension-impl jar for bulding new idp.war
   copy:
     src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/idp-oidc-extension-impl-0.5-SNAPSHOT.jar"
