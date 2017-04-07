@@ -31,7 +31,6 @@ package org.geant.idpextension.oidc.decoding.impl;
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 
-
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.decoder.MessageDecodingException;
@@ -49,7 +48,7 @@ public class OIDCDecoder extends AbstractHttpServletRequestMessageDecoder<Authen
     private final Logger log = LoggerFactory.getLogger(OIDCDecoder.class);
 
     /** {@inheritDoc} */
-    
+
     @Override
     protected void doDecode() throws MessageDecodingException {
         MessageContext<AuthenticationRequest> messageContext = new MessageContext<>();
@@ -58,7 +57,7 @@ public class OIDCDecoder extends AbstractHttpServletRequestMessageDecoder<Authen
         try {
             req = AuthenticationRequest.parse(request.getQueryString());
         } catch (com.nimbusds.oauth2.sdk.ParseException e) {
-            log.error("Unable to decode oidc request: "+ e.getMessage());
+            log.error("Unable to decode oidc request: {}", e.getMessage());
             throw new MessageDecodingException(e);
         }
         messageContext.setMessage(req);
