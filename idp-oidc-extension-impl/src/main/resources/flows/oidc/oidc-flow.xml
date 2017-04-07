@@ -12,8 +12,15 @@
 	<action-state id="DecodeMessage">
 		<evaluate expression="DecodeMessage" />
 		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="PostInitialSetup" />
+	</action-state>
+
+	<action-state id="PostInitialSetup">
+		<evaluate expression="InitializeAuthenticationContext" />
+		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="end" />
 	</action-state>
+
 
 	<end-state id="end">
 		<on-entry>
