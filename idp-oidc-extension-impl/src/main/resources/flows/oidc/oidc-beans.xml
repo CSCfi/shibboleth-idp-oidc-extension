@@ -19,7 +19,7 @@
 		scope="prototype">
 		<constructor-arg>
 			<bean class="org.geant.idpextension.oidc.decoding.impl.OIDCDecoder"
-				scope="prototype" p:httpServletRequest-ref="shibboleth.HttpServletRequest"
+				scope="prototype" p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
 		</constructor-arg>
 	</bean>
 
