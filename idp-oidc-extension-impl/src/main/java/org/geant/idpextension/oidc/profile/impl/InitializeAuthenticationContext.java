@@ -24,6 +24,7 @@ import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.profile.ActionSupport;
 import net.shibboleth.idp.profile.IdPEventIds;
 
+import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,13 +58,13 @@ public class InitializeAuthenticationContext extends AbstractProfileAction {
         log.debug("{} Initializing authentication context", getLogPrefix());
         final AuthenticationContext authnCtx = new AuthenticationContext();
         if (profileRequestContext.getInboundMessageContext() == null) {
-            log.debug("{} Unable to locate inbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_PROFILE_CONFIG);
+            log.error("{} Unable to locate inbound message context", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return;
         }
         if (profileRequestContext.getInboundMessageContext().getMessage() == null) {
-            log.debug("{} Unable to locate inbound message", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_PROFILE_CONFIG);
+            log.error("{} Unable to locate inbound message", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return;
         }
         Object request = profileRequestContext.getInboundMessageContext().getMessage();
