@@ -48,6 +48,32 @@
   shell: source {{ environment_file }} && "{{ idp_home }}/bin/build.sh"
   become_user: root
 
+- name: configure shibboleth-idp ldap.properties
+  lineinfile: dest={{ idp_home }}/conf/ldap.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
+  with_items:
+    - { option: 'idp.authn.LDAP.authenticator', value: 'bindSearchAuthenticator'}
+    - { option: 'idp.authn.LDAP.ldapURL', value: 'ldap://{{ hostvars[inventory_hostname].service_name }}:389' }
+    - { option: 'idp.authn.LDAP.useStartTLS', value: 'false' }
+    - { option: 'idp.authn.LDAP.useSSL', value: 'false' }
+    - { option: 'idp.authn.LDAP.baseDN', value: 'ou=People,{{ dirsrv_suffix }}' }
+    - { option: 'idp.authn.LDAP.bindDN', value: 'cn=Directory Manager' }
+    - { option: 'idp.authn.LDAP.bindDNCredential', value: '{{ dirsrv_password }}' }
+
+- name: Add one trusted test SP
+  blockinfile:
+    dest: "{{ idp_home }}/conf/metadata-providers.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertbefore: "</MetadataProvider>"
+    content: |
+          <MetadataProvider id="HTTPMetadata"
+                            xsi:type="FileBackedHTTPMetadataProvider"
+                            backingFile="/tmp/metadatacopy.xml"
+                            metadataURL="https://mpass-proxy-test.csc.fi/attributetest/Shibboleth.sso/Metadata"> 
+              <MetadataFilter xsi:type="EntityRoleWhiteList">
+                  <RetainedRole>md:SPSSODescriptor</RetainedRole>
+              </MetadataFilter>
+          </MetadataProvider>
+
 - name: Restart shibboleth idp
   service:
     name: shibboleth-idp
