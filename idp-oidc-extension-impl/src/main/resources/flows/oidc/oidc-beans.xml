@@ -23,6 +23,10 @@
 		</constructor-arg>
 	</bean>
 
+	<bean id="InitializeAuthenticationContext"
+		class="org.geant.idpextension.oidc.profile.impl.InitializeAuthenticationContext"
+		scope="prototype" />
+
 	<bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
 		scope="prototype" />
 
