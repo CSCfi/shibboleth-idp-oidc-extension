@@ -17,6 +17,11 @@ See LICENSE.txt file in the root directory of this repository for the copyright/
             <groupId>com.nimbusds</groupId>
             <artifactId>oauth2-oidc-sdk</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-authn-api</artifactId>
+        </dependency>
+
      <!-- following two for testing something out, remove -->
      <!--     
         <dependency>
