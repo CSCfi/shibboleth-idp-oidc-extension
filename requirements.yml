@@ -4,3 +4,4 @@
 - src: CSC-IT-Center-for-Science.jetty
 - src: CSC-IT-Center-for-Science.shibboleth-idp
 - src: CSC-IT-Center-for-Science.apache
+- src: CSCfi.389-ds
