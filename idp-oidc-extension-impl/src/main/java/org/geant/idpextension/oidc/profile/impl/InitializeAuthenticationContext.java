@@ -21,8 +21,7 @@ import javax.annotation.Nonnull;
 
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.idp.profile.ActionSupport;
-import net.shibboleth.idp.profile.IdPEventIds;
+import org.opensaml.profile.action.ActionSupport;
 
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -51,37 +50,49 @@ public class InitializeAuthenticationContext extends AbstractProfileAction {
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(InitializeAuthenticationContext.class);
 
+    /** OIDC Authentication request. */
+    AuthenticationRequest request;
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+        if (!super.doPreExecute(profileRequestContext)) {
+            log.error("{} pre-execute failed", getLogPrefix());
+            return false;
+        }
+        if (profileRequestContext.getInboundMessageContext() == null) {
+            log.error("{} Unable to locate inbound message context", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return false;
+        }
+        Object message = profileRequestContext.getInboundMessageContext().getMessage();
+
+        if (message == null || !(message instanceof AuthenticationRequest)) {
+            log.error("{} Unable to locate inbound message", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return false;
+        }
+        request = (AuthenticationRequest) message;
+        return true;
+
+    }
+
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         log.debug("{} Initializing authentication context", getLogPrefix());
         final AuthenticationContext authnCtx = new AuthenticationContext();
-        if (profileRequestContext.getInboundMessageContext() == null) {
-            log.error("{} Unable to locate inbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return;
+        /*
+         * TODO: This is a shortcut. We should compare the value to possible
+         * existing authentication result.
+         */
+        authnCtx.setForceAuthn(request.getMaxAge() == 0);
+        if (request.getPrompt() != null) {
+            authnCtx.setIsPassive(request.getPrompt().contains(Prompt.Type.NONE));
         }
-        if (profileRequestContext.getInboundMessageContext().getMessage() == null) {
-            log.error("{} Unable to locate inbound message", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return;
-        }
-        Object request = profileRequestContext.getInboundMessageContext().getMessage();
-        if (request != null && request instanceof AuthenticationRequest) {
-            log.debug("Initializing authentication context using oidc request parameters");
-            authnCtx.setForceAuthn(((AuthenticationRequest) request).getMaxAge() == 0);
-            authnCtx.setIsPassive(((AuthenticationRequest) request).getPrompt().contains(Prompt.Type.NONE));
-        }
-
-        final AuthenticationContext initialAuthnContext = profileRequestContext
-                .getSubcontext(AuthenticationContext.class);
-        if (initialAuthnContext != null) {
-            authnCtx.setInitialAuthenticationResult(initialAuthnContext.getAuthenticationResult());
-        }
-
         profileRequestContext.addSubcontext(authnCtx, true);
-
         log.debug("{} Created authentication context: {}", getLogPrefix(), authnCtx);
     }
 
