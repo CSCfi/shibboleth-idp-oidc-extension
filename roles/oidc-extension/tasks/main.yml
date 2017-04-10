@@ -33,6 +33,42 @@
     mode: 0644
     remote_src: no
 
+- name: Copy stepup dependency lang-tag.jar for bulding new idp.war
+  copy:
+    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/lang-tag-1.4.3.jar"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/lang-tag-1.4.3.jar"
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: no
+
+- name: Copy stepup dependency json-smart.jar for bulding new idp.war
+  copy:
+    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/json-smart-1.3.1.jar"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/json-smart-1.3.1.jar"
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: no
+
+- name: Copy stepup dependency commons-lang3-3.4.jar for bulding new idp.war
+  copy:
+    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-lang3-3.5.jar"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/commons-lang3-3.5.jar"
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: yes
+
+- name: Copy stepup dependency commons-collections4-4.1.jar for bulding new idp.war
+  copy:
+    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-collections4-4.1.jar"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/commons-collections4-4.1.jar"
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: no
+
 - name: Copy idp-oidc-extension-impl jar for bulding new idp.war
   copy:
     src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/idp-oidc-extension-impl-0.5-SNAPSHOT.jar"
