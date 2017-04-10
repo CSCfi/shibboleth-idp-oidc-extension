@@ -51,16 +51,16 @@
     mode: 0644
     remote_src: no
 
-- name: Copy stepup dependency commons-lang3-3.4.jar for bulding new idp.war
+- name: Copy stepup dependency commons-lang3.jar for bulding new idp.war
   copy:
     src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-lang3-3.5.jar"
     dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/commons-lang3-3.5.jar"
     owner: root
     group: root
     mode: 0644
-    remote_src: yes
+    remote_src: no
 
-- name: Copy stepup dependency commons-collections4-4.1.jar for bulding new idp.war
+- name: Copy stepup dependency commons-collections4.jar for bulding new idp.war
   copy:
     src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-collections4-4.1.jar"
     dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/commons-collections4-4.1.jar"
