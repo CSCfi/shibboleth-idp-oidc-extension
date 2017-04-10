@@ -92,6 +92,9 @@ public class InitializeAuthenticationContext extends AbstractProfileAction {
         if (request.getPrompt() != null) {
             authnCtx.setIsPassive(request.getPrompt().contains(Prompt.Type.NONE));
         }
+        if (request.getLoginHint() != null) {
+            authnCtx.setHintedName(request.getLoginHint());
+        }
         profileRequestContext.addSubcontext(authnCtx, true);
         log.debug("{} Created authentication context: {}", getLogPrefix(), authnCtx);
     }

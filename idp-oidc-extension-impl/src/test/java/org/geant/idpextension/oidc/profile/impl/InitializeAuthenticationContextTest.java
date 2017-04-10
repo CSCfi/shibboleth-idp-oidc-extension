@@ -80,7 +80,7 @@ public class InitializeAuthenticationContextTest {
     @Test
     public void testOIDCAuthnRequestNoFlags() throws Exception {
         AuthenticationRequest req = AuthenticationRequest
-                .parse("response_type=code&client_id=s6BhdRkqt3&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
+                .parse("response_type=code&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
         final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
         @SuppressWarnings("rawtypes")
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
@@ -91,6 +91,8 @@ public class InitializeAuthenticationContextTest {
         AuthenticationContext authnCtx = prc.getSubcontext(AuthenticationContext.class);
         Assert.assertFalse(authnCtx.isForceAuthn());
         Assert.assertFalse(authnCtx.isPassive());
+        Assert.assertEquals(authnCtx.getHintedName(), "foo");
+
     }
 
     /**
