@@ -28,7 +28,7 @@
 		</on-entry>
 	</end-state>
 
-
+	<bean-import resource="../../system/flows/saml/security-beans.xml" />
 	<bean-import resource="oidc-beans.xml" />
 
 </flow>
