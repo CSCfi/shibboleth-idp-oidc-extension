@@ -40,6 +40,7 @@ See LICENSE.txt file in the root directory of this repository for the copyright/
         </repository>
     </repositories>
     <modules>
+        <module>../idp-oidc-extension-api</module>
         <module>../idp-oidc-extension-impl</module>
     </modules>
     <dependencyManagement>
