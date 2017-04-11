@@ -28,17 +28,45 @@
 
 package org.geant.idpextension.oidc.messaging.context;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.opensaml.messaging.context.BaseContext;
 
 /**
  * Subcontext carrying information on metadata of the relying party. This
- * context appears as a subcontext of the 
+ * context appears as a subcontext of the
  * {@link org.opensaml.messaging.context.MessageContext} that carries the actual
  * OIDC request message, in such cases the metadata carried herein applies to
  * the issuer of that message.
  * 
- * This context is just a placeholder for the final solution.
+ * This context is just a placeholder for the final solution. At first phase we
+ * use only redirect uris.
  */
 public class OIDCMetadataContext extends BaseContext {
+
+    /** The only mandatory parameter. */
+    @Nullable
+    List<String> redirectURIs;
+
+    /**
+     * List of acceptable redirect uris rp may request response to.
+     * 
+     * @return redirect uris.
+     */
+    @Nullable
+    public List<String> getRedirectURIs() {
+        return redirectURIs;
+    }
+
+    /**
+     * Set the list of acceptable redirect uris for rp.
+     * 
+     * @param redirectURIs
+     */
+    public void setRedirectURIs(@Nullable List<String> redirectURIs) {
+        this.redirectURIs = redirectURIs;
+    }
 
 }
