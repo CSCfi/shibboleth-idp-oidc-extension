@@ -27,6 +27,10 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+                <dependency>
+                        <groupId>org.geant</groupId>
+                        <artifactId>idp-oidc-extension-api</artifactId>
+                </dependency>
 	</dependencies>
 	<build>
 		<plugins>

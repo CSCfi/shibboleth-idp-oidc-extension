@@ -57,6 +57,12 @@ See LICENSE.txt file in the root directory of this repository for the copyright/
                <artifactId>idp-authn-api</artifactId>
             </dependency>
             <dependency>
+               <groupId>org.geant</groupId>
+               <version>0.5-SNAPSHOT</version>
+               <artifactId>idp-oidc-extension-api</artifactId>
+            </dependency>
+            <!-- Test Dependencies -->
+            <dependency>
 	       <groupId>net.shibboleth.idp</groupId>
                <version>${shib.idp.version}</version>
 	       <artifactId>idp-profile-api</artifactId>
