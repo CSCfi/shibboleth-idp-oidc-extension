@@ -117,8 +117,8 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
         }
 
         log.debug("{} Attaching RelyingPartyContext for rp {}", getLogPrefix(), request.getClientID().getValue());
+        //TODO: rpContext.setVerified(Check from metadata client exists);
         rpContext.setRelyingPartyId(request.getClientID().getValue());
-
     }
 
 }
