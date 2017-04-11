@@ -11,6 +11,7 @@
 
 	<action-state id="DecodeMessage">
 		<evaluate expression="DecodeMessage" />
+		<evaluate expression="InitializeRelyingPartyContext" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="PostInitialSetup" />
 	</action-state>

@@ -38,7 +38,8 @@ import com.nimbusds.openid.connect.sdk.Prompt;
  * <p>
  * If the incoming message is a OIDC {@link AuthnRequest}, then basic
  * authentication policy (IsPassive, ForceAuthn) is interpreted from the request
- * max_age and prompt parameters.
+ * max_age and prompt parameters. If the incoming message has login_hint
+ * parameter the value of it is placed to hinted name.
  * </p>
  * 
  * 
@@ -51,7 +52,7 @@ public class InitializeAuthenticationContext extends AbstractProfileAction {
     private final Logger log = LoggerFactory.getLogger(InitializeAuthenticationContext.class);
 
     /** OIDC Authentication request. */
-    AuthenticationRequest request;
+    private AuthenticationRequest request;
 
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
