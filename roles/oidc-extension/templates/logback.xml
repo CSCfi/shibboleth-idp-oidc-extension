@@ -13,11 +13,11 @@
     <!-- <variable name="idp.process.appender" value="ASYNC_PROCESS" /> -->
     
     <!-- Logging level shortcuts. -->
-    <variable name="idp.loglevel.idp" value="ALL" />
+    <variable name="idp.loglevel.idp" value="INFO" />
     <variable name="idp.loglevel.ldap" value="WARN" />
     <variable name="idp.loglevel.messages" value="INFO" />
     <variable name="idp.loglevel.encryption" value="INFO" />
-    <variable name="idp.loglevel.opensaml" value="ALL" />
+    <variable name="idp.loglevel.opensaml" value="INFO" />
     <variable name="idp.loglevel.props" value="INFO" />
     
     <!-- Don't turn these up unless you want a *lot* of noise. -->
@@ -36,11 +36,11 @@
     <!-- =========================================================== -->
 
     <!-- Logs IdP, but not OpenSAML, messages -->
-    <logger name="net.shibboleth.idp" level="ALL"/>
+    <logger name="net.shibboleth.idp" level="INFO"/>
     <logger name="org.geant" level="ALL"/>
 
     <!-- Logs OpenSAML, but not IdP, messages -->
-    <logger name="org.opensaml.saml" level="ALL"/>
+    <logger name="org.opensaml.saml" level="INFO"/>
     
     <!-- Logs LDAP related messages -->
     <logger name="org.ldaptive" level="${idp.loglevel.ldap:-WARN}"/>
@@ -179,7 +179,7 @@
         <appender-ref ref="${idp.consent.appender:-IDP_CONSENT_AUDIT}"/>
     </logger>
     
-    <root level="ALL">
+    <root level="INFO">
         <appender-ref ref="${idp.process.appender:-IDP_PROCESS}"/>
         <appender-ref ref="${idp.warn.appender:-IDP_WARN}" />
     </root>
