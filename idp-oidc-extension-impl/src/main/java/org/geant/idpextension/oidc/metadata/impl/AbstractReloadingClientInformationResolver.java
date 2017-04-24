@@ -31,6 +31,8 @@ package org.geant.idpextension.oidc.metadata.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -42,8 +44,13 @@ import org.joda.time.chrono.ISOChronology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.nimbusds.oauth2.sdk.client.ClientInformation;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+
 import net.shibboleth.utilities.java.support.annotation.Duration;
 import net.shibboleth.utilities.java.support.annotation.constraint.Positive;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
@@ -107,7 +114,17 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
             taskTimer = backgroundTaskTimer;
         }
     }
-    
+
+    protected void initClientInformationResolver() throws ComponentInitializationException {
+        super.initClientInformationResolver();
+        try {
+            refresh();
+        } catch (ResolverException e) {
+            log.error("Could not refresh the client information", e);
+            throw new ComponentInitializationException("Could not refresh the client information", e);
+        }
+    }
+
     /** {@inheritDoc} */
     @Nullable public DateTime getLastUpdate() {
         return lastUpdate;
@@ -132,10 +149,18 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
             byte[] mdBytes = fetchMetadata();
             if (mdBytes == null) {
                 log.debug("Metadata from '{}' has not changed since last refresh", mdId);
-                //processCachedMetadata(mdId, now);
             } else {
                 log.debug("Processing new metadata from '{}'", mdId);
-                //processNewMetadata(mdId, now, mdBytes);
+                final Gson gson = new Gson();
+                final ClientInformation clientInformation = gson.fromJson(new String(mdBytes), ClientInformation.class);
+                final ClientID clientId = clientInformation.getID();
+                log.info("Parsed client information for client ID {}", clientId);
+                final ClientBackingStore newBackingStore = new ClientBackingStore();
+                List<ClientInformation> allInformation = new ArrayList<>();
+                allInformation.add(clientInformation);
+                newBackingStore.getIndexedInformation().put(clientId, allInformation);
+                newBackingStore.getOrderedInformation().add(clientInformation);
+                setBackingStore(newBackingStore);
             }
         } catch (Throwable t) {
             log.error("Error occurred while attempting to refresh metadata from '" + mdId + "'", t);
@@ -148,7 +173,10 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
             }
         } finally {
             refreshMetadataTask = new RefreshMetadataTask();
-            long nextRefreshDelay = nextRefresh.getMillis() - System.currentTimeMillis();
+            long nextRefreshDelay = minRefreshDelay;
+            //TODO: refresh-delays should be defined better
+            nextRefresh = new DateTime(ISOChronology.getInstanceUTC()).plus(minRefreshDelay);
+            
             taskTimer.schedule(refreshMetadataTask, nextRefreshDelay);
             log.info("Next refresh cycle for metadata provider '{}' will occur on '{}' ('{}' local time)",
                     new Object[] {mdId, nextRefresh, nextRefresh.toDateTime(DateTimeZone.getDefault()),});
