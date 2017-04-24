@@ -35,6 +35,24 @@
 		class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
 		scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
 
+    <bean id="OIDCMetadataLookup"
+            class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor" scope="prototype"
+            c:executionDirection="INBOUND">
+        <constructor-arg name="messageHandler">
+            <bean class="org.geant.idpextension.oidc.profile.impl.OIDCMetadataLookupHandler" scope="prototype">
+                <property name="clientInformationResolver">
+                    <bean class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver">
+                        <constructor-arg>
+                            <bean class="java.io.File">
+                                <constructor-arg type="String" value="/opt/shibboleth-idp/metadata/oidc-client.json"/>
+                            </bean>
+                        </constructor-arg>
+                    </bean>
+                </property>
+            </bean>
+        </constructor-arg>
+    </bean>
+
 	<bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
 		scope="prototype" />
 
