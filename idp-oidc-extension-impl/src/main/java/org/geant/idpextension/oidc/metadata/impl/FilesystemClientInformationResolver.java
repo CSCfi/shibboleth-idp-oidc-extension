@@ -117,6 +117,7 @@ public class FilesystemClientInformationResolver extends AbstractReloadingClient
             validateMetadataFile(metadataFile);
             DateTime metadataUpdateTime = new DateTime(metadataFile.lastModified(), ISOChronology.getInstanceUTC());
             if (getLastRefresh() == null || getLastUpdate() == null || metadataUpdateTime.isAfter(getLastRefresh())) {
+                log.debug("Returning the contents of {} as byte array", metadataFile.toPath());
                 return inputstreamToByteArray(new FileInputStream(metadataFile));
             }
 
