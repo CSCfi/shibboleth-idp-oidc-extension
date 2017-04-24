@@ -110,6 +110,10 @@
               </MetadataFilter>
           </MetadataProvider>
 
+- template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
+  with_items:
+    - "logback.xml"
+
 - name: Restart shibboleth idp
   service:
     name: shibboleth-idp
