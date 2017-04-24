@@ -69,6 +69,24 @@
     mode: 0644
     remote_src: no
 
+- name: Copy dependency gson bulding new idp.war
+  copy:
+    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/gson-2.8.0.jar"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/gson-2.8.0.jar"
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: no
+
+- name: Copy idp-oidc-extension-api jar for bulding new idp.war
+  copy:
+    src: "{{ playbook_dir }}/idp-oidc-extension-api/target/idp-oidc-extension-api-0.5-SNAPSHOT.jar"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/idp-oidc-extension-api-0.5-SNAPSHOT.jar"
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: no
+
 - name: Copy idp-oidc-extension-impl jar for bulding new idp.war
   copy:
     src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/idp-oidc-extension-impl-0.5-SNAPSHOT.jar"
@@ -113,6 +131,10 @@
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "logback.xml"
+
+- template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/metadata/{{item}}
+  with_items:
+    - "oidc-client.json"
 
 - name: Restart shibboleth idp
   service:
