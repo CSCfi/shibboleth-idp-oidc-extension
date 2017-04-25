@@ -128,6 +128,31 @@
               </MetadataFilter>
           </MetadataProvider>
 
+- name: Add OIDC.SSO profile configuration to relying-party-system.xml
+  blockinfile:
+    dest: "{{ idp_home }}/system/conf/relying-party-system.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertbefore: "<bean id=\"CAS.LoginConfiguration\""
+    content: |
+          <bean id="OIDC.SSO"
+              class="org.geant.idpextension.oidc.config.OIDCProtocolConfiguration"
+              p:securityConfiguration-ref="%{idp.security.config:shibboleth.DefaultSecurityConfiguration}"
+              p:servletRequest-ref="shibboleth.HttpServletRequest" />
+
+- name: Add OIDC.SSO profile configuration to relying-party.xml
+  blockinfile:
+    dest: "{{ idp_home }}/conf/relying-party.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertbefore: "</util:list>"
+    content: |
+          <bean parent="RelyingPartyByName" c:relyingPartyIds="testidp.funet.fi">
+               <property name="profileConfigurations">
+                    <list>
+                        <bean parent="OIDC.SSO" p:postAuthenticationFlows="attribute-release" />
+                    </list>
+                </property>
+          </bean>
+
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "logback.xml"
