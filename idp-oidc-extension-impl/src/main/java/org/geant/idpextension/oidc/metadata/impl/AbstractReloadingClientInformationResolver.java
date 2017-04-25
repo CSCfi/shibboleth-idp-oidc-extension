@@ -161,6 +161,7 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
                 newBackingStore.getIndexedInformation().put(clientId, allInformation);
                 newBackingStore.getOrderedInformation().add(clientInformation);
                 setBackingStore(newBackingStore);
+                lastUpdate = now;
             }
         } catch (Throwable t) {
             log.error("Error occurred while attempting to refresh metadata from '" + mdId + "'", t);
