@@ -28,13 +28,26 @@
 
 package org.geant.idpextension.oidc.config;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.annotation.Nonnull;
 
+import com.google.common.collect.ImmutableSet;
+
 import net.shibboleth.idp.profile.config.AbstractProfileConfiguration;
+import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+import net.shibboleth.utilities.java.support.annotation.constraint.NotLive;
+import net.shibboleth.utilities.java.support.annotation.constraint.Unmodifiable;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.InitializableComponent;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
 /**
  * Base class for OIDC protocol configuration.
@@ -53,6 +66,12 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
 
     /** Flag to indicate whether attributes should be resolved for this profile. */
     private boolean resolveAttributes = true;
+    
+    /** Filters the usable authentication flows. */
+    @Nonnull @NonnullElements private Set<String> authenticationFlows;
+    
+    /** Enables post-authentication interceptor flows. */
+    @Nonnull @NonnullElements private List<String> postAuthenticationFlows;
 
     /**
      * Constructor.
@@ -68,7 +87,8 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
      */
     public OIDCProtocolConfiguration(@Nonnull @NotEmpty final String profileId) {
         super(profileId);
-        //TODO: set security configuration
+        authenticationFlows = Collections.emptySet();
+        postAuthenticationFlows = Collections.emptyList();
     }
 
     /** {@inheritDoc} */
@@ -101,5 +121,45 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
      */
     public void setResolveAttributes(final boolean resolve) {
         resolveAttributes = resolve;
+    }
+    
+    /**
+     * Get the enabled authentication flows.
+     * 
+     * @return enabled authentiaction flows.
+     */
+    @Nonnull @NonnullElements @NotLive @Unmodifiable public Set<String> getAuthenticationFlows() {
+        return ImmutableSet.copyOf(authenticationFlows);
+    }
+
+    /**
+     * Set the authentication flows to use.
+     * 
+     * @param flows   flow identifiers to use
+     */
+    public void setAuthenticationFlows(@Nonnull @NonnullElements final Collection<String> flows) {
+        Constraint.isNotNull(flows, "Collection of flows cannot be null");
+        
+        authenticationFlows = new HashSet<>(StringSupport.normalizeStringCollection(flows));
+    }
+    
+    /**
+     * Get the ordered collection of enabled post-authentication interceptor flows.
+     * 
+     * @return enabled flow identifiers.
+     */
+    @Nonnull @NonnullElements @NotLive @Unmodifiable public List<String> getPostAuthenticationFlows() {
+        return postAuthenticationFlows;
+    }
+
+    /**
+     * Set the ordered collection of post-authentication interceptor flows to enable.
+     * 
+     * @param flows   flow identifiers to enable
+     */
+    public void setPostAuthenticationFlows(@Nonnull @NonnullElements final Collection<String> flows) {
+        Constraint.isNotNull(flows, "Collection of flows cannot be null");
+        
+        postAuthenticationFlows = new ArrayList<>(StringSupport.normalizeStringCollection(flows));
     }
 }
