@@ -33,6 +33,7 @@ import javax.annotation.Nonnull;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.opensaml.profile.context.navigate.InboundMessageContextLookup;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.profile.IdPEventIds;
@@ -40,11 +41,14 @@ import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
+import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
@@ -70,15 +74,20 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
     /** Strategy that will return or create a {@link RelyingPartyContext}. */
     @Nonnull
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextCreationStrategy;
+    
+    /** Strategy that will return {@link OIDCMetadataContext}. */
+    @Nonnull
+    private Function<ProfileRequestContext, OIDCMetadataContext> oidcMetadataContextLookupStrategy;
 
     /** Constructor. */
     public InitializeRelyingPartyContext() {
         relyingPartyContextCreationStrategy = new ChildContextLookup<>(RelyingPartyContext.class, true);
+        oidcMetadataContextLookupStrategy = Functions.compose(
+                new ChildContextLookup<>(OIDCMetadataContext.class), new InboundMessageContextLookup());
     }
 
     /**
-     * Set the strategy used to return or create the {@link RelyingPartyContext}
-     * .
+     * Set the strategy used to return or create the {@link RelyingPartyContext}.
      * 
      * @param strategy
      *            creation strategy
@@ -89,6 +98,19 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
 
         relyingPartyContextCreationStrategy = Constraint.isNotNull(strategy,
                 "RelyingPartyContext creation strategy cannot be null");
+    }
+    
+    /**
+     * Set the strategy used to return the {@link OIDCMetadataContext}.
+     * 
+     * @param strategy The lookup strategy.
+     */
+    public void setOidcMetadataContextLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, OIDCMetadataContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        oidcMetadataContextLookupStrategy = Constraint.isNotNull(strategy, 
+                "OIDCMetadataContext lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -127,9 +149,15 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
             return;
         }
 
-        log.debug("{} Attaching RelyingPartyContext for rp {}", getLogPrefix(), request.getClientID().getValue());
-        //TODO: rpContext.setVerified(Check from metadata client exists);
-        rpContext.setRelyingPartyId(request.getClientID().getValue());
+        final ClientID clientId = request.getClientID();
+        log.debug("{} Attaching RelyingPartyContext for rp {}", getLogPrefix(), clientId.getValue());
+        rpContext.setRelyingPartyId(clientId.getValue());
+        final OIDCMetadataContext oidcContext = oidcMetadataContextLookupStrategy.apply(profileRequestContext);
+        if (oidcContext != null && oidcContext.getClientInformation() != null 
+                && clientId.equals(oidcContext.getClientInformation().getID())) {
+            log.debug("{} Setting the rp context verified", getLogPrefix());
+            rpContext.setVerified(true);
+        }
     }
 
 }
