@@ -102,7 +102,7 @@ public class OIDCMetadataLookupHandler extends AbstractMessageHandler {
                 return;
             }
             final OIDCMetadataContext oidcCtx= new OIDCMetadataContext();
-            oidcCtx.setRedirectURIs(clientInformation.getMetadata().getRedirectionURIStrings()); //TODO add other details
+            oidcCtx.setClientInformation(clientInformation);
             messageContext.addSubcontext(oidcCtx);
             // Based on that info we know 1) client is valid 2) we know valid redirect uris
             log.debug("{} {} added to MessageContext as child of {}", getLogPrefix(), 

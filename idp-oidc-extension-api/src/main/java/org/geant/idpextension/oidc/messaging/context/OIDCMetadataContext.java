@@ -28,11 +28,11 @@
 
 package org.geant.idpextension.oidc.messaging.context;
 
-import java.util.Set;
-
 import javax.annotation.Nullable;
 
 import org.opensaml.messaging.context.BaseContext;
+
+import com.nimbusds.oauth2.sdk.client.ClientInformation;
 
 /**
  * Subcontext carrying information on metadata of the relying party. This
@@ -46,27 +46,26 @@ import org.opensaml.messaging.context.BaseContext;
  */
 public class OIDCMetadataContext extends BaseContext {
 
-    /** The only mandatory parameter. */
+    /** The client information. */
     @Nullable
-    Set<String> redirectURIs;
-
+    ClientInformation clientInformation;
+    
     /**
-     * Set of acceptable redirect uris rp may request response to.
+     * Set the client information.
      * 
-     * @return redirect uris.
+     * @return The client information.
      */
     @Nullable
-    public Set<String> getRedirectURIs() {
-        return redirectURIs;
+    public ClientInformation getClientInformation() {
+        return clientInformation;
     }
 
     /**
-     * Set the set of acceptable redirect uris for rp.
+     * Set the client information.
      * 
-     * @param redirectURIs
+     * @param information The client information.
      */
-    public void setRedirectURIs(@Nullable Set<String> redirectURIs) {
-        this.redirectURIs = redirectURIs;
+    public void setClientInformation(@Nullable ClientInformation information) {
+        clientInformation = information;
     }
-
 }
