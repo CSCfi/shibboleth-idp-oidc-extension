@@ -45,12 +45,22 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
     /** OIDC base protocol URI. */
     public static final String PROTOCOL_URI = "http://openid.net/specs/openid-connect-core-1_0.html";
 
+    /** ID for this profile configuration. */
+    public static final String PROFILE_ID = "http://shibboleth.net/ns/profiles/oidc/browser";
+    
     /** Initialization flag. */
     private boolean initialized;
 
     /** Flag to indicate whether attributes should be resolved for this profile. */
     private boolean resolveAttributes = true;
 
+    /**
+     * Constructor.
+     */
+    public OIDCProtocolConfiguration() {
+        this(PROFILE_ID);
+    }
+    
     /**
      * Creates a new configuration instance.
      *
