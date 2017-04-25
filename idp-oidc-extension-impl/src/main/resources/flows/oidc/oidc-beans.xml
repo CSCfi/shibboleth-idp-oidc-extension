@@ -35,6 +35,9 @@
 		class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
 		scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
 
+    <bean id="SelectProfileConfiguration"
+        class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration" scope="prototype" />
+
     <bean id="OIDCMetadataLookup"
             class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor" scope="prototype"
             c:executionDirection="INBOUND">
