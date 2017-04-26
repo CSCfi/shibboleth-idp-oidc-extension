@@ -28,6 +28,7 @@
 
 package org.geant.idpextension.oidc.config;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,8 +38,12 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import net.shibboleth.idp.authn.config.AuthenticationProfileConfiguration;
 import net.shibboleth.idp.profile.config.AbstractProfileConfiguration;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
@@ -53,7 +58,7 @@ import net.shibboleth.utilities.java.support.primitive.StringSupport;
  * Base class for OIDC protocol configuration.
  */
 public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
-    implements InitializableComponent {
+    implements InitializableComponent, AuthenticationProfileConfiguration {
 
     /** OIDC base protocol URI. */
     public static final String PROTOCOL_URI = "http://openid.net/specs/openid-connect-core-1_0.html";
@@ -75,6 +80,12 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
     
     /** Flag to indicate whether hybrid flow is supported by this profile. */
     private boolean hybridFlow = true;
+    
+    /** Selects, and limits, the authentication contexts to use for requests. */
+    @Nonnull @NonnullElements private List<Principal> defaultAuthenticationContexts;
+    
+    /** Precedence of name identifier formats to use for requests. */
+    @Nonnull @NonnullElements private List<String> nameIDFormatPrecedence;
     
     /** Filters the usable authentication flows. */
     @Nonnull @NonnullElements private Set<String> authenticationFlows;
@@ -224,5 +235,39 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
         Constraint.isNotNull(flows, "Collection of flows cannot be null");
         
         postAuthenticationFlows = new ArrayList<>(StringSupport.normalizeStringCollection(flows));
+    }
+    
+    /** {@inheritDoc} */
+    @Override @Nonnull @NonnullElements @NotLive @Unmodifiable public List<Principal> 
+        getDefaultAuthenticationMethods() {
+        return ImmutableList.<Principal> copyOf(defaultAuthenticationContexts);
+    }
+    
+    /**
+     * Set the default authentication contexts to use, expressed as custom principals.
+     * 
+     * @param contexts default authentication contexts to use
+     */
+    public void setDefaultAuthenticationMethods(
+            @Nonnull @NonnullElements final List<Principal> contexts) {
+        Constraint.isNotNull(contexts, "List of contexts cannot be null");
+
+        defaultAuthenticationContexts = new ArrayList<>(Collections2.filter(contexts, Predicates.notNull()));
+    }
+    
+    /** {@inheritDoc} */
+    @Override @Nonnull @NonnullElements @NotLive @Unmodifiable public List<String> getNameIDFormatPrecedence() {
+        return ImmutableList.copyOf(nameIDFormatPrecedence);
+    }
+
+    /**
+     * Set the name identifier formats to use.
+     * 
+     * @param formats name identifier formats to use
+     */
+    public void setNameIDFormatPrecedence(@Nonnull @NonnullElements final List<String> formats) {
+        Constraint.isNotNull(formats, "List of formats cannot be null");
+
+        nameIDFormatPrecedence = new ArrayList<>(StringSupport.normalizeStringCollection(formats));
     }
 }
