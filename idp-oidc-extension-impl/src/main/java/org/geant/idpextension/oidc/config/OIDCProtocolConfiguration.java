@@ -67,6 +67,15 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
     /** Flag to indicate whether attributes should be resolved for this profile. */
     private boolean resolveAttributes = true;
     
+    /** Flag to indicate whether authorization code flow is supported by this profile. */
+    private boolean authorizationCodeFlow = true;
+    
+    /** Flag to indicate whether implicit flow is supported by this profile. */
+    private boolean implicitFlow = true;
+    
+    /** Flag to indicate whether hybrid flow is supported by this profile. */
+    private boolean hybridFlow = true;
+    
     /** Filters the usable authentication flows. */
     @Nonnull @NonnullElements private Set<String> authenticationFlows;
     
@@ -123,6 +132,60 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
         resolveAttributes = resolve;
     }
     
+    /**
+     * Checks whether the authorization code flow is enabled for this profile.
+     * 
+     * @return True if the flow is enabled for this profile, false otherwise.
+     */
+    public boolean isAuthorizationCodeFlow() {
+        return authorizationCodeFlow;
+    }
+    
+    /**
+     * Enables or disables authorization code flow.
+     * 
+     * @param flow True to enable flow (default), false otherwise.
+     */
+    public void setAuthorizationCodeFlow(final boolean flow) {
+        authorizationCodeFlow = flow;
+    }
+
+    /**
+     * Checks whether the hybrid flow is enabled for this profile.
+     * 
+     * @return True if the flow is enabled for this profile, false otherwise.
+     */
+    public boolean isHybridFlow() {
+        return hybridFlow;
+    }
+    
+    /**
+     * Enables or disables hybrid flow.
+     * 
+     * @param flow True to enable flow (default), false otherwise.
+     */
+    public void setHybridFlow(final boolean flow) {
+        hybridFlow = flow;
+    }
+
+    /**
+     * Checks whether the implicit flow is enabled for this profile.
+     * 
+     * @return True if the flow is enabled for this profile, false otherwise.
+     */
+    public boolean isImplicitFlow() {
+        return implicitFlow;
+    }
+    
+    /**
+     * Enables or disables implicit flow.
+     * 
+     * @param flow True to enable flow (default), false otherwise.
+     */
+    public void setImplicitFlow(final boolean flow) {
+        implicitFlow = flow;
+    }
+
     /**
      * Get the enabled authentication flows.
      * 
