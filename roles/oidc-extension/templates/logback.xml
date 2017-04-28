@@ -37,6 +37,7 @@
 
     <!-- Logs IdP, but not OpenSAML, messages -->
     <logger name="net.shibboleth.idp" level="INFO"/>
+    <logger name="net.shibboleth.idp.authn.impl" level="ALL"/>
     <logger name="net.shibboleth.idp.profile.impl" level="ALL"/>
     <logger name="org.geant" level="ALL"/>
 
