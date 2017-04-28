@@ -15,16 +15,22 @@
 		<evaluate expression="InitializeRelyingPartyContext" />
 		<evaluate expression="SelectRelyingPartyConfiguration" />
                 <evaluate expression="SelectProfileConfiguration" />
+                <evaluate expression="PopulateUserAgentContext"/>
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="PostInitialSetup" />
 	</action-state>
 
-	<action-state id="PostInitialSetup">
-		<evaluate expression="InitializeAuthenticationContext" />
-		<evaluate expression="'proceed'" />
-		<transition on="proceed" to="end" />
-	</action-state>
+        <action-state id="PostInitialSetup">
+                <evaluate expression="InitializeAuthenticationContext" />
+                <evaluate expression="'proceed'" />
+                <transition on="proceed" to="DoAuthenticationSubflow" />
+        </action-state>
 
+        <subflow-state id="DoAuthenticationSubflow" subflow="authn">
+            <input name="calledAsSubflow" value="true" />
+            <transition on="proceed" to="end" />
+            <transition on="RestartAuthentication" to="PostInitialSetup" />
+        </subflow-state>
 
 	<end-state id="end">
 		<on-entry>

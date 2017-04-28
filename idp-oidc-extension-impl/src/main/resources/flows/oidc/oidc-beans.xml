@@ -38,6 +38,10 @@
     <bean id="SelectProfileConfiguration"
         class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration" scope="prototype" />
 
+    <bean id="PopulateUserAgentContext"
+          class="net.shibboleth.idp.profile.impl.PopulateUserAgentContext" scope="prototype"
+          p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
+
     <bean id="OIDCMetadataLookup"
             class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor" scope="prototype"
             c:executionDirection="INBOUND">
