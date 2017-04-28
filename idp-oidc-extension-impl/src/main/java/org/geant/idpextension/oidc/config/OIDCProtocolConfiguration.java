@@ -109,6 +109,8 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
         super(profileId);
         authenticationFlows = Collections.emptySet();
         postAuthenticationFlows = Collections.emptyList();
+        defaultAuthenticationContexts = Collections.emptyList();
+        nameIDFormatPrecedence = Collections.emptyList();
     }
 
     /** {@inheritDoc} */
@@ -197,12 +199,8 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
         implicitFlow = flow;
     }
 
-    /**
-     * Get the enabled authentication flows.
-     * 
-     * @return enabled authentiaction flows.
-     */
-    @Nonnull @NonnullElements @NotLive @Unmodifiable public Set<String> getAuthenticationFlows() {
+    /** {@inheritDoc} */
+    @Override @Nonnull @NonnullElements @NotLive @Unmodifiable public Set<String> getAuthenticationFlows() {
         return ImmutableSet.copyOf(authenticationFlows);
     }
 
@@ -217,12 +215,8 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
         authenticationFlows = new HashSet<>(StringSupport.normalizeStringCollection(flows));
     }
     
-    /**
-     * Get the ordered collection of enabled post-authentication interceptor flows.
-     * 
-     * @return enabled flow identifiers.
-     */
-    @Nonnull @NonnullElements @NotLive @Unmodifiable public List<String> getPostAuthenticationFlows() {
+    /** {@inheritDoc} */
+    @Override @Nonnull @NonnullElements @NotLive @Unmodifiable public List<String> getPostAuthenticationFlows() {
         return postAuthenticationFlows;
     }
 
