@@ -1,28 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:encoder="urn:mace:shibboleth:2.0:attribute:encoder" xmlns:resolver="urn:mace:shibboleth:2.0:resolver" targetNamespace="urn:mace:shibboleth:2.0:attribute:encoder" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:encoder="urn:mace:shibboleth:2.0:attribute:encoder"
+	xmlns:resolver="urn:mace:shibboleth:2.0:resolver" targetNamespace="org.geant.idpextension.oidc.attribute.encoder"
+	elementFormDefault="qualified">
 
-    <import namespace="urn:mace:shibboleth:2.0:resolver" schemaLocation="http://shibboleth.net/schema/idp/shibboleth-attribute-resolver.xsd"/>
+	<import namespace="urn:mace:shibboleth:2.0:resolver"
+		schemaLocation="http://shibboleth.net/schema/idp/shibboleth-attribute-resolver.xsd" />
 
-    <!-- Encoders that produce OIDC Attributes -->
+	<!-- Encoders that produce OIDC Attributes -->
 
-    <complexType name="OIDCString">
-        <annotation>
-            <documentation>Defines a OIDC string encoder for an attribute.</documentation>
-        </annotation>
-        <complexContent>
-            <extension base="resolver:BaseAttributeEncoderType">
-                <attribute name="nameFormat" type="string">
-                    <annotation>
-                        <documentation>The OIDC NameFormat of the attribute.</documentation>
-                    </annotation>
-                </attribute>
-                <attribute name="friendlyName" type="string" use="optional">
-                    <annotation>
-                        <documentation>The OIDC FriendlyName of the attribute.</documentation>
-                    </annotation>
-                </attribute>
-            </extension>
-        </complexContent>
-    </complexType>
- 
+	<complexType name="OIDCString">
+		<annotation>
+			<documentation>Defines a OIDC string encoder for an attribute.
+			</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="resolver:BaseAttributeEncoderType">
+				<attribute name="nameFormat" type="string">
+					<annotation>
+						<documentation>The OIDC NameFormat of the attribute.
+						</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="friendlyName" type="string" use="optional">
+					<annotation>
+						<documentation>The OIDC FriendlyName of the attribute.
+						</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+
 </schema>
