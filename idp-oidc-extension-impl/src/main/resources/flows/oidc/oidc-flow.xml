@@ -42,8 +42,15 @@
 		<evaluate expression="ResolveAttributes" />
 		<evaluate expression="FilterAttributes" />
 		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="BuildResponse" />
+	</action-state>
+	
+	<action-state id="BuildResponse">
+		<evaluate expression="AddIDTokenShell" />
+		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="end" />
 	</action-state>
+		
 
 	<end-state id="end">
 		<on-entry>

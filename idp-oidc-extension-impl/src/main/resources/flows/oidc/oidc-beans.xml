@@ -64,10 +64,15 @@
 			</bean>
 		</constructor-arg>
 	</bean>
-	
-	<bean id="InitializeOutboundMessageContext"
-        class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundMessageContext" scope="prototype" />
 
+	<bean id="InitializeOutboundMessageContext"
+		class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundMessageContext"
+		scope="prototype" />
+
+	<bean id="AddIDTokenShell"
+		class="org.geant.idpextension.oidc.profile.impl.AddIDTokenShell"
+		scope="prototype" p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple">
+	</bean>
 
 	<bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes"
 		scope="prototype" c:resolverService-ref="shibboleth.AttributeResolverService"
