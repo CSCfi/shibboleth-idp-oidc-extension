@@ -152,12 +152,12 @@ public class AddIDTokenShell extends AbstractProfileAction {
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        log.debug("Initializing id token");
-        List<Audience> aud = new ArrayList<Audience>();
         /**
          * TODO: We create the id token in very simple hard coded way here.
          * Needs to be studied what will come from the configurations.
          */
+
+        List<Audience> aud = new ArrayList<Audience>();
         // TODO: rp as audience is obvious but should we support multiple
         // audience?
         aud.add(new Audience(request.getClientID().getValue()));
