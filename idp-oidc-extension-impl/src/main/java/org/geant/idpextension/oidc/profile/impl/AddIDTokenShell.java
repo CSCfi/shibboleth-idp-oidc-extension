@@ -34,7 +34,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import net.shibboleth.idp.authn.AuthenticationResult;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
