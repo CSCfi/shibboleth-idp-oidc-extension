@@ -161,12 +161,12 @@ public class AddIDTokenShell extends AbstractProfileAction {
         // TODO: rp as audience is obvious but should we support multiple
         // audience?
         aud.add(new Audience(request.getClientID().getValue()));
-        Issuer iss = new Issuer(issuerId);
         // TODO: expiration time configuration
         Calendar calExp = Calendar.getInstance();
         calExp.add(Calendar.SECOND, 180);
-        IDTokenClaimsSet idToken = new IDTokenClaimsSet(iss, new Subject(subjectCtx.getPrincipalName()), aud,
-                calExp.getTime(), new Date(authResult.getAuthenticationInstant()));
+        IDTokenClaimsSet idToken = new IDTokenClaimsSet(new Issuer(issuerId),
+                new Subject(subjectCtx.getPrincipalName()), aud, calExp.getTime(), new Date(
+                        authResult.getAuthenticationInstant()));
         log.debug("{} Setting id token shell to response context {}", getLogPrefix(), idToken.toJSONObject()
                 .toJSONString());
         oidcResponseContext.setIDToken(idToken);
