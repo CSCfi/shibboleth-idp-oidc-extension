@@ -72,14 +72,15 @@ public class AddIDTokenShell extends AbstractProfileAction {
     private Logger log = LoggerFactory.getLogger(AddIDTokenShell.class);
 
     /** Strategy used to obtain the response issuer value. */
-    @Nullable
+    @Nonnull
     private Function<ProfileRequestContext, String> issuerLookupStrategy;
 
     /** EntityID to populate into Issuer element. */
-    @Nullable
+    @Nonnull
     private String issuerId;
 
     /** oidc response context. */
+    @Nonnull
     private OIDCResponseContext oidcResponseContext;
 
     /** OIDC Authentication request. */
