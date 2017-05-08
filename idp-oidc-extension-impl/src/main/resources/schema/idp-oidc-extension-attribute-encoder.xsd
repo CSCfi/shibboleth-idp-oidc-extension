@@ -15,18 +15,6 @@
 		</annotation>
 		<complexContent>
 			<extension base="resolver:BaseAttributeEncoderType">
-				<attribute name="nameFormat" type="string">
-					<annotation>
-						<documentation>The OIDC NameFormat of the attribute.
-						</documentation>
-					</annotation>
-				</attribute>
-				<attribute name="friendlyName" type="string" use="optional">
-					<annotation>
-						<documentation>The OIDC FriendlyName of the attribute.
-						</documentation>
-					</annotation>
-				</attribute>
 			</extension>
 		</complexContent>
 	</complexType>
