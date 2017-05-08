@@ -46,7 +46,6 @@ public class AttributeEncoderNamespaceHandler extends BaseSpringNamespaceHandler
     @Override
     public void init() {
         registerBeanDefinitionParser(OIDCStringEncoderParser.TYPE_NAME_ENC, new OIDCStringEncoderParser());
-
     }
 
 }
