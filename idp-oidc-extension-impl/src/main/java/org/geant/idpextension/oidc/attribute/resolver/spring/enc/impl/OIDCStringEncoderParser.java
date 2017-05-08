@@ -30,17 +30,10 @@ package  org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl;
 
 import net.shibboleth.idp.attribute.resolver.spring.enc.BaseAttributeEncoderParser;
 import net.shibboleth.idp.attribute.resolver.spring.impl.AttributeResolverNamespaceHandler;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.xml.namespace.QName;
-
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
-import net.shibboleth.utilities.java.support.primitive.StringSupport;
-
 import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCStringAttributeEncoder;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
 
 /**
@@ -55,13 +48,7 @@ public class OIDCStringEncoderParser extends BaseAttributeEncoderParser {
     /** Schema type name- resolver:. */
     @Nonnull public static final QName TYPE_NAME_RESOLVER = new QName(AttributeResolverNamespaceHandler.NAMESPACE, 
             "OIDCString");
-
-    /** Local name of name format attribute. */
-    @Nonnull @NotEmpty public static final String NAME_FORMAT_ATTRIBUTE_NAME = "nameFormat";
-
-    /** Local name of friendly name attribute. */
-    @Nonnull @NotEmpty public static final String FRIENDLY_NAME_ATTRIBUTE_NAME = "friendlyName";
-
+   
     /** Constructor. */
     public OIDCStringEncoderParser() {
         setNameRequired(true);
@@ -73,16 +60,5 @@ public class OIDCStringEncoderParser extends BaseAttributeEncoderParser {
         return OIDCStringAttributeEncoder.class;
     }
 
-    /** {@inheritDoc} */
-    @Override protected void doParse(@Nonnull final Element config, @Nonnull final ParserContext parserContext,
-            @Nonnull final BeanDefinitionBuilder builder) {
-        super.doParse(config, parserContext, builder);
-
-        if (config.hasAttributeNS(null, NAME_FORMAT_ATTRIBUTE_NAME)) {
-            final String nameFormat = StringSupport.trimOrNull(config.getAttributeNS(null, NAME_FORMAT_ATTRIBUTE_NAME));
-            builder.addPropertyValue("nameFormat", nameFormat);
-        }
-
-        builder.addPropertyValue("friendlyName", config.getAttribute(FRIENDLY_NAME_ATTRIBUTE_NAME));
-    }
+   
 }
