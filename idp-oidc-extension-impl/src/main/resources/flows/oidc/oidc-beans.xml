@@ -73,6 +73,10 @@
 		class="org.geant.idpextension.oidc.profile.impl.AddIDTokenShell"
 		scope="prototype" p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple">
 	</bean>
+	
+	<bean id="AddClaimsToIDToken"
+            class="org.geant.idpextension.oidc.profile.impl.AddClaimsToIDToken" scope="prototype">
+        </bean>
 
 	<bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes"
 		scope="prototype" c:resolverService-ref="shibboleth.AttributeResolverService"
