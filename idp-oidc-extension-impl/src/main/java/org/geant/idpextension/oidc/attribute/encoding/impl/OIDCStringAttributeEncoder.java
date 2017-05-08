@@ -36,33 +36,146 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 
+import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncoder;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.IdPAttribute;
+import net.shibboleth.idp.attribute.IdPAttributeValue;
+import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
+import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+import net.shibboleth.utilities.java.support.component.AbstractInitializableComponent;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
+import net.shibboleth.utilities.java.support.logic.Constraint;
+import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
-public class OIDCStringAttributeEncoder<EncodedType> implements AttributeEncoder<EncodedType>{
+/**
+ * Class encoding string attributes to flat json object having name as key and
+ * string containing attribute values separated by space.
+ */
+public class OIDCStringAttributeEncoder extends AbstractInitializableComponent implements AttributeEncoder<JSONObject> {
 
-	/** Class logger. */
+    /** Class logger. */
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(OIDCStringAttributeEncoder.class);
-    
+
+    /** The name of the attribute. */
+    @NonnullAfterInit
+    private String name;
+
+    /** Whether to encode with xsi:type or not. */
+    /** TODO, apply value. Now only present as required by template. */
+    private boolean encodeType;
+
+    /** Condition for use of this encoder. */
+    @SuppressWarnings("rawtypes")
+    @Nonnull
+    private Predicate<ProfileRequestContext> activationCondition;
+
+    /** Constructor. */
+    OIDCStringAttributeEncoder() {
+        encodeType = true;
+    }
+
+    /**
+     * Get whether to encode type information.
+     * 
+     * <p>
+     * Defaults to 'true'
+     * </p>
+     * 
+     * @return true if type information should be encoded
+     */
+    public boolean encodeType() {
+        return encodeType;
+    }
+
+    /**
+     * Set whether to encode type information.
+     * 
+     * @param flag
+     *            flag to set
+     */
+    public void setEncodeType(final boolean flag) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        encodeType = flag;
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("rawtypes")
     @Override
-    public EncodedType encode(IdPAttribute arg0) throws AttributeEncodingException {
-    	log.debug("encoding {}", arg0.toString());
-        return null;
+    @Nonnull
+    public Predicate<ProfileRequestContext> getActivationCondition() {
+        return activationCondition;
+    }
+
+    /**
+     * Set the activation condition for this encoder.
+     * 
+     * @param condition
+     *            condition to set
+     */
+    @SuppressWarnings("rawtypes")
+    public void setActivationCondition(@Nonnull final Predicate<ProfileRequestContext> condition) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        activationCondition = Constraint.isNotNull(condition, "Activation condition cannot be null");
+    }
+
+    /**
+     * Get the name of the attribute.
+     * 
+     * @return name of the attribute
+     */
+    @NonnullAfterInit
+    public final String getName() {
+        return name;
+    }
+
+    /**
+     * Set the name of the attribute.
+     * 
+     * @param attributeName
+     *            name of the attribute
+     */
+    public void setName(@Nonnull @NotEmpty final String attributeName) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        name = Constraint.isNotNull(StringSupport.trimOrNull(attributeName), "Attribute name cannot be null or empty");
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void doInitialize() throws ComponentInitializationException {
+        super.doInitialize();
+
+        if (name == null) {
+            throw new ComponentInitializationException("Attribute name cannot be null or empty");
+        }
     }
 
     @SuppressWarnings("rawtypes")
-	@Override
-    public Predicate<ProfileRequestContext> getActivationCondition() {
-    	log.debug("getActivationCondition");
-        return null;
+    @Override
+    public JSONObject encode(IdPAttribute idpAttribute) throws AttributeEncodingException {
+        String attributeString = "";
+        JSONObject obj = new JSONObject();
+        if (idpAttribute == null) {
+            throw new AttributeEncodingException("Attribute is null");
+        }
+        for (IdPAttributeValue value : idpAttribute.getValues()) {
+            if (value.getValue() instanceof String) {
+                attributeString += " " + (String) value.getValue();
+            }
+        }
+        obj.put(getName(), attributeString.trim());
+        return obj;
     }
 
     @Override
     public String getProtocol() {
-    	log.debug("getProtocol");
-        return null;
+        // TODO: return something meaningful for protocol
+        return "TBD";
     }
 
 }
