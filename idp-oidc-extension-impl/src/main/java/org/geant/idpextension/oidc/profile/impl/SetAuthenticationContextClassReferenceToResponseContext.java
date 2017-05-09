@@ -75,6 +75,7 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
     RequestedPrincipalContext requestedPrincipalContext;
 
     /** Strategy used to determine the AuthnContextClassRef. */
+    /** TODO: consider replacing with oidc authententication context classess.*/
     @NonnullAfterInit
     private Function<ProfileRequestContext, AuthnContextClassRefPrincipal> classRefLookupStrategy;
 
