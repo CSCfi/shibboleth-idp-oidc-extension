@@ -28,10 +28,14 @@
 
 package org.geant.idpextension.oidc.messaging.context;
 
+import java.net.URI;
+import java.util.Date;
+
 import javax.annotation.Nullable;
 
 import org.opensaml.messaging.context.BaseContext;
 
+import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
@@ -43,7 +47,107 @@ public class OIDCResponseContext extends BaseContext {
 
 	/** The id token formed. */
 	@Nullable
-	IDTokenClaimsSet idToken;
+	private IDTokenClaimsSet idToken;
+
+	/** the acr used in response. **/
+	@Nullable
+	private ACR acr;
+
+	/** validated redirect uri. */
+	@Nullable
+	private URI redirectURI;
+
+	/** Authentication time of the end user. */
+	private Date auth_time;
+
+	/** Expiration time of the id token. */
+	private Date exp;
+
+	/**
+	 * Authentication time of the end user.
+	 * 
+	 * @return authentication time of the end user. null if has not been set.
+	 */
+	@Nullable
+	public Date getAuthTime() {
+		return auth_time;
+	}
+
+	/**
+	 * Set authentication time of the end user in millis from 1970-01-01T0:0:0Z
+	 * as measured in UTC until the date/time.
+	 * 
+	 * @param authTime
+	 *            authentication time.
+	 */
+	public void setAuthTime(long authTime) {
+		this.auth_time = new Date(authTime);
+	}
+
+	/**
+	 * Expiration time of the id token.
+	 * 
+	 * @return expiration time of the id token. null if has not been set.
+	 */
+	@Nullable
+	public Date getExp() {
+		return exp;
+	}
+
+	/**
+	 * Set expiration time of the id token in millis from 1970-01-01T0:0:0Z as
+	 * measured in UTC until the date/time.
+	 * 
+	 * @param authTime
+	 *            authentication time.
+	 */
+	public void setExp(long expTime) {
+		this.exp = new Date(expTime);
+	}
+
+	/**
+	 * Returns a validated redirect uri for the response.
+	 * 
+	 * @return redirect uri.
+	 */
+	@Nullable
+	public URI getRedirectURI() {
+		return redirectURI;
+	}
+
+	/**
+	 * Sets a validated redirect uri for the response.
+	 * 
+	 * @param redirectURI
+	 */
+	public void setRedirectURI(@Nullable URI redirectURI) {
+		this.redirectURI = redirectURI;
+	}
+
+	/**
+	 * Returns the acr meant for response.
+	 * 
+	 * @return acr
+	 */
+	@Nullable
+	public ACR getAcr() {
+		return acr;
+	}
+
+	/**
+	 * Set acr for response.
+	 * 
+	 * @param acrValue
+	 *            for response.
+	 */
+	public void setAcr(@Nullable String acrValue) {
+		if (acrValue != null) {
+			acr = new ACR(acrValue);
+
+		} else {
+			acr = null;
+		}
+	}
 
 	/**
 	 * Get the id token.
