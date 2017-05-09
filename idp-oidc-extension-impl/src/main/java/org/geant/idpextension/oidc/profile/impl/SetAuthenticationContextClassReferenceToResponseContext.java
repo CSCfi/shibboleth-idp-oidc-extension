@@ -29,11 +29,8 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import net.shibboleth.idp.saml.profile.config.navigate.SessionLifetimeLookupFunction;
-import net.shibboleth.utilities.java.support.component.ComponentSupport;
+import net.shibboleth.idp.authn.context.AuthenticationContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
-import org.joda.time.DateTime;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
@@ -42,48 +39,23 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-
 /**
- * Action that sets id token expiration time to work context
+ * Action that sets authentication context class reference to work context
  * {@link OIDCResponseContext} located under
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
  *
  */
 @SuppressWarnings("rawtypes")
-public class SetExpirationTimeToResponseContext extends AbstractProfileAction {
+public class SetAuthenticationContextClassReferenceToResponseContext extends AbstractProfileAction {
 
     /** Class logger. */
     @Nonnull
-    private Logger log = LoggerFactory.getLogger(SetExpirationTimeToResponseContext.class);
+    private Logger log = LoggerFactory.getLogger(SetAuthenticationContextClassReferenceToResponseContext.class);
 
     /** oidc response context. */
     @Nonnull
     private OIDCResponseContext oidcResponseContext;
-
-    /** Strategy used to determine SessionNotOnOrAfter value to set. */
-    @Nullable
-    private Function<ProfileRequestContext, Long> sessionLifetimeLookupStrategy;
-
-    /**
-     * Constructor.
-     */
-    SetExpirationTimeToResponseContext() {
-        sessionLifetimeLookupStrategy = new SessionLifetimeLookupFunction();
-    }
-
-    /**
-     * Set the strategy used to locate the SessionNotOnOrAfter value to use.
-     * 
-     * @param strategy
-     *            lookup strategy
-     */
-    public void setSessionLifetimeLookupStrategy(@Nullable final Function<ProfileRequestContext, Long> strategy) {
-        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-
-        sessionLifetimeLookupStrategy = strategy;
-    }
-
+   
     /** {@inheritDoc} */
     @SuppressWarnings({ "unchecked" })
     @Override
@@ -101,6 +73,13 @@ public class SetExpirationTimeToResponseContext extends AbstractProfileAction {
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
+        AuthenticationContext authCtx = profileRequestContext.getSubcontext(AuthenticationContext.class, false);
+        if (authCtx == null) {
+            log.debug("{} No authentication context", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+            return false;
+        }
+   
         return super.doPreExecute(profileRequestContext);
     }
 
@@ -108,14 +87,7 @@ public class SetExpirationTimeToResponseContext extends AbstractProfileAction {
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        if (sessionLifetimeLookupStrategy != null) {
-            final Long lifetime = sessionLifetimeLookupStrategy.apply(profileRequestContext);
-            if (lifetime != null && lifetime > 0) {
-                long value = new DateTime().plus(lifetime).getMillis();
-                log.debug("{} Setting exp to {}", getLogPrefix(), value);
-                oidcResponseContext.setExp(value);
-            }
-        }
+        
     }
 
 }
