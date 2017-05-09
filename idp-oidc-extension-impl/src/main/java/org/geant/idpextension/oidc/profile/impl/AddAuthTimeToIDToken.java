@@ -99,6 +99,8 @@ public class AddAuthTimeToIDToken extends AbstractProfileAction {
             log.debug("{} Setting auth_time to id token", getLogPrefix());
             oidcResponseContext.getIDToken().setClaim(IDTokenClaimsSet.AUTH_TIME_CLAIM_NAME,
                     oidcResponseContext.getAuthTime());
+            log.debug("{} Updated token {}", getLogPrefix(), oidcResponseContext.getIDToken().toJSONObject()
+                    .toJSONString());
         }
 
     }

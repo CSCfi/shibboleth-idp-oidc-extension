@@ -107,6 +107,8 @@ public class AddAcrToIDToken extends AbstractProfileAction {
         if (oidcResponseContext.getAcr() != null) {
             log.debug("{} Setting acr to id token", getLogPrefix());
             oidcResponseContext.getIDToken().setClaim(IDTokenClaimsSet.ACR_CLAIM_NAME, oidcResponseContext.getAcr());
+            log.debug("{} Updated token {}", getLogPrefix(), oidcResponseContext.getIDToken().toJSONObject()
+                    .toJSONString());
         }
 
     }

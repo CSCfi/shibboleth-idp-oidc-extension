@@ -110,6 +110,8 @@ public class AddNonceToIDToken extends AbstractProfileAction {
         if (request.getNonce() != null) {
             log.debug("{} Setting nonce to id token", getLogPrefix());
             oidcResponseContext.getIDToken().setClaim(IDTokenClaimsSet.NONCE_CLAIM_NAME, request.getNonce());
+            log.debug("{} Updated token {}", getLogPrefix(), oidcResponseContext.getIDToken().toJSONObject()
+                    .toJSONString());
         }
 
     }

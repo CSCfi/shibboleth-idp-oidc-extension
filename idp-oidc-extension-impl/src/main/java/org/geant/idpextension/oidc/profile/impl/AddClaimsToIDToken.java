@@ -170,6 +170,8 @@ public class AddClaimsToIDToken extends AbstractProfileAction {
             }
 
         }
+        log.debug("{} id token after mapping attributes to claims {}", getLogPrefix(), oidcResponseContext.getIDToken()
+                .toJSONObject().toJSONString());
 
     }
 
