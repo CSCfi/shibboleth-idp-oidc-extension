@@ -50,7 +50,10 @@
 		<evaluate expression="SetExpirationTimeToResponseContext" />
 		<evaluate expression="SetAuthenticationContextClassReferenceToResponseContext" />
 		<evaluate expression="AddIDTokenShell" />
-		<evaluate expression="AddClaimsToIDToken" />
+		<evaluate expression="AddAttributeClaimsToIDToken" />
+		<evaluate expression="AddAuthTimeToIDToken" />
+		<evaluate expression="AddAcrToIDToken" />
+		<evaluate expression="AddNonceToIDToken" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="end" />
 	</action-state>

@@ -101,8 +101,23 @@
 		scope="prototype" p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple">
 	</bean>
 
-	<bean id="AddClaimsToIDToken"
+	<bean id="AddAttributeClaimsToIDToken"
 		class="org.geant.idpextension.oidc.profile.impl.AddClaimsToIDToken"
+		scope="prototype">
+	</bean>
+
+	<bean id="AddAuthTimeToIDToken"
+		class="org.geant.idpextension.oidc.profile.impl.AddAuthTimeToIDToken"
+		scope="prototype">
+	</bean>
+
+	<bean id="AddAcrToIDToken"
+		class="org.geant.idpextension.oidc.profile.impl.AddAcrToIDToken"
+		scope="prototype">
+	</bean>
+
+	<bean id="AddNonceToIDToken"
+		class="org.geant.idpextension.oidc.profile.impl.AddNonceToIDToken"
 		scope="prototype">
 	</bean>
 
