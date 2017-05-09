@@ -35,7 +35,6 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import net.shibboleth.idp.authn.AuthenticationResult;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
@@ -58,7 +57,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
- * Action that creates a {@link IDTokenClaimsSe} object shell , and sets it to
+ * Action that creates a {@link IDTokenClaimsSet} object shell , and sets it to
  * work context {@link OIDCResponseContext} located under
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
  *
@@ -85,11 +84,8 @@ public class AddIDTokenShell extends AbstractProfileAction {
     /** OIDC Authentication request. */
     private AuthenticationRequest request;
 
-    /** Authentication result. */
-    AuthenticationResult authResult;
-
     /** Subject context. */
-    SubjectContext subjectCtx;
+    private SubjectContext subjectCtx;
 
     /**
      * Set the strategy used to locate the issuer value to use.
@@ -133,12 +129,6 @@ public class AddIDTokenShell extends AbstractProfileAction {
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
         }
-        authResult = authCtx.getAuthenticationResult();
-        if (authResult == null) {
-            log.debug("{} No authentication result", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-            return false;
-        }
         subjectCtx = profileRequestContext.getSubcontext(SubjectContext.class, false);
         if (subjectCtx == null) {
             log.debug("{} No subject context", getLogPrefix());
@@ -153,20 +143,68 @@ public class AddIDTokenShell extends AbstractProfileAction {
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         /**
-         * TODO: We create the id token in very simple hard coded way here.
-         * Needs to be studied what will come from the configurations.
+         * aud REQUIRED. Audience(s) that this ID Token is intended for. It MUST
+         * contain the OAuth 2.0 client_id of the Relying Party as an audience
+         * value. It MAY also contain identifiers for other audiences. In the
+         * general case, the aud value is an array of case sensitive strings. In
+         * the common special case when there is one audience, the aud value MAY
+         * be a single case sensitive string.
+         * 
+         * NOTE. TODO. We allow only single value in this first version.
+         */
+        List<Audience> aud = new ArrayList<Audience>();
+        aud.add(new Audience(request.getClientID().getValue()));
+        /**
+         * exp REQUIRED. Expiration time on or after which the ID Token MUST NOT
+         * be accepted for processing. The processing of this parameter requires
+         * that the current date/time MUST be before the expiration date/time
+         * listed in the value. Implementers MAY provide for some small leeway,
+         * usually no more than a few minutes, to account for clock skew. Its
+         * value is a JSON number representing the number of seconds from
+         * 1970-01-01T0:0:0Z as measured in UTC until the date/time. See RFC
+         * 3339 [RFC3339] for details regarding date/times in general and UTC in
+         * particular.
+         * 
+         * NOTE. We set here exp to +180s unless set in response context.
+         */
+        Date exp = oidcResponseContext.getExp();
+        if (exp == null) {
+            Calendar calExp = Calendar.getInstance();
+            calExp.add(Calendar.SECOND, 180);
+            exp = calExp.getTime();
+        }
+
+        /**
+         * iss REQUIRED. Issuer Identifier for the Issuer of the response. The
+         * iss value is a case sensitive URL using the https scheme that
+         * contains scheme, host, and optionally, port number and path
+         * components and no query or fragment components.
+         * 
+         * NOTE! TODO. We set the "entity id" as issuer. No scheme validation is
+         * in place.
          */
 
-        List<Audience> aud = new ArrayList<Audience>();
-        // TODO: rp as audience is obvious but should we support multiple
-        // audience?
-        aud.add(new Audience(request.getClientID().getValue()));
-        // TODO: expiration time configuration
-        Calendar calExp = Calendar.getInstance();
-        calExp.add(Calendar.SECOND, 180);
+        /**
+         * sub REQUIRED. Subject Identifier. A locally unique and never
+         * reassigned identifier within the Issuer for the End-User, which is
+         * intended to be consumed by the Client, e.g., 24400320 or
+         * AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4. It MUST NOT exceed 255 ASCII
+         * characters in length. The sub value is a case sensitive string.
+         * 
+         * 
+         * Note. We use principalname as the sub.
+         * 
+         */
+
+        /**
+         * iat REQUIRED. Time at which the JWT was issued. Its value is a JSON
+         * number representing the number of seconds from 1970-01-01T0:0:0Z as
+         * measured in UTC until the date/time.
+         * 
+         * Note. We consider time of idtoken shell generation as iat.
+         */
         IDTokenClaimsSet idToken = new IDTokenClaimsSet(new Issuer(issuerId),
-                new Subject(subjectCtx.getPrincipalName()), aud, calExp.getTime(), new Date(
-                        authResult.getAuthenticationInstant()));
+                new Subject(subjectCtx.getPrincipalName()), aud, exp, new Date());
         log.debug("{} Setting id token shell to response context {}", getLogPrefix(), idToken.toJSONObject()
                 .toJSONString());
         oidcResponseContext.setIDToken(idToken);
