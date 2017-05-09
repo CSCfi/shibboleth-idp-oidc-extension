@@ -19,13 +19,13 @@
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="OutboundContextsAndSecurityParameters" />
 	</action-state>
-	
+
 	<action-state id="OutboundContextsAndSecurityParameters">
 		<evaluate expression="InitializeOutboundMessageContext" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="PostInitialSetup" />
 	</action-state>
-	
+
 	<action-state id="PostInitialSetup">
 		<evaluate expression="InitializeAuthenticationContext" />
 		<evaluate expression="'proceed'" />
@@ -37,21 +37,23 @@
 		<transition on="proceed" to="AttributeResolution" />
 		<transition on="RestartAuthentication" to="PostInitialSetup" />
 	</subflow-state>
-	
+
 	<action-state id="AttributeResolution">
 		<evaluate expression="ResolveAttributes" />
 		<evaluate expression="FilterAttributes" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="BuildResponse" />
 	</action-state>
-	
+
 	<action-state id="BuildResponse">
+		<evaluate expression="SetAuthenticationTimeToResponseContext" />
+		<evaluate expression="SetExpirationTimeToResponseContext" />
 		<evaluate expression="AddIDTokenShell" />
 		<evaluate expression="AddClaimsToIDToken" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="end" />
 	</action-state>
-		
+
 
 	<end-state id="end">
 		<on-entry>
