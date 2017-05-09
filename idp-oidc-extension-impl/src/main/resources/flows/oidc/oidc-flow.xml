@@ -48,6 +48,7 @@
 	<action-state id="BuildResponse">
 		<evaluate expression="SetAuthenticationTimeToResponseContext" />
 		<evaluate expression="SetExpirationTimeToResponseContext" />
+		<evaluate expression="SetAuthenticationContextClassReferenceToResponseContext" />
 		<evaluate expression="AddIDTokenShell" />
 		<evaluate expression="AddClaimsToIDToken" />
 		<evaluate expression="'proceed'" />

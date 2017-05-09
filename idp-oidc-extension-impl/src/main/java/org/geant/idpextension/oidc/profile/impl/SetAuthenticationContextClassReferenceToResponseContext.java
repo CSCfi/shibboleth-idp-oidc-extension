@@ -29,15 +29,29 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import net.shibboleth.idp.authn.context.AuthenticationContext;
+import net.shibboleth.idp.authn.context.RequestedPrincipalContext;
+import net.shibboleth.idp.authn.principal.DefaultPrincipalDeterminationStrategy;
+import net.shibboleth.idp.saml.authn.principal.AuthenticationMethodPrincipal;
+import net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal;
+import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
+import net.shibboleth.utilities.java.support.logic.Constraint;
+
 import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.opensaml.saml.saml2.core.AuthnContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Function;
 
 /**
  * Action that sets authentication context class reference to work context
@@ -55,7 +69,41 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
     /** oidc response context. */
     @Nonnull
     private OIDCResponseContext oidcResponseContext;
-   
+
+    /** requested principal context. */
+    @Nullable
+    RequestedPrincipalContext requestedPrincipalContext;
+
+    /** Strategy used to determine the AuthnContextClassRef. */
+    @NonnullAfterInit
+    private Function<ProfileRequestContext, AuthnContextClassRefPrincipal> classRefLookupStrategy;
+
+    /**
+     * Set the strategy function to use to obtain the authentication context
+     * class reference to use.
+     * 
+     * @param strategy
+     *            authentication context class reference lookup strategy
+     */
+    public void setClassRefLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, AuthnContextClassRefPrincipal> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        classRefLookupStrategy = Constraint.isNotNull(strategy,
+                "Authentication context class reference strategy cannot be null");
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void doInitialize() throws ComponentInitializationException {
+        super.doInitialize();
+
+        if (classRefLookupStrategy == null) {
+            classRefLookupStrategy = new DefaultPrincipalDeterminationStrategy<>(AuthnContextClassRefPrincipal.class,
+                    new AuthnContextClassRefPrincipal(AuthnContext.UNSPECIFIED_AUTHN_CTX));
+        }
+    }
+
     /** {@inheritDoc} */
     @SuppressWarnings({ "unchecked" })
     @Override
@@ -79,7 +127,7 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
         }
-   
+        requestedPrincipalContext = authCtx.getSubcontext(RequestedPrincipalContext.class);
         return super.doPreExecute(profileRequestContext);
     }
 
@@ -87,7 +135,16 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        
+        if (requestedPrincipalContext != null && requestedPrincipalContext.getMatchingPrincipal() != null
+                && requestedPrincipalContext.getMatchingPrincipal() instanceof AuthenticationMethodPrincipal) {
+            String name = requestedPrincipalContext.getMatchingPrincipal().getName();
+            log.debug("{} Setting acr based on requested ctx to {}", getLogPrefix(), name);
+            oidcResponseContext.setAcr(name);
+        } else {
+            String name = classRefLookupStrategy.apply(profileRequestContext).getName();
+            log.debug("{} Setting acr based on performed flow to {}", getLogPrefix(), name);
+            oidcResponseContext.setAcr(name);
+        }
     }
 
 }

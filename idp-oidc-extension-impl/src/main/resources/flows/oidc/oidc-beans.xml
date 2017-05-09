@@ -79,6 +79,23 @@
 		scope="prototype">
 	</bean>
 
+	<bean id="SetAuthenticationContextClassReferenceToResponseContext"
+		class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationContextClassReferenceToResponseContext"
+		scope="prototype">
+		<property name="classRefLookupStrategy">
+			<bean
+				class="net.shibboleth.idp.authn.principal.DefaultPrincipalDeterminationStrategy"
+				c:type="net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal"
+				p:weightMap="#{getObject('shibboleth.AuthenticationPrincipalWeightMap')}">
+				<constructor-arg name="principal">
+					<bean
+						class="net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal"
+						c:classRef="#{T(org.opensaml.saml.saml2.core.AuthnContext).UNSPECIFIED_AUTHN_CTX}" />
+				</constructor-arg>
+			</bean>
+		</property>
+	</bean>
+
 	<bean id="AddIDTokenShell"
 		class="org.geant.idpextension.oidc.profile.impl.AddIDTokenShell"
 		scope="prototype" p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple">
