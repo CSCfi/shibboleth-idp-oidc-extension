@@ -69,6 +69,10 @@
 		class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundMessageContext"
 		scope="prototype" />
 
+	<bean id="ValidateRedirectURI"
+		class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
+		scope="prototype" />
+
 	<bean id="SetAuthenticationTimeToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationTimeToResponseContext"
 		scope="prototype">
@@ -120,6 +124,10 @@
 		class="org.geant.idpextension.oidc.profile.impl.AddNonceToIDToken"
 		scope="prototype">
 	</bean>
+
+	<bean id="FormOutboundMessage"
+		class="org.geant.idpextension.oidc.profile.impl.FormOutboundMessage"
+		scope="prototype" />
 
 	<bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes"
 		scope="prototype" c:resolverService-ref="shibboleth.AttributeResolverService"
