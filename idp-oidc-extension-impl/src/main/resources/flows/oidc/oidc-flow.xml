@@ -61,12 +61,15 @@
 
 	<action-state id="HandleOutboundMessage">
 		<evaluate expression="FormOutboundMessage" />
-		<evaluate expression="RecordResponseComplete" />
+		<!-- will be activated id encoder is implemented <evaluate expression="RecordResponseComplete" 
+			/> -->
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="end" />
 	</action-state>
 
-	<end-state id="end" />
+	<!-- may be replaced by a encoder setting the redirect -->
+	<end-state id="end"
+		view="externalRedirect:#{opensamlProfileRequestContext.getOutboundMessageContext().getMessage().toURI()}"></end-state>
 
 	<bean-import resource="../../system/flows/saml/security-beans.xml" />
 	<bean-import resource="oidc-beans.xml" />
