@@ -22,6 +22,7 @@
 
 	<action-state id="OutboundContextsAndSecurityParameters">
 		<evaluate expression="InitializeOutboundMessageContext" />
+		<evaluate expression="ValidateRedirectURI" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="PostInitialSetup" />
 	</action-state>
@@ -55,15 +56,17 @@
 		<evaluate expression="AddAcrToIDToken" />
 		<evaluate expression="AddNonceToIDToken" />
 		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="HandleOutboundMessage" />
+	</action-state>
+
+	<action-state id="HandleOutboundMessage">
+		<evaluate expression="FormOutboundMessage" />
+		<evaluate expression="RecordResponseComplete" />
+		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="end" />
 	</action-state>
 
-
-	<end-state id="end">
-		<on-entry>
-			<evaluate expression="RecordResponseComplete" />
-		</on-entry>
-	</end-state>
+	<end-state id="end" />
 
 	<bean-import resource="../../system/flows/saml/security-beans.xml" />
 	<bean-import resource="oidc-beans.xml" />
