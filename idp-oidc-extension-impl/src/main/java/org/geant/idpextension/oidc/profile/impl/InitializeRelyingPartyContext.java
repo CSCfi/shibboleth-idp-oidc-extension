@@ -144,7 +144,7 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
 
         final RelyingPartyContext rpContext = relyingPartyContextCreationStrategy.apply(profileRequestContext);
         if (rpContext == null) {
-            log.debug("{} Unable to locate or create RelyingPartyContext", getLogPrefix());
+            log.error("{} Unable to locate or create RelyingPartyContext", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
             return;
         }

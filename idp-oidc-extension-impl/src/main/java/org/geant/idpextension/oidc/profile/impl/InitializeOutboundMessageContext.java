@@ -94,7 +94,7 @@ public class InitializeOutboundMessageContext extends AbstractProfileAction {
 
         final RelyingPartyContext relyingPartyCtx = relyingPartyContextLookupStrategy.apply(profileRequestContext);
         if (relyingPartyCtx == null) {
-            log.debug("{} No relying party context", getLogPrefix());
+            log.error("{} No relying party context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
             return false;
         }

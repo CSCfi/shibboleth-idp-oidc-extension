@@ -86,19 +86,19 @@ public class ValidateRedirectURI extends AbstractProfileAction {
         oidcMetadataContext = profileRequestContext.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class,
                 false);
         if (oidcMetadataContext == null) {
-            log.debug("{} No metadata found for relying party", getLogPrefix());
+            log.error("{} No metadata found for relying party", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
         final MessageContext outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
         if (outboundMessageCtx == null) {
-            log.debug("{} No outbound message context", getLogPrefix());
+            log.error("{} No outbound message context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
         oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
         if (oidcResponseContext == null) {
-            log.debug("{} No oidc response context", getLogPrefix());
+            log.error("{} No oidc response context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
@@ -115,6 +115,6 @@ public class ValidateRedirectURI extends AbstractProfileAction {
             log.debug("{} redirect uri validated {}", getLogPrefix(), request.getRedirectionURI());
             return;
         }
-        log.debug("{} unable to validate redirect uri {}", getLogPrefix(), request.getRedirectionURI());
+        log.warn("{} unable to validate redirect uri {}", getLogPrefix(), request.getRedirectionURI());
     }
 }

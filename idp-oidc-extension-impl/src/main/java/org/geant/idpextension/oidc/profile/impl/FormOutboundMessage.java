@@ -93,18 +93,18 @@ public class FormOutboundMessage extends AbstractProfileAction {
 
         outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
         if (outboundMessageCtx == null) {
-            log.debug("{} No outbound message context", getLogPrefix());
+            log.error("{} No outbound message context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
         oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
         if (oidcResponseContext == null) {
-            log.debug("{} No oidc response context", getLogPrefix());
+            log.error("{} No oidc response context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
         if (oidcResponseContext.getRedirectURI() == null) {
-            log.debug("{} redirect uri must be validated to form response", getLogPrefix());
+            log.error("{} redirect uri must be validated to form response", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
@@ -144,7 +144,7 @@ public class FormOutboundMessage extends AbstractProfileAction {
             }
         }
         if (resp == null) {
-            log.debug("{} unsupported response type {}", getLogPrefix(), request.getResponseType().toString());
+            log.error("{} unsupported response type {}", getLogPrefix(), request.getResponseType().toString());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
             return;
         }

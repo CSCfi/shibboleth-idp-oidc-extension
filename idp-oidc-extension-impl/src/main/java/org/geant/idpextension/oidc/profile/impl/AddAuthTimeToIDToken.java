@@ -73,18 +73,18 @@ public class AddAuthTimeToIDToken extends AbstractProfileAction {
 
         final MessageContext outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
         if (outboundMessageCtx == null) {
-            log.debug("{} No outbound message context", getLogPrefix());
+            log.error("{} No outbound message context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
         oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
         if (oidcResponseContext == null) {
-            log.debug("{} No oidc response context", getLogPrefix());
+            log.error("{} No oidc response context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
         if (oidcResponseContext.getIDToken() == null) {
-            log.debug("{} No id token", getLogPrefix());
+            log.error("{} No id token", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
