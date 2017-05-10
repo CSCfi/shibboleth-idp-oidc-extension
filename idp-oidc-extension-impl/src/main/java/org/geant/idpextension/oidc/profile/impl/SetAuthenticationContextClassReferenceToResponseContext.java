@@ -42,8 +42,6 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
-import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.action.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -60,22 +58,18 @@ import com.google.common.base.Function;
  *
  */
 @SuppressWarnings("rawtypes")
-public class SetAuthenticationContextClassReferenceToResponseContext extends AbstractProfileAction {
+public class SetAuthenticationContextClassReferenceToResponseContext extends AbstractOIDCResponseAction {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(SetAuthenticationContextClassReferenceToResponseContext.class);
-
-    /** oidc response context. */
-    @Nonnull
-    private OIDCResponseContext oidcResponseContext;
 
     /** requested principal context. */
     @Nullable
     RequestedPrincipalContext requestedPrincipalContext;
 
     /** Strategy used to determine the AuthnContextClassRef. */
-    /** TODO: consider replacing with oidc authententication context classess.*/
+    /** TODO: consider replacing with oidc authententication context classess. */
     @NonnullAfterInit
     private Function<ProfileRequestContext, AuthnContextClassRefPrincipal> classRefLookupStrategy;
 
@@ -106,22 +100,9 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings({ "unchecked" })
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        final MessageContext outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
-        if (outboundMessageCtx == null) {
-            log.error("{} No outbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
-        if (oidcResponseContext == null) {
-            log.error("{} No oidc response context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
         AuthenticationContext authCtx = profileRequestContext.getSubcontext(AuthenticationContext.class, false);
         if (authCtx == null) {
             log.error("{} No authentication context", getLogPrefix());
@@ -140,11 +121,11 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
                 && requestedPrincipalContext.getMatchingPrincipal() instanceof AuthenticationMethodPrincipal) {
             String name = requestedPrincipalContext.getMatchingPrincipal().getName();
             log.debug("{} Setting acr based on requested ctx to {}", getLogPrefix(), name);
-            oidcResponseContext.setAcr(name);
+            getOidcResponseContext().setAcr(name);
         } else {
             String name = classRefLookupStrategy.apply(profileRequestContext).getName();
             log.debug("{} Setting acr based on performed flow to {}", getLogPrefix(), name);
-            oidcResponseContext.setAcr(name);
+            getOidcResponseContext().setAcr(name);
         }
     }
 

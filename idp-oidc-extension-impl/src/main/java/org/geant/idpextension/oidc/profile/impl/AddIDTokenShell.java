@@ -41,8 +41,6 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
-import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.action.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -53,7 +51,6 @@ import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
@@ -63,7 +60,7 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
  *
  */
 @SuppressWarnings("rawtypes")
-public class AddIDTokenShell extends AbstractProfileAction {
+public class AddIDTokenShell extends AbstractOIDCResponseAction {
 
     /** Class logger. */
     @Nonnull
@@ -76,13 +73,6 @@ public class AddIDTokenShell extends AbstractProfileAction {
     /** EntityID to populate into Issuer element. */
     @Nonnull
     private String issuerId;
-
-    /** oidc response context. */
-    @Nonnull
-    private OIDCResponseContext oidcResponseContext;
-
-    /** OIDC Authentication request. */
-    private AuthenticationRequest request;
 
     /** Subject context. */
     private SubjectContext subjectCtx;
@@ -99,29 +89,9 @@ public class AddIDTokenShell extends AbstractProfileAction {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings({ "unchecked" })
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        final MessageContext outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
-        if (outboundMessageCtx == null) {
-            log.error("{} No outbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        Object message = profileRequestContext.getInboundMessageContext().getMessage();
-        if (message == null || !(message instanceof AuthenticationRequest)) {
-            log.error("{} No inbound message", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        request = (AuthenticationRequest) message;
-        oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
-        if (oidcResponseContext == null) {
-            log.error("{} No oidc response context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
         issuerId = issuerLookupStrategy.apply(profileRequestContext);
         AuthenticationContext authCtx = profileRequestContext.getSubcontext(AuthenticationContext.class, false);
         if (authCtx == null) {
@@ -153,7 +123,7 @@ public class AddIDTokenShell extends AbstractProfileAction {
          * NOTE. TODO. We allow only single value in this first version.
          */
         List<Audience> aud = new ArrayList<Audience>();
-        aud.add(new Audience(request.getClientID().getValue()));
+        aud.add(new Audience(getAuthenticationRequest().getClientID().getValue()));
         /**
          * exp REQUIRED. Expiration time on or after which the ID Token MUST NOT
          * be accepted for processing. The processing of this parameter requires
@@ -167,7 +137,7 @@ public class AddIDTokenShell extends AbstractProfileAction {
          * 
          * NOTE. We set here exp to +180s unless set in response context.
          */
-        Date exp = oidcResponseContext.getExp();
+        Date exp = getOidcResponseContext().getExp();
         if (exp == null) {
             Calendar calExp = Calendar.getInstance();
             calExp.add(Calendar.SECOND, 180);
@@ -207,7 +177,7 @@ public class AddIDTokenShell extends AbstractProfileAction {
                 new Subject(subjectCtx.getPrincipalName()), aud, exp, new Date());
         log.debug("{} Setting id token shell to response context {}", getLogPrefix(), idToken.toJSONObject()
                 .toJSONString());
-        oidcResponseContext.setIDToken(idToken);
+        getOidcResponseContext().setIDToken(idToken);
     }
 
 }

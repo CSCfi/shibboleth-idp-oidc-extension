@@ -34,10 +34,6 @@ import net.shibboleth.idp.saml.profile.config.navigate.SessionLifetimeLookupFunc
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
 import org.joda.time.DateTime;
-import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.action.AbstractProfileAction;
-import org.opensaml.profile.action.ActionSupport;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,15 +47,11 @@ import com.google.common.base.Function;
  *
  */
 @SuppressWarnings("rawtypes")
-public class SetExpirationTimeToResponseContext extends AbstractProfileAction {
+public class SetExpirationTimeToResponseContext extends AbstractOIDCResponseAction {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(SetExpirationTimeToResponseContext.class);
-
-    /** oidc response context. */
-    @Nonnull
-    private OIDCResponseContext oidcResponseContext;
 
     /** Strategy used to determine SessionNotOnOrAfter value to set. */
     @Nullable
@@ -85,26 +77,6 @@ public class SetExpirationTimeToResponseContext extends AbstractProfileAction {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings({ "unchecked" })
-    @Override
-    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        final MessageContext outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
-        if (outboundMessageCtx == null) {
-            log.error("{} No outbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
-        if (oidcResponseContext == null) {
-            log.error("{} No oidc response context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        return super.doPreExecute(profileRequestContext);
-    }
-
-    /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
@@ -113,7 +85,7 @@ public class SetExpirationTimeToResponseContext extends AbstractProfileAction {
             if (lifetime != null && lifetime > 0) {
                 long value = new DateTime().plus(lifetime).getMillis();
                 log.debug("{} Setting exp to {}", getLogPrefix(), value);
-                oidcResponseContext.setExp(value);
+                getOidcResponseContext().setExp(value);
             }
         }
     }

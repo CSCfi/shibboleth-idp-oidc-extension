@@ -30,7 +30,9 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 
+import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
 import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.profile.action.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -38,48 +40,72 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
- * Action that nonce claim to a {@link IDTokenClaimsSet}.
  * 
- * String value used to associate a Client session with an ID Token, and to
- * mitigate replay attacks. The value is passed through unmodified from the
- * Authentication Request to the ID Token. If present in the ID Token, Clients
- * MUST verify that the nonce Claim Value is equal to the value of the nonce
- * parameter sent in the Authentication Request. If present in the
- * Authentication Request, Authorization Servers MUST include a nonce Claim in
- * the ID Token with the Claim Value being the nonce value sent in the
- * Authentication Request. Authorization Servers SHOULD perform no other
- * processing on nonce values used. The nonce value is a case sensitive string.
+ * Abstract class for actions performing actions on {@link OIDCResponseContext}
+ * located under {@link ProfileRequestContext#getOutboundMessageContext()}.
  *
  *
  */
 @SuppressWarnings("rawtypes")
-public class AddNonceToIDToken extends AbstractOIDCResponseAction {
+abstract class AbstractOIDCResponseAction extends AbstractProfileAction {
 
     /** Class logger. */
     @Nonnull
-    private Logger log = LoggerFactory.getLogger(AddNonceToIDToken.class);
+    private Logger log = LoggerFactory.getLogger(AbstractOIDCResponseAction.class);
+
+    /** oidc response context. */
+    @Nonnull
+    private OIDCResponseContext oidcResponseContext;
+
+    /** OIDC Authentication request. */
+    private AuthenticationRequest request;
+
+    /**
+     * Returns OIDC authentication request.
+     * 
+     * @return request
+     */
+    public AuthenticationRequest getAuthenticationRequest() {
+        return request;
+    }
+
+    /**
+     * Returns oidc response context.
+     * 
+     * @return ctx.
+     */
+    @Nonnull
+    public OIDCResponseContext getOidcResponseContext() {
+        return oidcResponseContext;
+    }
 
     /** {@inheritDoc} */
+    @SuppressWarnings({ "unchecked" })
     @Override
-    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        if (getOidcResponseContext().getIDToken() == null) {
-            log.error("{} No id token", getLogPrefix());
+        final MessageContext outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
+        if (outboundMessageCtx == null) {
+            log.error("{} No outbound message context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return;
+            return false;
         }
-
-        if (getAuthenticationRequest().getNonce() != null) {
-            log.debug("{} Setting nonce to id token", getLogPrefix());
-            getOidcResponseContext().getIDToken().setClaim(IDTokenClaimsSet.NONCE_CLAIM_NAME,
-                    getAuthenticationRequest().getNonce());
-            log.debug("{} Updated token {}", getLogPrefix(), getOidcResponseContext().getIDToken().toJSONObject()
-                    .toJSONString());
+        oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
+        if (oidcResponseContext == null) {
+            log.error("{} No oidc response context", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return false;
         }
-
+        Object message = profileRequestContext.getInboundMessageContext().getMessage();
+        if (message == null || !(message instanceof AuthenticationRequest)) {
+            log.error("{} No inbound message", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return false;
+        }
+        request = (AuthenticationRequest) message;
+        return super.doPreExecute(profileRequestContext);
     }
 
 }

@@ -43,10 +43,7 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCStringAttributeEncoder;
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
-import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
-import org.opensaml.profile.action.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -63,18 +60,11 @@ import com.google.common.base.Functions;
  *
  */
 @SuppressWarnings("rawtypes")
-public class AddClaimsToIDToken extends AbstractProfileAction {
+public class AddClaimsToIDToken extends AbstractOIDCResponseAction {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(AddClaimsToIDToken.class);
-
-    /** oidc response context. */
-    @Nonnull
-    private OIDCResponseContext oidcResponseContext;
-
-    // TODO: This class is missing activation condition check
-    // See how AddAttributeStatementToAssertion is initialized.
 
     /**
      * Strategy used to locate the {@link AttributeContext} associated with a
@@ -110,27 +100,9 @@ public class AddClaimsToIDToken extends AbstractProfileAction {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings({ "unchecked" })
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        final MessageContext outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
-        if (outboundMessageCtx == null) {
-            log.error("{} No outbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
-        if (oidcResponseContext == null) {
-            log.error("{} No oidc response context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        if (oidcResponseContext.getIDToken() == null) {
-            log.error("{} No id token", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
         attributeCtx = attributeContextLookupStrategy.apply(profileRequestContext);
         if (attributeCtx == null) {
             log.debug("{} No AttributeSubcontext available, nothing to do", getLogPrefix());
@@ -142,6 +114,12 @@ public class AddClaimsToIDToken extends AbstractProfileAction {
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+
+        if (getOidcResponseContext().getIDToken() == null) {
+            log.error("{} No id token", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return;
+        }
 
         for (IdPAttribute attribute : attributeCtx.getIdPAttributes().values()) {
             final Set<AttributeEncoder<?>> encoders = attribute.getEncoders();
@@ -159,20 +137,16 @@ public class AddClaimsToIDToken extends AbstractProfileAction {
                         // There should be exactly one key
                         for (String name : obj.keySet()) {
                             log.debug("Adding claim " + name + " with value " + obj.get(name));
-                            oidcResponseContext.getIDToken().setClaim(name, obj.get(name));
+                            getOidcResponseContext().getIDToken().setClaim(name, obj.get(name));
                         }
 
                     }
                 } catch (AttributeEncodingException e) {
                     log.warn("{} Unable to encode attribute {} as OIDC attribute", getLogPrefix(), attribute.getId(), e);
                 }
-
             }
-
         }
-        log.debug("{} id token after mapping attributes to claims {}", getLogPrefix(), oidcResponseContext.getIDToken()
-                .toJSONObject().toJSONString());
-
+        log.debug("{} id token after mapping attributes to claims {}", getLogPrefix(), getOidcResponseContext()
+                .getIDToken().toJSONObject().toJSONString());
     }
-
 }

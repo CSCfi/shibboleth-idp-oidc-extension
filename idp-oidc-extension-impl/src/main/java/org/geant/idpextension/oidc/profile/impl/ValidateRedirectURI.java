@@ -29,18 +29,13 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
-
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
 import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.action.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
  * Action that validates redirect uri is a registered one. Validated redirect
@@ -48,41 +43,20 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
  *
  */
 @SuppressWarnings("rawtypes")
-public class ValidateRedirectURI extends AbstractProfileAction {
+public class ValidateRedirectURI extends AbstractOIDCResponseAction {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(ValidateRedirectURI.class);
-
-    /** OIDC Authentication request. */
-    private AuthenticationRequest request;
-
-    /** oidc response context. */
-    @Nonnull
-    private OIDCResponseContext oidcResponseContext;
 
     /** oidc response context. */
     @Nonnull
     private OIDCMetadataContext oidcMetadataContext;
 
     /** {@inheritDoc} */
-    @SuppressWarnings({ "unchecked" })
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        if (profileRequestContext.getInboundMessageContext() == null) {
-            log.error("{} Unable to locate inbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        Object message = profileRequestContext.getInboundMessageContext().getMessage();
-
-        if (message == null || !(message instanceof AuthenticationRequest)) {
-            log.error("{} Unable to locate inbound message", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        request = (AuthenticationRequest) message;
         oidcMetadataContext = profileRequestContext.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class,
                 false);
         if (oidcMetadataContext == null) {
@@ -96,25 +70,20 @@ public class ValidateRedirectURI extends AbstractProfileAction {
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
-        if (oidcResponseContext == null) {
-            log.error("{} No oidc response context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-
         return super.doPreExecute(profileRequestContext);
     }
 
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+
         if (oidcMetadataContext.getClientInformation().getMetadata().getRedirectionURIs()
-                .contains(request.getRedirectionURI())) {
-            oidcResponseContext.setRedirectURI(request.getRedirectionURI());
-            log.debug("{} redirect uri validated {}", getLogPrefix(), request.getRedirectionURI());
+                .contains(getAuthenticationRequest().getRedirectionURI())) {
+            getOidcResponseContext().setRedirectURI(getAuthenticationRequest().getRedirectionURI());
+            log.debug("{} redirect uri validated {}", getLogPrefix(), getAuthenticationRequest().getRedirectionURI());
             return;
         }
-        log.warn("{} unable to validate redirect uri {}", getLogPrefix(), request.getRedirectionURI());
+        log.warn("{} unable to validate redirect uri {}", getLogPrefix(), getAuthenticationRequest()
+                .getRedirectionURI());
     }
 }

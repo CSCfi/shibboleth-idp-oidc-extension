@@ -30,9 +30,7 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
 import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.action.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -43,7 +41,6 @@ import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 
@@ -56,18 +53,11 @@ import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
  *
  */
 @SuppressWarnings("rawtypes")
-public class FormOutboundMessage extends AbstractProfileAction {
+public class FormOutboundMessage extends AbstractOIDCResponseAction {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(FormOutboundMessage.class);
-
-    /** OIDC Authentication request. */
-    private AuthenticationRequest request;
-
-    /** oidc response context. */
-    @Nonnull
-    private OIDCResponseContext oidcResponseContext;
 
     /** outbound message context. */
     private MessageContext<AuthenticationResponse> outboundMessageCtx;
@@ -76,35 +66,9 @@ public class FormOutboundMessage extends AbstractProfileAction {
     @SuppressWarnings({ "unchecked" })
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        if (profileRequestContext.getInboundMessageContext() == null) {
-            log.error("{} Unable to locate inbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        Object message = profileRequestContext.getInboundMessageContext().getMessage();
-
-        if (message == null || !(message instanceof AuthenticationRequest)) {
-            log.error("{} Unable to locate inbound message", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        request = (AuthenticationRequest) message;
-
         outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
         if (outboundMessageCtx == null) {
             log.error("{} No outbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
-        if (oidcResponseContext == null) {
-            log.error("{} No oidc response context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        if (oidcResponseContext.getRedirectURI() == null) {
-            log.error("{} redirect uri must be validated to form response", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
@@ -114,11 +78,16 @@ public class FormOutboundMessage extends AbstractProfileAction {
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+        if (getOidcResponseContext().getRedirectURI() == null) {
+            log.error("{} redirect uri must be validated to form response", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return;
+        }
         AuthenticationResponse resp = null;
-        if (oidcResponseContext.getErrorCode() != null) {
-            resp = new AuthenticationErrorResponse(oidcResponseContext.getRedirectURI(), new ErrorObject(
-                    oidcResponseContext.getErrorCode(), oidcResponseContext.getErrorDescription()), request.getState(),
-                    request.getResponseMode());
+        if (getOidcResponseContext().getErrorCode() != null) {
+            resp = new AuthenticationErrorResponse(getOidcResponseContext().getRedirectURI(), new ErrorObject(
+                    getOidcResponseContext().getErrorCode(), getOidcResponseContext().getErrorDescription()),
+                    getAuthenticationRequest().getState(), getAuthenticationRequest().getResponseMode());
             log.debug("constructed response:" + ((AuthenticationErrorResponse) resp).toURI());
         } else {
             /**
@@ -130,11 +99,11 @@ public class FormOutboundMessage extends AbstractProfileAction {
              * still. We create a plain jwt here. Replace with fetching a signed
              * jwt from context
              */
-            if (request.getResponseType().impliesImplicitFlow()) {
+            if (getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
                 try {
-                    resp = new AuthenticationSuccessResponse(oidcResponseContext.getRedirectURI(), null, new PlainJWT(
-                            oidcResponseContext.getIDToken().toJWTClaimsSet()), null, request.getState(), null,
-                            request.getResponseMode());
+                    resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(), null,
+                            new PlainJWT(getOidcResponseContext().getIDToken().toJWTClaimsSet()), null,
+                            getAuthenticationRequest().getState(), null, getAuthenticationRequest().getResponseMode());
                     log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
                 } catch (ParseException e) {
                     log.error("{} jwt parsing failed {}", getLogPrefix(), e.getMessage());
@@ -144,7 +113,8 @@ public class FormOutboundMessage extends AbstractProfileAction {
             }
         }
         if (resp == null) {
-            log.error("{} unsupported response type {}", getLogPrefix(), request.getResponseType().toString());
+            log.error("{} unsupported response type {}", getLogPrefix(), getAuthenticationRequest().getResponseType()
+                    .toString());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
             return;
         }

@@ -32,8 +32,6 @@ import javax.annotation.Nonnull;
 import net.shibboleth.idp.authn.AuthenticationResult;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
-import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.action.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -47,50 +45,31 @@ import org.slf4j.LoggerFactory;
  *
  */
 @SuppressWarnings("rawtypes")
-public class SetAuthenticationTimeToResponseContext extends AbstractProfileAction {
+public class SetAuthenticationTimeToResponseContext extends AbstractOIDCResponseAction {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(SetAuthenticationTimeToResponseContext.class);
 
-    /** oidc response context. */
-    @Nonnull
-    private OIDCResponseContext oidcResponseContext;
-
     /** Authentication result. */
     AuthenticationResult authResult;
 
     /** {@inheritDoc} */
-    @SuppressWarnings({ "unchecked" })
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        final MessageContext outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
-        if (outboundMessageCtx == null) {
-            log.error("{} No outbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
-        if (oidcResponseContext == null) {
-            log.error("{} No oidc response context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
         AuthenticationContext authCtx = profileRequestContext.getSubcontext(AuthenticationContext.class, false);
         if (authCtx == null) {
             log.error("{} No authentication context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
         }
-
         authResult = authCtx.getAuthenticationResult();
         if (authResult == null) {
             log.error("{} No authentication result", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
         }
-
         return super.doPreExecute(profileRequestContext);
     }
 
@@ -99,7 +78,7 @@ public class SetAuthenticationTimeToResponseContext extends AbstractProfileActio
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         long value = authResult.getAuthenticationInstant();
         log.debug("{} Setting authentication time to {}", getLogPrefix(), value);
-        oidcResponseContext.setAuthTime(value);
+        getOidcResponseContext().setAuthTime(value);
     }
 
 }

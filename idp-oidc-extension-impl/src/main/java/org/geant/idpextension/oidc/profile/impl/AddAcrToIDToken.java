@@ -29,9 +29,6 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
-import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.action.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -62,55 +59,27 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
  *
  */
 @SuppressWarnings("rawtypes")
-public class AddAcrToIDToken extends AbstractProfileAction {
+public class AddAcrToIDToken extends AbstractOIDCResponseAction {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(AddAcrToIDToken.class);
 
-    /** oidc response context. */
-    @Nonnull
-    private OIDCResponseContext oidcResponseContext;
-
-    // TODO: This class is missing activation condition check
-    // See how AddAttributeStatementToAssertion is initialized.
-
-    /** {@inheritDoc} */
-    @SuppressWarnings({ "unchecked" })
-    @Override
-    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        final MessageContext outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
-        if (outboundMessageCtx == null) {
-            log.error("{} No outbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
-        if (oidcResponseContext == null) {
-            log.error("{} No oidc response context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        if (oidcResponseContext.getIDToken() == null) {
-            log.error("{} No id token", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        return super.doPreExecute(profileRequestContext);
-    }
-
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        if (oidcResponseContext.getAcr() != null) {
+        if (getOidcResponseContext().getIDToken() == null) {
+            log.error("{} No id token", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return;
+        }
+        if (getOidcResponseContext().getAcr() != null) {
             log.debug("{} Setting acr to id token", getLogPrefix());
-            oidcResponseContext.getIDToken().setClaim(IDTokenClaimsSet.ACR_CLAIM_NAME, oidcResponseContext.getAcr());
-            log.debug("{} Updated token {}", getLogPrefix(), oidcResponseContext.getIDToken().toJSONObject()
+            getOidcResponseContext().getIDToken().setClaim(IDTokenClaimsSet.ACR_CLAIM_NAME,
+                    getOidcResponseContext().getAcr());
+            log.debug("{} Updated token {}", getLogPrefix(), getOidcResponseContext().getIDToken().toJSONObject()
                     .toJSONString());
         }
-
     }
-
 }

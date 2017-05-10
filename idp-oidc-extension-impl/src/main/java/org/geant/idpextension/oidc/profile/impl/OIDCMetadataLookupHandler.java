@@ -51,35 +51,38 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
- * Handler for inbound OIDC protocol messages that attempts to locate OIDC metadata for
- * a rp, and attaches it with a {@link OIDCMetadataContext} as a child of a 
- * pre-existing instance of {@link MessagesContext}. 
+ * Handler for inbound OIDC protocol messages that attempts to locate OIDC
+ * metadata for a rp, and attaches it with a {@link OIDCMetadataContext} as a
+ * child of a pre-existing instance of {@link MessagesContext}.
  */
 @SuppressWarnings("rawtypes")
 public class OIDCMetadataLookupHandler extends AbstractMessageHandler {
-    
+
     /** Logger. */
-    @Nonnull private final Logger log = LoggerFactory.getLogger(OIDCMetadataLookupHandler.class);
-    
+    @Nonnull
+    private final Logger log = LoggerFactory.getLogger(OIDCMetadataLookupHandler.class);
+
     /** Resolver used to look up OIDC client information. */
-    @NonnullAfterInit private ClientInformationResolver clientResolver;
+    @NonnullAfterInit
+    private ClientInformationResolver clientResolver;
 
     /**
      * Set the {@link ClientInformationResolver} to use.
      * 
-     * @param resolver The resolver to use.
+     * @param resolver
+     *            The resolver to use.
      */
     public void setClientInformationResolver(@Nonnull final ClientInformationResolver resolver) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        
+
         clientResolver = Constraint.isNotNull(resolver, "ClientInformationResolver cannot be null");
     }
-    
+
     /** {@inheritDoc} */
     @Override
     protected void doInitialize() throws ComponentInitializationException {
         super.doInitialize();
-        
+
         if (clientResolver == null) {
             throw new ComponentInitializationException("ClientInformationResolver cannot be null");
         }
@@ -92,7 +95,7 @@ public class OIDCMetadataLookupHandler extends AbstractMessageHandler {
         final AuthenticationRequest message = (AuthenticationRequest) messageContext.getMessage();
         // Resolve client id from inbound message
         final ClientID clientId = message.getClientID();
-        // Resolve metadata for client id  
+        // Resolve metadata for client id
         final ClientIDCriterion clientCriterion = new ClientIDCriterion(clientId);
         final CriteriaSet criteria = new CriteriaSet(clientCriterion);
         try {
@@ -101,14 +104,15 @@ public class OIDCMetadataLookupHandler extends AbstractMessageHandler {
                 log.warn("{} No client information returned for {}", getLogPrefix(), clientId);
                 return;
             }
-            final OIDCMetadataContext oidcCtx= new OIDCMetadataContext();
+            final OIDCMetadataContext oidcCtx = new OIDCMetadataContext();
             oidcCtx.setClientInformation(clientInformation);
             messageContext.addSubcontext(oidcCtx);
-            // Based on that info we know 1) client is valid 2) we know valid redirect uris
-            log.debug("{} {} added to MessageContext as child of {}", getLogPrefix(), 
+            // Based on that info we know 1) client is valid 2) we know valid
+            // redirect uris
+            log.debug("{} {} added to MessageContext as child of {}", getLogPrefix(),
                     OIDCMetadataContext.class.getName(), messageContext.getClass().getName());
         } catch (ResolverException e) {
             log.error("{} ResolverException thrown during client information lookup", getLogPrefix(), e);
         }
-      }
+    }
 }
