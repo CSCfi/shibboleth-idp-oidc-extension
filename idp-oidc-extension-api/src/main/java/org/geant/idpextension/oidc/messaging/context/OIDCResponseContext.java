@@ -45,6 +45,12 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
  */
 public class OIDCResponseContext extends BaseContext {
 
+	/** error code. */
+	private String error;
+
+	/** error description. */
+	private String errorDescription;
+
 	/** The id token formed. */
 	@Nullable
 	private IDTokenClaimsSet idToken;
@@ -62,6 +68,44 @@ public class OIDCResponseContext extends BaseContext {
 
 	/** Expiration time of the id token. */
 	private Date exp;
+
+	/**
+	 * Get error code.
+	 * 
+	 * @return error code if set, otherwise null
+	 */
+	public String getErrorCode() {
+		return error;
+	}
+
+	/**
+	 * Set error code.
+	 * 
+	 * @param code
+	 *            for error
+	 */
+	public void setErrorCode(String code) {
+		this.error = code;
+	}
+
+	/**
+	 * Get error description.
+	 * 
+	 * @return error description if set, otherwise null
+	 */
+	public String getErrorDescription() {
+		return errorDescription;
+	}
+
+	/**
+	 * Set error description.
+	 * 
+	 * @param description
+	 *            of error
+	 */
+	public void setErrorDescription(String description) {
+		this.errorDescription = description;
+	}
 
 	/**
 	 * Authentication time of the end user.
