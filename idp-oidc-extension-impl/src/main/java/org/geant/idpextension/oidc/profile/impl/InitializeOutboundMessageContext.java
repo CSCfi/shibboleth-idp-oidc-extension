@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 
 /**
  * Action that adds an outbound {@link MessageContext} and related OIDC contexts
@@ -105,7 +106,7 @@ public class InitializeOutboundMessageContext extends AbstractProfileAction {
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        final MessageContext msgCtx = new MessageContext();
+        final MessageContext<AuthenticationResponse> msgCtx = new MessageContext<AuthenticationResponse>();
         profileRequestContext.setOutboundMessageContext(msgCtx);
         msgCtx.addSubcontext(new OIDCResponseContext());
         log.debug("{} Initialized outbound message context", getLogPrefix());
