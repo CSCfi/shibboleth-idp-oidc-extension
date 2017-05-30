@@ -166,6 +166,19 @@
   with_items:
     - "oidc-client.json"
 
+- name: Setting static.xml for jetty to serve static content
+  template: 
+    src: static.xml 
+    dest: "{{ idp_home }}/jetty-base/webapps/static.xml"
+
+- name: Ensure "{{ idp_home }}/static" dir exists
+  file: path="{{ idp_home }}/static/" state=directory
+
+- name: Setting index.html containing authentication links
+  template:
+    src: index.html
+    dest: "{{ idp_home }}/static/index.html"
+
 - name: Restart shibboleth idp
   service:
     name: shibboleth-idp
