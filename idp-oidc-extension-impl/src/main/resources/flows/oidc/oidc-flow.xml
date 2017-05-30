@@ -67,9 +67,51 @@
 		<transition on="proceed" to="end" />
 	</action-state>
 
+	<!-- Error views, handling and end states -->
+	<view-state id="DisplayError" view="#{flowRequestContext.activeFlow.id}-error">
+		<on-render>
+			<evaluate expression="environment" result="viewScope.environment" />
+			<evaluate expression="opensamlProfileRequestContext" result="viewScope.profileRequestContext" />
+			<evaluate
+				expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)"
+				result="viewScope.encoder" />
+			<evaluate
+				expression="flowRequestContext.getExternalContext().getNativeRequest()"
+				result="viewScope.request" />
+			<evaluate
+				expression="flowRequestContext.getExternalContext().getNativeResponse()"
+				result="viewScope.response" />
+		</on-render>
+		<transition to="HandleErrorLocally" />
+	</view-state>
+
+	<!-- Passthrough state if an exception is thrown. -->
+	<action-state id="LogRuntimeException">
+		<on-entry>
+			<evaluate
+				expression="T(org.slf4j.LoggerFactory).getLogger('net.shibboleth.idp.saml.profile').error('Uncaught runtime exception', flowExecutionException.getCause())" />
+		</on-entry>
+		<evaluate expression="'RuntimeException'" />
+		<transition to="DisplayError" />
+	</action-state>
+
+
 	<!-- may be replaced by a encoder setting the redirect -->
 	<end-state id="end"
 		view="externalRedirect:#{opensamlProfileRequestContext.getOutboundMessageContext().getMessage().toURI()}"></end-state>
+
+	<!-- end state after error display -->
+	<end-state id="HandleErrorLocally">
+		<on-entry>
+			<evaluate expression="RecordResponseComplete" />
+		</on-entry>
+	</end-state>
+
+	<!-- all unhandled non proceed results are turned into errors -->
+	<global-transitions>
+		<transition on-exception="java.lang.RuntimeException" to="LogRuntimeException" />
+		<transition on="#{!'proceed'.equals(currentEvent.id)}" to="DisplayError" />
+	</global-transitions>
 
 	<bean-import resource="../../system/flows/saml/security-beans.xml" />
 	<bean-import resource="oidc-beans.xml" />
