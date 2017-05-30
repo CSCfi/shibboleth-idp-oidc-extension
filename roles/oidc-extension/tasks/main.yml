@@ -150,7 +150,7 @@
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
     insertbefore: "</util:list>"
     content: |
-          <bean parent="RelyingPartyByName" c:relyingPartyIds="testidp.funet.fi">
+          <bean parent="RelyingPartyByName" c:relyingPartyIds="demo_rp">
                <property name="profileConfigurations">
                     <list>
                         <bean parent="OIDC.SSO" p:postAuthenticationFlows="attribute-release" />
