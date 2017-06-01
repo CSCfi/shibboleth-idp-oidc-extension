@@ -135,6 +135,25 @@
               </MetadataFilter>
           </MetadataProvider>
 
+- name: Add metadata filter for trusted test SP
+  blockinfile:
+    dest: "{{ idp_home }}/conf/attribute-filter.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertbefore: "</AttributeFilterPolicyGroup>"
+    content: |
+         <AttributeFilterPolicy id="demo_rp">
+             <PolicyRequirementRule xsi:type="Requester" value="demo_rp" />
+             <AttributeRule attributeID="eduPersonPrincipalName">
+                 <PermitValueRule xsi:type="ANY" />
+             </AttributeRule>
+             <AttributeRule attributeID="uid">
+                 <PermitValueRule xsi:type="ANY" />
+             </AttributeRule>
+             <AttributeRule attributeID="mail">
+                 <PermitValueRule xsi:type="ANY" />
+             </AttributeRule>
+         </AttributeFilterPolicy>
+
 - name: Add OIDC.SSO profile configuration to relying-party-system.xml
   blockinfile:
     dest: "{{ idp_home }}/system/conf/relying-party-system.xml"
@@ -172,6 +191,11 @@
   template: 
     src: static.xml 
     dest: "{{ idp_home }}/jetty-base/webapps/static.xml"
+
+- name: Setting attribute-resolver.xml
+  template:
+    src: attribute-resolver.xml
+    dest: "{{ idp_home }}/conf/attribute-resolver.xml"
 
 - name: Ensure "{{ idp_home }}/static" dir exists
   file: path="{{ idp_home }}/static/" state=directory
