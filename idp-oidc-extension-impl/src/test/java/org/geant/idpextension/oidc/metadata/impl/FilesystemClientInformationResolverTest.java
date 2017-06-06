@@ -51,7 +51,7 @@ public class FilesystemClientInformationResolverTest {
     
     @BeforeMethod
     public void initTests() throws Exception {
-        clientId = "testidp.funet.fi";
+        clientId = "demo_rp";
         final File file = new File("../roles/oidc-extension/templates/oidc-client.json");
         resolver = new FilesystemClientInformationResolver(file);
         resolver.setId("mockId");
