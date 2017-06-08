@@ -89,12 +89,12 @@
 		<property name="classRefLookupStrategy">
 			<bean
 				class="net.shibboleth.idp.authn.principal.DefaultPrincipalDeterminationStrategy"
-				c:type="net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal"
+				c:type="org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal"
 				p:weightMap="#{getObject('shibboleth.AuthenticationPrincipalWeightMap')}">
 				<constructor-arg name="principal">
 					<bean
-						class="net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal"
-						c:classRef="#{T(org.opensaml.saml.saml2.core.AuthnContext).UNSPECIFIED_AUTHN_CTX}" />
+						class="org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal"
+						c:classRef="#{T(org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal).UNSPECIFIED}" />
 				</constructor-arg>
 			</bean>
 		</property>
