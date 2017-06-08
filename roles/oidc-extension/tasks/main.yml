@@ -197,6 +197,11 @@
     src: attribute-resolver.xml
     dest: "{{ idp_home }}/conf/attribute-resolver.xml"
 
+- name: Setting general-authn.xml
+  template:
+    src: general-authn.xml
+    dest: "{{ idp_home }}/conf/authn/general-authn.xml"
+
 - name: Ensure "{{ idp_home }}/static" dir exists
   file: path="{{ idp_home }}/static/" state=directory
 
