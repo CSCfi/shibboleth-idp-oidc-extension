@@ -26,6 +26,10 @@
 	<bean id="InitializeAuthenticationContext"
 		class="org.geant.idpextension.oidc.profile.impl.InitializeAuthenticationContext"
 		scope="prototype" />
+		
+	<bean id="ProcessRequestedAuthnContext"
+		class="org.geant.idpextension.oidc.profile.impl.ProcessRequestedAuthnContext"
+		scope="prototype" />
 
 	<bean id="InitializeRelyingPartyContext"
 		class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext"
