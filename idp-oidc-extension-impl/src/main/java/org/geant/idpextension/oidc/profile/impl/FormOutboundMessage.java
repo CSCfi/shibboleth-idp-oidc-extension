@@ -59,23 +59,8 @@ public class FormOutboundMessage extends AbstractOIDCResponseAction {
     @Nonnull
     private Logger log = LoggerFactory.getLogger(FormOutboundMessage.class);
 
-    /** outbound message context. */
-    private MessageContext<AuthenticationResponse> outboundMessageCtx;
-
     /** {@inheritDoc} */
-    @SuppressWarnings({ "unchecked" })
-    @Override
-    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
-        if (outboundMessageCtx == null) {
-            log.error("{} No outbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        return super.doPreExecute(profileRequestContext);
-    }
-
-    /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         if (getOidcResponseContext().getRedirectURI() == null) {
@@ -118,6 +103,6 @@ public class FormOutboundMessage extends AbstractOIDCResponseAction {
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
             return;
         }
-        outboundMessageCtx.setMessage(resp);
+        ((MessageContext)getOidcResponseContext().getParent()).setMessage(resp);
     }
 }
