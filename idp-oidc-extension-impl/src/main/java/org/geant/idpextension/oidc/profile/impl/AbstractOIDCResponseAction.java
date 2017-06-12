@@ -32,7 +32,7 @@ import javax.annotation.Nonnull;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
 import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.action.AbstractProfileAction;
+import net.shibboleth.idp.profile.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -86,6 +86,10 @@ abstract class AbstractOIDCResponseAction extends AbstractProfileAction {
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
+        if (!super.doPreExecute(profileRequestContext)) {
+            log.error("{} pre-execute failed", getLogPrefix());
+            return false;
+        }
         final MessageContext outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
         if (outboundMessageCtx == null) {
             log.error("{} No outbound message context", getLogPrefix());
@@ -105,7 +109,7 @@ abstract class AbstractOIDCResponseAction extends AbstractProfileAction {
             return false;
         }
         request = (AuthenticationRequest) message;
-        return super.doPreExecute(profileRequestContext);
+        return true;
     }
 
 }
