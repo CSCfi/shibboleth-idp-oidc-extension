@@ -30,49 +30,18 @@ package org.geant.idpextension.oidc.profile.impl;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
-
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
 /** {@link InitializeAuthenticationContext} unit test. */
 public class InitializeAuthenticationContextTest {
 
-    /**
-     * Test that the action functions properly if there is no inbound message
-     * context.
-     */
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testNoInboundMessageContext() throws Exception {
-
-        final RequestContext requestCtx = new RequestContextBuilder().buildRequestContext();
-        @SuppressWarnings("rawtypes")
-        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        prc.setInboundMessageContext(null);
-        final InitializeAuthenticationContext action = new InitializeAuthenticationContext();
-        action.initialize();
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertEvent(event, EventIds.INVALID_MSG_CTX);
-    }
-
-    /** Test that the action functions properly if there is no inbound message. */
-    @Test
-    public void testNoInboundMessage() throws Exception {
-        final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(null).buildRequestContext();
-        final InitializeAuthenticationContext action = new InitializeAuthenticationContext();
-        action.initialize();
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertEvent(event, EventIds.INVALID_MSG_CTX);
-    }
-
+  
     /**
      * Test that the action functions properly if the inbound message is a oidc
      * authentication request.

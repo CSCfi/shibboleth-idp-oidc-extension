@@ -28,54 +28,64 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import net.shibboleth.idp.profile.ActionTestingSupport;
-import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
+import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
-import org.testng.Assert;
 import org.testng.annotations.Test;
+
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+
 import net.shibboleth.idp.profile.RequestContextBuilder;
-import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
 
 /** {@link InitializeAuthenticationContext} unit test. */
-public class InitializeRelyingPartyContextTest {
+public class AbstractOIDCRequestActionTest {
 
-  
-    /** Test that the action functions properly if rp strategy is set to null. */
+    /**
+     * Test that the action functions properly if there is no inbound message
+     * context.
+     */
     @SuppressWarnings("unchecked")
     @Test
-    public void testNoStrategy() throws Exception {
-        final InitializeRelyingPartyContext action = new InitializeRelyingPartyContext();
-        boolean bException = false;
-        try {
-            action.setProfileContextLookupStrategy(null);
-        } catch (ConstraintViolationException e) {
-            bException = true;
-        }
-        Assert.assertTrue(bException);
+    public void testNoInboundMessageContext() throws Exception {
+
+        final RequestContext requestCtx = new RequestContextBuilder().buildRequestContext();
+        @SuppressWarnings("rawtypes")
+        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+        prc.setInboundMessageContext(null);
+        final MockOIDCRequestAction action = new MockOIDCRequestAction();
         action.initialize();
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, EventIds.INVALID_MSG_CTX);
+    }
+
+    /** Test that the action functions properly if there is no inbound message. */
+    @Test
+    public void testNoInboundMessage() throws Exception {
+        final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(null).buildRequestContext();
+        final MockOIDCRequestAction action = new MockOIDCRequestAction();
+        action.initialize();
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, EventIds.INVALID_MSG_CTX);
     }
 
     /**
      * Test that the action functions properly if the inbound message is a oidc
-     * authentication request. Check that client id is set to rp ctx.
+     * authentication request.
      */
     @Test
-    public void testOIDCAuthnRequestNoFlags() throws Exception {
+    public void testSuccess() throws Exception {
         AuthenticationRequest req = AuthenticationRequest
                 .parse("response_type=code&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
         final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
-        @SuppressWarnings("rawtypes")
-        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        final InitializeRelyingPartyContext action = new InitializeRelyingPartyContext();
+        final MockOIDCRequestAction action = new MockOIDCRequestAction();
         action.initialize();
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        RelyingPartyContext rpCtx = prc.getSubcontext(RelyingPartyContext.class);
-        Assert.assertEquals(rpCtx.getRelyingPartyId(), "s6BhdRkqt3");
+      }
 
+    class MockOIDCRequestAction extends AbstractOIDCRequestAction{
+        
     }
-
 }
