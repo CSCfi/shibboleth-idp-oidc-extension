@@ -98,7 +98,7 @@ public class OIDCStringAttributeEncoder extends AbstractInitializableComponent i
      */
     public void setEncodeType(final boolean flag) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-
+        // TODO: flag is not used at all.
         encodeType = flag;
     }
 
@@ -118,8 +118,8 @@ public class OIDCStringAttributeEncoder extends AbstractInitializableComponent i
      */
     @SuppressWarnings("rawtypes")
     public void setActivationCondition(@Nonnull final Predicate<ProfileRequestContext> condition) {
+        // TODO: activation condition must be tested and be verified to work
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-
         activationCondition = Constraint.isNotNull(condition, "Activation condition cannot be null");
     }
 
@@ -141,7 +141,6 @@ public class OIDCStringAttributeEncoder extends AbstractInitializableComponent i
      */
     public void setName(@Nonnull @NotEmpty final String attributeName) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-
         name = Constraint.isNotNull(StringSupport.trimOrNull(attributeName), "Attribute name cannot be null or empty");
     }
 
@@ -149,7 +148,6 @@ public class OIDCStringAttributeEncoder extends AbstractInitializableComponent i
     @Override
     protected void doInitialize() throws ComponentInitializationException {
         super.doInitialize();
-
         if (name == null) {
             throw new ComponentInitializationException("Attribute name cannot be null or empty");
         }
@@ -174,8 +172,8 @@ public class OIDCStringAttributeEncoder extends AbstractInitializableComponent i
 
     @Override
     public String getProtocol() {
-        // TODO: return something meaningful for protocol
-        return "TBD";
+        // TODO: find a proper identifier for openid connect.
+        return "http://openid.net/specs/openid-connect-core-1_0.html";
     }
 
 }
