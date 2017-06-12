@@ -29,11 +29,8 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
-
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.RequestedPrincipalContext;
-import net.shibboleth.idp.profile.AbstractProfileAction;
-
 import org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -41,10 +38,7 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
-
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,49 +50,27 @@ import java.util.List;
  * <p>
  * If the incoming message contains acr values we create requested principal
  * context populated with matching
- * {@AuthenticationContextClassReferencePrincipal
- * 
- * 
- * }.
+ * {@AuthenticationContextClassReferencePrincipal}.
  * </p>
- * 
- * 
  */
 @SuppressWarnings("rawtypes")
-public class ProcessRequestedAuthnContext extends AbstractProfileAction {
+public class ProcessRequestedAuthnContext extends AbstractOIDCRequestAction {
 
     /** Class logger. */
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(ProcessRequestedAuthnContext.class);
 
-    /** OIDC Authentication request. */
-    private AuthenticationRequest request;
-
     /** Authentication context. */
     private AuthenticationContext authenticationContext;
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         if (!super.doPreExecute(profileRequestContext)) {
             log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
-        if (profileRequestContext.getInboundMessageContext() == null) {
-            log.error("{} Unable to locate inbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        Object message = profileRequestContext.getInboundMessageContext().getMessage();
-
-        if (message == null || !(message instanceof AuthenticationRequest)) {
-            log.error("{} Unable to locate inbound message", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        request = (AuthenticationRequest) message;
-        if (request.getACRValues() == null) {
+        if (getAuthenticationRequest().getACRValues() == null) {
             log.debug("No acr values in request, nothing to do");
             return false;
         }
@@ -116,10 +88,10 @@ public class ProcessRequestedAuthnContext extends AbstractProfileAction {
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        // TODO: Add check for allowed acr values per relying party
+        // TODO: Consider adding a check for allowed acr values per relying party
         // configuration
         final List<Principal> principals = new ArrayList<>();
-        for (ACR acr : request.getACRValues()) {
+        for (ACR acr : getAuthenticationRequest().getACRValues()) {
             log.debug("{} Located acr {} in request", getLogPrefix(), acr.getValue());
             principals.add(new AuthenticationContextClassReferencePrincipal(acr.getValue()));
         }

@@ -31,15 +31,9 @@ package org.geant.idpextension.oidc.profile.impl;
 import javax.annotation.Nonnull;
 
 import net.shibboleth.idp.authn.context.AuthenticationContext;
-import net.shibboleth.idp.profile.AbstractProfileAction;
-import org.opensaml.profile.action.ActionSupport;
-
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.Prompt;
 
 /**
@@ -47,7 +41,7 @@ import com.nimbusds.openid.connect.sdk.Prompt;
  * the current {@link ProfileRequestContext}.
  * 
  * <p>
- * If the incoming message is a OIDC {@link AuthnRequest}, then basic
+ * As the incoming message is a OIDC {@link AuthnRequest}, the basic
  * authentication policy (IsPassive, ForceAuthn) is interpreted from the request
  * max_age and prompt parameters. If the incoming message has login_hint
  * parameter the value of it is placed to hinted name.
@@ -56,40 +50,13 @@ import com.nimbusds.openid.connect.sdk.Prompt;
  * 
  */
 @SuppressWarnings("rawtypes")
-public class InitializeAuthenticationContext extends AbstractProfileAction {
+public class InitializeAuthenticationContext extends AbstractOIDCRequestAction {
 
     /** Class logger. */
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(InitializeAuthenticationContext.class);
 
-    /** OIDC Authentication request. */
-    private AuthenticationRequest request;
-
-    /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
-    @Override
-    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        if (!super.doPreExecute(profileRequestContext)) {
-            log.error("{} pre-execute failed", getLogPrefix());
-            return false;
-        }
-        if (profileRequestContext.getInboundMessageContext() == null) {
-            log.error("{} Unable to locate inbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        Object message = profileRequestContext.getInboundMessageContext().getMessage();
-
-        if (message == null || !(message instanceof AuthenticationRequest)) {
-            log.error("{} Unable to locate inbound message", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        request = (AuthenticationRequest) message;
-        return true;
-
-    }
-
+    
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -100,12 +67,12 @@ public class InitializeAuthenticationContext extends AbstractProfileAction {
          * TODO: This is a shortcut. We should compare the value to possible
          * existing authentication result.
          */
-        authnCtx.setForceAuthn(request.getMaxAge() == 0);
-        if (request.getPrompt() != null) {
-            authnCtx.setIsPassive(request.getPrompt().contains(Prompt.Type.NONE));
+        authnCtx.setForceAuthn(getAuthenticationRequest().getMaxAge() == 0);
+        if (getAuthenticationRequest().getPrompt() != null) {
+            authnCtx.setIsPassive(getAuthenticationRequest().getPrompt().contains(Prompt.Type.NONE));
         }
-        if (request.getLoginHint() != null) {
-            authnCtx.setHintedName(request.getLoginHint());
+        if (getAuthenticationRequest().getLoginHint() != null) {
+            authnCtx.setHintedName(getAuthenticationRequest().getLoginHint());
         }
         profileRequestContext.addSubcontext(authnCtx, true);
         log.debug("{} Created authentication context: {}", getLogPrefix(), authnCtx);

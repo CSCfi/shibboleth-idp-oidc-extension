@@ -29,54 +29,67 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
-import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
+
+import net.shibboleth.idp.profile.AbstractProfileAction;
+
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+
 /**
- * Action that validates redirect uri is a registered one. Validated redirect
- * uri is stored to response context.
+ * 
+ * Abstract class for actions performing actions on
+ * {@link AuthenticationRequest} found via
+ * {@link ProfileRequestContext#getInboundMessageContext()#getMessage()}.
+ *
  *
  */
 @SuppressWarnings("rawtypes")
-public class ValidateRedirectURI extends AbstractOIDCResponseAction {
+abstract class AbstractOIDCRequestAction extends AbstractProfileAction {
 
     /** Class logger. */
     @Nonnull
-    private Logger log = LoggerFactory.getLogger(ValidateRedirectURI.class);
+    private Logger log = LoggerFactory.getLogger(AbstractOIDCRequestAction.class);
 
-    /** oidc response context. */
-    @Nonnull
-    private OIDCMetadataContext oidcMetadataContext;
+    /** OIDC Authentication request. */
+    private AuthenticationRequest request;
+
+    /**
+     * Returns OIDC authentication request.
+     * 
+     * @return request
+     */
+    public AuthenticationRequest getAuthenticationRequest() {
+        return request;
+    }
 
     /** {@inheritDoc} */
+    @SuppressWarnings({ "unchecked" })
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        oidcMetadataContext = profileRequestContext.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class,
-                false);
-        if (oidcMetadataContext == null) {
-            log.error("{} No metadata found for relying party", getLogPrefix());
+        if (!super.doPreExecute(profileRequestContext)) {
+            log.error("{} pre-execute failed", getLogPrefix());
+            return false;
+        }
+        if (profileRequestContext.getInboundMessageContext() == null) {
+            log.error("{} Unable to locate inbound message context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        return super.doPreExecute(profileRequestContext);
-    }
+        Object message = profileRequestContext.getInboundMessageContext().getMessage();
 
-    /** {@inheritDoc} */
-    @Override
-    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        if (oidcMetadataContext.getClientInformation().getMetadata().getRedirectionURIs()
-                .contains(getAuthenticationRequest().getRedirectionURI())) {
-            getOidcResponseContext().setRedirectURI(getAuthenticationRequest().getRedirectionURI());
-            log.debug("{} redirect uri validated {}", getLogPrefix(), getAuthenticationRequest().getRedirectionURI());
-            return;
+        if (message == null || !(message instanceof AuthenticationRequest)) {
+            log.error("{} Unable to locate inbound message", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return false;
         }
-        log.warn("{} unable to validate redirect uri {}", getLogPrefix(), getAuthenticationRequest()
-                .getRedirectionURI());
+        request = (AuthenticationRequest) message;
+        return true;
     }
+
 }

@@ -29,27 +29,24 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
-
 import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
 import org.opensaml.messaging.context.MessageContext;
-import net.shibboleth.idp.profile.AbstractProfileAction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
  * 
  * Abstract class for actions performing actions on {@link OIDCResponseContext}
  * located under {@link ProfileRequestContext#getOutboundMessageContext()}.
- *
- *
+ * Extends baseclass that offers actions on {@link AuthenticationRequest} found
+ * via {@link ProfileRequestContext#getInboundMessageContext()#getMessage()}.
  */
 @SuppressWarnings("rawtypes")
-abstract class AbstractOIDCResponseAction extends AbstractProfileAction {
+abstract class AbstractOIDCResponseAction extends AbstractOIDCRequestAction {
 
     /** Class logger. */
     @Nonnull
@@ -58,18 +55,6 @@ abstract class AbstractOIDCResponseAction extends AbstractProfileAction {
     /** oidc response context. */
     @Nonnull
     private OIDCResponseContext oidcResponseContext;
-
-    /** OIDC Authentication request. */
-    private AuthenticationRequest request;
-
-    /**
-     * Returns OIDC authentication request.
-     * 
-     * @return request
-     */
-    public AuthenticationRequest getAuthenticationRequest() {
-        return request;
-    }
 
     /**
      * Returns oidc response context.
@@ -82,7 +67,6 @@ abstract class AbstractOIDCResponseAction extends AbstractProfileAction {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings({ "unchecked" })
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
@@ -102,13 +86,6 @@ abstract class AbstractOIDCResponseAction extends AbstractProfileAction {
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        Object message = profileRequestContext.getInboundMessageContext().getMessage();
-        if (message == null || !(message instanceof AuthenticationRequest)) {
-            log.error("{} No inbound message", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        request = (AuthenticationRequest) message;
         return true;
     }
 
