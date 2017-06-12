@@ -55,7 +55,6 @@ public class OIDCStringEncoderParser extends BaseAttributeEncoderParser {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("rawtypes")
     @Override protected Class<OIDCStringAttributeEncoder> getBeanClass(@Nullable final Element element) {
         return OIDCStringAttributeEncoder.class;
     }
