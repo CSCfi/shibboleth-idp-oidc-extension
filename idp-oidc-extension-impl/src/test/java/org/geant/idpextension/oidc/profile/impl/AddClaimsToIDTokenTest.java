@@ -30,7 +30,6 @@ package org.geant.idpextension.oidc.profile.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import net.shibboleth.idp.attribute.AttributeEncoder;
@@ -61,7 +60,7 @@ public class AddClaimsToIDTokenTest extends BaseOIDCResponseActionTest {
         action.initialize();
     }
 
-    @SuppressWarnings({ "unused", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     private void setAttributeContext() {
         // build 2 attributes
 
@@ -85,12 +84,18 @@ public class AddClaimsToIDTokenTest extends BaseOIDCResponseActionTest {
         stringAttributeValues2.add(new StringAttributeValue("value"));
         attribute2.setValues(stringAttributeValues2);
         attribute2.setEncoders(newEncoders2);
-
+        
+        IdPAttribute attribute3 = new IdPAttribute("test3");
+        List<StringAttributeValue> stringAttributeValues3 = new ArrayList<StringAttributeValue>();
+        stringAttributeValues3.add(new StringAttributeValue("value3"));
+        attribute3.setValues(stringAttributeValues3);
+        
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
         AttributeContext attributeCtx = new AttributeContext();
         Collection<IdPAttribute> attributes = new ArrayList<IdPAttribute>();
         attributes.add(attribute1);
         attributes.add(attribute2);
+        attributes.add(attribute3);
         attributeCtx.setIdPAttributes(attributes);
         prc.getSubcontext(RelyingPartyContext.class).addSubcontext(attributeCtx);
 
@@ -139,6 +144,7 @@ public class AddClaimsToIDTokenTest extends BaseOIDCResponseActionTest {
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertTrue(respCtx.getIDToken().getClaim("test1").equals("value1 value2"));
         Assert.assertTrue(respCtx.getIDToken().getClaim("test2").equals("value"));
+        Assert.assertNull(respCtx.getIDToken().getClaim("test3"));
     }
 
 }
