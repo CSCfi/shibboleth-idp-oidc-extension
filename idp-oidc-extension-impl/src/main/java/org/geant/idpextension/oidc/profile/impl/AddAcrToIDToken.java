@@ -76,8 +76,7 @@ public class AddAcrToIDToken extends AbstractOIDCResponseAction {
         }
         if (getOidcResponseContext().getAcr() != null) {
             log.debug("{} Setting acr to id token", getLogPrefix());
-            getOidcResponseContext().getIDToken().setClaim(IDTokenClaimsSet.ACR_CLAIM_NAME,
-                    getOidcResponseContext().getAcr());
+            getOidcResponseContext().getIDToken().setACR(getOidcResponseContext().getAcr());
             log.debug("{} Updated token {}", getLogPrefix(), getOidcResponseContext().getIDToken().toJSONObject()
                     .toJSONString());
         }
