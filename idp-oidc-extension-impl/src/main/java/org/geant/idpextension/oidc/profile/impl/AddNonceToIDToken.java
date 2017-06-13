@@ -70,8 +70,7 @@ public class AddNonceToIDToken extends AbstractOIDCResponseAction {
 
         if (getAuthenticationRequest().getNonce() != null) {
             log.debug("{} Setting nonce to id token", getLogPrefix());
-            getOidcResponseContext().getIDToken().setClaim(IDTokenClaimsSet.NONCE_CLAIM_NAME,
-                    getAuthenticationRequest().getNonce());
+            getOidcResponseContext().getIDToken().setNonce(getAuthenticationRequest().getNonce());
             log.debug("{} Updated token {}", getLogPrefix(), getOidcResponseContext().getIDToken().toJSONObject()
                     .toJSONString());
         }
