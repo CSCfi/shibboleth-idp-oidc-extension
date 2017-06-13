@@ -29,8 +29,6 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Date;
-
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
@@ -41,12 +39,9 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 
 /** {@link InitializeAuthenticationContext} unit test. */
 public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
