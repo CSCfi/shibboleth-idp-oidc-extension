@@ -32,10 +32,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
 import javax.annotation.Nonnull;
-
-import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
@@ -93,12 +90,6 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         issuerId = issuerLookupStrategy.apply(profileRequestContext);
-        AuthenticationContext authCtx = profileRequestContext.getSubcontext(AuthenticationContext.class, false);
-        if (authCtx == null) {
-            log.error("{} No authentication context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-            return false;
-        }
         subjectCtx = profileRequestContext.getSubcontext(SubjectContext.class, false);
         if (subjectCtx == null) {
             log.error("{} No subject context", getLogPrefix());
