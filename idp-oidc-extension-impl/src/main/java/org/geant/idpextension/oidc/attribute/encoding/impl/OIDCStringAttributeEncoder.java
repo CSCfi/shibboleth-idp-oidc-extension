@@ -73,7 +73,7 @@ public class OIDCStringAttributeEncoder extends AbstractInitializableComponent i
     private Predicate<ProfileRequestContext> activationCondition;
 
     /** Constructor. */
-    OIDCStringAttributeEncoder() {
+    public OIDCStringAttributeEncoder() {
         encodeType = true;
     }
 
