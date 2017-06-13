@@ -53,13 +53,14 @@ abstract class BaseOIDCResponseActionTest {
 
     protected RequestContext requestCtx;
     protected OIDCResponseContext respCtx;
+    protected AuthenticationRequest request;
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @BeforeMethod
     protected void setUp() throws Exception {
-        AuthenticationRequest req = AuthenticationRequest
+        request = AuthenticationRequest
                 .parse("response_type=code&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
-        requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
+        requestCtx = new RequestContextBuilder().setInboundMessage(request).buildRequestContext();
         final MessageContext<AuthenticationResponse> msgCtx = new MessageContext<AuthenticationResponse>();
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
         prc.setOutboundMessageContext(msgCtx);
