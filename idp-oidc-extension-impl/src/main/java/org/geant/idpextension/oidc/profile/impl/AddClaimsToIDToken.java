@@ -126,7 +126,7 @@ public class AddClaimsToIDToken extends AbstractOIDCResponseAction {
             if (encoders.isEmpty()) {
                 log.debug("{} Attribute {} does not have any encoders, nothing to do", getLogPrefix(),
                         attribute.getId());
-                return;
+                continue;
             }
             for (final AttributeEncoder<?> encoder : encoders) {
                 try {
