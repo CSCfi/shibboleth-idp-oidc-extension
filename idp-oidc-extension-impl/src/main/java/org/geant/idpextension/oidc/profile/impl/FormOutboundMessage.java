@@ -98,6 +98,8 @@ public class FormOutboundMessage extends AbstractOIDCResponseAction {
             }
         }
         if (resp == null) {
+            //TODO: We should have this check BEFORE and form oidc error response in the case of unsupported FLOW..
+            //This may be left in place as a final check.
             log.error("{} unsupported response type {}", getLogPrefix(), getAuthenticationRequest().getResponseType()
                     .toString());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
