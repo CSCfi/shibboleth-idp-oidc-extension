@@ -62,6 +62,22 @@ public class AddAcrToIDTokenTest extends BaseOIDCResponseActionTest {
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_MSG_CTX);
 
     }
+    
+    /**
+     * Test that action handles case of no acr.
+     * 
+     * @throws ComponentInitializationException
+     * @throws ParseException
+     */
+    @Test
+    public void testSuccess() throws ComponentInitializationException, ParseException {
+        init();
+        setIdTokenToResponseContext("iss", "sub", "aud", new Date(), new Date());
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertNull(respCtx.getIDToken().getACR());
+    }
+    
 
     /**
      * Test that action is able to copy acr to idtoken from context.
@@ -70,7 +86,7 @@ public class AddAcrToIDTokenTest extends BaseOIDCResponseActionTest {
      * @throws ParseException
      */
     @Test
-    public void testSuccess() throws ComponentInitializationException, ParseException {
+    public void testSuccess2() throws ComponentInitializationException, ParseException {
         init();
         setIdTokenToResponseContext("iss", "sub", "aud", new Date(), new Date());
         respCtx.setAcr("acrValue");
