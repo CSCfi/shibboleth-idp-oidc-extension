@@ -12,7 +12,7 @@
     - { role: CSCfi.shibboleth-idp, configurables: ['consent'], scope: csc.fi, port: 8443, bport: 8444, keystore_password: testpword }
     - { role: keystore, idp: true, keystore_password: testpword }
 
-    - { role: oidc-extension, build_user: vagrant, idp_home: /opt/shibboleth-idp, environment_file: /etc/default/shibboleth-idp, dirsrv_rootdn: "cn=Directory Manager", dirsrv_password: testpword, replpwd: testpword, administration_domain: csc.fi, root: "dc=csc,dc=fi", supplier: "{{ service_name }}", mode: single, service_name: "{{ service_name }}", aci: "teppo@{{ service_name }}", nimbus_version: "4.39" }
+    - { role: oidc-extension, build_user: vagrant, idp_home: /opt/shibboleth-idp, environment_file: /etc/default/shibboleth-idp, dirsrv_rootdn: "cn=Directory Manager", dirsrv_password: testpword, replpwd: testpword, administration_domain: csc.fi, root: "dc=csc,dc=fi", supplier: "{{ service_name }}", mode: single, service_name: "{{ service_name }}", aci: "teppo@{{ service_name }}"}
   
   tasks:
     - name: initial packages
