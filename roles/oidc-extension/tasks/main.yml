@@ -24,7 +24,7 @@
 - name: Copy nimbus-jose-jwt jar for bulding new idp.war
   copy:
     src: "{{ item.path }}"
-    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/nimbus-jose-jwt-{{ nimbus_version }}.jar"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/nimbus-jose-jwt.jar"
     owner: root
     group: root
     mode: 0644
