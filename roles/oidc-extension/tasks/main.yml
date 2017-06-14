@@ -17,14 +17,18 @@
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/views/oidc-error.vm", dest: "{{ idp_home }}/views/oidc-error.vm" }
 
 
+- local_action: find paths="{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency" patterns="nimbus-jose-jwt*.jar"
+  sudo: no
+  register: nimbus_match
+
 - name: Copy nimbus-jose-jwt jar for bulding new idp.war
   copy:
-    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/nimbus-jose-jwt-{{ nimbus_version }}.jar"
+    src: "{{ item.path }}"
     dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/nimbus-jose-jwt-{{ nimbus_version }}.jar"
     owner: root
     group: root
     mode: 0644
-    remote_src: no
+  with_items: "{{ nimbus_match.files }}"
 
 - name: Copy oauth2-oidc-sdk jar for bulding new idp.war
   copy:
