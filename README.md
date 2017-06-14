@@ -45,6 +45,14 @@ tail -f /opt/shibboleth-idp/logs/idp-process.log
 ### Initiate authentication
 There are few static links available in https://192.168.0.150/static/. Please not the page itself is not informative of the outcome, all the action needs to be followed from the log file. 
 
+#### LDAP User to authenticate with
+The LDAP user is Ted Tester, in Finnish:
+
+```
+user:teppo
+password:testaaja
+```
+
 ### Configuration
 You may configure following sections to alter the behaviour.
 
