@@ -43,7 +43,18 @@ tail -f /opt/shibboleth-idp/logs/idp-process.log
 ``` 
 
 ### Initiate authentication
-There are few static links available in https://192.168.0.150/static/. Please not the page itself is not informative of the outcome, all the action needs to be followed from the log file. 
+There are few static links available in https://192.168.0.150/static/.
+```
+Authentication request
+Authentication request: code flow (unsupported)
+Authentication request: max_age=0 / forceAuthn
+Authentication request: prompt=none / isPassive
+Authentication request: wrong redirect uri
+Authentication request: unknown client id
+Authentication request, acr=password
+Authentication request, acr=notsupported
+```
+Please not the page itself is not informative of the outcome, all the action needs to be followed from the log file. 
 
 #### LDAP User to authenticate with
 The LDAP user is Ted Tester, in Finnish:
