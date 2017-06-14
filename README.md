@@ -54,7 +54,7 @@ Authentication request: unknown client id
 Authentication request, acr=password
 Authentication request, acr=notsupported
 ```
-Please not the page itself is not informative of the outcome, all the action needs to be followed from the log file. 
+Please note the page itself is not informative of the outcome, all the action needs to be followed from the log file. 
 
 #### LDAP User to authenticate with
 The LDAP user is Ted Tester, in Finnish:
