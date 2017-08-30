@@ -30,11 +30,14 @@
     to the Shibboleth and eduPerson documentation. Above all, do
     not expose a value for this attribute without considering the
     long term implications.
+
+    This demonstrastes use of OIDCScopedString encoder.
     -->
     <AttributeDefinition id="eduPersonPrincipalName" xsi:type="Scoped" scope="%{idp.scope}" sourceAttributeID="uid">
         <Dependency ref="uid" />
         <AttributeEncoder xsi:type="SAML1ScopedString" name="urn:mace:dir:attribute-def:eduPersonPrincipalName" encodeType="false" />
         <AttributeEncoder xsi:type="SAML2ScopedString" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.6" friendlyName="eduPersonPrincipalName" encodeType="false" />
+        <AttributeEncoder xsi:type="oidcext:OIDCScopedString" name="eppn"/>
     </AttributeDefinition>
 
     <!--
@@ -51,6 +54,8 @@
     In the rest of the world, the email address is the standard identifier,
     despite the problems with that practice. Consider making the EPPN
     value the same as your official email addresses whenever possible.
+
+    This demonstrastes use of OIDCString encoder.
     -->
     <AttributeDefinition id="mail" xsi:type="Template">
         <Dependency ref="uid" />
@@ -67,11 +72,12 @@
 
     <!--
     This is an example of an attribute sourced from a data connector.
+
+    This demonstrastes use of OIDCStringArray encoder.
     -->
-    <AttributeDefinition id="eduPersonScopedAffiliation" xsi:type="Scoped" scope="%{idp.scope}" sourceAttributeID="affiliation">
-        <Dependency ref="staticAttributes" />
-        <AttributeEncoder xsi:type="SAML1ScopedString" name="urn:mace:dir:attribute-def:eduPersonScopedAffiliation" encodeType="false" />
-        <AttributeEncoder xsi:type="SAML2ScopedString" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.9" friendlyName="eduPersonScopedAffiliation" encodeType="false" />
+    <AttributeDefinition id="eduPersonAffiliation" xsi:type="Simple" sourceAttributeID="affiliation">
+        <Dependency ref="staticAttributes"/>
+        <AttributeEncoder xsi:type="oidcext:OIDCStringArray" name="affiliation"/>
     </AttributeDefinition>
 
 
@@ -82,6 +88,7 @@
     <DataConnector id="staticAttributes" xsi:type="Static">
         <Attribute id="affiliation">
             <Value>member</Value>
+            <Value>staff</Value>
         </Attribute>
     </DataConnector>
 
