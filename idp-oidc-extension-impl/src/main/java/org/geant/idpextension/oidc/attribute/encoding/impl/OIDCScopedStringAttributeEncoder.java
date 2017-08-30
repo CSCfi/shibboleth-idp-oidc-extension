@@ -29,43 +29,73 @@
 package org.geant.idpextension.oidc.attribute.encoding.impl;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.IdPAttribute;
 import net.shibboleth.idp.attribute.IdPAttributeValue;
-import net.shibboleth.idp.attribute.StringAttributeValue;
+import net.shibboleth.idp.attribute.ScopedStringAttributeValue;
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
 /**
- * Class encoding string attributes to string json object. Name of the attribute
- * will be set as the key. The string contains attribute value. If there are
- * several attribute values they are delimited with space. If no encodable
- * values are found returns a empty string.
+ * Class encoding scoped string attributes to string json object. Name of the
+ * attribute will be set as the key. The string contains attribute value,
+ * delimiter and scope catenated. If there are several attribute values they are
+ * delimited with space. If all values are uncodable, encoder returns an empty
+ * string.
  */
-public class OIDCStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
+public class OIDCScopedStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
 
     /** Class logger. */
     @Nonnull
-    private final Logger log = LoggerFactory.getLogger(OIDCStringAttributeEncoder.class);
+    private final Logger log = LoggerFactory.getLogger(OIDCScopedStringAttributeEncoder.class);
+
+    /** Delimiter used for scopeType. */
+    @Nullable
+    private String scopeDelimiter;
+
+    /**
+     * Constructor.
+     *
+     */
+    public OIDCScopedStringAttributeEncoder() {
+        scopeDelimiter = "@";
+    }
+
+    /**
+     * Set the scope delimiter.
+     * 
+     * @param newScopeDelimiter
+     *            delimiter to set
+     */
+    public void setScopeDelimiter(@Nullable final String newScopeDelimiter) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        scopeDelimiter = StringSupport.trimOrNull(newScopeDelimiter);
+    }
 
     @SuppressWarnings("rawtypes")
     @Override
     public JSONObject encode(IdPAttribute idpAttribute) throws AttributeEncodingException {
         Constraint.isNotNull(idpAttribute, "Attribute to encode cannot be null");
-        String attributeString = "";
+        Constraint.isNotNull(scopeDelimiter, "Scope delimiter cannot be null");
+        StringBuilder attributeString = new StringBuilder();
         JSONObject obj = new JSONObject();
         for (IdPAttributeValue value : idpAttribute.getValues()) {
-            if (value instanceof StringAttributeValue && value.getValue() != null) {
+            if (value instanceof ScopedStringAttributeValue && value.getValue() != null) {
                 if (attributeString.length() > 0) {
-                    attributeString += " ";
+                    attributeString.append(" ");
                 }
-                attributeString += value.getValue();
+                attributeString.append(value.getValue()).append(scopeDelimiter)
+                        .append(((ScopedStringAttributeValue) value).getScope());
             }
         }
-        obj.put(getName(), attributeString);
+        obj.put(getName(), attributeString.toString());
         return obj;
     }
 

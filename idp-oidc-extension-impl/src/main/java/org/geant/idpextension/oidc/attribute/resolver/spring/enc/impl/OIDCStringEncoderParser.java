@@ -26,7 +26,7 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package  org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl;
+package org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl;
 
 import net.shibboleth.idp.attribute.resolver.spring.enc.BaseAttributeEncoderParser;
 import net.shibboleth.idp.attribute.resolver.spring.impl.AttributeResolverNamespaceHandler;
@@ -37,27 +37,27 @@ import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCStringAttributeEn
 import org.w3c.dom.Element;
 
 /**
- * Spring bean definition parser for {@link OIDCStringNameIDEncoder}.
+ * Spring bean definition parser for {@link OIDCStringAttributeEncoder}.
  */
 public class OIDCStringEncoderParser extends BaseAttributeEncoderParser {
 
     /** Schema type name- enc: (legacy). */
-    @Nonnull public static final QName TYPE_NAME_ENC = new QName(AttributeEncoderNamespaceHandler.NAMESPACE, 
-            "OIDCString");
-    
+    @Nonnull
+    public static final QName TYPE_NAME_ENC = new QName(AttributeEncoderNamespaceHandler.NAMESPACE, "OIDCString");
+
     /** Schema type name- resolver:. */
-    @Nonnull public static final QName TYPE_NAME_RESOLVER = new QName(AttributeResolverNamespaceHandler.NAMESPACE, 
-            "OIDCString");
-   
+    @Nonnull
+    public static final QName TYPE_NAME_RESOLVER = new QName(AttributeResolverNamespaceHandler.NAMESPACE, "OIDCString");
+
     /** Constructor. */
     public OIDCStringEncoderParser() {
         setNameRequired(true);
     }
 
     /** {@inheritDoc} */
-    @Override protected Class<OIDCStringAttributeEncoder> getBeanClass(@Nullable final Element element) {
+    @Override
+    protected Class<OIDCStringAttributeEncoder> getBeanClass(@Nullable final Element element) {
         return OIDCStringAttributeEncoder.class;
     }
 
-   
 }

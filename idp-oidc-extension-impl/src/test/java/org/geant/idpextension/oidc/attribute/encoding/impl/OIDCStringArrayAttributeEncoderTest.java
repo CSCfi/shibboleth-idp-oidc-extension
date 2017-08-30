@@ -31,6 +31,7 @@ package org.geant.idpextension.oidc.attribute.encoding.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.ByteAttributeValue;
@@ -44,13 +45,13 @@ import org.testng.annotations.Test;
 
 import net.shibboleth.idp.attribute.StringAttributeValue;
 
-public class OIDCStringAttributeEncoderTest {
+public class OIDCStringArrayAttributeEncoderTest {
 
-    private OIDCStringAttributeEncoder encoder;
+    private OIDCStringArrayAttributeEncoder encoder;
 
     @BeforeMethod
     protected void setUp() throws Exception {
-        encoder = new OIDCStringAttributeEncoder();
+        encoder = new OIDCStringArrayAttributeEncoder();
     }
 
     private void init() throws ComponentInitializationException {
@@ -92,9 +93,9 @@ public class OIDCStringAttributeEncoderTest {
         stringAttributeValues.add(new StringAttributeValue("value2"));
         attribute.setValues(stringAttributeValues);
         JSONObject object = encoder.encode(attribute);
-        Assert.assertTrue(((String) object.get("attributeName")).split(" ")[0].equals("value1"));
-        Assert.assertTrue(((String) object.get("attributeName")).split(" ")[1].equals("value2"));
-        Assert.assertTrue(((String) object.get("attributeName")).split(" ").length == 2);
+        JSONArray array = (JSONArray) object.get("attributeName");
+        Assert.assertTrue(array.get(0).equals("value1"));
+        Assert.assertTrue(array.get(1).equals("value2"));
     }
 
     @Test
@@ -107,6 +108,7 @@ public class OIDCStringAttributeEncoderTest {
         byteAttributeValues.add(new ByteAttributeValue(bytes));
         attribute.setValues(byteAttributeValues);
         JSONObject object = encoder.encode(attribute);
-        Assert.assertTrue(((String) object.get("attributeName")).length() == 0);
+        JSONArray array = (JSONArray) object.get("attributeName");
+        Assert.assertTrue(array.size() == 0);
     }
 }

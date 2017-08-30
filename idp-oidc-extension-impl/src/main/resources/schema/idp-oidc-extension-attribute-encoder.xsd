@@ -19,4 +19,34 @@
 		</complexContent>
 	</complexType>
 
+	<complexType name="OIDCScopedString">
+		<annotation>
+			<documentation>Defines a OIDC scoped string encoder for an attribute.
+			</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="resolver:BaseAttributeEncoderType">
+				<attribute name="scopeDelimiter" type="string" use="optional">
+					<annotation>
+						<documentation>
+							This is the delimeter used between the attribute value and
+							scope.
+						</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="OIDCStringArray">
+		<annotation>
+			<documentation>Defines a OIDC string array encoder for an attribute.
+			</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="resolver:BaseAttributeEncoderType">
+			</extension>
+		</complexContent>
+	</complexType>
+
 </schema>

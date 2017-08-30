@@ -42,7 +42,7 @@ import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
-import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCStringAttributeEncoder;
+import org.geant.idpextension.oidc.attribute.encoding.impl.AbstractOIDCAttributeEncoder;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -130,7 +130,7 @@ public class AddClaimsToIDToken extends AbstractOIDCResponseAction {
             }
             for (final AttributeEncoder<?> encoder : encoders) {
                 try {
-                    if (encoder instanceof OIDCStringAttributeEncoder) {
+                    if (encoder instanceof AbstractOIDCAttributeEncoder) {
                         // TODO: missing a activation condition check for
                         // encoder!
                         JSONObject obj = (JSONObject) encoder.encode(attribute);

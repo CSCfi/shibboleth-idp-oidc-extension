@@ -26,47 +26,41 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.geant.idpextension.oidc.attribute.encoding.impl;
+package org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl;
+
+import net.shibboleth.idp.attribute.resolver.spring.enc.BaseScopedAttributeEncoderParser;
+import net.shibboleth.idp.attribute.resolver.spring.impl.AttributeResolverNamespaceHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.xml.namespace.QName;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import net.minidev.json.JSONObject;
-import net.shibboleth.idp.attribute.AttributeEncodingException;
-import net.shibboleth.idp.attribute.IdPAttribute;
-import net.shibboleth.idp.attribute.IdPAttributeValue;
-import net.shibboleth.idp.attribute.StringAttributeValue;
-import net.shibboleth.utilities.java.support.logic.Constraint;
+import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCScopedStringAttributeEncoder;
+import org.w3c.dom.Element;
 
 /**
- * Class encoding string attributes to string json object. Name of the attribute
- * will be set as the key. The string contains attribute value. If there are
- * several attribute values they are delimited with space. If no encodable
- * values are found returns a empty string.
+ * Spring bean definition parser for {@link OIDCScopedStringAttributeEncoder}.
  */
-public class OIDCStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
+public class OIDCScopedStringEncoderParser extends BaseScopedAttributeEncoderParser {
 
-    /** Class logger. */
+    /** Schema type name- enc: (legacy). */
     @Nonnull
-    private final Logger log = LoggerFactory.getLogger(OIDCStringAttributeEncoder.class);
+    public static final QName TYPE_NAME_ENC = new QName(AttributeEncoderNamespaceHandler.NAMESPACE, "OIDCScopedString");
 
-    @SuppressWarnings("rawtypes")
+    /** Schema type name- resolver:. */
+    @Nonnull
+    public static final QName TYPE_NAME_RESOLVER = new QName(AttributeResolverNamespaceHandler.NAMESPACE,
+            "OIDCScopedString");
+
+    /** Constructor. */
+    public OIDCScopedStringEncoderParser() {
+        setNameRequired(true);
+    }
+
+    /** {@inheritDoc} */
     @Override
-    public JSONObject encode(IdPAttribute idpAttribute) throws AttributeEncodingException {
-        Constraint.isNotNull(idpAttribute, "Attribute to encode cannot be null");
-        String attributeString = "";
-        JSONObject obj = new JSONObject();
-        for (IdPAttributeValue value : idpAttribute.getValues()) {
-            if (value instanceof StringAttributeValue && value.getValue() != null) {
-                if (attributeString.length() > 0) {
-                    attributeString += " ";
-                }
-                attributeString += value.getValue();
-            }
-        }
-        obj.put(getName(), attributeString);
-        return obj;
+    protected Class<OIDCScopedStringAttributeEncoder> getBeanClass(@Nullable final Element element) {
+        return OIDCScopedStringAttributeEncoder.class;
     }
 
 }

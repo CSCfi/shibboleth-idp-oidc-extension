@@ -30,27 +30,24 @@ package org.geant.idpextension.oidc.attribute.encoding.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.ByteAttributeValue;
 import net.shibboleth.idp.attribute.IdPAttribute;
+import net.shibboleth.idp.attribute.ScopedStringAttributeValue;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
-
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import net.shibboleth.idp.attribute.StringAttributeValue;
+public class OIDCScopedStringAttributeEncoderTest {
 
-public class OIDCStringAttributeEncoderTest {
-
-    private OIDCStringAttributeEncoder encoder;
+    private OIDCScopedStringAttributeEncoder encoder;
 
     @BeforeMethod
     protected void setUp() throws Exception {
-        encoder = new OIDCStringAttributeEncoder();
+        encoder = new OIDCScopedStringAttributeEncoder();
     }
 
     private void init() throws ComponentInitializationException {
@@ -87,13 +84,18 @@ public class OIDCStringAttributeEncoderTest {
     public void testEncoding() throws ComponentInitializationException, AttributeEncodingException {
         init();
         IdPAttribute attribute = new IdPAttribute("test");
-        List<StringAttributeValue> stringAttributeValues = new ArrayList<StringAttributeValue>();
-        stringAttributeValues.add(new StringAttributeValue("value1"));
-        stringAttributeValues.add(new StringAttributeValue("value2"));
+        List<ScopedStringAttributeValue> stringAttributeValues = new ArrayList<ScopedStringAttributeValue>();
+        stringAttributeValues.add(new ScopedStringAttributeValue("value1", "scope"));
+        stringAttributeValues.add(new ScopedStringAttributeValue("value2", "scope"));
         attribute.setValues(stringAttributeValues);
         JSONObject object = encoder.encode(attribute);
-        Assert.assertTrue(((String) object.get("attributeName")).split(" ")[0].equals("value1"));
-        Assert.assertTrue(((String) object.get("attributeName")).split(" ")[1].equals("value2"));
+        Assert.assertTrue(((String) object.get("attributeName")).split(" ")[0].equals("value1@scope"));
+        Assert.assertTrue(((String) object.get("attributeName")).split(" ")[1].equals("value2@scope"));
+        Assert.assertTrue(((String) object.get("attributeName")).split(" ").length == 2);
+        encoder.setScopeDelimiter(":");
+        object = encoder.encode(attribute);
+        Assert.assertTrue(((String) object.get("attributeName")).split(" ")[0].equals("value1:scope"));
+        Assert.assertTrue(((String) object.get("attributeName")).split(" ")[1].equals("value2:scope"));
         Assert.assertTrue(((String) object.get("attributeName")).split(" ").length == 2);
     }
 

@@ -32,6 +32,7 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.IdPAttribute;
@@ -40,32 +41,28 @@ import net.shibboleth.idp.attribute.StringAttributeValue;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Class encoding string attributes to string json object. Name of the attribute
- * will be set as the key. The string contains attribute value. If there are
- * several attribute values they are delimited with space. If no encodable
- * values are found returns a empty string.
+ * Class encoding string attributes to json string array. If no encodable values
+ * are found returns an empty array.
+ * 
  */
-public class OIDCStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
+public class OIDCStringArrayAttributeEncoder extends AbstractOIDCAttributeEncoder {
 
     /** Class logger. */
     @Nonnull
-    private final Logger log = LoggerFactory.getLogger(OIDCStringAttributeEncoder.class);
+    private final Logger log = LoggerFactory.getLogger(OIDCStringArrayAttributeEncoder.class);
 
     @SuppressWarnings("rawtypes")
     @Override
     public JSONObject encode(IdPAttribute idpAttribute) throws AttributeEncodingException {
         Constraint.isNotNull(idpAttribute, "Attribute to encode cannot be null");
-        String attributeString = "";
         JSONObject obj = new JSONObject();
+        JSONArray array = new JSONArray();
         for (IdPAttributeValue value : idpAttribute.getValues()) {
             if (value instanceof StringAttributeValue && value.getValue() != null) {
-                if (attributeString.length() > 0) {
-                    attributeString += " ";
-                }
-                attributeString += value.getValue();
+                array.add(value.getValue());
             }
         }
-        obj.put(getName(), attributeString);
+        obj.put(getName(), array);
         return obj;
     }
 
