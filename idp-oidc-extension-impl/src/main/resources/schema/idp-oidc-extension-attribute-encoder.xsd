@@ -19,6 +19,17 @@
 		</complexContent>
 	</complexType>
 	
+	<complexType name="OIDCBase64">
+		<annotation>
+			<documentation>Defines a OIDC base64 encoder for a byte attribute.
+			</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="resolver:BaseAttributeEncoderType">
+			</extension>
+		</complexContent>
+	</complexType>
+	
 	<complexType name="OIDCStringInteger">
 		<annotation>
 			<documentation>Defines a OIDC integer encoder for a string attribute having a value parsable as integer.
