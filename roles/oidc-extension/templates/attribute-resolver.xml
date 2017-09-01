@@ -80,6 +80,16 @@
         <AttributeEncoder xsi:type="oidcext:OIDCStringArray" name="affiliation"/>
     </AttributeDefinition>
 
+     <!-- 
+    This is an example of an attribute sourced from a data connector.
+
+    This demonstrastes use of OIDCStringInteger encoder.
+    -->
+    <AttributeDefinition id="age" xsi:type="Simple" sourceAttributeID="age">
+        <Dependency ref="staticAttributes"/>
+        <AttributeEncoder xsi:type="oidcext:OIDCStringInteger" name="age"/>
+    </AttributeDefinition>
+
 
     <!-- ========================================== -->
     <!--      Data Connectors                       -->
@@ -89,6 +99,9 @@
         <Attribute id="affiliation">
             <Value>member</Value>
             <Value>staff</Value>
+        </Attribute>
+        <Attribute id="age">
+            <Value>50</Value>
         </Attribute>
     </DataConnector>
 

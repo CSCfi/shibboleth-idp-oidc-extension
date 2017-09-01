@@ -150,7 +150,10 @@
              <AttributeRule attributeID="eduPersonPrincipalName">
                  <PermitValueRule xsi:type="ANY" />
              </AttributeRule>
-              <AttributeRule attributeID="eduPersonAffiliation">
+             <AttributeRule attributeID="age">
+                 <PermitValueRule xsi:type="ANY" />
+             </AttributeRule>
+             <AttributeRule attributeID="eduPersonAffiliation">
                  <PermitValueRule xsi:type="ANY" />
              </AttributeRule>
              <AttributeRule attributeID="uid">
