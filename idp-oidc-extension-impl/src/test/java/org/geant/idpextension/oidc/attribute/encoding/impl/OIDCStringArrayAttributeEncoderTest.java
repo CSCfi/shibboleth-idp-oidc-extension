@@ -108,7 +108,6 @@ public class OIDCStringArrayAttributeEncoderTest {
         byteAttributeValues.add(new ByteAttributeValue(bytes));
         attribute.setValues(byteAttributeValues);
         JSONObject object = encoder.encode(attribute);
-        JSONArray array = (JSONArray) object.get("attributeName");
-        Assert.assertTrue(array.size() == 0);
+        Assert.assertNull(object.get("attributeName"));
     }
 }

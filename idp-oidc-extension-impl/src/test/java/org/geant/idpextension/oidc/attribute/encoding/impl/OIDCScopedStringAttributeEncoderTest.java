@@ -109,6 +109,6 @@ public class OIDCScopedStringAttributeEncoderTest {
         byteAttributeValues.add(new ByteAttributeValue(bytes));
         attribute.setValues(byteAttributeValues);
         JSONObject object = encoder.encode(attribute);
-        Assert.assertTrue(((String) object.get("attributeName")).length() == 0);
+        Assert.assertNull(object.get("attributeName"));
     }
 }

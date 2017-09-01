@@ -47,8 +47,8 @@ import net.shibboleth.utilities.java.support.primitive.StringSupport;
  * Class encoding scoped string attributes to string json object. Name of the
  * attribute will be set as the key. The string contains attribute value,
  * delimiter and scope catenated. If there are several attribute values they are
- * delimited with space. If all values are uncodable, encoder returns an empty
- * string.
+ * delimited with space. If all values are uncodable, encoder returns null
+ * value.
  */
 public class OIDCScopedStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
 
@@ -95,7 +95,7 @@ public class OIDCScopedStringAttributeEncoder extends AbstractOIDCAttributeEncod
                         .append(((ScopedStringAttributeValue) value).getScope());
             }
         }
-        obj.put(getName(), attributeString.toString());
+        obj.put(getName(), attributeString.toString().isEmpty() ? null : attributeString.toString());
         return obj;
     }
 

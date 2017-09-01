@@ -43,7 +43,7 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
  * Class encoding string attributes to string json object. Name of the attribute
  * will be set as the key. The string contains attribute value. If there are
  * several attribute values they are delimited with space. If no encodable
- * values are found returns a empty string.
+ * values are found returns null value.
  */
 public class OIDCStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
 
@@ -65,7 +65,7 @@ public class OIDCStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
                 attributeString += value.getValue();
             }
         }
-        obj.put(getName(), attributeString);
+        obj.put(getName(), attributeString.toString().isEmpty() ? null : attributeString.toString());
         return obj;
     }
 

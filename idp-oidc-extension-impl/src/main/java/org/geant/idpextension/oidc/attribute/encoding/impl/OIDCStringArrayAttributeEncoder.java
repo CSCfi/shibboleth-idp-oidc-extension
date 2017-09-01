@@ -42,7 +42,7 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
  * Class encoding string attributes to json string array. If no encodable values
- * are found returns an empty array.
+ * are found returns null value.
  * 
  */
 public class OIDCStringArrayAttributeEncoder extends AbstractOIDCAttributeEncoder {
@@ -62,7 +62,7 @@ public class OIDCStringArrayAttributeEncoder extends AbstractOIDCAttributeEncode
                 array.add(value.getValue());
             }
         }
-        obj.put(getName(), array);
+        obj.put(getName(), array.size() == 0 ? null : array);
         return obj;
     }
 
