@@ -136,7 +136,7 @@ public class AddClaimsToIDToken extends AbstractOIDCResponseAction {
                         JSONObject obj = (JSONObject) encoder.encode(attribute);
                         // There should be exactly one key
                         for (String name : obj.keySet()) {
-                            log.debug("Adding claim " + name + " with value " + obj.get(name));
+                            log.debug("Adding claim {} with value {}", name, obj.get(name));
                             getOidcResponseContext().getIDToken().setClaim(name, obj.get(name));
                         }
 
