@@ -94,7 +94,7 @@ public class OIDCByteAttributeEncoderTest {
         byteAttributeValues.add(new ByteAttributeValue(bytes));
         attribute.setValues(byteAttributeValues);
         JSONObject object = encoder.encode(attribute);
-        String base64Coded=(String) object.get("attributeName");
+        String base64Coded = (String) object.get("attributeName");
         Assert.assertEquals(bytes, Base64.decode(base64Coded));
     }
 
