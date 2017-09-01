@@ -10,7 +10,18 @@
 
 	<complexType name="OIDCString">
 		<annotation>
-			<documentation>Defines a OIDC string encoder for an attribute.
+			<documentation>Defines a OIDC string encoder for a string attribute.
+			</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="resolver:BaseAttributeEncoderType">
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="OIDCStringInteger">
+		<annotation>
+			<documentation>Defines a OIDC integer encoder for a string attribute having a value parsable as integer.
 			</documentation>
 		</annotation>
 		<complexContent>
@@ -21,7 +32,7 @@
 
 	<complexType name="OIDCScopedString">
 		<annotation>
-			<documentation>Defines a OIDC scoped string encoder for an attribute.
+			<documentation>Defines a OIDC string encoder for a scoped string attribute.
 			</documentation>
 		</annotation>
 		<complexContent>
@@ -40,7 +51,7 @@
 
 	<complexType name="OIDCStringArray">
 		<annotation>
-			<documentation>Defines a OIDC string array encoder for an attribute.
+			<documentation>Defines a OIDC string array encoder for a string attribute.
 			</documentation>
 		</annotation>
 		<complexContent>

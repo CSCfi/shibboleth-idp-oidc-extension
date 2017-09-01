@@ -28,27 +28,38 @@
 
 package org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl;
 
+import net.shibboleth.idp.attribute.resolver.spring.enc.BaseAttributeEncoderParser;
+import net.shibboleth.idp.attribute.resolver.spring.impl.AttributeResolverNamespaceHandler;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.xml.namespace.QName;
 
-import net.shibboleth.ext.spring.util.BaseSpringNamespaceHandler;
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
-import org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl.OIDCStringEncoderParser;
+import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCStringIntegerAttributeEncoder;
+import org.w3c.dom.Element;
 
-/** Namespace handler for the attribute resolver. */
-public class AttributeEncoderNamespaceHandler extends BaseSpringNamespaceHandler {
+/**
+ * Spring bean definition parser for {@link OIDCStringIntegerAttributeEncoder}.
+ */
+public class OIDCStringIntegerEncoderParser extends BaseAttributeEncoderParser {
 
-    /** Namespace for this handler. */
+    /** Schema type name- enc: (legacy). */
     @Nonnull
-    @NotEmpty
-    public static final String NAMESPACE = "org.geant.idpextension.oidc.attribute.encoder";
+    public static final QName TYPE_NAME_ENC = new QName(AttributeEncoderNamespaceHandler.NAMESPACE, "OIDCStringInteger");
+
+    /** Schema type name- resolver:. */
+    @Nonnull
+    public static final QName TYPE_NAME_RESOLVER = new QName(AttributeResolverNamespaceHandler.NAMESPACE, "OIDCStringInteger");
+
+    /** Constructor. */
+    public OIDCStringIntegerEncoderParser() {
+        setNameRequired(true);
+    }
 
     /** {@inheritDoc} */
     @Override
-    public void init() {
-        registerBeanDefinitionParser(OIDCStringEncoderParser.TYPE_NAME_ENC, new OIDCStringEncoderParser());
-        registerBeanDefinitionParser(OIDCStringIntegerEncoderParser.TYPE_NAME_ENC, new OIDCStringIntegerEncoderParser());
-        registerBeanDefinitionParser(OIDCScopedStringEncoderParser.TYPE_NAME_ENC, new OIDCScopedStringEncoderParser());
-        registerBeanDefinitionParser(OIDCStringArrayEncoderParser.TYPE_NAME_ENC, new OIDCStringArrayEncoderParser());
+    protected Class<OIDCStringIntegerAttributeEncoder> getBeanClass(@Nullable final Element element) {
+        return OIDCStringIntegerAttributeEncoder.class;
     }
 
 }
