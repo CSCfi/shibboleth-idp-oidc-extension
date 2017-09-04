@@ -8,7 +8,7 @@
       dirsrv_keystore_dst: "/etc/dirsrv/slapd-{{ hostvars[inventory_hostname].host_name }}/"
       chain: DigiCertBundle.crt
       force: no
-      crt_dir: "{{ playbook_dir }}/../../certs"
+      crt_dir: "{{ playbook_dir }}/roles/keystore/files"
 
   - name: Check | exists | {{ crt_dir }}/{{ crt }}
     local_action: stat path={{ crt_dir }}/{{ crt }}
