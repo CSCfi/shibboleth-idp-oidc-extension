@@ -220,10 +220,18 @@
 - name: Ensure "{{ idp_home }}/static" dir exists
   file: path="{{ idp_home }}/static/" state=directory
 
+- name: Ensure "{{ idp_home }}/static/.well-known/" dir exists
+  file: path="{{ idp_home }}/static/.well-known/" state=directory
+
 - name: Setting index.html containing authentication links
   template:
     src: index.html
     dest: "{{ idp_home }}/static/index.html"
+
+- name: Setting op metadata file
+  template:
+    src: openid-configuration
+    dest: "{{ idp_home }}/static/.well-known/openid-configuration"
 
 - name: Restart shibboleth idp
   service:
