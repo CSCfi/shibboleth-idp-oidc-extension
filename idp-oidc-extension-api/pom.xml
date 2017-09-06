@@ -1,35 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- See LICENSE.txt file in the root directory of this repository for the 
-	copyright/license information. -->
+    copyright/license information. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<artifactId>idp-oidc-extension-parent</artifactId>
-		<groupId>org.geant</groupId>
-		<version>0.5-SNAPSHOT</version>
-		<relativePath>../idp-oidc-extension-parent</relativePath>
-	</parent>
-	<artifactId>idp-oidc-extension-api</artifactId>
-	<packaging>jar</packaging>
-	<dependencies>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>idp-oidc-extension-parent</artifactId>
+        <groupId>org.geant</groupId>
+        <version>0.5-SNAPSHOT</version>
+        <relativePath>../idp-oidc-extension-parent</relativePath>
+    </parent>
+    <artifactId>idp-oidc-extension-api</artifactId>
+    <packaging>jar</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>net.shibboleth.ext</groupId>
+            <artifactId>spring-extensions</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>oauth2-oidc-sdk</artifactId>
         </dependency>
-	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven.compiler.version}</version>
-				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 
