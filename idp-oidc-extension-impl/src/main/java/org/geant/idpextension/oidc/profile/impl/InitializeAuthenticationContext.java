@@ -56,7 +56,6 @@ public class InitializeAuthenticationContext extends AbstractOIDCRequestAction {
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(InitializeAuthenticationContext.class);
 
-    
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -70,6 +69,7 @@ public class InitializeAuthenticationContext extends AbstractOIDCRequestAction {
         authnCtx.setForceAuthn(getAuthenticationRequest().getMaxAge() == 0);
         if (getAuthenticationRequest().getPrompt() != null) {
             authnCtx.setIsPassive(getAuthenticationRequest().getPrompt().contains(Prompt.Type.NONE));
+            authnCtx.setForceAuthn(getAuthenticationRequest().getPrompt().contains(Prompt.Type.LOGIN));
         }
         if (getAuthenticationRequest().getLoginHint() != null) {
             authnCtx.setHintedName(getAuthenticationRequest().getLoginHint());

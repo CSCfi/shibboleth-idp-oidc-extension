@@ -69,9 +69,28 @@ public class InitializeAuthenticationContextTest {
      * authentication request.
      */
     @Test
-    public void testOIDCAuthnRequestFlags() throws Exception {
+    public void testOIDCAuthnRequestPromptNone() throws Exception {
         AuthenticationRequest req = AuthenticationRequest
-                .parse("response_type=code&max_age=0&prompt=none&client_id=s6BhdRkqt3&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
+                .parse("response_type=code&prompt=none&client_id=s6BhdRkqt3&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
+        final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
+        @SuppressWarnings("rawtypes")
+        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+        final InitializeAuthenticationContext action = new InitializeAuthenticationContext();
+        action.initialize();
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        AuthenticationContext authnCtx = prc.getSubcontext(AuthenticationContext.class);
+        Assert.assertTrue(authnCtx.isPassive());
+    }
+    
+    /**
+     * Test that the action functions properly if the inbound message is a oidc
+     * authentication request.
+     */
+    @Test
+    public void testOIDCAuthnRequestFlagsPromptLogin() throws Exception {
+        AuthenticationRequest req = AuthenticationRequest
+                .parse("response_type=code&prompt=login&client_id=s6BhdRkqt3&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
         final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
         @SuppressWarnings("rawtypes")
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
@@ -81,7 +100,6 @@ public class InitializeAuthenticationContextTest {
         ActionTestingSupport.assertProceedEvent(event);
         AuthenticationContext authnCtx = prc.getSubcontext(AuthenticationContext.class);
         Assert.assertTrue(authnCtx.isForceAuthn());
-        Assert.assertTrue(authnCtx.isPassive());
     }
 
 }
