@@ -189,9 +189,36 @@
                 </property>
           </bean>
 
+- name: Add OIDC client information resolver service to services-system.xml
+  blockinfile:
+    dest: "{{ idp_home }}/system/conf/services-system.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertbefore: "<bean id=\"shibboleth.LoggingService"
+    content: |
+        <bean id="shibboleth.ClientInformationResolverService" class="net.shibboleth.ext.spring.service.ReloadableSpringService"
+                depends-on="shibboleth.AttributeResolverService"
+                p:serviceConfigurations-ref="shibboleth.ClientInformationResolverResources"
+                p:failFast="%{idp.service.metadata.failFast:%{idp.service.failFast:false}}"
+                p:reloadCheckDelay="%{idp.service.metadata.checkInterval:PT0S}"
+                p:beanFactoryPostProcessors-ref="shibboleth.PropertySourcesPlaceholderConfigurer">
+            <constructor-arg name="claz" value="org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver" />
+            <constructor-arg name="strategy">
+                <bean class="org.geant.idpextension.oidc.profile.spring.relyingparty.metadata.impl.ClientInformationResolverServiceStrategy" />
+            </constructor-arg>
+        </bean>
+
+        <bean id="shibboleth.ClientInformationResolver"
+            class="org.geant.idpextension.oidc.metadata.impl.ReloadingRelyingPartyClientInformationProvider"
+            c:resolverService-ref="shibboleth.ClientInformationResolverService" />
+
+        <util:list id="shibboleth.ClientInformationResolverResources">
+            <value>/opt/shibboleth-idp/conf/oidc-metadata-providers.xml</value>
+        </util:list>
+
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "logback.xml"
+    - "oidc-metadata-providers.xml"
 
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/metadata/{{item}}
   with_items:
