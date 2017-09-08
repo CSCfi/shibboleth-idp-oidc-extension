@@ -57,28 +57,8 @@
                 class="org.geant.idpextension.oidc.profile.impl.OIDCMetadataLookupHandler"
                 scope="prototype">
                 <property name="clientInformationResolver">
-                    <bean
-                        class="org.geant.idpextension.oidc.metadata.impl.ChainingClientInformationResolver">
-                        <property name="resolvers">
-                            <ref bean="OIDCResolvers" />
-                        </property>
-                    </bean>
+                    <ref bean="shibboleth.ClientInformationResolver"/>
                 </property>
-            </bean>
-        </constructor-arg>
-    </bean>
-
-    <util:list id="OIDCResolvers"
-        value-type="org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver">
-        <ref bean="OIDCFileResolver" />
-    </util:list>
-
-    <bean id="OIDCFileResolver"
-        class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver">
-        <constructor-arg>
-            <bean class="java.io.File">
-                <constructor-arg type="String"
-                    value="/opt/shibboleth-idp/metadata/oidc-client.json" />
             </bean>
         </constructor-arg>
     </bean>
