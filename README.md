@@ -43,7 +43,7 @@ tail -f /opt/shibboleth-idp/logs/idp-process.log
 ``` 
 
 ### Initiate authentication
-There are few static links available in https://192.168.0.150/static/.
+There are few static links available in https://192.168.0.150/.
 ```
 Authentication request
 Authentication request: code flow (unsupported)
