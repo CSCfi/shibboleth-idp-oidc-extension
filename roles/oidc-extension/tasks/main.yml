@@ -199,13 +199,27 @@
             class="org.geant.idpextension.oidc.profile.impl.FilterActiveAuthenticationResultsByMaxAge"
             scope="prototype" />
 
-- name: Add FilterActiveAuthenticationResultsByMaxAge bean to authn-flow.xml. SYSTEM FILE CHANGE!!
+- name: Copy authn-flow.xml to authn-oidc-flow.xml. SYSTEM DIRECTORY CHANGE!!
+  copy:
+    src: "{{ idp_home }}/system/flows/authn/authn-flow.xml"
+    dest: "{{ idp_home }}/system/flows/authn/authn-oidc-flow.xml"
+    remote_src: yes
+
+- name: Add FilterActiveAuthenticationResultsByMaxAge expression to authn-oidc-flow.xml. SYSTEM DIRECTORY CHANGE!!
   blockinfile:
-    dest: "{{ idp_home }}/system/flows/authn/authn-flow.xml"
+    dest: "{{ idp_home }}/system/flows/authn/authn-oidc-flow.xml"
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
     insertafter: "ExtractActiveAuthenticationResults"
     content: |
         <evaluate expression="FilterActiveAuthenticationResultsByMaxAge" />
+
+- name: Activate the new authn-oidc flow. SYSTEM FILE CHANGE!!
+  blockinfile:
+    dest: "{{ idp_home }}/system/conf/webflow-config.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertafter: "../system/flows/authn/authn-flow.xml"
+    content: |
+         <entry key="authn-oidc" value="../system/flows/authn/authn-oidc-flow.xml" />
 
 - name: Add OIDC client information resolver service to services-system.xml
   blockinfile:
