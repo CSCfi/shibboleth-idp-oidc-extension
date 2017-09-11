@@ -189,6 +189,24 @@
                 </property>
           </bean>
 
+- name: Add FilterActiveAuthenticationResultsByMaxAge bean to authn-beans.xml. SYSTEM FILE CHANGE!!
+  blockinfile:
+    dest: "{{ idp_home }}/system/flows/authn/authn-beans.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertafter: "net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor"
+    content: |
+        <bean id="FilterActiveAuthenticationResultsByMaxAge"
+            class="org.geant.idpextension.oidc.profile.impl.FilterActiveAuthenticationResultsByMaxAge"
+            scope="prototype" />
+
+- name: Add FilterActiveAuthenticationResultsByMaxAge bean to authn-flow.xml. SYSTEM FILE CHANGE!!
+  blockinfile:
+    dest: "{{ idp_home }}/system/flows/authn/authn-flow.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertafter: "ExtractActiveAuthenticationResults"
+    content: |
+        <evaluate expression="FilterActiveAuthenticationResultsByMaxAge" />
+
 - name: Add OIDC client information resolver service to services-system.xml
   blockinfile:
     dest: "{{ idp_home }}/system/conf/services-system.xml"
