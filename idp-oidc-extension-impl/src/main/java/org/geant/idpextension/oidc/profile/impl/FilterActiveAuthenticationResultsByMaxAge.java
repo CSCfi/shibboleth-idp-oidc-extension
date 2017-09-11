@@ -59,6 +59,7 @@ public class FilterActiveAuthenticationResultsByMaxAge extends AbstractOIDCReque
         log.debug("{} Filtering active results by max_age parameter {}", getLogPrefix(), maxAge);
         if (maxAge < 0) {
             log.debug("{} max_age is not set, nothing to do", getLogPrefix());
+            return;
         }
         final AuthenticationContext authnCtx = profileRequestContext.getSubcontext(AuthenticationContext.class);
         if (authnCtx == null) {
