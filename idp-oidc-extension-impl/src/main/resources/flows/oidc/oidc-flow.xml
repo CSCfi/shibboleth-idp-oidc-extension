@@ -23,6 +23,7 @@
 	<action-state id="OutboundContextsAndSecurityParameters">
 		<evaluate expression="InitializeOutboundMessageContext" />
 		<evaluate expression="ValidateRedirectURI" />
+		<evaluate expression="PopulateIDTokenSignatureSigningParameters" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="PostInitialSetup" />
 	</action-state>
@@ -56,6 +57,7 @@
 		<evaluate expression="AddAuthTimeToIDToken" />
 		<evaluate expression="AddAcrToIDToken" />
 		<evaluate expression="AddNonceToIDToken" />
+		<evaluate expression="SignIDToken" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="HandleOutboundMessage" />
 	</action-state>

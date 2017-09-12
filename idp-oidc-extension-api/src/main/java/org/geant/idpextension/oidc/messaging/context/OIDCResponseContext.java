@@ -35,6 +35,7 @@ import javax.annotation.Nullable;
 
 import org.opensaml.messaging.context.BaseContext;
 
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
@@ -54,6 +55,10 @@ public class OIDCResponseContext extends BaseContext {
 	/** The id token formed. */
 	@Nullable
 	private IDTokenClaimsSet idToken;
+
+	/** The id token formed. */
+	@Nullable
+	private SignedJWT signedIDToken;
 
 	/** the acr used in response. **/
 	@Nullable
@@ -196,7 +201,7 @@ public class OIDCResponseContext extends BaseContext {
 	/**
 	 * Get the id token.
 	 * 
-	 * @return The client information.
+	 * @return The id token.
 	 */
 	@Nullable
 	public IDTokenClaimsSet getIDToken() {
@@ -211,5 +216,25 @@ public class OIDCResponseContext extends BaseContext {
 	 */
 	public void setIDToken(@Nullable IDTokenClaimsSet token) {
 		idToken = token;
+	}
+
+	/**
+	 * Get the signed id token.
+	 * 
+	 * @return The signed id token
+	 */
+	@Nullable
+	public SignedJWT getSignedIDToken() {
+		return signedIDToken;
+	}
+
+	/**
+	 * Set the signed id token.
+	 * 
+	 * @param idToken
+	 *            The signed id token
+	 */
+	public void setSignedIDToken(@Nullable SignedJWT idToken) {
+		this.signedIDToken = idToken;
 	}
 }

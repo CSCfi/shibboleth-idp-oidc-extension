@@ -80,31 +80,28 @@ public class FormOutboundMessage extends AbstractOIDCResponseAction {
              * We support now only forming implicit response.
              * 
              * 
-             * TODO: idtoken signing is mandatory. We are missing that step
-             * still. We create a plain jwt here. Replace with fetching a signed
-             * jwt from context
              */
             if (getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
-                try {
-                    resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(), null,
-                            new PlainJWT(getOidcResponseContext().getIDToken().toJWTClaimsSet()), null,
-                            getAuthenticationRequest().getState(), null, getAuthenticationRequest().getResponseMode());
-                    log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
-                } catch (ParseException e) {
-                    log.error("{} jwt parsing failed {}", getLogPrefix(), e.getMessage());
-                    ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_ENCODE);
+                if (getOidcResponseContext().getSignedIDToken() == null) {
+                    log.error("{} implicit flow requires id token to be signed, configuration error", getLogPrefix());
+                    ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
                     return;
                 }
+                resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(), null,
+                        getOidcResponseContext().getSignedIDToken(), null, getAuthenticationRequest().getState(), null,
+                        getAuthenticationRequest().getResponseMode());
+                log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
             }
         }
         if (resp == null) {
-            //TODO: We should have this check BEFORE and form oidc error response in the case of unsupported FLOW..
-            //This may be left in place as a final check.
+            // TODO: We should have this check BEFORE and form oidc error
+            // response in the case of unsupported FLOW..
+            // This may be left in place as a final check.
             log.error("{} unsupported response type {}", getLogPrefix(), getAuthenticationRequest().getResponseType()
                     .toString());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
             return;
         }
-        ((MessageContext)getOidcResponseContext().getParent()).setMessage(resp);
+        ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
 }
