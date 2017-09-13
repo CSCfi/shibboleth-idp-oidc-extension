@@ -44,6 +44,7 @@ import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
@@ -120,16 +121,19 @@ public class FormOutboundMessageTest extends BaseOIDCResponseActionTest {
      * 
      * @throws ComponentInitializationException
      * @throws URISyntaxException
+     * @throws JOSEException
+     * @throws ParseException
      */
     @Test
-    public void testSuccessMessage() throws ComponentInitializationException, URISyntaxException {
+    public void testSuccessMessage() throws ComponentInitializationException, URISyntaxException, ParseException,
+            JOSEException {
         init();
         setIdTokenToResponseContext("iss", "sub", "aud", new Date(), new Date());
-        //TODO: add signed token
+        signIdTokenInResponseContext();
         final Event event = action.execute(requestCtx);
-        //ActionTestingSupport.assertProceedEvent(event);
-        //AuthenticationResponse resp = (AuthenticationResponse) ((MessageContext<?>) respCtx.getParent()).getMessage();
-        //Assert.assertTrue(resp instanceof AuthenticationSuccessResponse);
+        ActionTestingSupport.assertProceedEvent(event);
+        AuthenticationResponse resp = (AuthenticationResponse) ((MessageContext<?>) respCtx.getParent()).getMessage();
+        Assert.assertTrue(resp instanceof AuthenticationSuccessResponse);
     }
 
 }
