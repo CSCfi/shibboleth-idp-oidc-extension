@@ -1,6 +1,6 @@
 {
  "issuer": "https://{{ service_name }}/idp/shibboleth",
- "authorization_endpoint": "https://{{ service_name }}/idp/profile/oidc",
+ "authorization_endpoint": "https://{{ service_name }}/idp/profile/oidc/authorize",
  "jwks_uri": "https://{{ service_name }}/oidc/keyset.jwk",
  "response_types_supported": [
   "id_token"

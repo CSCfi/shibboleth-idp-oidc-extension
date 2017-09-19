@@ -3,6 +3,9 @@
 - name: Ensure "{{ idp_home }}/flows/oidc" dir exists
   file: path="{{ idp_home }}/flows/oidc" state=directory
 
+- name: Ensure "{{ idp_home }}/flows/oidc/authorize" dir exists
+  file: path="{{ idp_home }}/flows/oidc/authorize" state=directory
+
 - name: Copy oidc flow, views and beans
   copy:
     src: "{{ item.src }}"
@@ -12,8 +15,8 @@
     mode: 0644
     remote_src: no
   with_items:
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/oidc-flow.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/oidc-beans.xml" }
+    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/authorize/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/authorize/oidc-flow.xml" }
+    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/authorize/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/authorize/oidc-beans.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/views/oidc-error.vm", dest: "{{ idp_home }}/views/oidc-error.vm" }
 
 
@@ -28,6 +31,7 @@
     - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/nimbus-jose-jwt*.jar"
     - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/oauth2-oidc-sdk*.jar"
     - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/json-smart-*.jar"
+    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/accessors-smart-*.jar"
     - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/lang-tag-*.jar"
     - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-lang3-*.jar"
     - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-collections4-*.jar"
