@@ -17,92 +17,23 @@
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/views/oidc-error.vm", dest: "{{ idp_home }}/views/oidc-error.vm" }
 
 
-- local_action: find paths="{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency" patterns="nimbus-jose-jwt*.jar"
-  sudo: no
-  register: nimbus_match
-
-- name: Copy nimbus-jose-jwt jar for bulding new idp.war
+- name: Copy selected JARs for building new idp.war
   copy:
-    src: "{{ item.path }}"
-    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/nimbus-jose-jwt.jar"
+    src: "{{ item }}"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/"
     owner: root
     group: root
     mode: 0644
-  with_items: "{{ nimbus_match.files }}"
-
-- name: Copy oauth2-oidc-sdk jar for bulding new idp.war
-  copy:
-    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/oauth2-oidc-sdk-5.24.1.jar"
-    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/oauth2-oidc-sdk-5.24.1.jar"
-    owner: root
-    group: root
-    mode: 0644
-    remote_src: no
-
-- name: Copy dependency lang-tag.jar for bulding new idp.war
-  copy:
-    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/lang-tag-1.4.3.jar"
-    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/lang-tag-1.4.3.jar"
-    owner: root
-    group: root
-    mode: 0644
-    remote_src: no
-
-- name: Copy dependency json-smart.jar for bulding new idp.war
-  copy:
-    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/json-smart-1.3.1.jar"
-    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/json-smart-1.3.1.jar"
-    owner: root
-    group: root
-    mode: 0644
-    remote_src: no
-
-- name: Copy dependency commons-lang3.jar for bulding new idp.war
-  copy:
-    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-lang3-3.5.jar"
-    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/commons-lang3-3.5.jar"
-    owner: root
-    group: root
-    mode: 0644
-    remote_src: no
-
-- name: Copy dependency commons-collections4.jar for bulding new idp.war
-  copy:
-    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-collections4-4.1.jar"
-    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/commons-collections4-4.1.jar"
-    owner: root
-    group: root
-    mode: 0644
-    remote_src: no
-
-- name: Copy dependency gson bulding new idp.war
-  copy:
-    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/gson-2.8.0.jar"
-    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/gson-2.8.0.jar"
-    owner: root
-    group: root
-    mode: 0644
-    remote_src: no
-
-- name: Copy idp-oidc-extension-api jar for bulding new idp.war
-  copy:
-    src: "{{ playbook_dir }}/idp-oidc-extension-api/target/idp-oidc-extension-api-0.5-SNAPSHOT.jar"
-    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/idp-oidc-extension-api-0.5-SNAPSHOT.jar"
-    owner: root
-    group: root
-    mode: 0644
-    remote_src: no
-
-- name: Copy idp-oidc-extension-impl jar for bulding new idp.war
-  copy:
-    src: "{{ playbook_dir }}/idp-oidc-extension-impl/target/idp-oidc-extension-impl-0.5-SNAPSHOT.jar"
-    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/idp-oidc-extension-impl-0.5-SNAPSHOT.jar"
-    owner: root
-    group: root
-    mode: 0644
-    remote_src: no
-
-#add copy of basic set of dependencies
+  with_fileglob:
+    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/nimbus-jose-jwt*.jar"
+    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/oauth2-oidc-sdk*.jar"
+    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/json-smart-*.jar"
+    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/lang-tag-*.jar"
+    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-lang3-*.jar"
+    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-collections4-*.jar"
+    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/gson-*.jar"
+    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/idp-oidc-extension-api-*.jar"
+    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/idp-oidc-extension-impl-*.jar"
 
 - name: Build new idp.war
   shell: source {{ environment_file }} && "{{ idp_home }}/bin/build.sh"
