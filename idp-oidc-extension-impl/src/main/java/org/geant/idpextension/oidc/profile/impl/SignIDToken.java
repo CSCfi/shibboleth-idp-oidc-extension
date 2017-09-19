@@ -64,6 +64,10 @@ public class SignIDToken extends AbstractOIDCResponseAction {
     @Nonnull
     private Logger log = LoggerFactory.getLogger(SignIDToken.class);
 
+    // TODO: Configuration option for signing parameter is missing.
+    /** JWS algorithm used to sign token. */
+    private JWSAlgorithm jwsAlgorithm = JWSAlgorithm.RS256;
+
     /**
      * Strategy used to locate the {@link SecurityParametersContext} to use for
      * signing.
@@ -128,13 +132,17 @@ public class SignIDToken extends AbstractOIDCResponseAction {
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         SignedJWT jwt = null;
-        // TODO: support for algorithm selection? RS256 is the only option in
-        // spec.
-        // TODO: support for key id. Key id should come from credential
-        // configuration.
+        String keyId = null;
+        if (signatureSigningParameters.getSigningCredential().getKeyNames() != null) {
+            for (String keyName : signatureSigningParameters.getSigningCredential().getKeyNames()) {
+                keyId = keyName;
+                break;
+            }
+        }
         try {
-            jwt = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("id").build(), getOidcResponseContext()
+            jwt = new SignedJWT(new JWSHeader.Builder(jwsAlgorithm).keyID(keyId).build(), getOidcResponseContext()
                     .getIDToken().toJWTClaimsSet());
+
         } catch (ParseException e) {
             log.error("{} Error parsing claimset: {}", getLogPrefix(), e.getMessage());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
