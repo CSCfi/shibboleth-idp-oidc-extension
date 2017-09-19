@@ -54,7 +54,7 @@ public class OIDCAuthenticationRequestDecoderTest {
 		decoder.initialize();
 	}
 
-	@Test
+    @Test
 	public void testRequestDecoding() throws MessageDecodingException {
 		httpRequest
 				.setQueryString("response_type=code&client_id=s6BhdRkqt3&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
@@ -68,20 +68,11 @@ public class OIDCAuthenticationRequestDecoderTest {
 
 	}
 
-	@Test
-	public void testInvalidRequestDecoding() {
-
+	@Test(expectedExceptions = MessageDecodingException.class)
+	public void testInvalidRequestDecoding() throws MessageDecodingException {
 		// Mandatory response_type parameter removed, decoding should fail
-		boolean failed = false;
 		httpRequest
 				.setQueryString("client_id=s6BhdRkqt3&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
-		try {
-			decoder.decode();
-		} catch (MessageDecodingException e) {
-			failed = true;
-		}
-		Assert.assertTrue(failed);
-
+		decoder.decode();
 	}
-
 }
