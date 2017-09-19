@@ -30,14 +30,24 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 
+import net.shibboleth.idp.profile.config.ProfileConfiguration;
+import net.shibboleth.idp.profile.context.RelyingPartyContext;
+import net.shibboleth.utilities.java.support.logic.Constraint;
+
+import org.geant.idpextension.oidc.config.OIDCProtocolConfiguration;
 import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
@@ -57,6 +67,67 @@ public class FormOutboundMessage extends AbstractOIDCResponseAction {
     @Nonnull
     private Logger log = LoggerFactory.getLogger(FormOutboundMessage.class);
 
+    /** if id token should be signed or not. */
+    boolean signedToken = true;
+
+    /** Strategy function to lookup RelyingPartyContext. */
+    @Nonnull
+    private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
+
+    public FormOutboundMessage() {
+        relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
+
+    }
+
+    /**
+     * Set the lookup strategy to use to locate the {@link RelyingPartyContext}.
+     * 
+     * @param strategy
+     *            lookup function to use
+     */
+    public void setRelyingPartyContextLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
+
+        relyingPartyContextLookupStrategy = Constraint.isNotNull(strategy,
+                "RelyingPartyContext lookup strategy cannot be null");
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+
+        if (!super.doPreExecute(profileRequestContext)) {
+            log.error("{} pre-execute failed", getLogPrefix());
+            return false;
+        }
+        final RelyingPartyContext rpc = relyingPartyContextLookupStrategy.apply(profileRequestContext);
+        if (rpc != null) {
+            final ProfileConfiguration pc = rpc.getProfileConfig();
+            if (pc != null && pc instanceof OIDCProtocolConfiguration) {
+                signedToken = ((OIDCProtocolConfiguration) pc).getSignIDTokens().apply(profileRequestContext);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns signed (preferred) or non signed id token. Returns null if signed token is
+     * expected but not available.
+     * 
+     * @return id token.
+     */
+    private JWT getIdToken() {
+        JWT jwt = getOidcResponseContext().getSignedIDToken();
+        if (jwt == null && !signedToken) {
+            try {
+                jwt = new PlainJWT(getOidcResponseContext().getIDToken().toJWTClaimsSet());
+            } catch (ParseException e) {
+                log.error("{} error parsing claimset", getLogPrefix());
+            }
+        }
+        return jwt;
+    }
+
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override
@@ -73,28 +144,23 @@ public class FormOutboundMessage extends AbstractOIDCResponseAction {
                     getAuthenticationRequest().getState(), getAuthenticationRequest().getResponseMode());
             log.debug("constructed response:" + ((AuthenticationErrorResponse) resp).toURI());
         } else {
-            /**
-             * 
-             * We support now only forming implicit response.
-             * 
-             * 
-             */
+
             if (getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
-                if (getOidcResponseContext().getSignedIDToken() == null) {
-                    log.error("{} implicit flow requires id token to be signed, configuration error", getLogPrefix());
-                    ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+                JWT idToken = getIdToken();
+                if (idToken == null) {
+                    log.error("{} unable to provide id token (required)", getLogPrefix());
+                    ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
                     return;
                 }
-                resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(), null,
-                        getOidcResponseContext().getSignedIDToken(), null, getAuthenticationRequest().getState(), null,
-                        getAuthenticationRequest().getResponseMode());
+                resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(), null, getIdToken(),
+                        null, getAuthenticationRequest().getState(), null, getAuthenticationRequest().getResponseMode());
                 log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
             }
         }
         if (resp == null) {
-            // TODO: We should have this check BEFORE and form oidc error
-            // response in the case of unsupported FLOW..
-            // This may be left in place as a final check.
+            /**
+             * We support now only forming implicit response.
+             */
             log.error("{} unsupported response type {}", getLogPrefix(), getAuthenticationRequest().getResponseType()
                     .toString());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
