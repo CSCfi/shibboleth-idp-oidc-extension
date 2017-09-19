@@ -71,26 +71,23 @@
         class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
         scope="prototype" />
 
-    <bean id="PopulateIDTokenSignatureSigningParameters"
-        class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters"
-        scope="prototype" p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
-        p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
-        <!-- placeholder, replace with something appropriate <property name="activationCondition"> 
-            <bean class="net.shibboleth.idp.saml.profile.config.logic.SignResponsesPredicate" 
-            /> </property> -->
-        <property name="securityParametersContextLookupStrategy">
-            <bean class="com.google.common.base.Functions"
-                factory-method="compose"
-                c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters"
-                c:f-ref="shibboleth.ChildLookup.RelyingParty" />
-        </property>
-        <property name="existingParametersContextLookupStrategy">
-            <bean class="com.google.common.base.Functions"
-                factory-method="compose"
-                c:g-ref="shibboleth.ChildLookup.SecurityParameters"
-                c:f-ref="shibboleth.MessageContextLookup.Outbound" />
-        </property>
-    </bean>
+	<bean id="PopulateIDTokenSignatureSigningParameters"
+		class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters"
+		scope="prototype" p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
+		p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
+		<property name="activationCondition">
+			<bean
+				class="org.geant.idpextension.oidc.config.logic.SignIDTokensPredicate" />
+		</property>
+		<property name="securityParametersContextLookupStrategy">
+			<bean class="com.google.common.base.Functions" factory-method="compose"
+				c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+		</property>
+		<property name="existingParametersContextLookupStrategy">
+			<bean class="com.google.common.base.Functions" factory-method="compose"
+				c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
+		</property>
+	</bean>
 
     <bean id="SetAuthenticationTimeToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationTimeToResponseContext"
