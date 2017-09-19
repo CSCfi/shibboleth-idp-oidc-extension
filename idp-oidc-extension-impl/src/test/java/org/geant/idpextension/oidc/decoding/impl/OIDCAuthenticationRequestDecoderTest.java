@@ -28,41 +28,60 @@
 
 package org.geant.idpextension.oidc.decoding.impl;
 
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-
 import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.decoder.MessageDecodingException;
-import org.opensaml.messaging.decoder.servlet.AbstractHttpServletRequestMessageDecoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
+import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
-public class OIDCDecoder extends AbstractHttpServletRequestMessageDecoder<AuthenticationRequest> implements
-        MessageDecoder<AuthenticationRequest> {
+/**
+ * Unit tests for {@link OIDCAuthenticationRequestDecoder}.
+ */
+public class OIDCAuthenticationRequestDecoderTest {
 
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(OIDCDecoder.class);
+	private MockHttpServletRequest httpRequest;
+	private OIDCAuthenticationRequestDecoder decoder;
 
-    /** {@inheritDoc} */
+	@BeforeMethod
+	protected void setUp() throws Exception {
+		httpRequest = new MockHttpServletRequest();
+		decoder = new OIDCAuthenticationRequestDecoder();
+		decoder.setHttpServletRequest(httpRequest);
+		decoder.initialize();
+	}
 
-    @Override
-    protected void doDecode() throws MessageDecodingException {
-        MessageContext<AuthenticationRequest> messageContext = new MessageContext<>();
-        HttpServletRequest request = getHttpServletRequest();
-        AuthenticationRequest req = null;
-        try {
-            req = AuthenticationRequest.parse(request.getQueryString());
-        } catch (com.nimbusds.oauth2.sdk.ParseException e) {
-            log.error("Unable to decode oidc request: {}", e.getMessage());
-            throw new MessageDecodingException(e);
-        }
-        messageContext.setMessage(req);
-        log.debug("Decoded oidc request {}", req.toQueryString());
-        setMessageContext(messageContext);
-    }
+	@Test
+	public void testRequestDecoding() throws MessageDecodingException {
+		httpRequest
+				.setQueryString("response_type=code&client_id=s6BhdRkqt3&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
+		decoder.decode();
+		MessageContext<AuthenticationRequest> messageContext = decoder
+				.getMessageContext();
+		// We are not testing nimbus itself here, i.e. we are happy to decode
+		// one parameter successfully
+		Assert.assertEquals(messageContext.getMessage().getResponseType()
+				.toString(), ResponseType.Value.CODE.toString());
+
+	}
+
+	@Test
+	public void testInvalidRequestDecoding() {
+
+		// Mandatory response_type parameter removed, decoding should fail
+		boolean failed = false;
+		httpRequest
+				.setQueryString("client_id=s6BhdRkqt3&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
+		try {
+			decoder.decode();
+		} catch (MessageDecodingException e) {
+			failed = true;
+		}
+		Assert.assertTrue(failed);
+
+	}
 
 }
