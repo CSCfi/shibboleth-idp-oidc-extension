@@ -52,7 +52,7 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
  *
  */
 @SuppressWarnings("rawtypes")
-public class AddNonceToIDToken extends AbstractOIDCResponseAction {
+public class AddNonceToIDToken extends AbstractOIDCAuthenticationResponseAction {
 
     /** Class logger. */
     @Nonnull

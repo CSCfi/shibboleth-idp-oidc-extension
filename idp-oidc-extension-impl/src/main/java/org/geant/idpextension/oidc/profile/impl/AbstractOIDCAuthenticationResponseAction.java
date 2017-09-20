@@ -46,11 +46,11 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
  * via {@link ProfileRequestContext#getInboundMessageContext()#getMessage()}.
  */
 @SuppressWarnings("rawtypes")
-abstract class AbstractOIDCResponseAction extends AbstractOIDCRequestAction {
+abstract class AbstractOIDCAuthenticationResponseAction extends AbstractOIDCAuthenticationRequestAction {
 
     /** Class logger. */
     @Nonnull
-    private Logger log = LoggerFactory.getLogger(AbstractOIDCResponseAction.class);
+    private Logger log = LoggerFactory.getLogger(AbstractOIDCAuthenticationResponseAction.class);
 
     /** oidc response context. */
     @Nonnull

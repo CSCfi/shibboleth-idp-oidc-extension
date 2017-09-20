@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @SuppressWarnings("rawtypes")
-public class ValidateRedirectURI extends AbstractOIDCResponseAction {
+public class ValidateRedirectURI extends AbstractOIDCAuthenticationResponseAction {
 
     /** Class logger. */
     @Nonnull

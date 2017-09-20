@@ -54,7 +54,7 @@ import com.google.common.base.Function;
  *
  */
 @SuppressWarnings("rawtypes")
-public class SetAuthenticationContextClassReferenceToResponseContext extends AbstractOIDCResponseAction {
+public class SetAuthenticationContextClassReferenceToResponseContext extends AbstractOIDCAuthenticationResponseAction {
 
     /** Class logger. */
     @Nonnull

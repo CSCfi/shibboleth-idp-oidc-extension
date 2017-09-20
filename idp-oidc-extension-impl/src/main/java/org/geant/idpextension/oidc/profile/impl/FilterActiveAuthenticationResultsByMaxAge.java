@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @SuppressWarnings("rawtypes")
-public class FilterActiveAuthenticationResultsByMaxAge extends AbstractOIDCRequestAction {
+public class FilterActiveAuthenticationResultsByMaxAge extends AbstractOIDCAuthenticationRequestAction {
 
     /** Class logger. */
     @Nonnull

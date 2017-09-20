@@ -40,7 +40,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
 /** {@link InitializeAuthenticationContext} unit test. */
-public class AbstractOIDCRequestActionTest {
+public class AbstractOIDCAuthenticationRequestActionTest {
 
     /**
      * Test that the action functions properly if there is no inbound message
@@ -85,7 +85,7 @@ public class AbstractOIDCRequestActionTest {
         ActionTestingSupport.assertProceedEvent(event);
       }
 
-    class MockOIDCRequestAction extends AbstractOIDCRequestAction{
+    class MockOIDCRequestAction extends AbstractOIDCAuthenticationRequestAction{
         
     }
 }

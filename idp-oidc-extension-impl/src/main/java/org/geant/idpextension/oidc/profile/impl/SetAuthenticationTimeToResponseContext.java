@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @SuppressWarnings("rawtypes")
-public class SetAuthenticationTimeToResponseContext extends AbstractOIDCResponseAction {
+public class SetAuthenticationTimeToResponseContext extends AbstractOIDCAuthenticationResponseAction {
 
     /** Class logger. */
     @Nonnull

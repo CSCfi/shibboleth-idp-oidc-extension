@@ -52,12 +52,12 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 
 /** {@link InitializeAuthenticationContext} unit test. */
-public class FormOutboundMessageTest extends BaseOIDCResponseActionTest {
+public class FormOutboundAuthenticationResponseMessageTest extends BaseOIDCResponseActionTest {
 
-    private FormOutboundMessage action;
+    private FormOutboundAuthenticationResponseMessage action;
 
     private void init() throws ComponentInitializationException, URISyntaxException {
-        action = new FormOutboundMessage();
+        action = new FormOutboundAuthenticationResponseMessage();
         respCtx.setRedirectURI(new URI("http://example.org"));
         action.initialize();
     }

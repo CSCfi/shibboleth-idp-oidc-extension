@@ -58,18 +58,18 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
  * @event {@link IdPEventIds#INVALID_RELYING_PARTY_CTX}
  */
 @SuppressWarnings("rawtypes")
-public class InitializeOutboundMessageContext extends AbstractProfileAction {
+public class InitializeOutboundAuthenticationResponseMessageContext extends AbstractProfileAction {
 
     /** Class logger. */
     @Nonnull
-    private final Logger log = LoggerFactory.getLogger(InitializeOutboundMessageContext.class);
+    private final Logger log = LoggerFactory.getLogger(InitializeOutboundAuthenticationResponseMessageContext.class);
 
     /** Relying party context lookup strategy. */
     @Nonnull
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
 
     /** Constructor. */
-    public InitializeOutboundMessageContext() {
+    public InitializeOutboundAuthenticationResponseMessageContext() {
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
     }
 

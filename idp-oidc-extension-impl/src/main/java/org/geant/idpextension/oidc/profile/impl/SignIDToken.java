@@ -58,7 +58,7 @@ import org.opensaml.xmlsec.context.SecurityParametersContext;
  *
  */
 @SuppressWarnings("rawtypes")
-public class SignIDToken extends AbstractOIDCResponseAction {
+public class SignIDToken extends AbstractOIDCAuthenticationResponseAction {
 
     /** Class logger. */
     @Nonnull

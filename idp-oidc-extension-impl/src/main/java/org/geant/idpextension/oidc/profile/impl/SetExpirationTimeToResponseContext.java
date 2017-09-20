@@ -47,7 +47,7 @@ import com.google.common.base.Function;
  *
  */
 @SuppressWarnings("rawtypes")
-public class SetExpirationTimeToResponseContext extends AbstractOIDCResponseAction {
+public class SetExpirationTimeToResponseContext extends AbstractOIDCAuthenticationResponseAction {
 
     /** Class logger. */
     @Nonnull

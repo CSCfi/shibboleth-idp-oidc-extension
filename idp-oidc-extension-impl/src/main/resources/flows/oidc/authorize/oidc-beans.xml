@@ -64,7 +64,7 @@
     </bean>
 
     <bean id="InitializeOutboundMessageContext"
-        class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundMessageContext"
+        class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundAuthenticationResponseMessageContext"
         scope="prototype" />
 
     <bean id="ValidateRedirectURI"
@@ -152,7 +152,7 @@
     </bean>
 
     <bean id="FormOutboundMessage"
-        class="org.geant.idpextension.oidc.profile.impl.FormOutboundMessage"
+        class="org.geant.idpextension.oidc.profile.impl.FormOutboundAuthenticationResponseMessage"
         scope="prototype" />
 
     <bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes"

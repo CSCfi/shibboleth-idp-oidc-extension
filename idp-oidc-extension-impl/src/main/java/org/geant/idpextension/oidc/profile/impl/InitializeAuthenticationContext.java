@@ -50,7 +50,7 @@ import com.nimbusds.openid.connect.sdk.Prompt;
  * 
  */
 @SuppressWarnings("rawtypes")
-public class InitializeAuthenticationContext extends AbstractOIDCRequestAction {
+public class InitializeAuthenticationContext extends AbstractOIDCAuthenticationRequestAction {
 
     /** Class logger. */
     @Nonnull

@@ -57,7 +57,7 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
  *
  */
 @SuppressWarnings("rawtypes")
-public class AddIDTokenShell extends AbstractOIDCResponseAction {
+public class AddIDTokenShell extends AbstractOIDCAuthenticationResponseAction {
 
     /** Class logger. */
     @Nonnull

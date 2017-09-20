@@ -61,11 +61,11 @@ import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
  *
  */
 @SuppressWarnings("rawtypes")
-public class FormOutboundMessage extends AbstractOIDCResponseAction {
+public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthenticationResponseAction {
 
     /** Class logger. */
     @Nonnull
-    private Logger log = LoggerFactory.getLogger(FormOutboundMessage.class);
+    private Logger log = LoggerFactory.getLogger(FormOutboundAuthenticationResponseMessage.class);
 
     /** if id token should be signed or not. */
     boolean signedToken = true;
@@ -74,7 +74,7 @@ public class FormOutboundMessage extends AbstractOIDCResponseAction {
     @Nonnull
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
 
-    public FormOutboundMessage() {
+    public FormOutboundAuthenticationResponseMessage() {
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
 
     }

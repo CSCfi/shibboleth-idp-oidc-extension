@@ -54,7 +54,7 @@ import java.util.List;
  * </p>
  */
 @SuppressWarnings("rawtypes")
-public class ProcessRequestedAuthnContext extends AbstractOIDCRequestAction {
+public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequestAction {
 
     /** Class logger. */
     @Nonnull
