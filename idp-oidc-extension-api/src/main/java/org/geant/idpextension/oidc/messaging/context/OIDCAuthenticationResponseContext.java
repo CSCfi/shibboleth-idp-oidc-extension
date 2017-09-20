@@ -41,7 +41,7 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
  * Subcontext carrying information on authentication response formed for relying party. This
  * context appears as a subcontext of the {@link org.opensaml.messaging.context.MessageContext}.
  */
-public class OIDCResponseContext extends BaseOIDCResponseContext {
+public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
 
 	/** The id token formed. */
 	@Nullable
