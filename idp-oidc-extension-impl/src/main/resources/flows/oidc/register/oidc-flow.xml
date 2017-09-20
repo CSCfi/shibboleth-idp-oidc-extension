@@ -1,0 +1,46 @@
+<flow xmlns="http://www.springframework.org/schema/webflow"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd">
+
+    <action-state id="InitializeProfileRequestContext">
+        <evaluate expression="InitializeProfileRequestContext" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="DecodeMessage" />
+    </action-state>
+
+    <action-state id="DecodeMessage">
+        <evaluate expression="DecodeMessage" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed"
+            to="HandleErrorLocally" />
+    </action-state>
+
+    <!-- Passthrough state if an exception is thrown. -->
+    <action-state id="LogRuntimeException">
+        <on-entry>
+            <evaluate
+                expression="T(org.slf4j.LoggerFactory).getLogger('net.shibboleth.idp.saml.profile').error('Uncaught runtime exception', flowExecutionException.getCause())" />
+        </on-entry>
+        <evaluate expression="'RuntimeException'" />
+        <transition to="HandleErrorLocally" />
+    </action-state>
+
+    <!-- end state after error display -->
+    <end-state id="HandleErrorLocally">
+        <on-entry>
+            <evaluate expression="RecordResponseComplete" />
+        </on-entry>
+    </end-state>
+
+    <!-- all unhandled non proceed results are turned into errors -->
+    <global-transitions>
+        <transition on-exception="java.lang.RuntimeException"
+            to="LogRuntimeException" />
+        <transition on="#{!'proceed'.equals(currentEvent.id)}"
+            to="HandleErrorLocally" />
+    </global-transitions>
+
+    <bean-import resource="../../../system/flows/saml/security-beans.xml" />
+    <bean-import resource="oidc-beans.xml" />
+
+</flow>
