@@ -29,7 +29,7 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -40,7 +40,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
  * 
- * Abstract class for actions performing actions on {@link OIDCResponseContext}
+ * Abstract class for actions performing actions on {@link OIDCAuthenticationResponseContext}
  * located under {@link ProfileRequestContext#getOutboundMessageContext()}.
  * Extends baseclass that offers actions on {@link AuthenticationRequest} found
  * via {@link ProfileRequestContext#getInboundMessageContext()#getMessage()}.
@@ -54,7 +54,7 @@ abstract class AbstractOIDCResponseAction extends AbstractOIDCRequestAction {
 
     /** oidc response context. */
     @Nonnull
-    private OIDCResponseContext oidcResponseContext;
+    private OIDCAuthenticationResponseContext oidcResponseContext;
 
     /**
      * Returns oidc response context.
@@ -62,7 +62,7 @@ abstract class AbstractOIDCResponseAction extends AbstractOIDCRequestAction {
      * @return ctx.
      */
     @Nonnull
-    public OIDCResponseContext getOidcResponseContext() {
+    public OIDCAuthenticationResponseContext getOidcResponseContext() {
         return oidcResponseContext;
     }
 
@@ -80,7 +80,7 @@ abstract class AbstractOIDCResponseAction extends AbstractOIDCRequestAction {
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCResponseContext.class, false);
+        oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCAuthenticationResponseContext.class, false);
         if (oidcResponseContext == null) {
             log.error("{} No oidc response context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);

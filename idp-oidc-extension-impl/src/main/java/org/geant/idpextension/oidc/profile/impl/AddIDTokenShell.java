@@ -37,7 +37,7 @@ import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -52,7 +52,7 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
  * Action that creates a {@link IDTokenClaimsSet} object shell , and sets it to
- * work context {@link OIDCResponseContext} located under
+ * work context {@link OIDCAuthenticationResponseContext} located under
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
  *
  */

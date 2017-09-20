@@ -31,7 +31,7 @@ package org.geant.idpextension.oidc.profile.impl;
 import javax.annotation.Nonnull;
 import net.shibboleth.idp.authn.AuthenticationResult;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Action that sets authentication instant to work context
- * {@link OIDCResponseContext} located under
+ * {@link OIDCAuthenticationResponseContext} located under
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
  *
  */

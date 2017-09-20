@@ -29,7 +29,7 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -95,7 +95,7 @@ public class AbstractOIDCResponseActionTest {
     @Test
     public void testSuccess() throws Exception {
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        prc.getOutboundMessageContext().addSubcontext(new OIDCResponseContext());
+        prc.getOutboundMessageContext().addSubcontext(new OIDCAuthenticationResponseContext());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
     }

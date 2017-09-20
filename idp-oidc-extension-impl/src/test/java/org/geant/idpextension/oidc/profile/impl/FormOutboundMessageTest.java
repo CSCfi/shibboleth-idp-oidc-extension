@@ -36,7 +36,7 @@ import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -109,7 +109,7 @@ public class FormOutboundMessageTest extends BaseOIDCResponseActionTest {
         final MessageContext<AuthenticationResponse> msgCtx = new MessageContext<AuthenticationResponse>();
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
         prc.setOutboundMessageContext(msgCtx);
-        respCtx = new OIDCResponseContext();
+        respCtx = new OIDCAuthenticationResponseContext();
         prc.getOutboundMessageContext().addSubcontext(respCtx);
         init();
         final Event event = action.execute(requestCtx);

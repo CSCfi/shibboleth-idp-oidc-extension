@@ -36,7 +36,7 @@ import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
@@ -108,7 +108,7 @@ public class InitializeOutboundMessageContext extends AbstractProfileAction {
 
         final MessageContext<AuthenticationResponse> msgCtx = new MessageContext<AuthenticationResponse>();
         profileRequestContext.setOutboundMessageContext(msgCtx);
-        msgCtx.addSubcontext(new OIDCResponseContext());
+        msgCtx.addSubcontext(new OIDCAuthenticationResponseContext());
         log.debug("{} Initialized outbound message context", getLogPrefix());
     }
 }

@@ -39,7 +39,7 @@ import net.shibboleth.utilities.java.support.component.ComponentInitializationEx
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal;
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -49,7 +49,7 @@ import com.google.common.base.Function;
 
 /**
  * Action that sets authentication context class reference to work context
- * {@link OIDCResponseContext} located under
+ * {@link OIDCAuthenticationResponseContext} located under
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
  *
  */

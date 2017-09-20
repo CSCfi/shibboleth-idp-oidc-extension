@@ -42,7 +42,7 @@ import javax.crypto.SecretKey;
 
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 
-import org.geant.idpextension.oidc.messaging.context.OIDCResponseContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -72,7 +72,7 @@ import net.shibboleth.idp.profile.RequestContextBuilder;
 abstract class BaseOIDCResponseActionTest {
 
     protected RequestContext requestCtx;
-    protected OIDCResponseContext respCtx;
+    protected OIDCAuthenticationResponseContext respCtx;
     protected AuthenticationRequest request;
     @SuppressWarnings("rawtypes")
 	protected ProfileRequestContext profileRequestCtx;
@@ -87,7 +87,7 @@ abstract class BaseOIDCResponseActionTest {
         final MessageContext<AuthenticationResponse> msgCtx = new MessageContext<AuthenticationResponse>();
         profileRequestCtx = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
         profileRequestCtx.setOutboundMessageContext(msgCtx);
-        respCtx = new OIDCResponseContext();
+        respCtx = new OIDCAuthenticationResponseContext();
         profileRequestCtx.getOutboundMessageContext().addSubcontext(respCtx);
     }
     
