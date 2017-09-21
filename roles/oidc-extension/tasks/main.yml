@@ -12,6 +12,15 @@
 - name: Ensure "{{ idp_home }}/flows/oidc/register" dir exists
   file: path="{{ idp_home }}/flows/oidc/register" state=directory
 
+- name: Ensure "{{ idp_home }}/static" dir exists
+  file: path="{{ idp_home }}/static/" state=directory
+
+- name: Ensure "{{ idp_home }}/static/oidc/" dir exists
+  file: path="{{ idp_home }}/static/oidc/" state=directory
+
+- name: Ensure "{{ idp_home }}/static/.well-known/" dir exists
+  file: path="{{ idp_home }}/static/.well-known/" state=directory
+
 - name: Copy oidc flow, views and beans
   copy:
     src: "{{ item.src }}"
@@ -82,6 +91,44 @@
               </MetadataFilter>
           </MetadataProvider>
 
+- name: Add default oidc credentials to credentials.xml
+  blockinfile:
+    dest: "{{ idp_home }}/conf/credentials.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertafter: "default signing key"
+    content: |
+         <bean id="shibboleth.oidc.DefaultSigningCredential"
+             class="org.geant.idpextension.oidc.profile.spring.factory.BasicJWKCredentialFactoryBean"
+             p:jWKResource="%{idp.signing.oidc.key}" />
+
+- name: Add default oidc security configuration shibboleth.oidc.DefaultSecurityConfiguration to relying-party.xml
+  blockinfile:
+    dest: "{{ idp_home }}/conf/relying-party.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertafter: "default-destroy-method"
+    content: |
+         <bean id="shibboleth.oidc.DefaultSecurityConfiguration" parent="shibboleth.DefaultSecurityConfiguration">
+             <property name="signatureSigningConfiguration">
+                <bean parent="shibboleth.BasicSignatureSigningConfiguration" p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential"/>
+             </property>
+         </bean>
+
+- name: Add OIDC.SSO profile configuration to relying-party.xml, override sec. conf with shibboleth.oidc.DefaultSecurityConfiguration
+  blockinfile:
+    dest: "{{ idp_home }}/conf/relying-party.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK 2 -->"
+    insertafter: "SSOS"
+    content: |
+         <bean parent="OIDC.SSO" p:securityConfiguration-ref="shibboleth.oidc.DefaultSecurityConfiguration" p:postAuthenticationFlows="attribute-release" />
+
+- name: Set oidc credential to idp.properties       
+  blockinfile:
+    dest: "{{ idp_home }}/conf/idp.properties"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertafter: "idp.signing.key"
+    content: |
+         idp.signing.oidc.key= %{idp.home}/credentials/idp-signing-rs256.jwk
+
 - name: Add metadata filter for trusted test SP
   blockinfile:
     dest: "{{ idp_home }}/conf/attribute-filter.xml"
@@ -117,20 +164,6 @@
               class="org.geant.idpextension.oidc.config.OIDCProtocolConfiguration"
               p:securityConfiguration-ref="%{idp.security.config:shibboleth.DefaultSecurityConfiguration}"
               p:servletRequest-ref="shibboleth.HttpServletRequest" />
-
-- name: Add OIDC.SSO profile configuration to relying-party.xml
-  blockinfile:
-    dest: "{{ idp_home }}/conf/relying-party.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertbefore: "</util:list>"
-    content: |
-          <bean parent="RelyingPartyByName" c:relyingPartyIds="demo_rp">
-               <property name="profileConfigurations">
-                    <list>
-                        <bean parent="OIDC.SSO" p:postAuthenticationFlows="attribute-release" />
-                    </list>
-                </property>
-          </bean>
 
 - name: Add FilterActiveAuthenticationResultsByMaxAge bean to authn-beans.xml. SYSTEM FILE CHANGE!!
   blockinfile:
@@ -199,6 +232,16 @@
   with_items:
     - "oidc-client.json"
 
+- name: copying jwk for signing id tokens
+  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/credentials/{{item}}
+  with_items:
+    - "idp-signing-rs256.jwk"
+
+- name: copying key to be published
+  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/static/oidc/{{item}}
+  with_items:
+    - "keyset.jwk"
+
 - name: Setting static.xml for jetty to serve static content
   template: 
     src: static.xml 
@@ -218,15 +261,6 @@
   template:
     src: authn-comparison.xml
     dest: "{{ idp_home }}/conf/authn/authn-comparison.xml"
-
-- name: Ensure "{{ idp_home }}/static" dir exists
-  file: path="{{ idp_home }}/static/" state=directory
-
-- name: Ensure "{{ idp_home }}/static/oidc/" dir exists
-  file: path="{{ idp_home }}/static/oidc/" state=directory
-
-- name: Ensure "{{ idp_home }}/static/.well-known/" dir exists
-  file: path="{{ idp_home }}/static/.well-known/" state=directory
 
 - name: Setting index.html containing authentication links
   template:
@@ -256,24 +290,4 @@
   ignore_errors: yes
   when: aci is defined
 
-- name: fetching httpparser to install nodejs, workaround before centos 7.4
-  command: "rpm -ivh https://kojipkgs.fedoraproject.org//packages/http-parser/2.7.1/3.el7/x86_64/http-parser-2.7.1-3.el7.x86_64.rpm"
-
-- name: Install nodejs and npm
-  yum: name={{ item }} state=present
-  with_items:
-    - nodejs
-    - npm
-
-- name: Install pem-jwk
-  command: npm install -g pem-jwk
-  become: true
-
-- name: "Extracting public key {{ idp_home }}/credentials/idp-signing.key to file  {{ idp_home }}/credentials/idp-pub-signing.pem"                            
-  command: "openssl rsa -in  {{ idp_home }}/credentials/idp-signing.key -outform PEM -pubout -out {{ idp_home }}/credentials/idp-pub-signing.pem"
-  become: true
-
-- name: "Converting {{ idp_home }}/credentials/idp-pub-signing.pem and publishing it as id token signing key {{ idp_home }}/static/oidc/keyset.jwk"      
-  command: "pem-jwk {{ idp_home }}/credentials/idp-pub-signing.pem > {{ idp_home }}/static/oidc/keyset.jwk"
-  become: true
 
