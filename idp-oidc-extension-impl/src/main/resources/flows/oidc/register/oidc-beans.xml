@@ -8,6 +8,19 @@
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
     default-init-method="initialize" default-destroy-method="destroy">
 
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
+        p:placeholderPrefix="%{" p:placeholderSuffix="}" />
+
+    <bean class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
+    <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
+
+    <bean id="PopulateMetricContext"
+        class="org.opensaml.profile.action.impl.PopulateMetricContext" scope="prototype"
+        p:metricStrategy="#{getObject('shibboleth.metrics.MetricStrategy')}" />
+
+    <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
+    <import resource="../../../system/conf/audit-system.xml" />
+
     <!-- The profile and logging id used as arguments are for development 
         phase only -->
     <bean id="InitializeProfileRequestContext"
@@ -23,6 +36,20 @@
                 class="org.geant.idpextension.oidc.decoding.impl.OIDCClientRegistrationRequestDecoder"
                 scope="prototype" p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
         </constructor-arg>
+    </bean>
+    
+    <bean id="BuildErrorResponseFromEvent" class="org.geant.idpextension.oidc.profile.impl.BuildRegistrationErrorResponseFromEvent"
+        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>    
+    </bean>
+
+    <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
+            p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>
     </bean>
 
     <bean id="RecordResponseComplete"

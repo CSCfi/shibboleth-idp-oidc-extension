@@ -12,9 +12,15 @@
         <evaluate expression="DecodeMessage" />
         <evaluate expression="'proceed'" />
         <transition on="proceed"
-            to="HandleErrorLocally" />
+            to="OutboundContextsAndSecurityParameters" />
     </action-state>
 
+    <action-state id="OutboundContextsAndSecurityParameters">
+        <evaluate expression="InitializeOutboundMessageContext" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="HandleError" />
+    </action-state>
+    
     <!-- Passthrough state if an exception is thrown. -->
     <action-state id="LogRuntimeException">
         <on-entry>
@@ -22,11 +28,22 @@
                 expression="T(org.slf4j.LoggerFactory).getLogger('net.shibboleth.idp.saml.profile').error('Uncaught runtime exception', flowExecutionException.getCause())" />
         </on-entry>
         <evaluate expression="'RuntimeException'" />
-        <transition to="HandleErrorLocally" />
+        <transition to="HandleError" />
+    </action-state>
+
+    <action-state id="HandleError">
+        <on-entry>
+            <evaluate
+                expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.SpringRequestContext), true).setRequestContext(flowRequestContext)" />
+            <evaluate expression="LogEvent" />
+        </on-entry>
+        <evaluate expression="BuildErrorResponseFromEvent" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="CommitResponse" />
     </action-state>
 
     <!-- end state after error display -->
-    <end-state id="HandleErrorLocally">
+    <end-state id="CommitResponse">
         <on-entry>
             <evaluate expression="RecordResponseComplete" />
         </on-entry>
@@ -37,7 +54,7 @@
         <transition on-exception="java.lang.RuntimeException"
             to="LogRuntimeException" />
         <transition on="#{!'proceed'.equals(currentEvent.id)}"
-            to="HandleErrorLocally" />
+            to="HandleError" />
     </global-transitions>
 
     <bean-import resource="../../../system/flows/saml/security-beans.xml" />
