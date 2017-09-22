@@ -61,7 +61,7 @@ import com.google.common.base.Predicate;
 /**
  * Base class for OIDC protocol configuration.
  */
-public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
+public class OIDCCoreProtocolConfiguration extends AbstractProfileConfiguration
     implements InitializableComponent, AuthenticationProfileConfiguration {
 
     /** OIDC base protocol URI. */
@@ -104,7 +104,7 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
     /**
      * Constructor.
      */
-    public OIDCProtocolConfiguration() {
+    public OIDCCoreProtocolConfiguration() {
         this(PROFILE_ID);
     }
     
@@ -113,7 +113,7 @@ public class OIDCProtocolConfiguration extends AbstractProfileConfiguration
      *
      * @param profileId Unique profile identifier.
      */
-    public OIDCProtocolConfiguration(@Nonnull @NotEmpty final String profileId) {
+    public OIDCCoreProtocolConfiguration(@Nonnull @NotEmpty final String profileId) {
         super(profileId);
         authenticationFlows = Collections.emptySet();
         postAuthenticationFlows = Collections.emptyList();

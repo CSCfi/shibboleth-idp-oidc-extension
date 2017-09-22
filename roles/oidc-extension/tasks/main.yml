@@ -162,7 +162,7 @@
     insertbefore: "<bean id=\"CAS.LoginConfiguration\""
     content: |
           <bean id="OIDC.SSO"
-              class="org.geant.idpextension.oidc.config.OIDCProtocolConfiguration"
+              class="org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration"
               p:securityConfiguration-ref="%{idp.security.config:shibboleth.DefaultSecurityConfiguration}"
               p:servletRequest-ref="shibboleth.HttpServletRequest" />
 

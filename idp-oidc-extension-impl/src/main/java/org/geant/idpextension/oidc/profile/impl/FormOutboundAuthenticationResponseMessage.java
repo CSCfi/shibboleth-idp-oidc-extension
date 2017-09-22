@@ -34,7 +34,7 @@ import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
-import org.geant.idpextension.oidc.config.OIDCProtocolConfiguration;
+import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
@@ -103,8 +103,8 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
         final RelyingPartyContext rpc = relyingPartyContextLookupStrategy.apply(profileRequestContext);
         if (rpc != null) {
             final ProfileConfiguration pc = rpc.getProfileConfig();
-            if (pc != null && pc instanceof OIDCProtocolConfiguration) {
-                signedToken = ((OIDCProtocolConfiguration) pc).getSignIDTokens().apply(profileRequestContext);
+            if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
+                signedToken = ((OIDCCoreProtocolConfiguration) pc).getSignIDTokens().apply(profileRequestContext);
             }
         }
         return true;

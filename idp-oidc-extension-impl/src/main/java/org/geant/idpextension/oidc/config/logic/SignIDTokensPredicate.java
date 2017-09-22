@@ -33,10 +33,10 @@ import javax.annotation.Nullable;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.logic.AbstractRelyingPartyPredicate;
-import org.geant.idpextension.oidc.config.OIDCProtocolConfiguration;
+import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.opensaml.profile.context.ProfileRequestContext;
 
-/** A predicate implementation that forwards to {@link OIDCProtocolConfiguration#getSignIDTokens()}. */
+/** A predicate implementation that forwards to {@link OIDCCoreProtocolConfiguration#getSignIDTokens()}. */
 public class SignIDTokensPredicate extends AbstractRelyingPartyPredicate {
     
     /** {@inheritDoc} */
@@ -46,8 +46,8 @@ public class SignIDTokensPredicate extends AbstractRelyingPartyPredicate {
         final RelyingPartyContext rpc = getRelyingPartyContextLookupStrategy().apply(input);
         if (rpc != null) {
             final ProfileConfiguration pc = rpc.getProfileConfig();
-            if (pc != null && pc instanceof OIDCProtocolConfiguration) {
-                return ((OIDCProtocolConfiguration) pc).getSignIDTokens().apply(input);
+            if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
+                return ((OIDCCoreProtocolConfiguration) pc).getSignIDTokens().apply(input);
             }
         }
         
