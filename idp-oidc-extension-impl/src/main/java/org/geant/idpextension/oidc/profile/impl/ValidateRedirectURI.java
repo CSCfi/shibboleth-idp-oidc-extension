@@ -28,6 +28,9 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
+import java.net.URI;
+import java.util.Set;
+
 import javax.annotation.Nonnull;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.opensaml.profile.action.ActionSupport;
@@ -69,9 +72,8 @@ public class ValidateRedirectURI extends AbstractOIDCAuthenticationResponseActio
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        if (oidcMetadataContext.getClientInformation().getMetadata().getRedirectionURIs()
-                .contains(getAuthenticationRequest().getRedirectionURI())) {
+        final Set<URI> redirectionURIs = oidcMetadataContext.getClientInformation().getMetadata().getRedirectionURIs();
+        if (redirectionURIs != null && redirectionURIs.contains(getAuthenticationRequest().getRedirectionURI())) {
             getOidcResponseContext().setRedirectURI(getAuthenticationRequest().getRedirectionURI());
             log.debug("{} redirect uri validated {}", getLogPrefix(), getAuthenticationRequest().getRedirectionURI());
             return;
