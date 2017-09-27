@@ -34,7 +34,7 @@ import net.shibboleth.ext.spring.util.BaseSpringNamespaceHandler;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 import org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl.OIDCStringEncoderParser;
 
-/** Namespace handler for the attribute resolver. */
+/** Namespace handler for the oidc attribute resolver. */
 public class AttributeEncoderNamespaceHandler extends BaseSpringNamespaceHandler {
 
     /** Namespace for this handler. */
@@ -45,11 +45,11 @@ public class AttributeEncoderNamespaceHandler extends BaseSpringNamespaceHandler
     /** {@inheritDoc} */
     @Override
     public void init() {
-        registerBeanDefinitionParser(OIDCStringEncoderParser.TYPE_NAME_ENC, new OIDCStringEncoderParser());
-        registerBeanDefinitionParser(OIDCStringIntegerEncoderParser.TYPE_NAME_ENC, new OIDCStringIntegerEncoderParser());
-        registerBeanDefinitionParser(OIDCScopedStringEncoderParser.TYPE_NAME_ENC, new OIDCScopedStringEncoderParser());
-        registerBeanDefinitionParser(OIDCStringArrayEncoderParser.TYPE_NAME_ENC, new OIDCStringArrayEncoderParser());
-        registerBeanDefinitionParser(OIDCBase64EncoderParser.TYPE_NAME_ENC, new OIDCBase64EncoderParser());
+        registerBeanDefinitionParser(OIDCStringEncoderParser.TYPE_NAME, new OIDCStringEncoderParser());
+        registerBeanDefinitionParser(OIDCStringIntegerEncoderParser.TYPE_NAME, new OIDCStringIntegerEncoderParser());
+        registerBeanDefinitionParser(OIDCScopedStringEncoderParser.TYPE_NAME, new OIDCScopedStringEncoderParser());
+        registerBeanDefinitionParser(OIDCStringArrayEncoderParser.TYPE_NAME, new OIDCStringArrayEncoderParser());
+        registerBeanDefinitionParser(OIDCBase64EncoderParser.TYPE_NAME, new OIDCBase64EncoderParser());
     }
 
 }
