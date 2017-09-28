@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file is an EXAMPLE policy file. While the policy presented in this 
+	example file is illustrative of some simple cases, it relies on the names 
+	of non-existent example services and the example attributes demonstrated 
+	in the default attribute-resolver.xml file. Deployers should refer to the 
+	documentation for a complete list of components and their options. -->
+<AttributeFilterPolicyGroup id="ShibbolethFilterPolicy"
+	xmlns="urn:mace:shibboleth:2.0:afp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:oidcext="org.geant.idpextension.oidc.attribute.filter"
+	xsi:schemaLocation="urn:mace:shibboleth:2.0:afp http://shibboleth.net/schema/idp/shibboleth-afp.xsd org.geant.idpextension.oidc.attribute.filter classpath:/schema/idp-oidc-extension-afp.xsd">
+
+	<!-- This demonstrates a rule that releases a claim in response to all oidc 
+		authentication requests -->
+	<AttributeFilterPolicy id="ALL_OPENID_CLIENTS">
+		<PolicyRequirementRule xsi:type="oidcext:OIDCScope"
+			value="openid" />
+		<AttributeRule attributeID="eduPersonPrincipalName">
+			<PermitValueRule xsi:type="ANY" />
+		</AttributeRule>
+	</AttributeFilterPolicy>
+
+	<!-- This demonstrates a rule that releases claims in response to oidc authentication 
+		request of demo_rp with requested scope info -->
+	<AttributeFilterPolicy id="DEMO_RP_SCOPE_INFO">
+		<PolicyRequirementRule xsi:type="AND">
+			<Rule xsi:type="Requester" value="demo_rp" />
+			<Rule xsi:type="oidcext:OIDCScope" value="info" />
+		</PolicyRequirementRule>
+		<AttributeRule attributeID="age">
+			<PermitValueRule xsi:type="ANY" />
+		</AttributeRule>
+		<AttributeRule attributeID="eduPersonAffiliation">
+			<PermitValueRule xsi:type="ANY" />
+		</AttributeRule>
+		<AttributeRule attributeID="mail">
+			<PermitValueRule xsi:type="ANY" />
+		</AttributeRule>
+	</AttributeFilterPolicy>
+
+</AttributeFilterPolicyGroup>
+
