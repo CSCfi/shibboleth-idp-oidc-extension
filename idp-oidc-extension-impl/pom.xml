@@ -25,10 +25,10 @@
 			<groupId>net.shibboleth.idp</groupId>
 			<artifactId>idp-attribute-resolver-spring</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml-storage-api</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.opensaml</groupId>
+			<artifactId>opensaml-storage-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>net.shibboleth.idp</groupId>
 			<artifactId>idp-profile-api</artifactId>
@@ -43,6 +43,17 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.shibboleth.idp</groupId>
+			<version>${shib.idp.version}</version>
+			<artifactId>idp-attribute-filter-spring</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.shibboleth.idp</groupId>
+			<version>${shib.idp.version}</version>
+			<artifactId>idp-attribute-filter-impl</artifactId>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>

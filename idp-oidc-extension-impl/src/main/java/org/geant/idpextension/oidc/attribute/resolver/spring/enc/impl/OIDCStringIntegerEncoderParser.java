@@ -29,8 +29,6 @@
 package org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl;
 
 import net.shibboleth.idp.attribute.resolver.spring.enc.BaseAttributeEncoderParser;
-import net.shibboleth.idp.attribute.resolver.spring.impl.AttributeResolverNamespaceHandler;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.xml.namespace.QName;
@@ -43,13 +41,9 @@ import org.w3c.dom.Element;
  */
 public class OIDCStringIntegerEncoderParser extends BaseAttributeEncoderParser {
 
-    /** Schema type name- enc: (legacy). */
+    /** Schema type name:. */
     @Nonnull
-    public static final QName TYPE_NAME_ENC = new QName(AttributeEncoderNamespaceHandler.NAMESPACE, "OIDCStringInteger");
-
-    /** Schema type name- resolver:. */
-    @Nonnull
-    public static final QName TYPE_NAME_RESOLVER = new QName(AttributeResolverNamespaceHandler.NAMESPACE, "OIDCStringInteger");
+    public static final QName TYPE_NAME = new QName(AttributeEncoderNamespaceHandler.NAMESPACE, "OIDCStringInteger");
 
     /** Constructor. */
     public OIDCStringIntegerEncoderParser() {

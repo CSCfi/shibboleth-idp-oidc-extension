@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:afp="urn:mace:shibboleth:2.0:afp"
+	targetNamespace="org.geant.idpextension.oidc.attribute.filter"
+	elementFormDefault="qualified">
+
+	<import namespace="urn:mace:shibboleth:2.0:afp"
+		schemaLocation="http://shibboleth.net/schema/idp/shibboleth-afp.xsd" />
+
+	<annotation>
+		<documentation>Schema for the oidc extension attribute filter
+			policies.
+		</documentation>
+	</annotation>
+
+	<!-- Literal String Match Functions -->
+	<complexType name="OIDCScope">
+		<annotation>
+			<documentation>
+				A match function that matches the scope of
+				authentication request
+				against the specified value.
+			</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="afp:StringMatchType" />
+		</complexContent>
+	</complexType>
+
+</schema>

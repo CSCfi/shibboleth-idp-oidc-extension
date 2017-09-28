@@ -266,6 +266,11 @@
     src: attribute-resolver.xml
     dest: "{{ idp_home }}/conf/attribute-resolver.xml"
 
+- name: Setting modified attribute-filter.xml
+  template:
+    src: attribute-filter.xml
+    dest: "{{ idp_home }}/conf/attribute-filter.xml"
+
 - name: Setting modified general-authn.xml
   template:
     src: general-authn.xml

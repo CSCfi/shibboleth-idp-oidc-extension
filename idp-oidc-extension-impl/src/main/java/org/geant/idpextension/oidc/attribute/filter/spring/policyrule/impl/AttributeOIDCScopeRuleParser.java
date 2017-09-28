@@ -26,33 +26,33 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl;
+package org.geant.idpextension.oidc.attribute.filter.spring.policyrule.impl;
 
-import net.shibboleth.idp.attribute.resolver.spring.enc.BaseAttributeEncoderParser;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.xml.namespace.QName;
-import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCStringAttributeEncoder;
-import org.w3c.dom.Element;
+import org.geant.idpextension.oidc.attribute.filter.spring.impl.AttributeFilterNamespaceHandler;
+import org.geant.idpextension.oidc.attribute.filter.spring.policyrule.filtercontext.impl.AttributeOIDCScopePolicyRule;
+import net.shibboleth.idp.attribute.filter.spring.policyrule.impl.AbstractStringPolicyRuleParser;
 
 /**
- * Spring bean definition parser for {@link OIDCStringAttributeEncoder}.
+ * Bean definition parser for {@link AttributeOIDCScopePolicyRule}.
  */
-public class OIDCStringEncoderParser extends BaseAttributeEncoderParser {
+public class AttributeOIDCScopeRuleParser extends AbstractStringPolicyRuleParser {
 
-    /** Schema type name:. */
-    @Nonnull
-    public static final QName TYPE_NAME = new QName(AttributeEncoderNamespaceHandler.NAMESPACE, "OIDCString");
+    /** Schema type. */
+    public static final QName SCHEMA_TYPE_AFP = new QName(AttributeFilterNamespaceHandler.NAMESPACE, "OIDCScope");
 
-    /** Constructor. */
-    public OIDCStringEncoderParser() {
-        setNameRequired(true);
+    /** {@inheritDoc} */
+    @Override
+    protected QName getAFPName() {
+        return SCHEMA_TYPE_AFP;
     }
 
     /** {@inheritDoc} */
     @Override
-    protected Class<OIDCStringAttributeEncoder> getBeanClass(@Nullable final Element element) {
-        return OIDCStringAttributeEncoder.class;
+    @Nonnull
+    protected Class<AttributeOIDCScopePolicyRule> getNativeBeanClass() {
+        return AttributeOIDCScopePolicyRule.class;
     }
 
 }

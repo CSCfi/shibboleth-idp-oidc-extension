@@ -26,33 +26,22 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl;
+package org.geant.idpextension.oidc.attribute.filter.spring.impl;
 
-import net.shibboleth.idp.attribute.resolver.spring.enc.BaseAttributeEncoderParser;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.xml.namespace.QName;
-import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCStringAttributeEncoder;
-import org.w3c.dom.Element;
+import org.geant.idpextension.oidc.attribute.filter.spring.policyrule.impl.AttributeOIDCScopeRuleParser;
 
-/**
- * Spring bean definition parser for {@link OIDCStringAttributeEncoder}.
- */
-public class OIDCStringEncoderParser extends BaseAttributeEncoderParser {
+import net.shibboleth.ext.spring.util.BaseSpringNamespaceHandler;
 
-    /** Schema type name:. */
-    @Nonnull
-    public static final QName TYPE_NAME = new QName(AttributeEncoderNamespaceHandler.NAMESPACE, "OIDCString");
+/** Namespace handler for the oidc specific attribute filter engine functions. */
+public class AttributeFilterNamespaceHandler extends BaseSpringNamespaceHandler {
 
-    /** Constructor. */
-    public OIDCStringEncoderParser() {
-        setNameRequired(true);
-    }
+    /** oidc namespace. */
+    public static final String NAMESPACE = "org.geant.idpextension.oidc.attribute.filter";
 
     /** {@inheritDoc} */
     @Override
-    protected Class<OIDCStringAttributeEncoder> getBeanClass(@Nullable final Element element) {
-        return OIDCStringAttributeEncoder.class;
+    public void init() {
+        // Policy
+        registerBeanDefinitionParser(AttributeOIDCScopeRuleParser.SCHEMA_TYPE_AFP, new AttributeOIDCScopeRuleParser());
     }
-
 }

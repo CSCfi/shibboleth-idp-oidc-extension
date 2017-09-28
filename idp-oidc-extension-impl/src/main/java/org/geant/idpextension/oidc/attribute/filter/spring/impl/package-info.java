@@ -25,34 +25,5 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl;
-
-import net.shibboleth.idp.attribute.resolver.spring.enc.BaseAttributeEncoderParser;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.xml.namespace.QName;
-import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCStringAttributeEncoder;
-import org.w3c.dom.Element;
-
-/**
- * Spring bean definition parser for {@link OIDCStringAttributeEncoder}.
- */
-public class OIDCStringEncoderParser extends BaseAttributeEncoderParser {
-
-    /** Schema type name:. */
-    @Nonnull
-    public static final QName TYPE_NAME = new QName(AttributeEncoderNamespaceHandler.NAMESPACE, "OIDCString");
-
-    /** Constructor. */
-    public OIDCStringEncoderParser() {
-        setNameRequired(true);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected Class<OIDCStringAttributeEncoder> getBeanClass(@Nullable final Element element) {
-        return OIDCStringAttributeEncoder.class;
-    }
-
-}
+/** package for oidc attribute filter name handlers. */
+package org.geant.idpextension.oidc.attribute.filter.spring.impl;
