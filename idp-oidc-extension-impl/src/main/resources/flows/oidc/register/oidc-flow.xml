@@ -2,23 +2,44 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd">
 
-    <action-state id="InitializeProfileRequestContext">
+    <action-state id="InitializeMandatoryContexts">
         <evaluate expression="InitializeProfileRequestContext" />
+        <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="DecodeMessage" />
     </action-state>
 
     <action-state id="DecodeMessage">
         <evaluate expression="DecodeMessage" />
+        <evaluate expression="InitializeRelyingPartyContext" />
+        <evaluate expression="SelectRelyingPartyConfiguration" />
+        <evaluate expression="SelectProfileConfiguration" />
         <evaluate expression="'proceed'" />
         <transition on="proceed"
             to="OutboundContextsAndSecurityParameters" />
     </action-state>
 
     <action-state id="OutboundContextsAndSecurityParameters">
-        <evaluate expression="InitializeOutboundMessageContext" />
+        <!--  Validate message (possible initial access token, other validations) -->
+        <!--  token_endpoint_auth_method? -->
+        <!--  userinfo_encrypted_response_* -->
         <evaluate expression="'proceed'" />
-        <transition on="proceed" to="HandleError" />
+        <transition on="proceed" to="BuildResponse" />
+    </action-state>
+    
+    <action-state id="BuildResponse">
+        <evaluate expression="GenerateClientID" />
+        <evaluate expression="StoreClientInformation" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="HandleOutboundMessage" />
+    </action-state>
+
+    <action-state id="HandleOutboundMessage">
+        <evaluate expression="BuildClientInformation" />
+        <!-- will be activated id encoder is implemented <evaluate expression="RecordResponseComplete" 
+            /> -->
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="CommitResponse" />
     </action-state>
     
     <!-- Passthrough state if an exception is thrown. -->
@@ -45,6 +66,7 @@
     <!-- end state after error display -->
     <end-state id="CommitResponse">
         <on-entry>
+            <evaluate expression="BuildRegistrationResponse" />
             <evaluate expression="RecordResponseComplete" />
         </on-entry>
     </end-state>

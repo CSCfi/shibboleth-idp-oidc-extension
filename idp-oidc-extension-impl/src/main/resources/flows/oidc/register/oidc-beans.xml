@@ -37,6 +37,34 @@
                 scope="prototype" p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
         </constructor-arg>
     </bean>
+
+    <bean id="InitializeRelyingPartyContext"
+        class="org.geant.idpextension.oidc.profile.impl.InitializeRegistrationRelyingPartyContext"
+        scope="prototype" />
+
+    <bean id="GenerateClientID"
+        class="org.geant.idpextension.oidc.profile.impl.GenerateClientID"
+        scope="prototype" />
+
+    <bean id="ClientInformationManager"
+        class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
+        scope="prototype" p:id="cim" p:storageService-ref="shibboleth.StorageService"/>
+
+    <bean id="StoreClientInformation"
+        class="org.geant.idpextension.oidc.profile.impl.StoreClientInformation"
+        scope="prototype" p:clientInformationManager-ref="ClientInformationManager" />
+
+    <bean id="SelectRelyingPartyConfiguration"
+        class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
+        scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+
+    <bean id="SelectProfileConfiguration"
+        class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
+        scope="prototype" />
+
+    <bean id="InitializeOutboundMessageContext" class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundRegistrationResponseMessageContext"
+        scope="prototype">
+    </bean>
     
     <bean id="BuildErrorResponseFromEvent" class="org.geant.idpextension.oidc.profile.impl.BuildRegistrationErrorResponseFromEvent"
         scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse">
@@ -44,6 +72,12 @@
             <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
         </property>    
     </bean>
+
+    <bean id="BuildClientInformation" class="org.geant.idpextension.oidc.profile.impl.BuildClientInformation"
+        scope="prototype" />
+
+    <bean id="BuildRegistrationResponse" class="org.geant.idpextension.oidc.profile.impl.BuildRegistrationResponse"
+        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
 
     <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
             p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
