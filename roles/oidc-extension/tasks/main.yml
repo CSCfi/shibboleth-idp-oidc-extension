@@ -114,6 +114,14 @@
              </property>
          </bean>
 
+- name: Add OIDC.Registration profile configuration to relying-party.xml, using UnverifiedRelyingParty
+  blockinfile:
+    dest: "{{ idp_home }}/conf/relying-party.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK 3 -->"
+    insertafter: "<!-- <bean parent=\"SAML2.SSO\" p:encryptAssertions=\"false\" /> -->"
+    content: |
+         <bean parent="OIDC.Registration" p:securityConfiguration-ref="shibboleth.oidc.DefaultSecurityConfiguration" />
+
 - name: Add OIDC.SSO profile configuration to relying-party.xml, override sec. conf with shibboleth.oidc.DefaultSecurityConfiguration
   blockinfile:
     dest: "{{ idp_home }}/conf/relying-party.xml"
@@ -155,7 +163,7 @@
              </AttributeRule>
          </AttributeFilterPolicy>
 
-- name: Add OIDC.SSO profile configuration to relying-party-system.xml
+- name: Add OIDC.SSO profile configuration to relying-party-system.xml. SYSTEM FILE CHANGE!!
   blockinfile:
     dest: "{{ idp_home }}/system/conf/relying-party-system.xml"
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
@@ -163,6 +171,11 @@
     content: |
           <bean id="OIDC.SSO"
               class="org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration"
+              p:securityConfiguration-ref="%{idp.security.config:shibboleth.DefaultSecurityConfiguration}"
+              p:servletRequest-ref="shibboleth.HttpServletRequest" />
+
+          <bean id="OIDC.Registration"
+              class="org.geant.idpextension.oidc.config.OIDCDynamicRegistrationConfiguration"
               p:securityConfiguration-ref="%{idp.security.config:shibboleth.DefaultSecurityConfiguration}"
               p:servletRequest-ref="shibboleth.HttpServletRequest" />
 
