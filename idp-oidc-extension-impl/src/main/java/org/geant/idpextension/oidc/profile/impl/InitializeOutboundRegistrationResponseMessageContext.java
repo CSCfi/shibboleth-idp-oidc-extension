@@ -32,21 +32,23 @@ import javax.annotation.Nonnull;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCClientRegistrationResponseContext;
 import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationResponse;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.idp.profile.IdPEventIds;
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
+import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
  * Action that adds an outbound {@link MessageContext} and related OIDC context
  * to the {@link ProfileRequestContext}.
  * 
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
- * @event {@link IdPEventIds#INVALID_RELYING_PARTY_CTX}
  */
 @SuppressWarnings("rawtypes")
 public class InitializeOutboundRegistrationResponseMessageContext extends AbstractProfileAction {
@@ -54,20 +56,41 @@ public class InitializeOutboundRegistrationResponseMessageContext extends Abstra
     /** Class logger. */
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(InitializeOutboundRegistrationResponseMessageContext.class);
+    
+    /** Strategy that will return or create a {@link OIDCClientRegistrationResponseContext}. */
+    @Nonnull
+    private Function<MessageContext, OIDCClientRegistrationResponseContext> oidcResponseContextCreationStrategy;
 
     /** Constructor. */
     public InitializeOutboundRegistrationResponseMessageContext() {
         super();
+        oidcResponseContextCreationStrategy = 
+                new ChildContextLookup<>(OIDCClientRegistrationResponseContext.class, true);
     }
 
+    /**
+     * Set the strategy used to return or create the {@link OIDCClientRegistrationResponseContext}
+     * .
+     * @param strategy
+     *            creation strategy
+     */
+    public void setRelyingPartyContextCreationStrategy(
+            @Nonnull final Function<MessageContext, OIDCClientRegistrationResponseContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        oidcResponseContextCreationStrategy = Constraint.isNotNull(strategy,
+                "OIDCClientRegistrationResponseContext creation strategy cannot be null");
+    }
+
+    
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         final MessageContext<ClientRegistrationResponse> msgCtx = new MessageContext<ClientRegistrationResponse>();
+        oidcResponseContextCreationStrategy.apply(msgCtx);
         profileRequestContext.setOutboundMessageContext(msgCtx);
-        msgCtx.addSubcontext(new OIDCClientRegistrationResponseContext());
         log.debug("{} Initialized outbound message context", getLogPrefix());
     }
 }
