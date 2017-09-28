@@ -26,6 +26,7 @@
     <util:list id="OIDCResolvers"
         value-type="org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver">
         <ref bean="OIDCFileResolver" />
+        <ref bean="StorageClientInformationResolver" />
     </util:list>
 
     <bean id="OIDCFileResolver"
@@ -37,6 +38,10 @@
             </bean>
         </constructor-arg>
     </bean>
+
+    <bean id="StorageClientInformationResolver"
+        class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationResolver"
+        p:id="cimresolver" p:storageService-ref="shibboleth.StorageService"/>
     
 </beans>
 
