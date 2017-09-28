@@ -1,1 +1,2 @@
 org.geant.idpextension.oidc.attribute.encoder = org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl.AttributeEncoderNamespaceHandler
+org.geant.idpextension.oidc.attribute.filter = org.geant.idpextension.oidc.attribute.filter.spring.impl.AttributeFilterNamespaceHandler
