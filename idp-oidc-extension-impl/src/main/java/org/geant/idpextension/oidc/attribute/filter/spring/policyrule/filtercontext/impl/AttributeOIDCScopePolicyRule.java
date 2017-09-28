@@ -124,7 +124,7 @@ public class AttributeOIDCScopePolicyRule extends AbstractStringPolicyRule {
                 return Tristate.TRUE;
             }
         }
-        return Tristate.FAIL;
+        return Tristate.FALSE;
     }
 
 }
