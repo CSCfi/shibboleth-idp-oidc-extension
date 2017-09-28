@@ -28,8 +28,6 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.io.IOException;
-
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,7 +41,6 @@ import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationErrorResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.http.ServletUtils;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
@@ -87,19 +84,11 @@ public class BuildRegistrationErrorResponseFromEvent extends AbstractProfileActi
             log.error("No event to be included in the response, nothing to do");
             return;
         }
-        final HttpServletResponse servletResponse = getHttpServletResponse();
-        //TODO: hardcoded type at the moment, maybe a map of events -> errorobjects should be done (?)
         final ErrorObject error = new ErrorObject("invalid_request", "Invalid request: " 
                 + eventCtx.getEvent().toString(), HTTPResponse.SC_BAD_REQUEST);
-        final ClientRegistrationErrorResponse r = new ClientRegistrationErrorResponse(error);
+        final ClientRegistrationErrorResponse response = new ClientRegistrationErrorResponse(error);
+        profileRequestContext.getOutboundMessageContext().setMessage(response);
 
-        try {
-            ServletUtils.applyHTTPResponse(r.toHTTPResponse(), servletResponse);
-        } catch (IOException e) {
-            log.error("Could not apply the parameters to the servlet response", e);
-            return;
-        }
-        
-        log.debug("Error successfully applied to the response");
+        log.debug("{} ClientRegistrationErrorResponse successfully applied to the HTTP response", getLogPrefix());
     }
 }
