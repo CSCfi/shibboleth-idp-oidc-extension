@@ -42,6 +42,10 @@
         class="org.geant.idpextension.oidc.profile.impl.InitializeRegistrationRelyingPartyContext"
         scope="prototype" />
 
+    <bean id="CheckRedirectURIs"
+        class="org.geant.idpextension.oidc.profile.impl.CheckRedirectURIs"
+        scope="prototype" />
+
     <bean id="GenerateClientID"
         class="org.geant.idpextension.oidc.profile.impl.GenerateClientID"
         scope="prototype" />
@@ -70,7 +74,12 @@
         scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse">
         <property name="eventContextLookupStrategy">
             <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
-        </property>    
+        </property>
+        <property name="mappedErrors">
+            <map value-type="com.nimbusds.oauth2.sdk.ErrorObject">
+                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).MISSING_REDIRECT_URIS}" value="#{T(com.nimbusds.oauth2.sdk.client.RegistrationError).INVALID_REDIRECT_URI}" />
+            </map>        
+        </property>
     </bean>
 
     <bean id="BuildClientInformation" class="org.geant.idpextension.oidc.profile.impl.BuildClientInformation"
