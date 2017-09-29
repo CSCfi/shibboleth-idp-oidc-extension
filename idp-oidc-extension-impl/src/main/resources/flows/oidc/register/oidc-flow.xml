@@ -21,6 +21,7 @@
 
     <action-state id="OutboundContextsAndSecurityParameters">
         <!--  Validate message (possible initial access token, other validations) -->
+        <evaluate expression="CheckRedirectURIs" />
         <!--  token_endpoint_auth_method? -->
         <!--  userinfo_encrypted_response_* -->
         <evaluate expression="'proceed'" />
