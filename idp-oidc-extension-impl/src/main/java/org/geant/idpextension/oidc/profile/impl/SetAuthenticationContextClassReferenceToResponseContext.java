@@ -33,7 +33,6 @@ import javax.annotation.Nullable;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.RequestedPrincipalContext;
 import net.shibboleth.idp.authn.principal.DefaultPrincipalDeterminationStrategy;
-import net.shibboleth.idp.saml.authn.principal.AuthenticationMethodPrincipal;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
@@ -116,7 +115,7 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
 
         String name = null;
         if (requestedPrincipalContext != null && requestedPrincipalContext.getMatchingPrincipal() != null
-                && requestedPrincipalContext.getMatchingPrincipal() instanceof AuthenticationMethodPrincipal) {
+                && requestedPrincipalContext.getMatchingPrincipal() instanceof AuthenticationContextClassReferencePrincipal) {
             name = requestedPrincipalContext.getMatchingPrincipal().getName();
             log.debug("{} Setting acr based on requested ctx", getLogPrefix());
         } else {
