@@ -12,7 +12,6 @@
 		</documentation>
 	</annotation>
 
-	<!-- Literal String Match Functions -->
 	<complexType name="OIDCScope">
 		<annotation>
 			<documentation>
@@ -25,5 +24,50 @@
 			<extension base="afp:StringMatchType" />
 		</complexContent>
 	</complexType>
+
+	<complexType name="AttributeInOIDCRequestedClaims">
+		<annotation>
+			<documentation>
+				Function that evaluate to true if an attribute is in requested claims.
+			</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="afp:MatchFunctorType">
+				<attribute name="onlyIfValuesMatch" type="string" use="optional">
+					<annotation>
+						<documentation>If requested claims contains value(s), non matching
+							idp attribute values are filtered out. Default is true.
+						</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="onlyIfEssential" type="string" use="optional">
+					<annotation>
+						<documentation>Non essential claims are filtered out. Default is
+							false.</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="matchOnlyIDToken" type="string" use="optional">
+					<annotation>
+						<documentation>Match only to id token part of requested claims.
+							Default is false.</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="matchOnlyUserInfo" type="string" use="optional">
+					<annotation>
+						<documentation>Match only to user info part of requested claims.
+							Default is false.</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="matchIfRequestedClaimsSilent" type="string"
+					use="optional">
+					<annotation>
+						<documentation>Match true if no requested claim set exists.
+							Default is false.</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+
 
 </schema>

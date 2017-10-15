@@ -26,26 +26,8 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.geant.idpextension.oidc.attribute.filter.spring.impl;
+/**
+ * This is package for all oidc matchers. 
+ */
 
-import org.geant.idpextension.oidc.attribute.filter.spring.matcher.impl.AttributeInOIDCRequestedClaimsRuleParser;
-import org.geant.idpextension.oidc.attribute.filter.spring.policyrule.impl.AttributeOIDCScopeRuleParser;
-
-import net.shibboleth.ext.spring.util.BaseSpringNamespaceHandler;
-
-/** Namespace handler for the oidc specific attribute filter engine functions. */
-public class AttributeFilterNamespaceHandler extends BaseSpringNamespaceHandler {
-
-    /** oidc namespace. */
-    public static final String NAMESPACE = "org.geant.idpextension.oidc.attribute.filter";
-
-    /** {@inheritDoc} */
-    @Override
-    public void init() {
-        // Policy rules
-        registerBeanDefinitionParser(AttributeOIDCScopeRuleParser.SCHEMA_TYPE_AFP, new AttributeOIDCScopeRuleParser());
-        // Matchers
-        registerBeanDefinitionParser(AttributeInOIDCRequestedClaimsRuleParser.SCHEMA_TYPE_AFP,
-                new AttributeInOIDCRequestedClaimsRuleParser());
-    }
-}
+package org.geant.idpextension.oidc.attribute.filter.matcher.impl;
