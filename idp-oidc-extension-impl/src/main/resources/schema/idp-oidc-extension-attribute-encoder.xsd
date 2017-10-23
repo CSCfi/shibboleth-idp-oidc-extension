@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:encoder="urn:mace:shibboleth:2.0:attribute:encoder"
-	xmlns:resolver="urn:mace:shibboleth:2.0:resolver" targetNamespace="org.geant.idpextension.oidc.attribute.encoder"
+	xmlns:resolver="urn:mace:shibboleth:2.0:resolver" xmlns:oidcresolver="org.geant.idpextension.oidc.attribute.encoder"
+	targetNamespace="org.geant.idpextension.oidc.attribute.encoder"
 	elementFormDefault="qualified">
 
 	<import namespace="urn:mace:shibboleth:2.0:resolver"
@@ -10,48 +11,39 @@
 
 	<complexType name="OIDCString">
 		<annotation>
-			<documentation>Defines a OIDC string encoder for a string attribute.
+			<documentation>Defines a encoder for a string attribute.
 			</documentation>
 		</annotation>
 		<complexContent>
-			<extension base="resolver:BaseAttributeEncoderType">
+			<extension base="oidcresolver:BaseAttributeToJSONEncoderType">
 			</extension>
 		</complexContent>
 	</complexType>
-	
-	<complexType name="OIDCBase64">
+
+	<complexType name="OIDCByte">
 		<annotation>
-			<documentation>Defines a OIDC base64 encoder for a byte attribute.
+			<documentation>Defines a base64 encoder for a byte attribute.
 			</documentation>
 		</annotation>
 		<complexContent>
-			<extension base="resolver:BaseAttributeEncoderType">
-			</extension>
-		</complexContent>
-	</complexType>
-	
-	<complexType name="OIDCStringInteger">
-		<annotation>
-			<documentation>Defines a OIDC integer encoder for a string attribute having a value parsable as integer.
-			</documentation>
-		</annotation>
-		<complexContent>
-			<extension base="resolver:BaseAttributeEncoderType">
+			<extension base="oidcresolver:BaseAttributeToJSONEncoderType">
 			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="OIDCScopedString">
 		<annotation>
-			<documentation>Defines a OIDC string encoder for a scoped string attribute.
+			<documentation>Defines a OIDC string encoder for a scoped string
+				attribute.
 			</documentation>
 		</annotation>
 		<complexContent>
-			<extension base="resolver:BaseAttributeEncoderType">
+			<extension base="oidcresolver:BaseToJSONStringAttributeEncoderType">
 				<attribute name="scopeDelimiter" type="string" use="optional">
 					<annotation>
 						<documentation>
-							This is the delimeter used between the attribute value and
+							This is the delimeter used between the attribute
+							value and
 							scope.
 						</documentation>
 					</annotation>
@@ -60,13 +52,51 @@
 		</complexContent>
 	</complexType>
 
-	<complexType name="OIDCStringArray">
+	<element name="OIDCStringAttributeEncoder"
+		type="oidcresolver:BaseToJSONStringAttributeEncoderType">
 		<annotation>
-			<documentation>Defines a OIDC string array encoder for a string attribute.
+			<documentation>Defines a encoder (to JSON Object) for a string
+				attribute.</documentation>
+		</annotation>
+	</element>
+	<complexType name="BaseToJSONStringAttributeEncoderType">
+		<complexContent>
+			<extension base="oidcresolver:BaseAttributeToJSONEncoderType">
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<element name="OIDCAttributeEncoder" type="oidcresolver:BaseAttributeToJSONEncoderType">
+		<annotation>
+			<documentation>Defines a encoder (to JSON Object) for an attribute.
 			</documentation>
 		</annotation>
+	</element>
+	<complexType name="BaseAttributeToJSONEncoderType">
 		<complexContent>
 			<extension base="resolver:BaseAttributeEncoderType">
+				<attribute name="asArray" type="string" use="optional">
+					<annotation>
+						<documentation>
+							Encode values into array.
+						</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="asInt" type="string" use="optional">
+					<annotation>
+						<documentation>
+							Convert value to integer if possible.
+						</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="stringDelimiter" type="string" use="optional">
+					<annotation>
+						<documentation>
+							Delimeter used when catenating multiple attribute
+							values to one.
+						</documentation>
+					</annotation>
+				</attribute>
 			</extension>
 		</complexContent>
 	</complexType>
