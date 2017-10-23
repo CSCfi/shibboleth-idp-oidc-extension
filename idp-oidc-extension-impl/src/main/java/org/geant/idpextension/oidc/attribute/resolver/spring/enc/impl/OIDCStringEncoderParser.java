@@ -28,7 +28,6 @@
 
 package org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl;
 
-import net.shibboleth.idp.attribute.resolver.spring.enc.BaseAttributeEncoderParser;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.xml.namespace.QName;
@@ -38,7 +37,7 @@ import org.w3c.dom.Element;
 /**
  * Spring bean definition parser for {@link OIDCStringAttributeEncoder}.
  */
-public class OIDCStringEncoderParser extends BaseAttributeEncoderParser {
+public class OIDCStringEncoderParser extends AbstractOIDCEncoderParser {
 
     /** Schema type name:. */
     @Nonnull
