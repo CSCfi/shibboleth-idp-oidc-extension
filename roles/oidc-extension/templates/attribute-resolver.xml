@@ -31,7 +31,7 @@
     not expose a value for this attribute without considering the
     long term implications.
 
-    This demonstrastes use of OIDCScopedString encoder.
+    This demonstrates use of OIDCScopedString encoder.
     -->
     <AttributeDefinition id="eduPersonPrincipalName" xsi:type="Scoped" scope="%{idp.scope}" sourceAttributeID="uid">
         <Dependency ref="uid" />
@@ -55,7 +55,7 @@
     despite the problems with that practice. Consider making the EPPN
     value the same as your official email addresses whenever possible.
 
-    This demonstrastes use of OIDCString encoder.
+    This demonstrates use of OIDCString encoder.
     -->
     <AttributeDefinition id="mail" xsi:type="Template">
         <Dependency ref="uid" />
@@ -73,21 +73,21 @@
     <!--
     This is an example of an attribute sourced from a data connector.
 
-    This demonstrastes use of OIDCStringArray encoder.
+    This demonstrates use of OIDCString as array encoder.
     -->
     <AttributeDefinition id="eduPersonAffiliation" xsi:type="Simple" sourceAttributeID="affiliation">
         <Dependency ref="staticAttributes"/>
-        <AttributeEncoder xsi:type="oidcext:OIDCStringArray" name="affiliation"/>
+        <AttributeEncoder xsi:type="oidcext:OIDCStringArray" asArray="true" name="affiliation"/>
     </AttributeDefinition>
 
-     <!-- 
+    <!-- 
     This is an example of an attribute sourced from a data connector.
 
-    This demonstrastes use of OIDCStringInteger encoder.
+    This demonstrates use of OIDCString as int encoder.
     -->
     <AttributeDefinition id="age" xsi:type="Simple" sourceAttributeID="age">
         <Dependency ref="staticAttributes"/>
-        <AttributeEncoder xsi:type="oidcext:OIDCStringInteger" name="age"/>
+        <AttributeEncoder xsi:type="oidcext:OIDCString" asInt="true" name="age"/>
     </AttributeDefinition>
 
 
@@ -101,7 +101,8 @@
             <Value>staff</Value>
         </Attribute>
         <Attribute id="age">
-            <Value>50</Value>
+            <Value>Fiftyfive</Value>
+            <Value>55</Value>
         </Attribute>
     </DataConnector>
 
