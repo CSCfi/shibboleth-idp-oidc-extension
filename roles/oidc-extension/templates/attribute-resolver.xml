@@ -77,7 +77,7 @@
     -->
     <AttributeDefinition id="eduPersonAffiliation" xsi:type="Simple" sourceAttributeID="affiliation">
         <Dependency ref="staticAttributes"/>
-        <AttributeEncoder xsi:type="oidcext:OIDCStringArray" asArray="true" name="affiliation"/>
+        <AttributeEncoder xsi:type="oidcext:OIDCString" asArray="true" name="affiliation"/>
     </AttributeDefinition>
 
     <!-- 
