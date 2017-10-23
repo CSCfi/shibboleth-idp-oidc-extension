@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.IdPAttribute;
@@ -47,8 +48,7 @@ import net.shibboleth.utilities.java.support.primitive.StringSupport;
  * Class encoding scoped string attributes to string json object. Name of the
  * attribute will be set as the key. The string contains attribute value,
  * delimiter and scope catenated. If there are several attribute values they are
- * delimited with space. If all values are uncodable, encoder returns null
- * value.
+ * delimited with delimiter(space is default) or placed to array.
  */
 public class OIDCScopedStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
 
@@ -86,16 +86,25 @@ public class OIDCScopedStringAttributeEncoder extends AbstractOIDCAttributeEncod
         Constraint.isNotNull(scopeDelimiter, "Scope delimiter cannot be null");
         StringBuilder attributeString = new StringBuilder();
         JSONObject obj = new JSONObject();
+        JSONArray array = new JSONArray();
         for (IdPAttributeValue value : idpAttribute.getValues()) {
             if (value instanceof ScopedStringAttributeValue && value.getValue() != null) {
                 if (attributeString.length() > 0) {
-                    attributeString.append(" ");
+                    attributeString.append(getStringDelimiter());
                 }
                 attributeString.append(value.getValue()).append(scopeDelimiter)
                         .append(((ScopedStringAttributeValue) value).getScope());
+                if (getAsArray()) {
+                    array.add(attributeString.toString());
+                    attributeString.setLength(0);
+                }
             }
         }
-        obj.put(getName(), attributeString.toString().isEmpty() ? null : attributeString.toString());
+        if (getAsArray()) {
+            obj.put(getName(), array.size() == 0 ? null : array);
+        } else {
+            obj.put(getName(), attributeString.toString().isEmpty() ? null : attributeString.toString());
+        }
         return obj;
     }
 
