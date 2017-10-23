@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.attribute.encoding.impl;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncoder;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.IdPAttribute;
+import net.shibboleth.idp.attribute.StringAttributeValue;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 import net.shibboleth.utilities.java.support.component.AbstractInitializableComponent;
@@ -63,10 +65,79 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     @NonnullAfterInit
     private String name;
 
+    /** Whether to set value to array. */
+    private boolean asArray;
+    /** Whether to interpret value as integer. */
+    private boolean asInt;
+    /** Delimiter used for when catenating string values. */
+    @Nullable
+    private String stringDelimiter;
     /** Condition for use of this encoder. */
     @SuppressWarnings("rawtypes")
     @Nonnull
     private Predicate<ProfileRequestContext> activationCondition;
+
+    public AbstractOIDCAttributeEncoder() {
+        stringDelimiter = " ";
+    }
+
+    /**
+     * Gets whether to set value to array.
+     * 
+     * @return whether to set value to array
+     */
+    public boolean getAsArray() {
+        return asArray;
+    }
+
+    /**
+     * Sets whether to set value to array.
+     * 
+     * @param flag
+     *            whether to set value to array
+     */
+    public void setAsArray(boolean flag) {
+        asArray = flag;
+    }
+
+    /**
+     * Gets whether to interpret value as integer.
+     * 
+     * @return whether to interpret value as integer
+     */
+    public boolean getAsInt() {
+        return asInt;
+    }
+
+    /**
+     * Sets whether to interpret value as integer.
+     * 
+     * @param flag
+     *            whether to interpret value as integer
+     */
+    public void setAsInt(boolean flag) {
+        asInt = flag;
+    }
+
+    /**
+     * Gets delimiter used when catenating string values.
+     * 
+     * @return delimiter used when catenating string values
+     */
+    public String getStringDelimiter() {
+        return stringDelimiter;
+    }
+
+    /**
+     * Sets delimiter used when catenating string values.
+     * 
+     * @param delimeter
+     *            delimiter used when catenating string values
+     */
+    public void setStringDelimiter(@Nullable String delimeter) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        stringDelimiter = delimeter;
+    }
 
     /**
      * Set whether to encode type information. Not Supported. Encoder parser
@@ -128,6 +199,28 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
         if (name == null) {
             throw new ComponentInitializationException("Attribute name cannot be null or empty");
         }
+    }
+
+    /**
+     * Returns string attribute value either as int or as string based on flag.
+     * 
+     * @param value attribute value to be returned.
+     * @return string attribute value as string or as int (null if not parsable).
+     */
+    protected Object getValue(StringAttributeValue value) {
+        if (value.getValue() == null) {
+            return null;
+        }
+        if (getAsInt()) {
+            try {
+                int intValue = Integer.parseInt((String) value.getValue());
+                return intValue;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return value.getValue();
+
     }
 
     @Override
