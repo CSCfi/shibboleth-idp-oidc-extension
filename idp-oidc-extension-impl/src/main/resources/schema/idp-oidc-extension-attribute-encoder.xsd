@@ -15,7 +15,7 @@
 			</documentation>
 		</annotation>
 		<complexContent>
-			<extension base="oidcresolver:BaseAttributeToJSONEncoderType">
+			<extension base="oidcresolver:BaseAttributeEncoderType">
 			</extension>
 		</complexContent>
 	</complexType>
@@ -26,7 +26,7 @@
 			</documentation>
 		</annotation>
 		<complexContent>
-			<extension base="oidcresolver:BaseAttributeToJSONEncoderType">
+			<extension base="oidcresolver:BaseAttributeEncoderType">
 			</extension>
 		</complexContent>
 	</complexType>
@@ -38,7 +38,7 @@
 			</documentation>
 		</annotation>
 		<complexContent>
-			<extension base="oidcresolver:BaseToJSONStringAttributeEncoderType">
+			<extension base="oidcresolver:BaseAttributeEncoderType">
 				<attribute name="scopeDelimiter" type="string" use="optional">
 					<annotation>
 						<documentation>
@@ -52,27 +52,14 @@
 		</complexContent>
 	</complexType>
 
-	<element name="OIDCStringAttributeEncoder"
-		type="oidcresolver:BaseToJSONStringAttributeEncoderType">
-		<annotation>
-			<documentation>Defines a encoder (to JSON Object) for a string
-				attribute.</documentation>
-		</annotation>
-	</element>
-	<complexType name="BaseToJSONStringAttributeEncoderType">
-		<complexContent>
-			<extension base="oidcresolver:BaseAttributeToJSONEncoderType">
-			</extension>
-		</complexContent>
-	</complexType>
-
-	<element name="OIDCAttributeEncoder" type="oidcresolver:BaseAttributeToJSONEncoderType">
+	
+	<element name="OIDCAttributeEncoder" type="oidcresolver:BaseAttributeEncoderType">
 		<annotation>
 			<documentation>Defines a encoder (to JSON Object) for an attribute.
 			</documentation>
 		</annotation>
 	</element>
-	<complexType name="BaseAttributeToJSONEncoderType">
+	<complexType name="BaseAttributeEncoderType">
 		<complexContent>
 			<extension base="resolver:BaseAttributeEncoderType">
 				<attribute name="asArray" type="string" use="optional">
