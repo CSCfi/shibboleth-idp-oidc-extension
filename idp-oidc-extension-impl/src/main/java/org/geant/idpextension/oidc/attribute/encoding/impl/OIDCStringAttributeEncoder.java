@@ -32,6 +32,8 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.IdPAttribute;
@@ -42,8 +44,10 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 /**
  * Class encoding string attributes to string json object. Name of the attribute
  * will be set as the key. The string contains attribute value. If there are
- * several attribute values they are delimited with space. If no encodable
- * values are found returns null value.
+ * several attribute values they are delimited with delimiter(space is default)
+ * or placed to array. If the value is set to be interpreted as int, only values
+ * that may be parsed to int are used. In case output is interpreted as int but
+ * not set to array, only the first parsable value is used.
  */
 public class OIDCStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
 
@@ -57,15 +61,39 @@ public class OIDCStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
         Constraint.isNotNull(idpAttribute, "Attribute to encode cannot be null");
         String attributeString = "";
         JSONObject obj = new JSONObject();
+        JSONArray array = new JSONArray();
         for (IdPAttributeValue value : idpAttribute.getValues()) {
             if (value instanceof StringAttributeValue && value.getValue() != null) {
-                if (attributeString.length() > 0) {
-                    attributeString += " ";
+                Object objValue = getValue((StringAttributeValue) value);
+                if (getAsArray()) {
+                    if (objValue != null) {
+                        // adding string or int to array
+                        array.add(objValue);
+                    }
+                } else {
+                    if (getAsInt()) {
+                        if (objValue != null) {
+                            // first int value locate is returned in the case of
+                            // nonarray int
+                            obj.put(getName(), objValue);
+                            return obj;
+                        }
+                    } else {
+                        // strings parsed together
+                        if (attributeString.length() > 0 && getStringDelimiter() != null) {
+                            attributeString += getStringDelimiter();
+                        }
+                        attributeString += value.getValue();
+                    }
                 }
-                attributeString += value.getValue();
             }
         }
-        obj.put(getName(), attributeString.toString().isEmpty() ? null : attributeString.toString());
+        if (getAsArray()) {
+            obj.put(getName(), array.size() == 0 ? null : array);
+        } else {
+            // returning string item or nonfound int in nonarray case (null)
+            obj.put(getName(), attributeString.toString().isEmpty() ? null : attributeString.toString());
+        }
         return obj;
     }
 
