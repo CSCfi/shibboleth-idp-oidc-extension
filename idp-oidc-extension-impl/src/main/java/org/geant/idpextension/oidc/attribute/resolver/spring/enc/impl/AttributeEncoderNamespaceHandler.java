@@ -46,10 +46,8 @@ public class AttributeEncoderNamespaceHandler extends BaseSpringNamespaceHandler
     @Override
     public void init() {
         registerBeanDefinitionParser(OIDCStringEncoderParser.TYPE_NAME, new OIDCStringEncoderParser());
-        registerBeanDefinitionParser(OIDCStringIntegerEncoderParser.TYPE_NAME, new OIDCStringIntegerEncoderParser());
         registerBeanDefinitionParser(OIDCScopedStringEncoderParser.TYPE_NAME, new OIDCScopedStringEncoderParser());
-        registerBeanDefinitionParser(OIDCStringArrayEncoderParser.TYPE_NAME, new OIDCStringArrayEncoderParser());
-        registerBeanDefinitionParser(OIDCBase64EncoderParser.TYPE_NAME, new OIDCBase64EncoderParser());
+        registerBeanDefinitionParser(OIDCByteEncoderParser.TYPE_NAME, new OIDCByteEncoderParser());
     }
 
 }
