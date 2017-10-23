@@ -32,6 +32,8 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.ByteAttributeValue;
@@ -41,10 +43,12 @@ import net.shibboleth.utilities.java.support.codec.Base64Support;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Class encoding byte attributes to base64 encoded string json object. Name of the attribute
- * will be set as the key. The string contains base64 coded attribute value. If there are
- * several attribute values they are delimited with space. If no encodable
- * values are found returns null value.
+ * Class encoding byte attributes to base64 encoded string json object. Name of
+ * the attribute will be set as the key. The string contains base64 coded
+ * attribute value. If there are several attribute values they are delimited
+ * with space. The output may be set also to array. The output may also be set
+ * to be int instead of b64. In that case each value (byte[]) is converted to
+ * int array and placed into array.
  */
 public class OIDCByteAttributeEncoder extends AbstractOIDCAttributeEncoder {
 
@@ -58,15 +62,37 @@ public class OIDCByteAttributeEncoder extends AbstractOIDCAttributeEncoder {
         Constraint.isNotNull(idpAttribute, "Attribute to encode cannot be null");
         String attributeString = "";
         JSONObject obj = new JSONObject();
+        JSONArray array = new JSONArray();
         for (IdPAttributeValue value : idpAttribute.getValues()) {
             if (value instanceof ByteAttributeValue && value.getValue() != null) {
-                if (attributeString.length() > 0) {
-                    attributeString += " ";
+                if (getAsInt()) {
+                    // int
+                    JSONArray innerArray = new JSONArray();
+                    for (byte byteValue : ((ByteAttributeValue) value).getValue()) {
+                        innerArray.add(byteValue);
+                    }
+                    // each byte array is converted to json int array and placed
+                    // to json array.
+                    array.add(innerArray);
+                } else {
+                    // b64
+                    if (attributeString.length() > 0 && getStringDelimiter() != null) {
+                        attributeString += getStringDelimiter();
+                    }
+                    attributeString += Base64Support.encode(((ByteAttributeValue) value).getValue(),
+                            Base64Support.UNCHUNKED);
+                    if (getAsArray()) {
+                        array.add(attributeString.toString());
+                        attributeString = "";
+                    }
                 }
-                attributeString += Base64Support.encode(((ByteAttributeValue)value).getValue(), Base64Support.UNCHUNKED);
             }
         }
-        obj.put(getName(), attributeString.toString().isEmpty() ? null : attributeString.toString());
+        if (getAsArray()) {
+            obj.put(getName(), array.size() == 0 ? null : array);
+        } else {
+            obj.put(getName(), attributeString.toString().isEmpty() ? null : attributeString.toString());
+        }
         return obj;
     }
 
