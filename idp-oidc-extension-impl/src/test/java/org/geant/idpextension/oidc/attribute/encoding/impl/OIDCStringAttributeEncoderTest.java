@@ -31,6 +31,7 @@ package org.geant.idpextension.oidc.attribute.encoding.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.ByteAttributeValue;
@@ -91,10 +92,41 @@ public class OIDCStringAttributeEncoderTest {
         stringAttributeValues.add(new StringAttributeValue("value1"));
         stringAttributeValues.add(new StringAttributeValue("value2"));
         attribute.setValues(stringAttributeValues);
+        encoder.setStringDelimiter(";");
         JSONObject object = encoder.encode(attribute);
-        Assert.assertTrue(((String) object.get("attributeName")).split(" ")[0].equals("value1"));
-        Assert.assertTrue(((String) object.get("attributeName")).split(" ")[1].equals("value2"));
-        Assert.assertTrue(((String) object.get("attributeName")).split(" ").length == 2);
+        Assert.assertTrue(((String) object.get("attributeName")).split(";")[0].equals("value1"));
+        Assert.assertTrue(((String) object.get("attributeName")).split(";")[1].equals("value2"));
+        Assert.assertTrue(((String) object.get("attributeName")).split(";").length == 2);
+        
+    }
+
+    @Test
+    public void testEncoding2() throws ComponentInitializationException, AttributeEncodingException {
+        init();
+        IdPAttribute attribute = new IdPAttribute("test");
+        List<StringAttributeValue> stringAttributeValues = new ArrayList<StringAttributeValue>();
+        stringAttributeValues.add(new StringAttributeValue("value1"));
+        stringAttributeValues.add(new StringAttributeValue("value2"));
+        attribute.setValues(stringAttributeValues);
+        encoder.setAsArray(true);
+        JSONObject object = encoder.encode(attribute);
+        JSONArray array = (JSONArray)object.get("attributeName");
+        Assert.assertEquals("value1",array.get(0));
+        Assert.assertEquals("value2",array.get(1));
+        Assert.assertTrue(array.size() == 2);
+    }
+    
+    @Test
+    public void testEncoding3() throws ComponentInitializationException, AttributeEncodingException {
+        init();
+        IdPAttribute attribute = new IdPAttribute("test");
+        List<StringAttributeValue> stringAttributeValues = new ArrayList<StringAttributeValue>();
+        stringAttributeValues.add(new StringAttributeValue("value1"));
+        stringAttributeValues.add(new StringAttributeValue("2"));
+        attribute.setValues(stringAttributeValues);
+        encoder.setAsInt(true);
+        JSONObject object = encoder.encode(attribute);
+        Assert.assertEquals(2,object.get("attributeName"));
     }
 
     @Test

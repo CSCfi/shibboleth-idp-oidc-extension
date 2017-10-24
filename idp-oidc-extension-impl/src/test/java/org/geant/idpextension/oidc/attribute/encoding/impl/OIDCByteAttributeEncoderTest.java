@@ -31,6 +31,7 @@ package org.geant.idpextension.oidc.attribute.encoding.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.ByteAttributeValue;
@@ -97,6 +98,25 @@ public class OIDCByteAttributeEncoderTest {
         String base64Coded = (String) object.get("attributeName");
         Assert.assertEquals(bytes, Base64.decode(base64Coded));
     }
+    
+    @Test
+    public void testEncoding2() throws ComponentInitializationException, AttributeEncodingException {
+        init();
+        IdPAttribute attribute = new IdPAttribute("test");
+        List<ByteAttributeValue> byteAttributeValues = new ArrayList<ByteAttributeValue>();
+        byte[] bytes = new byte[2];
+        bytes[0] = 0;
+        bytes[1] = 1;
+        byteAttributeValues.add(new ByteAttributeValue(bytes));
+        attribute.setValues(byteAttributeValues);
+        encoder.setAsInt(true);
+        JSONObject object = encoder.encode(attribute);
+        JSONArray array = (JSONArray)object.get("attributeName");
+        JSONArray arrayInts = (JSONArray)array.get(0);
+        Assert.assertEquals(arrayInts.get(0),0);
+        Assert.assertEquals(arrayInts.get(1),1);
+    }
+
 
     @Test
     public void testEncodingWrongType() throws ComponentInitializationException, AttributeEncodingException {
