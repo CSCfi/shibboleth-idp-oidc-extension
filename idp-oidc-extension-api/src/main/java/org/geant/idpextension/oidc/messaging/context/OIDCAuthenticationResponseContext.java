@@ -34,160 +34,184 @@ import java.util.Date;
 import javax.annotation.Nullable;
 
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
- * Subcontext carrying information on authentication response formed for relying party. This
- * context appears as a subcontext of the {@link org.opensaml.messaging.context.MessageContext}.
+ * Subcontext carrying information to form authentication response for relying
+ * party. This context appears as a subcontext of the
+ * {@link org.opensaml.messaging.context.MessageContext}.
  */
 public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
 
-	/** The id token formed. */
-	@Nullable
-	private IDTokenClaimsSet idToken;
+    /** The id token formed. */
+    @Nullable
+    private IDTokenClaimsSet idToken;
 
-	/** The id token formed. */
-	@Nullable
-	private SignedJWT signedIDToken;
+    /** The id token formed. */
+    @Nullable
+    private SignedJWT signedIDToken;
 
-	/** the acr used in response. **/
-	@Nullable
-	private ACR acr;
+    /** the acr used in response. **/
+    @Nullable
+    private ACR acr;
 
-	/** validated redirect uri. */
-	@Nullable
-	private URI redirectURI;
+    /** validated redirect uri. */
+    @Nullable
+    private URI redirectURI;
 
-	/** Authentication time of the end user. */
-	private Date auth_time;
+    /** Authentication time of the end user. */
+    private Date auth_time;
 
-	/** Expiration time of the id token. */
-	private Date exp;
-	
-	/**
-	 * Authentication time of the end user.
-	 * 
-	 * @return authentication time of the end user. null if has not been set.
-	 */
-	@Nullable
-	public Date getAuthTime() {
-		return auth_time;
-	}
+    /** Expiration time of the id token. */
+    private Date exp;
 
-	/**
-	 * Set authentication time of the end user in millis from 1970-01-01T0:0:0Z
-	 * as measured in UTC until the date/time.
-	 * 
-	 * @param authTime
-	 *            authentication time.
-	 */
-	public void setAuthTime(long authTime) {
-		this.auth_time = new Date(authTime);
-	}
+    /** Validated scope values. */
+    private Scope requestedScope;
 
-	/**
-	 * Expiration time of the id token.
-	 * 
-	 * @return expiration time of the id token. null if has not been set.
-	 */
-	@Nullable
-	public Date getExp() {
-		return exp;
-	}
+    /**
+     * Get validated scope values.
+     * 
+     * @return validated scope values
+     */
+    public Scope getScope() {
+        return requestedScope;
+    }
 
-	/**
-	 * Set expiration time of the id token in millis from 1970-01-01T0:0:0Z as
-	 * measured in UTC until the date/time.
-	 * 
-	 * @param authTime
-	 *            authentication time.
-	 */
-	public void setExp(long expTime) {
-		this.exp = new Date(expTime);
-	}
+    /**
+     * Set validated scope values.
+     * 
+     * @param validated
+     *            scope values
+     */
+    public void setScope(Scope scope) {
+        requestedScope = scope;
+    }
 
-	/**
-	 * Returns a validated redirect uri for the response.
-	 * 
-	 * @return redirect uri.
-	 */
-	@Nullable
-	public URI getRedirectURI() {
-		return redirectURI;
-	}
+    /**
+     * Authentication time of the end user.
+     * 
+     * @return authentication time of the end user. null if has not been set.
+     */
+    @Nullable
+    public Date getAuthTime() {
+        return auth_time;
+    }
 
-	/**
-	 * Sets a validated redirect uri for the response.
-	 * 
-	 * @param redirectURI
-	 */
-	public void setRedirectURI(@Nullable URI redirectURI) {
-		this.redirectURI = redirectURI;
-	}
+    /**
+     * Set authentication time of the end user in millis from 1970-01-01T0:0:0Z
+     * as measured in UTC until the date/time.
+     * 
+     * @param time
+     *            authentication time.
+     */
+    public void setAuthTime(long time) {
+        auth_time = new Date(time);
+    }
 
-	/**
-	 * Returns the acr meant for response.
-	 * 
-	 * @return acr
-	 */
-	@Nullable
-	public ACR getAcr() {
-		return acr;
-	}
+    /**
+     * Expiration time of the id token.
+     * 
+     * @return expiration time of the id token. null if has not been set.
+     */
+    @Nullable
+    public Date getExp() {
+        return exp;
+    }
 
-	/**
-	 * Set acr for response.
-	 * 
-	 * @param acrValue
-	 *            for response.
-	 */
-	public void setAcr(@Nullable String acrValue) {
-		if (acrValue != null) {
-			acr = new ACR(acrValue);
+    /**
+     * Set expiration time of the id token in millis from 1970-01-01T0:0:0Z as
+     * measured in UTC until the date/time.
+     * 
+     * @param expTime
+     *            authentication time.
+     */
+    public void setExp(long expTime) {
+        exp = new Date(expTime);
+    }
 
-		} else {
-			acr = null;
-		}
-	}
+    /**
+     * Returns a validated redirect uri for the response.
+     * 
+     * @return redirect uri.
+     */
+    @Nullable
+    public URI getRedirectURI() {
+        return redirectURI;
+    }
 
-	/**
-	 * Get the id token.
-	 * 
-	 * @return The id token.
-	 */
-	@Nullable
-	public IDTokenClaimsSet getIDToken() {
-		return idToken;
-	}
+    /**
+     * Sets a validated redirect uri for the response.
+     * 
+     * @param uri
+     */
+    public void setRedirectURI(@Nullable URI uri) {
+        redirectURI = uri;
+    }
 
-	/**
-	 * Set the id token.
-	 * 
-	 * @param token
-	 *            The id token.
-	 */
-	public void setIDToken(@Nullable IDTokenClaimsSet token) {
-		idToken = token;
-	}
+    /**
+     * Returns the acr meant for response.
+     * 
+     * @return acr
+     */
+    @Nullable
+    public ACR getAcr() {
+        return acr;
+    }
 
-	/**
-	 * Get the signed id token.
-	 * 
-	 * @return The signed id token
-	 */
-	@Nullable
-	public SignedJWT getSignedIDToken() {
-		return signedIDToken;
-	}
+    /**
+     * Set acr for response.
+     * 
+     * @param acrValue
+     *            for response.
+     */
+    public void setAcr(@Nullable String acrValue) {
+        if (acrValue != null) {
+            acr = new ACR(acrValue);
 
-	/**
-	 * Set the signed id token.
-	 * 
-	 * @param idToken
-	 *            The signed id token
-	 */
-	public void setSignedIDToken(@Nullable SignedJWT idToken) {
-		this.signedIDToken = idToken;
-	}
+        } else {
+            acr = null;
+        }
+    }
+
+    /**
+     * Get the id token.
+     * 
+     * @return The id token.
+     */
+    @Nullable
+    public IDTokenClaimsSet getIDToken() {
+        return idToken;
+    }
+
+    /**
+     * Set the id token.
+     * 
+     * @param token
+     *            The id token.
+     */
+    public void setIDToken(@Nullable IDTokenClaimsSet token) {
+        idToken = token;
+    }
+
+    /**
+     * Get the signed id token.
+     * 
+     * @return The signed id token
+     */
+    @Nullable
+    public SignedJWT getSignedIDToken() {
+        return signedIDToken;
+    }
+
+    /**
+     * Set the signed id token.
+     * 
+     * @param idToken
+     *            The signed id token
+     */
+    public void setSignedIDToken(@Nullable SignedJWT idToken) {
+        this.signedIDToken = idToken;
+    }
 }
