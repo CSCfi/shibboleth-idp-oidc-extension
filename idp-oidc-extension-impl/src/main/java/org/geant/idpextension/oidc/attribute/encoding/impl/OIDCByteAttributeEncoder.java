@@ -69,7 +69,7 @@ public class OIDCByteAttributeEncoder extends AbstractOIDCAttributeEncoder {
                     // int
                     JSONArray innerArray = new JSONArray();
                     for (byte byteValue : ((ByteAttributeValue) value).getValue()) {
-                        innerArray.add(byteValue);
+                        innerArray.add((int)byteValue);
                     }
                     // each byte array is converted to json int array and placed
                     // to json array.
@@ -88,7 +88,7 @@ public class OIDCByteAttributeEncoder extends AbstractOIDCAttributeEncoder {
                 }
             }
         }
-        if (getAsArray()) {
+        if (getAsArray() || getAsInt()) {
             obj.put(getName(), array.size() == 0 ? null : array);
         } else {
             obj.put(getName(), attributeString.toString().isEmpty() ? null : attributeString.toString());
