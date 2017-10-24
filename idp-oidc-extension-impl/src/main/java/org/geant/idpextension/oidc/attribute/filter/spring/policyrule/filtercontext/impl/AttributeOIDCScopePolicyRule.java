@@ -36,13 +36,11 @@ import net.shibboleth.idp.attribute.filter.context.AttributeFilterContext;
 import net.shibboleth.idp.attribute.filter.policyrule.impl.AbstractStringPolicyRule;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.BaseContext;
-import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
  * Compare the scopes of oidc authentication request with the provided value.
@@ -53,17 +51,17 @@ public class AttributeOIDCScopePolicyRule extends AbstractStringPolicyRule {
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(AttributeOIDCScopePolicyRule.class);
 
-    // TODO: consider moving the two helper methods elsewhere!
+    // TODO: consider moving hhelper methods elsewhere!
 
     /**
-     * Helper method to locate inbound message context.
+     * Helper method to locate authentication response context.
      * 
      * @param ctx
-     *            any context decendant from profile request context,
+     *            any context child of profile request context,
      * @return Inbound message context or null if not found.
      */
     @SuppressWarnings("rawtypes")
-    private MessageContext getInboundMessageContext(BaseContext ctx) {
+    private OIDCAuthenticationResponseContext getAuthenticationResponseContext(BaseContext ctx) {
         if (ctx == null) {
             return null;
         }
@@ -71,28 +69,10 @@ public class AttributeOIDCScopePolicyRule extends AbstractStringPolicyRule {
             ctx = ctx.getParent();
         }
         if (ctx instanceof ProfileRequestContext) {
-            return ((ProfileRequestContext) ctx).getInboundMessageContext();
+            return ((ProfileRequestContext) ctx).getOutboundMessageContext().getSubcontext(
+                    OIDCAuthenticationResponseContext.class, false);
         }
         return null;
-    }
-
-    /**
-     * Returns oidc authentication request from message context.
-     * 
-     * @param msgCtx
-     *            Inbound message context.
-     * @return authentication request or null if not found.
-     */
-    @SuppressWarnings("rawtypes")
-    private AuthenticationRequest getAuthenticationRequest(MessageContext msgCtx) {
-        if (msgCtx == null) {
-            return null;
-        }
-        Object message = msgCtx.getMessage();
-        if (message == null || !(message instanceof AuthenticationRequest)) {
-            return null;
-        }
-        return (AuthenticationRequest) message;
     }
 
     /**
@@ -108,13 +88,13 @@ public class AttributeOIDCScopePolicyRule extends AbstractStringPolicyRule {
     public Tristate matches(@Nonnull final AttributeFilterContext filterContext) {
 
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
-        AuthenticationRequest request = getAuthenticationRequest(getInboundMessageContext(filterContext));
-        if (request == null) {
-            log.warn("{} No oidc request found for this comparison", getLogPrefix());
-            return Tristate.FAIL;
+        OIDCAuthenticationResponseContext ctx = getAuthenticationResponseContext(filterContext);
+        if (ctx == null || ctx.getScope() == null) {
+            log.warn("{} No verified requested scopes for oidc found", getLogPrefix());
+            return Tristate.FALSE;
         }
-        List<String> scopes = request.getScope().toStringList();
-        if (scopes == null) {
+        List<String> scopes = ctx.getScope().toStringList();
+        if (scopes == null || scopes.isEmpty()) {
             log.warn("{} No scopes in oidc request, should not happen", getLogPrefix());
             return Tristate.FAIL;
         }
