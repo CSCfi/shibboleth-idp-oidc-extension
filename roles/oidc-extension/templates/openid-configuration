@@ -11,11 +11,10 @@
  "id_token_signing_alg_values_supported": [
   "RS256"
  ],
- "request_object_signing_alg_values_supported": [
-  "RS256"
- ],
+ "request_uri_parameter_supported": false,
  "scopes_supported": [
-  "openid"
+  "openid",
+  "info"
  ],
  "claims_supported": [
   "aud",
