@@ -67,9 +67,12 @@
         class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundAuthenticationResponseMessageContext"
         scope="prototype" />
 
-    <bean id="ValidateRedirectURI"
-        class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
-        scope="prototype" />
+	<bean id="ValidateRedirectURI"
+		class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
+		scope="prototype" />
+
+	<bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope"
+		scope="prototype" />
 
 	<bean id="PopulateIDTokenSignatureSigningParameters"
 		class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters"
