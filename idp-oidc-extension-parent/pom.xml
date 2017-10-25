@@ -62,6 +62,11 @@
 				<artifactId>opensaml-storage-api</artifactId>
 				<version>${opensaml.version}</version>
 			</dependency>
+                        <dependency>
+                                <groupId>org.opensaml</groupId>
+                                <artifactId>opensaml-xmlsec-api</artifactId>
+                                <version>${opensaml.version}</version>
+                        </dependency>
 			<dependency>
 				<groupId>net.shibboleth.idp</groupId>
 				<version>${shib.idp.version}</version>
