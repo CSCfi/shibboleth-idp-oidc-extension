@@ -1,6 +1,7 @@
 {
  "issuer": "https://{{ service_name }}",
  "authorization_endpoint": "https://{{ service_name }}/idp/profile/oidc/authorize",
+ "registration_endpoint": "https://{{ service_name }}/idp/profile/oidc/register",
  "jwks_uri": "https://{{ service_name }}/oidc/keyset.jwk",
  "response_types_supported": [
   "id_token"
@@ -11,6 +12,9 @@
  "id_token_signing_alg_values_supported": [
   "RS256"
  ],
+ "request_parameter_supported": false,
+ "request_uri_parameter_supported": false,
+ "require_request_uri_registration": false,
  "request_uri_parameter_supported": false,
  "scopes_supported": [
   "openid",
