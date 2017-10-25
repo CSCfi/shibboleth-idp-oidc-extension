@@ -58,6 +58,7 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         SignatureSigningParameters params = new SignatureSigningParameters();
         spCtx.setSignatureSigningParameters(params);
         params.setSigningCredential(credential);
+        params.setSignatureAlgorithm("RS256");
         profileRequestCtx.addSubcontext(spCtx);
     }
     
