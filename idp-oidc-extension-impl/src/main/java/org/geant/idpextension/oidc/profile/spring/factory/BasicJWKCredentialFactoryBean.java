@@ -30,21 +30,31 @@ package org.geant.idpextension.oidc.profile.spring.factory;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.annotation.Nonnull;
+
 import org.opensaml.security.credential.UsageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.core.io.Resource;
+
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.text.ParseException;
 import java.util.List;
+
 import net.shibboleth.idp.profile.spring.factory.AbstractCredentialFactoryBean;
+
 import org.geant.security.jwk.BasicJWKCredential;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.AssymetricJWK;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
+import com.nimbusds.jose.jwk.KeyType;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.google.common.io.ByteStreams;
 
@@ -65,26 +75,6 @@ public class BasicJWKCredentialFactoryBean extends AbstractCredentialFactoryBean
      */
     public void setJWKResource(@Nonnull final Resource res) {
         jwkResource = res;
-    }
-
-    /**
-     * Get RSA/EC privatekey of JWK.
-     * 
-     * @param jwk
-     *            containing private key
-     * @return jwk private key
-     * @throws JOSEException
-     *             if private key parsing fails
-     */
-    private PrivateKey getPrivateKey(JWK jwk) throws JOSEException {
-        if (jwk instanceof RSAKey) {
-            return ((RSAKey) jwk).toPrivateKey();
-        }
-        if (jwk instanceof ECKey) {
-            return ((ECKey) jwk).toPrivateKey();
-        }
-        log.error("{}: Unsupported KeyFile at {}", getConfigDescription(), jwkResource.getDescription());
-        throw new FatalBeanException("Unsupported KeyFile at " + jwkResource.getDescription());
     }
 
     /**
@@ -118,7 +108,16 @@ public class BasicJWKCredentialFactoryBean extends AbstractCredentialFactoryBean
         try (InputStream is = jwkResource.getInputStream()) {
             jwk = JWK.parse(new String(ByteStreams.toByteArray(is)));
             jwkCredential = new BasicJWKCredential();
-            jwkCredential.setPrivateKey(getPrivateKey(jwk));
+            if (jwk.getKeyType() == KeyType.EC || jwk.getKeyType() == KeyType.RSA) {
+                if (jwk.isPrivate()) {
+                    jwkCredential.setPrivateKey(((AssymetricJWK) jwk).toPrivateKey());
+                }
+                jwkCredential.setPublicKey(((AssymetricJWK) jwk).toPublicKey());
+            } else if (jwk.getKeyType() == KeyType.OCT) {
+                jwkCredential.setSecretKey(((OctetSequenceKey) jwk).toSecretKey());
+            } else {
+                throw new FatalBeanException("Unsupported KeyFile at " + jwkResource.getDescription());
+            }
         } catch (IOException | ParseException | JOSEException e) {
             log.error("{}: Could not decode KeyFile at {}: {}", getConfigDescription(), jwkResource.getDescription(), e);
             throw new FatalBeanException("Could not decode provided KeyFile " + jwkResource.getDescription(), e);
