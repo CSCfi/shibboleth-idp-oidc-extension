@@ -33,13 +33,6 @@
 		</annotation>
 		<complexContent>
 			<extension base="afp:MatchFunctorType">
-				<attribute name="onlyIfValuesMatch" type="string" use="optional">
-					<annotation>
-						<documentation>If requested claims contains value(s), non matching
-							idp attribute values are filtered out. Default is true.
-						</documentation>
-					</annotation>
-				</attribute>
 				<attribute name="onlyIfEssential" type="string" use="optional">
 					<annotation>
 						<documentation>Non essential claims are filtered out. Default is
