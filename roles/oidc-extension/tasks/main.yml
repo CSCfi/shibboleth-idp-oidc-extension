@@ -36,6 +36,41 @@
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/register/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/register/oidc-beans.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/views/oidc-error.vm", dest: "{{ idp_home }}/views/oidc/authorize-error.vm" }
 
+## OIDCFED library stuff start
+
+- name: Set surveymanager and jetty install based facts
+  set_fact:
+   oidcfedlib_src_dir: /opt/oidcfed-library
+
+- name: Install packages for compiling oidcfed library
+  package: name={{ item }} state=present use=yum
+  with_items:
+    - maven
+    - git
+
+- name: Create directory for oidcfed library
+  file: path="{{ oidcfedlib_src_dir }}" state=directory mode=0755 owner=root group=root
+
+- name: Fetch oidcfed library from GitHub
+  git: repo=https://github.com/alejandro-perez/OIDCFederatedMetadataStatement.git dest="{{ oidcfedlib_src_dir }}"
+
+- name: Compile oidcfed library
+  shell: "/usr/bin/mvn clean package"
+  args:
+    chdir: "{{ oidcfedlib_src_dir }}"
+
+- name: Get the filename for the oidcfed library
+  shell: "ls {{ oidcfedlib_src_dir }}/target/*.jar"
+  register: oidcfed_library_files
+
+- name: Copy oidcfed library for building new idp.war
+  copy:
+    src: "{{ item }}"
+    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/"
+    remote_src: yes
+  with_items: "{{ oidcfed_library_files.stdout_lines }}"
+
+## OIDCFED library stuff end
 
 - name: Copy selected JARs for building new idp.war
   copy:
