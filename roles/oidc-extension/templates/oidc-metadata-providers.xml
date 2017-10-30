@@ -41,7 +41,7 @@
 
     <bean id="StorageClientInformationResolver"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationResolver"
-        p:id="cimresolver" p:storageService-ref="shibboleth.StorageService"/>
+        p:id="cimresolver" p:storageService-ref="shibboleth.JPAStorageService"/>
     
 </beans>
 

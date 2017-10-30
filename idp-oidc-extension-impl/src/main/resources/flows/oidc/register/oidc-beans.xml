@@ -52,7 +52,7 @@
 
     <bean id="ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
-        scope="prototype" p:id="cim" p:storageService-ref="shibboleth.StorageService"/>
+        scope="prototype" p:id="cim" p:storageService-ref="shibboleth.JPAStorageService"/>
 
     <bean id="StoreClientInformation"
         class="org.geant.idpextension.oidc.profile.impl.StoreClientInformation"
