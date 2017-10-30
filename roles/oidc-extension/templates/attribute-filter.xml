@@ -26,9 +26,6 @@
 			<Rule xsi:type="Requester" value="demo_rp" />
 			<Rule xsi:type="oidcext:OIDCScope" value="info" />
 		</PolicyRequirementRule>
-		<AttributeRule attributeID="age">
-			<PermitValueRule xsi:type="ANY" />
-		</AttributeRule>
 		<AttributeRule attributeID="eduPersonAffiliation">
 			<PermitValueRule xsi:type="ANY" />
 		</AttributeRule>
@@ -36,6 +33,17 @@
 			<PermitValueRule xsi:type="ANY" />
 		</AttributeRule>
 	</AttributeFilterPolicy>
+
+        <!-- This demonstrates a rule that releases claim in response to oidc authentication
+                request of demo_rp if the claim is specifically requested -->
+        <AttributeFilterPolicy id="DEMO_RP_REQUEST_CLAIM">
+                <PolicyRequirementRule xsi:type="AND">
+                        <Rule xsi:type="Requester" value="demo_rp" />
+                </PolicyRequirementRule>
+                <AttributeRule attributeID="age">
+                        <PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" />
+                </AttributeRule>
+        </AttributeFilterPolicy>
 
 </AttributeFilterPolicyGroup>
 

@@ -28,15 +28,11 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.security.PrivateKey;
 import java.security.interfaces.ECPrivateKey;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-
 import org.geant.security.jwk.JWKCredential;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
@@ -46,7 +42,6 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Function;
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JOSEException;
@@ -54,11 +49,11 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.ECDSASigner;
+import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
-
 import org.opensaml.xmlsec.context.SecurityParametersContext;
 
 /**
@@ -140,83 +135,77 @@ public class SignIDToken extends AbstractOIDCAuthenticationResponseAction {
      * 
      * @param jwsAlgorithm
      *            JWS algorithm
-     * @param key
-     *            private key used
+     * @param Credential
+     *            credential used
      * @return signer for algorithm and private key
      * @throws JOSEException
      *             if algorithm cannot be supported
      */
-    private JWSSigner getSigner(Algorithm jwsAlgorithm, PrivateKey key) throws JOSEException {
+    private JWSSigner getSigner(Algorithm jwsAlgorithm, Credential credential) throws JOSEException {
         if (JWSAlgorithm.Family.EC.contains(jwsAlgorithm)) {
-            return new ECDSASigner((ECPrivateKey) key);
+            return new ECDSASigner((ECPrivateKey) credential.getPrivateKey());
         }
         if (JWSAlgorithm.Family.RSA.contains(jwsAlgorithm)) {
-            return new RSASSASigner(key);
+            return new RSASSASigner(credential.getPrivateKey());
+        }
+        if (JWSAlgorithm.Family.HMAC_SHA.contains(jwsAlgorithm)) {
+            return new MACSigner(credential.getSecretKey());
         }
         throw new JOSEException("Unsupported algorithm " + jwsAlgorithm.getName());
     }
 
     /**
-     * Resolves kid from key name. First key name is treated as kid.
+     * Resolves kid from key name. If there is no key name and the credential is
+     * JWK, the kid is read from JWK.
      * 
      * @param credential
      *            with key names.
      * @return key names or null if not found.
      */
-    private String resolveKidFromKeyName(Credential credential) {
+    private String resolveKid(Credential credential) {
         if (credential.getKeyNames() != null) {
-            // if the key is not jwk, we use first key name if available
             for (String keyName : credential.getKeyNames()) {
                 return keyName;
             }
+        }
+        if (credential instanceof JWKCredential) {
+            return ((JWKCredential) credential).getKid();
         }
         return null;
     }
 
     /**
-     * Resolves JWSAlgorithm from privatekey type. All RSA keys are treated as
-     * RS256 and all EC keys are treaded as ES256.
+     * Resolves JWS algorithm from signature signing parameters.
      * 
      * @param credential
-     *            with private key.
-     * @return RS256,ES256 or null if undetermined.
+     *            used for signing
+     * @param signatureSigningParameters
+     *            containing algorithm name
+     * @return JWS algorithm
      */
-    private JWSAlgorithm resolveAlgorithm(Credential credential) {
-        // We check if the key is either RSA or EC
-        if (credential.getPrivateKey().getAlgorithm().equals("RSA")) {
-            return JWSAlgorithm.RS256;
-        } else if (credential.getPrivateKey().getAlgorithm().equals("EC")) {
-            return JWSAlgorithm.ES256;
+    private JWSAlgorithm resolveAlgorithm(Credential credential, SignatureSigningParameters signatureSigningParameters) {
+
+        JWSAlgorithm algorithm = new JWSAlgorithm(signatureSigningParameters.getSignatureAlgorithm());
+        if (credential instanceof JWKCredential) {
+            if (!algorithm.equals(((JWKCredential) credential).getAlgorithm())) {
+                log.warn("{} Signature signing algorithm {} differs from JWK algorithm {}", getLogPrefix(),
+                        algorithm.getName(), ((JWKCredential) credential).getAlgorithm());
+            }
         }
-        return null;
+        log.debug("{} Algorithm resolved {}", getLogPrefix(), algorithm.getName());
+        return algorithm;
     }
 
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        Algorithm jwsAlgorithm = null;
         SignedJWT jwt = null;
-        String kid = null;
-
-        if (credential instanceof JWKCredential) {
-            // We are lucky and JWKCredential is used
-            kid = ((JWKCredential) credential).getKid();
-            jwsAlgorithm = ((JWKCredential) credential).getAlgorithm();
-        } else {
-            // We set the first key name as kid if it is found.
-            kid = resolveKidFromKeyName(credential);
-            jwsAlgorithm = resolveAlgorithm(credential);
-            if (jwsAlgorithm == null) {
-                log.error("{} Unable to sign id token, algorthmn not supported: {}", getLogPrefix(), credential
-                        .getPrivateKey().getAlgorithm());
-                ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_SIGN);
-                return;
-            }
-        }
+        Algorithm jwsAlgorithm = resolveAlgorithm(credential, signatureSigningParameters);
+        String kid = resolveKid(credential);
 
         try {
-            JWSSigner signer = getSigner(jwsAlgorithm, credential.getPrivateKey());
+            JWSSigner signer = getSigner(jwsAlgorithm, credential);
             jwt = new SignedJWT(new JWSHeader.Builder(new JWSAlgorithm(jwsAlgorithm.getName())).keyID(kid).build(),
                     getOidcResponseContext().getIDToken().toJWTClaimsSet());
             jwt.sign(signer);

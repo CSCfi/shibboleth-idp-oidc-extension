@@ -66,11 +66,7 @@ public class AttributeInOIDCRequestedClaimsRuleParser extends BaseAttributeValue
             @Nonnull final BeanDefinitionBuilder builder) {
         super.doParse(config, builder);
 
-        if (config.hasAttributeNS(null, "onlyIfValuesMatch")) {
-            builder.addPropertyValue("onlyIfValuesMatch",
-                    StringSupport.trimOrNull(config.getAttributeNS(null, "onlyIfValuesMatch")));
-        }
-
+        
         if (config.hasAttributeNS(null, "onlyIfEssential")) {
             builder.addPropertyValue("onlyIfEssential",
                     StringSupport.trimOrNull(config.getAttributeNS(null, "onlyIfEssential")));

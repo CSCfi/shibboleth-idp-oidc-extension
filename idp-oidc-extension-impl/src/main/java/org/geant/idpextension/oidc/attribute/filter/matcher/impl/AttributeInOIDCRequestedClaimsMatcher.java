@@ -69,34 +69,13 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
     /** Whether to look for a match only in user info part. */
     private boolean matchOnlyUserInfo;
 
-    /** Whether to drop values not matching requested claim value(s). */
-    private boolean onlyIfValuesMatch = true;
-
     /** Whether to drop non essential claims. */
     private boolean onlyIfEssential;
 
     /** The String used to prefix log message. */
     private String logPrefix;
 
-    /**
-     * Gets whether to drop values not matching requested claim value(s).
-     * 
-     * @return whether to drop values not matching requested claim value(s)
-     */
-    public boolean getOnlyIfValuesMatch() {
-        return onlyIfValuesMatch;
-    }
-
-    /**
-     * Sets whether to drop values not matching requested claim value(s).
-     * 
-     * @param flag
-     *            whether to drop values not matching requested claim value(s).
-     */
-    public void setOnlyIfValuesMatch(boolean flag) {
-        onlyIfValuesMatch = flag;
-    }
-
+   
     /**
      * Gets whether to drop non essential claims.
      * 
@@ -223,7 +202,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
         if (request.getClaims().getIDTokenClaimNames(false) != null && !getMatchOnlyUserInfo()) {
             if (!Collections.disjoint(request.getClaims().getIDTokenClaimNames(false), names)) {
                 log.debug("{} all values matched as {} is requested id token claims", getLogPrefix(), attribute.getId());
-                log.warn("{} Essential and Values checking not implemented yet", getLogPrefix());
+                log.warn("{} Essential checking not implemented yet", getLogPrefix());
                 // TODO: value based filtering with options onlyEssential,
                 // onlyValue
                 return ImmutableSet.copyOf(attribute.getValues());
@@ -233,7 +212,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
             if (!Collections.disjoint(request.getClaims().getIDTokenClaimNames(false), names)) {
                 log.debug("{} all values matched as {} is requested user info claims", getLogPrefix(),
                         attribute.getId());
-                log.warn("{} Essential and Values checking not implemented yet", getLogPrefix());
+                log.warn("{} Essential checking not implemented yet", getLogPrefix());
                 // TODO: value based filtering with options onlyEssential,
                 // onlyValue
                 return ImmutableSet.copyOf(attribute.getValues());

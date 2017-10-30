@@ -143,11 +143,20 @@
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
     insertafter: "default-destroy-method"
     content: |
-         <bean id="shibboleth.oidc.DefaultSecurityConfiguration" parent="shibboleth.DefaultSecurityConfiguration">
-             <property name="signatureSigningConfiguration">
-                <bean parent="shibboleth.BasicSignatureSigningConfiguration" p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential"/>
+         <bean id="shibboleth.SigningConfiguration.RS256" parent="shibboleth.BasicSignatureSigningConfiguration"
+             p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+             <property name="signatureAlgorithms">
+                 <list>
+                     <util:constant
+                        static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_256" />
+                 </list>
              </property>
          </bean>
+         <bean id="shibboleth.oidc.DefaultSecurityConfiguration" class="net.shibboleth.idp.profile.config.SecurityConfiguration">
+             <property name="signatureSigningConfiguration">
+                <ref bean="#{'%{idp.oidc.signing.config:shibboleth.SigningConfiguration.RS256}'.trim()}" />
+             </property>
+         </bean>        
 
 - name: Add OIDC.Registration profile configuration to relying-party.xml, using UnverifiedRelyingParty
   blockinfile:
