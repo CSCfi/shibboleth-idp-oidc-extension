@@ -30,15 +30,14 @@
     
     <action-state id="BuildResponse">
         <evaluate expression="GenerateClientID" />
-        <evaluate expression="StoreClientInformation" />
+        <evaluate expression="AddRedirectUrisToClientRegistrationResponse" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="HandleOutboundMessage" />
     </action-state>
 
     <action-state id="HandleOutboundMessage">
         <evaluate expression="BuildClientInformation" />
-        <!-- will be activated id encoder is implemented <evaluate expression="RecordResponseComplete" 
-            /> -->
+        <evaluate expression="StoreClientInformation" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="CommitResponse" />
     </action-state>
@@ -47,7 +46,7 @@
     <action-state id="LogRuntimeException">
         <on-entry>
             <evaluate
-                expression="T(org.slf4j.LoggerFactory).getLogger('net.shibboleth.idp.saml.profile').error('Uncaught runtime exception', flowExecutionException.getCause())" />
+                expression="T(org.slf4j.LoggerFactory).getLogger('org.geant.idpextension.oidc.profile').error('Uncaught runtime exception', flowExecutionException.getCause())" />
         </on-entry>
         <evaluate expression="'RuntimeException'" />
         <transition to="HandleError" />

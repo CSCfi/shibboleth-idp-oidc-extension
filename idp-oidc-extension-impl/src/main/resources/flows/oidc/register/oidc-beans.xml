@@ -50,6 +50,10 @@
         class="org.geant.idpextension.oidc.profile.impl.GenerateClientID"
         scope="prototype" />
 
+    <bean id="AddRedirectUrisToClientRegistrationResponse"
+        class="org.geant.idpextension.oidc.profile.impl.AddRedirectUrisToClientRegistrationResponse"
+        scope="prototype" />
+
     <bean id="ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
         scope="prototype" p:id="cim" p:storageService-ref="shibboleth.JPAStorageService"/>
