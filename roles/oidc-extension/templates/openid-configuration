@@ -9,8 +9,11 @@
  "subject_types_supported": [
   "public"
  ],
+ "grant_types_supported": [
+        "implicit"
+ ],
  "id_token_signing_alg_values_supported": [
-  "RS256"
+  "RS256",  
  ],
  "request_parameter_supported": false,
  "request_uri_parameter_supported": false,
@@ -18,6 +21,10 @@
  "request_uri_parameter_supported": false,
  "scopes_supported": [
   "openid",
+  "profile",
+  "email",
+  "address",
+  "phone",
   "info"
  ],
  "claims_supported": [
@@ -32,3 +39,4 @@
   "mail"
  ]
 }
+
