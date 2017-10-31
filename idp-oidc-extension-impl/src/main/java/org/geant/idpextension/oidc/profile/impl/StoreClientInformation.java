@@ -47,8 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.client.ClientInformation;
-import com.nimbusds.oauth2.sdk.client.ClientRegistrationRequest;
-import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.client.ClientInformationResponse;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.annotation.Duration;
@@ -57,7 +56,8 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * An action that 
+ * An action that stores the {@link ClientInformation} from the {@link OIDCClientRegistrationResponseContext} to the
+ * associated {@link StorageService}.
  */
 @SuppressWarnings("rawtypes")
 public class StoreClientInformation extends AbstractProfileAction {
@@ -75,8 +75,8 @@ public class StoreClientInformation extends AbstractProfileAction {
     /** Default validity period for registration. */
     @Duration @NonNegative private long defaultRegistrationValidityPeriod;
     
-    /** The request message. */
-    private ClientRegistrationRequest request;
+    /** The response message. */
+    private ClientInformationResponse response;
     
     /**
      * Strategy used to locate the {@link OIDCClientRegistrationResponseContext} associated with a given 
@@ -154,19 +154,19 @@ public class StoreClientInformation extends AbstractProfileAction {
             log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
-        if (profileRequestContext.getInboundMessageContext() == null) {
-            log.error("{} Unable to locate inbound message context", getLogPrefix());
+        if (profileRequestContext.getOutboundMessageContext() == null) {
+            log.error("{} Unable to locate outbound message context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        Object message = profileRequestContext.getInboundMessageContext().getMessage();
+        Object message = profileRequestContext.getOutboundMessageContext().getMessage();
 
-        if (message == null || !(message instanceof ClientRegistrationRequest)) {
-            log.error("{} Unable to locate inbound message", getLogPrefix());
+        if (message == null || !(message instanceof ClientInformationResponse)) {
+            log.error("{} Unable to locate outbound message", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        request = (ClientRegistrationRequest) message;
+        response = (ClientInformationResponse) message;
         return true;
     }
     
@@ -174,20 +174,13 @@ public class StoreClientInformation extends AbstractProfileAction {
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        final OIDCClientRegistrationResponseContext oidcContext = 
-                oidcResponseContextLookupStrategy.apply(profileRequestContext.getOutboundMessageContext());
-        final ClientID clientId = new ClientID(oidcContext.getClientId());
-        final Date now = new Date();
-        final ClientInformation clientInformation = new ClientInformation(clientId, now, 
-                request.getClientMetadata(), null);
-        //TODO: secret above is hardcoded to null
-      
+        final ClientInformation clientInformation = response.getClientInformation();
         final Long lifetime = registrationValidityPeriodStrategy != null ?
                 registrationValidityPeriodStrategy.apply(profileRequestContext) : null;
         if (lifetime == null) {
             log.debug("{} No registration validity period supplied, using default", getLogPrefix());
         }
-        final DateTime expiration = new DateTime(now).plus(
+        final DateTime expiration = new DateTime(new Date()).plus(
                 lifetime != null ? lifetime : defaultRegistrationValidityPeriod);
         
         try {
@@ -202,7 +195,8 @@ public class StoreClientInformation extends AbstractProfileAction {
             log.error("{} Could not store the client information", getLogPrefix(), e);
             return;
         }
-        log.info("{} Client information successfully stored for {}", getLogPrefix(), clientId.getValue());
+        log.info("{} Client information successfully stored for {}", getLogPrefix(), 
+                clientInformation.getID().getValue());
         
     }    
 }

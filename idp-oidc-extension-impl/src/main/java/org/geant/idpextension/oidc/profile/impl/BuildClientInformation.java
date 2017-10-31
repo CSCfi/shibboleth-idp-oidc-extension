@@ -44,7 +44,6 @@ import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.client.ClientInformationResponse;
-import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
@@ -119,9 +118,8 @@ public class BuildClientInformation extends AbstractProfileAction {
             clientSecret = null;
         }
         
-        final ClientMetadata metadata = new ClientMetadata();
-        //TODO: metadata is empty
-        final ClientInformation clientInformation = new ClientInformation(clientId, new Date(), metadata, clientSecret);
+        final ClientInformation clientInformation = new ClientInformation(clientId, new Date(), 
+                oidcContext.getClientMetadata(), clientSecret);
         final ClientInformationResponse response = new ClientInformationResponse(clientInformation);
         profileRequestContext.getOutboundMessageContext().setMessage(response);
         log.info("{} Client information successfully added to the outbound context", getLogPrefix());
