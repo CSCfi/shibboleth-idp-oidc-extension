@@ -1,1 +1,9 @@
 org.geant.idpextension.oidc.algorithm.descriptors.SignatureRS256
+org.geant.idpextension.oidc.algorithm.descriptors.SignatureRS384
+org.geant.idpextension.oidc.algorithm.descriptors.SignatureRS512
+org.geant.idpextension.oidc.algorithm.descriptors.SignatureES256
+org.geant.idpextension.oidc.algorithm.descriptors.SignatureES384
+org.geant.idpextension.oidc.algorithm.descriptors.SignatureES512
+org.geant.idpextension.oidc.algorithm.descriptors.SignatureHS256
+org.geant.idpextension.oidc.algorithm.descriptors.SignatureHS384
+org.geant.idpextension.oidc.algorithm.descriptors.SignatureHS512
