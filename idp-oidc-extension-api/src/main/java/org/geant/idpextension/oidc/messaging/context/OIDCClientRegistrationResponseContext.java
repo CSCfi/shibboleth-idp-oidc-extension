@@ -30,6 +30,8 @@ package org.geant.idpextension.oidc.messaging.context;
 
 import org.joda.time.DateTime;
 
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
+
 /**
  * Subcontext carrying information on OIDC client registration response. This
  * context appears as a subcontext of the {@link org.opensaml.messaging.context.MessageContext}.
@@ -53,6 +55,9 @@ public class OIDCClientRegistrationResponseContext extends BaseOIDCResponseConte
     
     /** Time at which the client secret will expire or 0 if it will not expire. Required if the secret was issued. */
     private DateTime clientSecretExpiresAt;
+    
+    /** The metadata for the client: the attributes supported by the OP must be included. */
+    private OIDCClientMetadata clientMetadata;
 
     /**
      * Get the client identifier.
@@ -148,5 +153,21 @@ public class OIDCClientRegistrationResponseContext extends BaseOIDCResponseConte
      */
     public void setClientSecretExpiresAt(final DateTime secretExpiresAt) {
         this.clientSecretExpiresAt = secretExpiresAt;
+    }
+
+    /**
+     * Get the metadata for the client: the attributes supported by the OP must be included.
+     * @return The metadata for the client: the attributes supported by the OP must be included.
+     */
+    public OIDCClientMetadata getClientMetadata() {
+        return clientMetadata;
+    }
+    
+    /**
+     * Set the metadata for the client: the attributes supported by the OP must be included.
+     * @param metadata The metadata for the client: the attributes supported by the OP must be included.
+     */
+    public void setClientMetadata(final OIDCClientMetadata metadata) {
+        this.clientMetadata = metadata;
     }
 }
