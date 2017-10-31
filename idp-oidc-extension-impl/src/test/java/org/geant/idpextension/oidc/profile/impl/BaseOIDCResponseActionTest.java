@@ -27,10 +27,10 @@
  */
 package org.geant.idpextension.oidc.profile.impl;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -38,14 +38,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.action.ActionSupport;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.CredentialContextSet;
@@ -57,6 +56,7 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Audience;
@@ -75,9 +75,13 @@ abstract class BaseOIDCResponseActionTest {
     protected OIDCAuthenticationResponseContext respCtx;
     protected AuthenticationRequest request;
     @SuppressWarnings("rawtypes")
-	protected ProfileRequestContext profileRequestCtx;
-    Credential credential = new BaseOIDCResponseActionTest.mockCredential();
-    
+    protected ProfileRequestContext profileRequestCtx;
+    Credential credentialRSA = new BaseOIDCResponseActionTest.mockCredential("RSA");
+    Credential credentialEC256 = new BaseOIDCResponseActionTest.mockCredential("EC256");
+    Credential credentialEC384 = new BaseOIDCResponseActionTest.mockCredential("EC384");
+    Credential credentialEC512 = new BaseOIDCResponseActionTest.mockCredential("EC512");
+    Credential credentialHMAC = new BaseOIDCResponseActionTest.mockCredential("HMAC");
+
     @SuppressWarnings({ "unchecked" })
     @BeforeMethod
     protected void setUp() throws Exception {
@@ -90,86 +94,105 @@ abstract class BaseOIDCResponseActionTest {
         respCtx = new OIDCAuthenticationResponseContext();
         profileRequestCtx.getOutboundMessageContext().addSubcontext(respCtx);
     }
-    
-    protected void setIdTokenToResponseContext(String iss, String sub, String aud, Date exp, Date iat){
+
+    protected void setIdTokenToResponseContext(String iss, String sub, String aud, Date exp, Date iat) {
         List<Audience> audience = new ArrayList<Audience>();
         audience.add(new Audience(aud));
-        IDTokenClaimsSet idToken = new IDTokenClaimsSet(new Issuer(iss),
-                new Subject(sub), audience, exp, iat);
+        IDTokenClaimsSet idToken = new IDTokenClaimsSet(new Issuer(iss), new Subject(sub), audience, exp, iat);
         respCtx.setIDToken(idToken);
     }
-    
-    protected void signIdTokenInResponseContext() throws ParseException, JOSEException{
+
+    protected void signIdTokenInResponseContext() throws ParseException, JOSEException {
         SignedJWT jwt = null;
-        jwt = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("id").build(), respCtx.getIDToken().toJWTClaimsSet());
-        jwt.sign(new RSASSASigner(credential.getPrivateKey()));
+        jwt = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("id").build(), respCtx.getIDToken()
+                .toJWTClaimsSet());
+        jwt.sign(new RSASSASigner(credentialRSA.getPrivateKey()));
         respCtx.setSignedIDToken(jwt);
-       
+
     }
-    
-    public class mockCredential implements Credential{
 
-    	PrivateKey priv;
-    	PublicKey pub;
-    	
-    	mockCredential(){
-    		try {
-				KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-				KeyPair pair = keyGen.generateKeyPair();
-				priv = pair.getPrivate();
-				pub  = pair.getPublic();
-			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}	
-    	}
-    	
-		@Override
-		public CredentialContextSet getCredentialContextSet() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+    public class mockCredential implements Credential {
 
-		@Override
-		public Class<? extends Credential> getCredentialType() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        PrivateKey priv;
+        PublicKey pub;
+        SecretKey sec;
 
-		@Override
-		public String getEntityId() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        mockCredential(String algo) {
+            try {
+                if ("RSA".equals(algo)) {
+                    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+                    KeyPair pair = keyGen.generateKeyPair();
+                    priv = pair.getPrivate();
+                    pub = pair.getPublic();
+                } else if ("EC256".equals(algo)) {
+                    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+                    keyGen.initialize(Curve.P_256.toECParameterSpec());
+                    KeyPair pair = keyGen.generateKeyPair();
+                    priv = pair.getPrivate();
+                    pub = pair.getPublic();
 
-		@Override
-		public Collection<String> getKeyNames() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+                } else if ("EC384".equals(algo)) {
+                    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+                    keyGen.initialize(Curve.P_384.toECParameterSpec());
+                    KeyPair pair = keyGen.generateKeyPair();
+                    priv = pair.getPrivate();
+                    pub = pair.getPublic();
 
-		@Override
-		public PrivateKey getPrivateKey() {
-			return priv;
-		}
+                } else if ("EC512".equals(algo)) {
+                    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+                    keyGen.initialize(Curve.P_521.toECParameterSpec());
+                    KeyPair pair = keyGen.generateKeyPair();
+                    priv = pair.getPrivate();
+                    pub = pair.getPublic();
 
-		@Override
-		public PublicKey getPublicKey() {
-			return pub;
-		}
+                } else {
+                    sec = KeyGenerator.getInstance("HmacSha512").generateKey();
+                }
+            } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+        }
 
-		@Override
-		public SecretKey getSecretKey() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        @Override
+        public CredentialContextSet getCredentialContextSet() {
+            return null;
+        }
 
-		@Override
-		public UsageType getUsageType() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-    	
+        @Override
+        public Class<? extends Credential> getCredentialType() {
+            return null;
+        }
+
+        @Override
+        public String getEntityId() {
+            return null;
+        }
+
+        @Override
+        public Collection<String> getKeyNames() {
+            return null;
+        }
+
+        @Override
+        public PrivateKey getPrivateKey() {
+            return priv;
+        }
+
+        @Override
+        public PublicKey getPublicKey() {
+            return pub;
+        }
+
+        @Override
+        public SecretKey getSecretKey() {
+            return sec;
+        }
+
+        @Override
+        public UsageType getUsageType() {
+            return null;
+        }
+
     }
- 
+
 }
