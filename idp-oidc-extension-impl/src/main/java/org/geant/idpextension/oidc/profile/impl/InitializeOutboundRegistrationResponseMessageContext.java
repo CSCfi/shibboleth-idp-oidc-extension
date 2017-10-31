@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationResponse;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
@@ -46,7 +47,8 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
  * Action that adds an outbound {@link MessageContext} and related OIDC context
- * to the {@link ProfileRequestContext}.
+ * to the {@link ProfileRequestContext}. The {@link OIDCClientRegistrationResponseContext} is also initialized to
+ * contain empty {@link OIDCClientMetadata}.
  * 
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
  */
@@ -89,7 +91,9 @@ public class InitializeOutboundRegistrationResponseMessageContext extends Abstra
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         final MessageContext<ClientRegistrationResponse> msgCtx = new MessageContext<ClientRegistrationResponse>();
-        oidcResponseContextCreationStrategy.apply(msgCtx);
+        final OIDCClientRegistrationResponseContext oidcResponseCtx = 
+                oidcResponseContextCreationStrategy.apply(msgCtx);
+        oidcResponseCtx.setClientMetadata(new OIDCClientMetadata());
         profileRequestContext.setOutboundMessageContext(msgCtx);
         log.debug("{} Initialized outbound message context", getLogPrefix());
     }
