@@ -31,10 +31,12 @@ package org.geant.idpextension.oidc.profile.impl;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCClientRegistrationResponseContext;
 import org.geant.idpextension.oidc.metadata.resolver.ClientInformationManager;
 import org.geant.idpextension.oidc.metadata.resolver.ClientInformationManagerException;
+import org.joda.time.DateTime;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
@@ -49,6 +51,8 @@ import com.nimbusds.oauth2.sdk.client.ClientRegistrationRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
+import net.shibboleth.utilities.java.support.annotation.Duration;
+import net.shibboleth.utilities.java.support.annotation.constraint.NonNegative;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
@@ -65,6 +69,12 @@ public class StoreClientInformation extends AbstractProfileAction {
     /** The client information manager used for storing the information. */
     private ClientInformationManager clientInformationManager;
     
+    /** Strategy to obtain registration validity period policy. */
+    @Nullable private Function<ProfileRequestContext,Long> registrationValidityPeriodStrategy;
+    
+    /** Default validity period for registration. */
+    @Duration @NonNegative private long defaultRegistrationValidityPeriod;
+    
     /** The request message. */
     private ClientRegistrationRequest request;
     
@@ -78,6 +88,30 @@ public class StoreClientInformation extends AbstractProfileAction {
     public StoreClientInformation() {
         super();
         oidcResponseContextLookupStrategy = new ChildContextLookup<>(OIDCClientRegistrationResponseContext.class);
+        defaultRegistrationValidityPeriod = 24 * 60 * 60 * 1000;
+    }
+    
+    /**
+     * Set strategy function to obtain registration validity period.
+     * 
+     * @param strategy The strategy function.
+     */
+    public void setRegistrationValidityPeriodStrategy(@Nullable final Function<ProfileRequestContext,Long> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        
+        registrationValidityPeriodStrategy = strategy;
+    }
+    
+    /**
+     * Set the default registration validity period in milliseconds.
+     * 
+     * @param lifetime The default validity period in milliseconds.
+     */
+    @Duration public void setDefaultRegistrationValidityPeriod(@Duration @NonNegative final long lifetime) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        
+        defaultRegistrationValidityPeriod = Constraint.isGreaterThanOrEqual(0, lifetime,
+                "Default registration validity period must be greater than or equal to 0");
     }
     
     /**
@@ -142,18 +176,33 @@ public class StoreClientInformation extends AbstractProfileAction {
 
         final OIDCClientRegistrationResponseContext oidcContext = 
                 oidcResponseContextLookupStrategy.apply(profileRequestContext.getOutboundMessageContext());
-        ClientID clientId = new ClientID(oidcContext.getClientId());
-        ClientInformation clientInformation = new ClientInformation(clientId, new Date(), request.getClientMetadata(), 
-                null);
+        final ClientID clientId = new ClientID(oidcContext.getClientId());
+        final Date now = new Date();
+        final ClientInformation clientInformation = new ClientInformation(clientId, now, 
+                request.getClientMetadata(), null);
         //TODO: secret above is hardcoded to null
       
+        final Long lifetime = registrationValidityPeriodStrategy != null ?
+                registrationValidityPeriodStrategy.apply(profileRequestContext) : null;
+        if (lifetime == null) {
+            log.debug("{} No registration validity period supplied, using default", getLogPrefix());
+        }
+        final DateTime expiration = new DateTime(now).plus(
+                lifetime != null ? lifetime : defaultRegistrationValidityPeriod);
+        
         try {
-            clientInformationManager.storeClientInformation(clientInformation, null);
+            if (lifetime == 0) {
+                log.debug("{} Registration won't expire, validity set to 0", getLogPrefix());
+                clientInformationManager.storeClientInformation(clientInformation, null);
+            } else {
+                log.debug("{} Registration will expire on {}", getLogPrefix(), expiration);
+                clientInformationManager.storeClientInformation(clientInformation, expiration.getMillis());                
+            }
         } catch (ClientInformationManagerException e) {
-            log.error("Could not store the client information", e);
+            log.error("{} Could not store the client information", getLogPrefix(), e);
             return;
         }
-        log.info("Client information successfully stored for {}", clientId.getValue());
+        log.info("{} Client information successfully stored for {}", getLogPrefix(), clientId.getValue());
         
     }    
 }

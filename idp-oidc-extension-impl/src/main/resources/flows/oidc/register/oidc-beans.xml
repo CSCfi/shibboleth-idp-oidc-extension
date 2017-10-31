@@ -56,8 +56,13 @@
 
     <bean id="StoreClientInformation"
         class="org.geant.idpextension.oidc.profile.impl.StoreClientInformation"
-        scope="prototype" p:clientInformationManager-ref="ClientInformationManager" />
-
+        scope="prototype" p:clientInformationManager-ref="ClientInformationManager"
+        p:defaultRegistrationValidityPeriod="PT24H">
+        <property name="registrationValidityPeriodStrategy">
+            <bean class="org.geant.idpextension.oidc.config.navigate.RegistrationValidityPeriodLookupFunction" />
+        </property>
+    </bean>
+    
     <bean id="SelectRelyingPartyConfiguration"
         class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
         scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
