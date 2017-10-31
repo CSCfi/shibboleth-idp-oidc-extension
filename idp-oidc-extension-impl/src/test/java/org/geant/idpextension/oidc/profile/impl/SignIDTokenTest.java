@@ -28,6 +28,7 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import java.net.URISyntaxException;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 
@@ -43,6 +44,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.ECDSAVerifier;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.oauth2.sdk.ParseException;
 
@@ -52,56 +56,68 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
     private SignIDToken action = new SignIDToken();
     SecurityParametersContext spCtx;
 
-    private void init() throws ComponentInitializationException, URISyntaxException {
+    private void init(String algo, Credential credential) throws ComponentInitializationException, URISyntaxException {
         action.initialize();
         spCtx = new SecurityParametersContext();
         SignatureSigningParameters params = new SignatureSigningParameters();
         spCtx.setSignatureSigningParameters(params);
         params.setSigningCredential(credential);
-        params.setSignatureAlgorithm("RS256");
+        params.setSignatureAlgorithm(algo);
         profileRequestCtx.addSubcontext(spCtx);
     }
-    
-    
+
     /**
      * Test that action does nothing if there is no sec ctx
-     * @throws ComponentInitializationException 
+     * 
+     * @throws ComponentInitializationException
      */
     @Test
-    public void testNoSecCtx() throws ComponentInitializationException{
+    public void testNoSecCtx() throws ComponentInitializationException {
         action.initialize();
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertNull(respCtx.getSignedIDToken());
     }
-    
+
     /**
      * Test that action does nothing if there is no signing parameters
-     * @throws ComponentInitializationException 
-     * @throws URISyntaxException 
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
      */
     @Test
-    public void testNoSigningParameters() throws ComponentInitializationException, URISyntaxException{
-        init();
+    public void testNoSigningParameters() throws ComponentInitializationException, URISyntaxException {
+        init("RS256", credentialRSA);
         spCtx.setSignatureSigningParameters(null);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertNull(respCtx.getSignedIDToken());
     }
-    
+
     /**
      * Test that action fails if there is no id token
-     * @throws ComponentInitializationException 
-     * @throws URISyntaxException 
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
      */
     @Test
-    public void testNoIdToken() throws ComponentInitializationException, URISyntaxException{
-        init();
+    public void testNoIdToken() throws ComponentInitializationException, URISyntaxException {
+        init("RS256", credentialRSA);
         final Event event = action.execute(requestCtx);
         respCtx.setIDToken(null);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_MSG_CTX);
     }
-    
+
+    private void testSuccessMessage(JWSVerifier verifier) throws ComponentInitializationException, URISyntaxException,
+            JOSEException, ParseException {
+        setIdTokenToResponseContext("iss", "sub", "aud", new Date(), new Date());
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertNotNull(respCtx.getSignedIDToken());
+        Assert.assertTrue(respCtx.getSignedIDToken().verify(verifier));
+
+    }
+
     /**
      * Test that action is able to form success message.
      * 
@@ -111,15 +127,137 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * @throws ParseException
      */
     @Test
-    public void testSuccessMessage() throws ComponentInitializationException, URISyntaxException, JOSEException,
+    public void testSuccessMessageRS256() throws ComponentInitializationException, URISyntaxException, JOSEException,
             ParseException {
-        init();
-        setIdTokenToResponseContext("iss", "sub", "aud", new Date(), new Date());
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNotNull(respCtx.getSignedIDToken());
-        Assert.assertTrue(respCtx.getSignedIDToken().verify(
-                new RSASSAVerifier((RSAPublicKey) credential.getPublicKey())));
+        init("RS256", credentialRSA);
+        testSuccessMessage(new RSASSAVerifier((RSAPublicKey) credentialRSA.getPublicKey()));
+
+    }
+
+    /**
+     * Test that action is able to form success message.
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
+     * @throws JOSEException
+     * @throws ParseException
+     */
+    @Test
+    public void testSuccessMessageRS384() throws ComponentInitializationException, URISyntaxException, JOSEException,
+            ParseException {
+        init("RS384", credentialRSA);
+        testSuccessMessage(new RSASSAVerifier((RSAPublicKey) credentialRSA.getPublicKey()));
+    }
+
+    /**
+     * Test that action is able to form success message.
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
+     * @throws JOSEException
+     * @throws ParseException
+     */
+    @Test
+    public void testSuccessMessageRS512() throws ComponentInitializationException, URISyntaxException, JOSEException,
+            ParseException {
+        init("RS512", credentialRSA);
+        testSuccessMessage(new RSASSAVerifier((RSAPublicKey) credentialRSA.getPublicKey()));
+
+    }
+
+    /**
+     * Test that action is able to form success message.
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
+     * @throws JOSEException
+     * @throws ParseException
+     */
+    @Test
+    public void testSuccessMessageES256() throws ComponentInitializationException, URISyntaxException, JOSEException,
+            ParseException {
+        init("ES256", credentialEC256);
+        testSuccessMessage(new ECDSAVerifier((ECPublicKey) credentialEC256.getPublicKey()));
+
+    }
+
+    /**
+     * Test that action is able to form success message.
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
+     * @throws JOSEException
+     * @throws ParseException
+     */
+    @Test
+    public void testSuccessMessageES384() throws ComponentInitializationException, URISyntaxException, JOSEException,
+            ParseException {
+        init("ES384", credentialEC384);
+        testSuccessMessage(new ECDSAVerifier((ECPublicKey) credentialEC384.getPublicKey()));
+
+    }
+
+    /**
+     * Test that action is able to form success message.
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
+     * @throws JOSEException
+     * @throws ParseException
+     */
+    @Test
+    public void testSuccessMessageES512() throws ComponentInitializationException, URISyntaxException, JOSEException,
+            ParseException {
+        init("ES512", credentialEC512);
+        testSuccessMessage(new ECDSAVerifier((ECPublicKey) credentialEC512.getPublicKey()));
+
+    }
+
+    /**
+     * Test that action is able to form success message.
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
+     * @throws JOSEException
+     * @throws ParseException
+     */
+    @Test
+    public void testSuccessMessageHS256() throws ComponentInitializationException, URISyntaxException, JOSEException,
+            ParseException {
+        init("HS256", credentialHMAC);
+        testSuccessMessage(new MACVerifier(credentialHMAC.getSecretKey()));
+
+    }
+
+    /**
+     * Test that action is able to form success message.
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
+     * @throws JOSEException
+     * @throws ParseException
+     */
+    @Test
+    public void testSuccessMessageHS384() throws ComponentInitializationException, URISyntaxException, JOSEException,
+            ParseException {
+        init("HS384", credentialHMAC);
+        testSuccessMessage(new MACVerifier(credentialHMAC.getSecretKey()));
+
+    }
+
+    /**
+     * Test that action is able to form success message.
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
+     * @throws JOSEException
+     * @throws ParseException
+     */
+    @Test
+    public void testSuccessMessageHS512() throws ComponentInitializationException, URISyntaxException, JOSEException,
+            ParseException {
+        init("HS512", credentialHMAC);
+        testSuccessMessage(new MACVerifier(credentialHMAC.getSecretKey()));
 
     }
 
