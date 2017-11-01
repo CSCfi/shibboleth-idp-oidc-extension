@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
-import com.nimbusds.oauth2.sdk.client.ClientInformationResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformationResponse;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
@@ -118,9 +118,9 @@ public class BuildClientInformation extends AbstractProfileAction {
             clientSecret = null;
         }
         
-        final ClientInformation clientInformation = new ClientInformation(clientId, new Date(), 
+        final OIDCClientInformation clientInformation = new OIDCClientInformation(clientId, new Date(), 
                 oidcContext.getClientMetadata(), clientSecret);
-        final ClientInformationResponse response = new ClientInformationResponse(clientInformation);
+        final OIDCClientInformationResponse response = new OIDCClientInformationResponse(clientInformation);
         profileRequestContext.getOutboundMessageContext().setMessage(response);
         log.info("{} Client information successfully added to the outbound context", getLogPrefix());
         
