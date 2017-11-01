@@ -41,7 +41,6 @@ import org.w3c.dom.Element;
  */
 public abstract class AbstractOIDCEncoderParser extends BaseAttributeEncoderParser {
 
-  
     /** Local name of as array attribute. */
     @Nonnull
     @NotEmpty
@@ -57,25 +56,50 @@ public abstract class AbstractOIDCEncoderParser extends BaseAttributeEncoderPars
     @NotEmpty
     public static final String STRING_DELIMETER_ATTRIBUTE_NAME = "stringDelimiter";
 
+    /** Local name of as object attribute. */
+    @Nonnull
+    @NotEmpty
+    public static final String AS_OBJECT_ATTRIBUTE_NAME = "asObject";
+
+    /** Local name of as object attribute. */
+    @Nonnull
+    @NotEmpty
+    public static final String FIELD_NAME_ATTRIBUTE_NAME = "fieldName";
+
+    /** Local name of as boolean attribute. */
+    @Nonnull
+    @NotEmpty
+    public static final String AS_BOOLEAN_ATTRIBUTE_NAME = "asBoolean";
+
     /** {@inheritDoc} */
     @Override
     protected void doParse(@Nonnull final Element config, @Nonnull final ParserContext parserContext,
             @Nonnull final BeanDefinitionBuilder builder) {
-        
+
         super.doParse(config, parserContext, builder);
         if (config.hasAttributeNS(null, AS_ARRAY_ATTRIBUTE_NAME)) {
             builder.addPropertyValue("asArray",
                     StringSupport.trimOrNull(config.getAttributeNS(null, AS_ARRAY_ATTRIBUTE_NAME)));
         }
-
         if (config.hasAttributeNS(null, AS_INT_ATTRIBUTE_NAME)) {
             builder.addPropertyValue("asInt",
                     StringSupport.trimOrNull(config.getAttributeNS(null, AS_INT_ATTRIBUTE_NAME)));
         }
-
         if (config.hasAttributeNS(null, STRING_DELIMETER_ATTRIBUTE_NAME)) {
             builder.addPropertyValue("stringDelimiter",
                     StringSupport.trimOrNull(config.getAttributeNS(null, STRING_DELIMETER_ATTRIBUTE_NAME)));
+        }
+        if (config.hasAttributeNS(null, AS_OBJECT_ATTRIBUTE_NAME)) {
+            builder.addPropertyValue("asObject",
+                    StringSupport.trimOrNull(config.getAttributeNS(null, AS_OBJECT_ATTRIBUTE_NAME)));
+        }
+        if (config.hasAttributeNS(null, FIELD_NAME_ATTRIBUTE_NAME)) {
+            builder.addPropertyValue("fieldName",
+                    StringSupport.trimOrNull(config.getAttributeNS(null, FIELD_NAME_ATTRIBUTE_NAME)));
+        }
+        if (config.hasAttributeNS(null, AS_BOOLEAN_ATTRIBUTE_NAME)) {
+            builder.addPropertyValue("asBoolean",
+                    StringSupport.trimOrNull(config.getAttributeNS(null, AS_BOOLEAN_ATTRIBUTE_NAME)));
         }
     }
 
