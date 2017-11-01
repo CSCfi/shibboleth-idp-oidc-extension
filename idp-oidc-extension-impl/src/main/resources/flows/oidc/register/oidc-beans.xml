@@ -43,8 +43,11 @@
         scope="prototype" />
 
     <bean id="CheckRedirectURIs"
-        class="org.geant.idpextension.oidc.profile.impl.CheckRedirectURIs"
+        class="org.geant.idpextension.oidc.profile.impl.CheckRedirectURIs" p:httpClientBuilder-ref="httpClientBuilder"
         scope="prototype" />
+        
+    <bean id="httpClientBuilder"
+        class="net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder" />
 
     <bean id="GenerateClientID"
         class="org.geant.idpextension.oidc.profile.impl.GenerateClientID"
@@ -52,6 +55,10 @@
 
     <bean id="AddRedirectUrisToClientRegistrationResponse"
         class="org.geant.idpextension.oidc.profile.impl.AddRedirectUrisToClientRegistrationResponse"
+        scope="prototype" />
+
+    <bean id="AddApplicationTypeToClientRegistrationResponse"
+        class="org.geant.idpextension.oidc.profile.impl.AddApplicationTypeToClientRegistrationResponse"
         scope="prototype" />
 
     <bean id="ClientInformationManager"
