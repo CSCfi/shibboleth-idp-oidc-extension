@@ -85,7 +85,7 @@ public class OIDCStringAttributeEncoderTest {
     }
 
     @Test
-    public void testEncoding() throws ComponentInitializationException, AttributeEncodingException {
+    public void testEncodingString() throws ComponentInitializationException, AttributeEncodingException {
         init();
         IdPAttribute attribute = new IdPAttribute("test");
         List<StringAttributeValue> stringAttributeValues = new ArrayList<StringAttributeValue>();
@@ -101,7 +101,7 @@ public class OIDCStringAttributeEncoderTest {
     }
 
     @Test
-    public void testEncoding2() throws ComponentInitializationException, AttributeEncodingException {
+    public void testEncodingStringArray() throws ComponentInitializationException, AttributeEncodingException {
         init();
         IdPAttribute attribute = new IdPAttribute("test");
         List<StringAttributeValue> stringAttributeValues = new ArrayList<StringAttributeValue>();
@@ -117,7 +117,7 @@ public class OIDCStringAttributeEncoderTest {
     }
     
     @Test
-    public void testEncoding3() throws ComponentInitializationException, AttributeEncodingException {
+    public void testEncodingInteger() throws ComponentInitializationException, AttributeEncodingException {
         init();
         IdPAttribute attribute = new IdPAttribute("test");
         List<StringAttributeValue> stringAttributeValues = new ArrayList<StringAttributeValue>();
@@ -127,6 +127,34 @@ public class OIDCStringAttributeEncoderTest {
         encoder.setAsInt(true);
         JSONObject object = encoder.encode(attribute);
         Assert.assertEquals(2,object.get("attributeName"));
+    }
+    
+    @Test
+    public void testEncodingBoolean() throws ComponentInitializationException, AttributeEncodingException {
+        init();
+        IdPAttribute attribute = new IdPAttribute("test");
+        List<StringAttributeValue> stringAttributeValues = new ArrayList<StringAttributeValue>();
+        stringAttributeValues.add(new StringAttributeValue("true"));
+        stringAttributeValues.add(new StringAttributeValue("2"));
+        attribute.setValues(stringAttributeValues);
+        encoder.setAsBoolean(true);
+        JSONObject object = encoder.encode(attribute);
+        Assert.assertTrue((boolean)object.get("attributeName"));
+    }
+    
+    @Test
+    public void testEncodingJSONObject() throws ComponentInitializationException, AttributeEncodingException {
+        init();
+        IdPAttribute attribute = new IdPAttribute("test");
+        List<StringAttributeValue> stringAttributeValues = new ArrayList<StringAttributeValue>();
+        stringAttributeValues.add(new StringAttributeValue("true"));
+        stringAttributeValues.add(new StringAttributeValue("2"));
+        attribute.setValues(stringAttributeValues);
+        encoder.setAsBoolean(true);
+        encoder.setAsObject(true);
+        encoder.setFieldName("verified");
+        JSONObject object = encoder.encode(attribute);
+        Assert.assertTrue((boolean)((JSONObject)object.get("attributeName")).get("verified"));
     }
 
     @Test
