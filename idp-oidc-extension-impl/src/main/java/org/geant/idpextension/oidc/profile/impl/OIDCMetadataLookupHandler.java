@@ -46,9 +46,9 @@ import org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 /**
  * Handler for inbound OIDC protocol messages that attempts to locate OIDC
@@ -99,7 +99,7 @@ public class OIDCMetadataLookupHandler extends AbstractMessageHandler {
         final ClientIDCriterion clientCriterion = new ClientIDCriterion(clientId);
         final CriteriaSet criteria = new CriteriaSet(clientCriterion);
         try {
-            final ClientInformation clientInformation = clientResolver.resolveSingle(criteria);
+            final OIDCClientInformation clientInformation = clientResolver.resolveSingle(criteria);
             if (clientInformation == null) {
                 log.warn("{} No client information returned for {}", getLogPrefix(), clientId);
                 return;

@@ -39,9 +39,9 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
-import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 /** {@link InitializeAuthenticationContext} unit test. */
 public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
@@ -77,9 +77,9 @@ public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
         init();
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
         OIDCMetadataContext oidcCtx = prc.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, true);
-        ClientMetadata metaData = new ClientMetadata();
+        OIDCClientMetadata metaData = new OIDCClientMetadata();
         metaData.setRedirectionURI(new URI("https://notmatching.org"));
-        ClientInformation information = new ClientInformation(new ClientID("test"), null, metaData, null, null, null);
+        OIDCClientInformation information = new OIDCClientInformation(new ClientID("test"), null, metaData, null, null, null);
         oidcCtx.setClientInformation(information);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
@@ -98,9 +98,9 @@ public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
         init();
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
         OIDCMetadataContext oidcCtx = prc.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, true);
-        ClientMetadata metaData = new ClientMetadata();
+        OIDCClientMetadata metaData = new OIDCClientMetadata();
         metaData.setRedirectionURI(new URI("https://client.example.org/cb"));
-        ClientInformation information = new ClientInformation(new ClientID("test"), null, metaData, null, null, null);
+        OIDCClientInformation information = new OIDCClientInformation(new ClientID("test"), null, metaData, null, null, null);
         oidcCtx.setClientInformation(information);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);

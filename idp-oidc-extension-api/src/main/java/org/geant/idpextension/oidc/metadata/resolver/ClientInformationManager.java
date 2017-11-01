@@ -31,8 +31,8 @@ package org.geant.idpextension.oidc.metadata.resolver;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 import net.shibboleth.utilities.java.support.annotation.constraint.Positive;
 
@@ -48,7 +48,7 @@ public interface ClientInformationManager {
      * @param expiration The expiration for record, or null.
      * @throws ClientInformationManagerException If the client information cannot be stored.
      */
-    @Nonnull void storeClientInformation(@Nonnull final ClientInformation clientInformation, 
+    @Nonnull void storeClientInformation(@Nonnull final OIDCClientInformation clientInformation, 
             @Nullable @Positive final Long expiration) throws ClientInformationManagerException;
     
     /**

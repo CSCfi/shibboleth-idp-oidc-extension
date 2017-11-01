@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
 
 import org.opensaml.messaging.context.BaseContext;
 
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 /**
  * Subcontext carrying information on metadata of the relying party. This
@@ -48,7 +48,7 @@ public class OIDCMetadataContext extends BaseContext {
 
     /** The client information. */
     @Nullable
-    ClientInformation clientInformation;
+    OIDCClientInformation clientInformation;
     
     /**
      * Set the client information.
@@ -56,7 +56,7 @@ public class OIDCMetadataContext extends BaseContext {
      * @return The client information.
      */
     @Nullable
-    public ClientInformation getClientInformation() {
+    public OIDCClientInformation getClientInformation() {
         return clientInformation;
     }
 
@@ -65,7 +65,7 @@ public class OIDCMetadataContext extends BaseContext {
      * 
      * @param information The client information.
      */
-    public void setClientInformation(@Nullable ClientInformation information) {
+    public void setClientInformation(@Nullable OIDCClientInformation information) {
         clientInformation = information;
     }
 }

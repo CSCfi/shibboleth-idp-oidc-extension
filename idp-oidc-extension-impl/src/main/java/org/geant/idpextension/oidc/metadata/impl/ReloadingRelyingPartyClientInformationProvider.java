@@ -37,7 +37,7 @@ import org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 import net.shibboleth.utilities.java.support.component.AbstractIdentifiableInitializableComponent;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
@@ -71,7 +71,8 @@ public class ReloadingRelyingPartyClientInformationProvider extends AbstractIden
     }
 
     /** {@inheritDoc} */
-    @Override @Nonnull public Iterable<ClientInformation> resolve(final CriteriaSet criteria) throws ResolverException {
+    @Override @Nonnull public Iterable<OIDCClientInformation> resolve(final CriteriaSet criteria) 
+            throws ResolverException {
 
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
         ServiceableComponent<ClientInformationResolver> component = null;
@@ -95,7 +96,8 @@ public class ReloadingRelyingPartyClientInformationProvider extends AbstractIden
     }
 
     /** {@inheritDoc} */
-    @Override @Nullable public ClientInformation resolveSingle(final CriteriaSet criteria) throws ResolverException {
+    @Override @Nullable public OIDCClientInformation resolveSingle(final CriteriaSet criteria) 
+            throws ResolverException {
 
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
         ServiceableComponent<ClientInformationResolver> component = null;

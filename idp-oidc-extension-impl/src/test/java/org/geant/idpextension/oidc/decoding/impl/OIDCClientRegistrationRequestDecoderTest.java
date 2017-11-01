@@ -39,8 +39,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.io.Files;
-import com.nimbusds.oauth2.sdk.client.ClientRegistrationRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientRegistrationRequest;
 
 /**
  * Unit tests for {@link OIDCClientRegistrationRequestDecoder}.
@@ -78,9 +78,9 @@ public class OIDCClientRegistrationRequestDecoderTest {
         httpRequest.setContent(bytes);
         httpRequest.setContentType("application/json");
         decoder.decode();
-        final MessageContext<ClientRegistrationRequest> messageContext = decoder
+        final MessageContext<OIDCClientRegistrationRequest> messageContext = decoder
                 .getMessageContext();
-        final ClientRegistrationRequest message = messageContext.getMessage();
+        final OIDCClientRegistrationRequest message = messageContext.getMessage();
         // We are not testing nimbus itself here, i.e. we are happy to decode
         // one parameter successfully
         Assert.assertEquals(message.getClientMetadata().getName(), "My Example");

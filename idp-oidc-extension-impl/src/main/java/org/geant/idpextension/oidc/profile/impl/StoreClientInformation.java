@@ -46,8 +46,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
-import com.nimbusds.oauth2.sdk.client.ClientInformationResponse;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformationResponse;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.annotation.Duration;
@@ -76,7 +76,7 @@ public class StoreClientInformation extends AbstractProfileAction {
     @Duration @NonNegative private long defaultRegistrationValidityPeriod;
     
     /** The response message. */
-    private ClientInformationResponse response;
+    private OIDCClientInformationResponse response;
     
     /**
      * Strategy used to locate the {@link OIDCClientRegistrationResponseContext} associated with a given 
@@ -161,12 +161,12 @@ public class StoreClientInformation extends AbstractProfileAction {
         }
         Object message = profileRequestContext.getOutboundMessageContext().getMessage();
 
-        if (message == null || !(message instanceof ClientInformationResponse)) {
+        if (message == null || !(message instanceof OIDCClientInformationResponse)) {
             log.error("{} Unable to locate outbound message", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        response = (ClientInformationResponse) message;
+        response = (OIDCClientInformationResponse) message;
         return true;
     }
     
@@ -174,7 +174,7 @@ public class StoreClientInformation extends AbstractProfileAction {
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        final ClientInformation clientInformation = response.getClientInformation();
+        final OIDCClientInformation clientInformation = response.getOIDCClientInformation();
         final Long lifetime = registrationValidityPeriodStrategy != null ?
                 registrationValidityPeriodStrategy.apply(profileRequestContext) : null;
         if (lifetime == null) {

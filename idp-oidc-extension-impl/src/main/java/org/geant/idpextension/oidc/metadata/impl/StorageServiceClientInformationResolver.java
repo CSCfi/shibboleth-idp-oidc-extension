@@ -43,8 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
@@ -62,7 +62,7 @@ public class StorageServiceClientInformationResolver extends BaseStorageServiceC
     
     /** {@inheritDoc} */
     @Override
-    public Iterable<ClientInformation> resolve(CriteriaSet criteria) throws ResolverException {
+    public Iterable<OIDCClientInformation> resolve(CriteriaSet criteria) throws ResolverException {
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
         ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
 
@@ -73,14 +73,14 @@ public class StorageServiceClientInformationResolver extends BaseStorageServiceC
         }
         //TODO: support other criterion
         final String clientId = clientIdCriterion.getClientID().getValue();
-        final List<ClientInformation> result = new ArrayList<>();
+        final List<OIDCClientInformation> result = new ArrayList<>();
         try {
             final StorageRecord record = getStorageService().read(CONTEXT_NAME, clientId);
             if (record == null) {
                 log.error("Could not find any records with clientId {}", clientId);
             } else {
-                final ClientInformation clientInformation = 
-                        ClientInformation.parse(JSONObjectUtils.parse(record.getValue()));
+                final OIDCClientInformation clientInformation = 
+                        OIDCClientInformation.parse(JSONObjectUtils.parse(record.getValue()));
                 log.debug("Found a record with clientId {}", clientId);
                 result.add(clientInformation);
             }
@@ -92,10 +92,10 @@ public class StorageServiceClientInformationResolver extends BaseStorageServiceC
 
     /** {@inheritDoc} */
     @Override
-    public ClientInformation resolveSingle(CriteriaSet criteria) throws ResolverException {
-        final Iterable<ClientInformation> iterable = resolve(criteria);
+    public OIDCClientInformation resolveSingle(CriteriaSet criteria) throws ResolverException {
+        final Iterable<OIDCClientInformation> iterable = resolve(criteria);
         if (iterable != null) {
-            final Iterator<ClientInformation> iterator = iterable.iterator();
+            final Iterator<OIDCClientInformation> iterator = iterable.iterator();
             if (iterator != null && iterator.hasNext()) {
                 return iterator.next();
             }

@@ -37,8 +37,8 @@ import org.geant.idpextension.oidc.metadata.resolver.ClientInformationManagerExc
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 public class StorageServiceClientInformationManager extends BaseStorageServiceClientInformationComponent 
     implements ClientInformationManager {
@@ -51,7 +51,7 @@ public class StorageServiceClientInformationManager extends BaseStorageServiceCl
     }
     
     @Override
-    public void storeClientInformation(final ClientInformation clientInformation, final Long expiration)
+    public void storeClientInformation(final OIDCClientInformation clientInformation, final Long expiration)
             throws ClientInformationManagerException {
         log.debug("Attempting to store client information");
         final String clientId = clientInformation.getID().getValue();

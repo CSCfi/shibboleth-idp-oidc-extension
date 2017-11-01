@@ -43,8 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
@@ -83,7 +83,7 @@ public abstract class AbstractClientInformationResolver extends AbstractIdentifi
     
     /** {@inheritDoc} */
     @Override
-    public Iterable<ClientInformation> resolve(CriteriaSet criteria) throws ResolverException {
+    public Iterable<OIDCClientInformation> resolve(CriteriaSet criteria) throws ResolverException {
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
         ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
 
@@ -98,10 +98,10 @@ public abstract class AbstractClientInformationResolver extends AbstractIdentifi
 
     /** {@inheritDoc} */
     @Override
-    public ClientInformation resolveSingle(CriteriaSet criteria) throws ResolverException {
-        final Iterable<ClientInformation> iterable = resolve(criteria);
+    public OIDCClientInformation resolveSingle(CriteriaSet criteria) throws ResolverException {
+        final Iterable<OIDCClientInformation> iterable = resolve(criteria);
         if (iterable != null) {
-            final Iterator<ClientInformation> iterator = iterable.iterator();
+            final Iterator<OIDCClientInformation> iterator = iterable.iterator();
             if (iterator != null && iterator.hasNext()) {
                 return iterator.next();
             }
@@ -117,7 +117,8 @@ public abstract class AbstractClientInformationResolver extends AbstractIdentifi
      * @return a list of information
      * @throws ResolverException if an error occurs
      */
-    @Nonnull @NonnullElements protected List<ClientInformation> lookupClientID(@Nonnull @NotEmpty final ClientID clientId)
+    @Nonnull @NonnullElements protected List<OIDCClientInformation> lookupClientID(
+            @Nonnull @NotEmpty final ClientID clientId)
             throws ResolverException {
         if (!isInitialized()) {
             throw new ResolverException("Metadata resolver has not been initialized");
@@ -128,7 +129,7 @@ public abstract class AbstractClientInformationResolver extends AbstractIdentifi
             return Collections.emptyList();
         }
 
-        List<ClientInformation> allInformation = lookupIndexedEntityID(clientId);
+        List<OIDCClientInformation> allInformation = lookupIndexedEntityID(clientId);
         if (allInformation.isEmpty()) {
             log.debug("Client backing store does not contain any information with the ID: {}", clientId);
             return allInformation;
@@ -144,9 +145,9 @@ public abstract class AbstractClientInformationResolver extends AbstractIdentifi
      * 
      * @return list copy of indexed client IDs, may be empty, will never be null
      */
-    @Nonnull @NonnullElements protected List<ClientInformation> lookupIndexedEntityID(
+    @Nonnull @NonnullElements protected List<OIDCClientInformation> lookupIndexedEntityID(
             @Nonnull @NotEmpty final ClientID clientId) {
-        List<ClientInformation> allInformation = getBackingStore().getIndexedInformation().get(clientId);
+        List<OIDCClientInformation> allInformation = getBackingStore().getIndexedInformation().get(clientId);
         if (allInformation != null) {
             return new ArrayList<>(allInformation);
         } else {
@@ -190,7 +191,7 @@ public abstract class AbstractClientInformationResolver extends AbstractIdentifi
      * @param entityDescriptor the target entity descriptor to process
      * @param backingStore the backing store instance to update
      */
-    protected void preProcessEntityDescriptor(@Nonnull final ClientInformation entityDescriptor,
+    protected void preProcessEntityDescriptor(@Nonnull final OIDCClientInformation entityDescriptor,
             @Nonnull final ClientBackingStore backingStore) {
 
         backingStore.getOrderedInformation().add(entityDescriptor);
@@ -204,8 +205,8 @@ public abstract class AbstractClientInformationResolver extends AbstractIdentifi
      * @param backingStore the backing store instance to update
      */
     protected void removeByEntityID(@Nonnull final ClientID clientId, @Nonnull final ClientBackingStore backingStore) {
-        final Map<ClientID, List<ClientInformation>> indexedDescriptors = backingStore.getIndexedInformation();
-        final List<ClientInformation> descriptors = indexedDescriptors.get(clientId);
+        final Map<ClientID, List<OIDCClientInformation>> indexedDescriptors = backingStore.getIndexedInformation();
+        final List<OIDCClientInformation> descriptors = indexedDescriptors.get(clientId);
         if (descriptors != null) {
             backingStore.getOrderedInformation().removeAll(descriptors);
         }
@@ -218,12 +219,12 @@ public abstract class AbstractClientInformationResolver extends AbstractIdentifi
      * @param entityDescriptor the target entity descriptor to process
      * @param backingStore the backing store instance to update
      */
-    protected void indexEntityDescriptor(@Nonnull final ClientInformation entityDescriptor,
+    protected void indexEntityDescriptor(@Nonnull final OIDCClientInformation entityDescriptor,
             @Nonnull final ClientBackingStore backingStore) {
 
         ClientID clientId = entityDescriptor.getID();
         if (clientId != null) {
-            List<ClientInformation> entities = backingStore.getIndexedInformation().get(clientId);
+            List<OIDCClientInformation> entities = backingStore.getIndexedInformation().get(clientId);
             if (entities == null) {
                 entities = new ArrayList<>();
                 backingStore.getIndexedInformation().put(clientId, entities);
@@ -240,10 +241,10 @@ public abstract class AbstractClientInformationResolver extends AbstractIdentifi
     protected class ClientBackingStore {
 
         /** Index of client IDs to their information. */
-        private Map<ClientID, List<ClientInformation>> indexedClients;
+        private Map<ClientID, List<OIDCClientInformation>> indexedClients;
 
         /** Ordered list of client information. */
-        private List<ClientInformation> orderedClients;
+        private List<OIDCClientInformation> orderedClients;
 
         /** Constructor. */
         protected ClientBackingStore() {
@@ -256,7 +257,7 @@ public abstract class AbstractClientInformationResolver extends AbstractIdentifi
          * 
          * @return the client information index.
          */
-        @Nonnull public Map<ClientID, List<ClientInformation>> getIndexedInformation() {
+        @Nonnull public Map<ClientID, List<OIDCClientInformation>> getIndexedInformation() {
             return indexedClients;
         }
 
@@ -265,7 +266,7 @@ public abstract class AbstractClientInformationResolver extends AbstractIdentifi
          * 
          * @return the client information.
          */
-        @Nonnull public List<ClientInformation> getOrderedInformation() {
+        @Nonnull public List<OIDCClientInformation> getOrderedInformation() {
             return orderedClients;
         }
 

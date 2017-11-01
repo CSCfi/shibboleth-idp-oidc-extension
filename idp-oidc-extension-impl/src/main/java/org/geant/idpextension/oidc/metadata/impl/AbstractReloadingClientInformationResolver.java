@@ -45,8 +45,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 import net.shibboleth.utilities.java.support.annotation.Duration;
 import net.shibboleth.utilities.java.support.annotation.constraint.Positive;
@@ -152,11 +152,12 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
             } else {
                 log.debug("Processing new metadata from '{}'", mdId);
                 final Gson gson = new Gson();
-                final ClientInformation clientInformation = gson.fromJson(new String(mdBytes), ClientInformation.class);
+                final OIDCClientInformation clientInformation = gson.fromJson(new String(mdBytes), 
+                        OIDCClientInformation.class);
                 final ClientID clientId = clientInformation.getID();
                 log.info("Parsed client information for client ID {}", clientId);
                 final ClientBackingStore newBackingStore = new ClientBackingStore();
-                List<ClientInformation> allInformation = new ArrayList<>();
+                List<OIDCClientInformation> allInformation = new ArrayList<>();
                 allInformation.add(clientInformation);
                 newBackingStore.getIndexedInformation().put(clientId, allInformation);
                 newBackingStore.getOrderedInformation().add(clientInformation);

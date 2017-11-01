@@ -39,16 +39,16 @@ import org.opensaml.messaging.decoder.servlet.AbstractHttpServletRequestMessageD
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nimbusds.oauth2.sdk.client.ClientRegistrationRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientRegistrationRequest;
 
 /**
  * Message decoder decoding OpenID Connect {@link ClientRegistrationRequest}s.
  */
 public class OIDCClientRegistrationRequestDecoder 
-    extends AbstractHttpServletRequestMessageDecoder<ClientRegistrationRequest>
-    implements MessageDecoder<ClientRegistrationRequest> {
+    extends AbstractHttpServletRequestMessageDecoder<OIDCClientRegistrationRequest>
+    implements MessageDecoder<OIDCClientRegistrationRequest> {
 
     /** Class logger. */
     @Nonnull
@@ -57,10 +57,10 @@ public class OIDCClientRegistrationRequestDecoder
     /** {@inheritDoc} */
     @Override
     protected void doDecode() throws MessageDecodingException {
-        final MessageContext<ClientRegistrationRequest> messageContext = new MessageContext<>();
+        final MessageContext<OIDCClientRegistrationRequest> messageContext = new MessageContext<>();
         try {
             final HTTPRequest httpRequest = ServletUtils.createHTTPRequest(getHttpServletRequest());
-            final ClientRegistrationRequest request = ClientRegistrationRequest.parse(httpRequest);
+            final OIDCClientRegistrationRequest request = OIDCClientRegistrationRequest.parse(httpRequest);
             messageContext.setMessage(request);
         } catch (IOException e) {
             log.error("Could not create HTTP request from the request", e);

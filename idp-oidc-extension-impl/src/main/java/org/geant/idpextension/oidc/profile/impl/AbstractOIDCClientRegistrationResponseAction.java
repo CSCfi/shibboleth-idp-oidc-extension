@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
-import com.nimbusds.oauth2.sdk.client.ClientRegistrationRequest;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientRegistrationRequest;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
@@ -68,7 +68,7 @@ public abstract class AbstractOIDCClientRegistrationResponseAction extends Abstr
     @Nullable private OIDCClientRegistrationResponseContext oidcResponseCtx;
 
     /** The ClientRegistrationRequest to populate metadata from. */
-    @Nullable private ClientRegistrationRequest request;
+    @Nullable private OIDCClientRegistrationRequest request;
     
     /** Constructor. */
     public AbstractOIDCClientRegistrationResponseAction() {
@@ -102,7 +102,7 @@ public abstract class AbstractOIDCClientRegistrationResponseAction extends Abstr
      * Get the ClientRegistrationRequest to populate metadata from.
      * @return The ClientRegistrationRequest to populate metadata from.
      */
-    protected ClientRegistrationRequest getOidcClientRegistrationRequest() {
+    protected OIDCClientRegistrationRequest getOidcClientRegistrationRequest() {
         return request;
     }
     
@@ -119,12 +119,12 @@ public abstract class AbstractOIDCClientRegistrationResponseAction extends Abstr
             return false;            
         }
         Object message = profileRequestContext.getInboundMessageContext().getMessage();
-        if (message == null || !(message instanceof ClientRegistrationRequest)) {
+        if (message == null || !(message instanceof OIDCClientRegistrationRequest)) {
             log.debug("{} No inbound message associated with this profile request", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;                        
         }
-        request = (ClientRegistrationRequest) message;
+        request = (OIDCClientRegistrationRequest) message;
 
         if (profileRequestContext.getOutboundMessageContext() == null) {
             log.debug("{} No outbound message context associated with this profile request", getLogPrefix());

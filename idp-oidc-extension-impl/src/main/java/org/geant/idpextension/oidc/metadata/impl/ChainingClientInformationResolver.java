@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotLive;
@@ -107,12 +107,13 @@ public class ChainingClientInformationResolver extends AbstractIdentifiableIniti
 
     /** {@inheritDoc} */
     @Override
-    @Nullable public ClientInformation resolveSingle(@Nullable final CriteriaSet criteria) throws ResolverException {
+    @Nullable public OIDCClientInformation resolveSingle(@Nullable final CriteriaSet criteria) 
+            throws ResolverException {
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
 
-        final Iterable<ClientInformation> iterable = resolve(criteria);
+        final Iterable<OIDCClientInformation> iterable = resolve(criteria);
         if (iterable != null) {
-            final Iterator<ClientInformation> iterator = iterable.iterator();
+            final Iterator<OIDCClientInformation> iterator = iterable.iterator();
             if (iterator != null && iterator.hasNext()) {
                 return iterator.next();
             }
@@ -122,12 +123,13 @@ public class ChainingClientInformationResolver extends AbstractIdentifiableIniti
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull public Iterable<ClientInformation> resolve(@Nullable final CriteriaSet criteria) throws ResolverException {
+    @Nonnull public Iterable<OIDCClientInformation> resolve(@Nullable final CriteriaSet criteria) 
+            throws ResolverException {
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
 
         for (final ClientInformationResolver resolver : resolvers) {
             try {
-                final Iterable<ClientInformation> clientInformations = resolver.resolve(criteria);
+                final Iterable<OIDCClientInformation> clientInformations = resolver.resolve(criteria);
                 if (clientInformations != null && clientInformations.iterator().hasNext()) {
                     return clientInformations;
                 }

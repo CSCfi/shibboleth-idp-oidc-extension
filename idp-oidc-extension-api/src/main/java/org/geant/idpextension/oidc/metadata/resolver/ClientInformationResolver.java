@@ -28,7 +28,7 @@
 
 package org.geant.idpextension.oidc.metadata.resolver;
 
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 import net.shibboleth.utilities.java.support.component.IdentifiedComponent;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
@@ -37,6 +37,6 @@ import net.shibboleth.utilities.java.support.resolver.Resolver;
 /**
  * A resolver that is capable of resolving {@link ClientInformation} instances which meet certain supplied criteria.
  */
-public interface ClientInformationResolver extends Resolver<ClientInformation, CriteriaSet>, IdentifiedComponent {
+public interface ClientInformationResolver extends Resolver<OIDCClientInformation, CriteriaSet>, IdentifiedComponent {
 
 }

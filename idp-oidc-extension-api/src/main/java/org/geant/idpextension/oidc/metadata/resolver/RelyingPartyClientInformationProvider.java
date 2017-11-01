@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 import net.shibboleth.ext.spring.service.AbstractServiceableComponent;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
@@ -106,7 +106,7 @@ public class RelyingPartyClientInformationProvider extends AbstractServiceableCo
     /** {@inheritDoc} */
     @Override
     @Nonnull
-    public Iterable<ClientInformation> resolve(@Nullable final CriteriaSet criteria) throws ResolverException {
+    public Iterable<OIDCClientInformation> resolve(@Nullable final CriteriaSet criteria) throws ResolverException {
 
         return resolver.resolve(criteria);
     }
@@ -114,7 +114,7 @@ public class RelyingPartyClientInformationProvider extends AbstractServiceableCo
     /** {@inheritDoc} */
     @Override
     @Nullable
-    public ClientInformation resolveSingle(@Nullable final CriteriaSet criteria) throws ResolverException {
+    public OIDCClientInformation resolveSingle(@Nullable final CriteriaSet criteria) throws ResolverException {
 
         return resolver.resolveSingle(criteria);
     }
