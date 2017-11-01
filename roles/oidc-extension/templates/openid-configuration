@@ -13,7 +13,7 @@
         "implicit"
  ],
  "id_token_signing_alg_values_supported": [
-  "RS256",  
+  "RS256"
  ],
  "request_parameter_supported": false,
  "request_uri_parameter_supported": false,
