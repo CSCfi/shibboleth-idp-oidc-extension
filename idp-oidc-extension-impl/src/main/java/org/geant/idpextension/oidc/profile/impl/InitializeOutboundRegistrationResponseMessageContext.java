@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
-import com.nimbusds.oauth2.sdk.client.ClientRegistrationResponse;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformationResponse;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
@@ -90,7 +90,8 @@ public class InitializeOutboundRegistrationResponseMessageContext extends Abstra
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        final MessageContext<ClientRegistrationResponse> msgCtx = new MessageContext<ClientRegistrationResponse>();
+        final MessageContext<OIDCClientInformationResponse> msgCtx = 
+                new MessageContext<OIDCClientInformationResponse>();
         final OIDCClientRegistrationResponseContext oidcResponseCtx = 
                 oidcResponseContextCreationStrategy.apply(msgCtx);
         oidcResponseCtx.setClientMetadata(new OIDCClientMetadata());
