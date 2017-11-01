@@ -96,26 +96,20 @@
         <AttributeEncoder xsi:type="oidcext:OIDCString" name="phone_number" />
     </AttributeDefinition>
     
-    <!-- boolean not supported yet!
     <AttributeDefinition id="phone_number_verified" xsi:type="Simple" sourceAttributeID="phone_number_verified">
         <Dependency ref="staticAttributes"/>
-        <AttributeEncoder xsi:type="oidcext:OIDCString" name="phone_number_verified"/>
+        <AttributeEncoder xsi:type="oidcext:OIDCString" asBoolean="true" name="phone_number_verified"/>
     </AttributeDefinition>
-    -->
     
-    <!-- JSONObject as in address not supported yet!
     <AttributeDefinition id="address" xsi:type="Simple" sourceAttributeID="address">
         <Dependency ref="staticAttributes"/>
-        <AttributeEncoder xsi:type="oidcext:OIDCString" name="address"/>
+        <AttributeEncoder xsi:type="oidcext:OIDCString" asObject="true" fieldName="formatted" name="address"/>
     </AttributeDefinition>
-    -->
-   
-    <!-- boolean not supported yet!
-    <AttributeDefinition id="email_verified" xsi:type="Simple" sourceAttributeID="email">
-        <Dependency ref="email" />
-        <AttributeEncoder xsi:type="oidcext:OIDCString" name="phone_verified"/>
+    
+    <AttributeDefinition id="email_verified" xsi:type="Simple" sourceAttributeID="email_verified">
+        <Dependency ref="staticAttributes" />
+        <AttributeEncoder xsi:type="oidcext:OIDCString" asBoolean="true" name="email_verified"/>
     </AttributeDefinition>
-     -->
     
     <AttributeDefinition id="name" xsi:type="Simple" sourceAttributeID="name">
         <Dependency ref="staticAttributes" />
@@ -202,6 +196,12 @@
         <Attribute id="phone_number">
             <Value>+1 (604) 555-1234;ext=5678</Value>
         </Attribute>
+        <Attribute id="phone_number_verified">
+            <Value>true</Value>
+        </Attribute>
+        <Attribute id="email_verified">
+            <Value>false</Value>
+        </Attribute>
         <Attribute id="name">
             <Value>Mr.Teppo Matias Testaaja</Value>
         </Attribute>
@@ -243,6 +243,9 @@
         </Attribute>
         <Attribute id="updated_at">
             <Value>1509450347</Value>
+        </Attribute>
+        <Attribute id="address">
+            <Value>Street Address P.O. Box 555 Finland</Value>
         </Attribute>
     </DataConnector>
 </AttributeResolver>
