@@ -62,6 +62,27 @@
 	<complexType name="BaseAttributeEncoderType">
 		<complexContent>
 			<extension base="resolver:BaseAttributeEncoderType">
+			    <attribute name="asObject" type="string" use="optional">
+					<annotation>
+						<documentation>
+							Wrap encoded values into JSON Object.
+						</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="fieldName" type="string" use="optional">
+					<annotation>
+						<documentation>
+							If values are wrapped into JSON Object, the name of the value.
+						</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="asBoolean" type="string" use="optional">
+					<annotation>
+						<documentation>
+							Encode values as boolean.
+						</documentation>
+					</annotation>
+				</attribute>
 				<attribute name="asArray" type="string" use="optional">
 					<annotation>
 						<documentation>
