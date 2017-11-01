@@ -33,12 +33,9 @@ import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.IdPAttribute;
-import net.shibboleth.idp.attribute.IdPAttributeValue;
-import net.shibboleth.idp.attribute.StringAttributeValue;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
@@ -47,7 +44,11 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
  * several attribute values they are delimited with delimiter(space is default)
  * or placed to array. If the value is set to be interpreted as int, only values
  * that may be parsed to int are used. In case output is interpreted as int but
- * not set to array, only the first parsable value is used.
+ * not set to array, only the first parsable value is used. If the value is
+ * interpreted as boolean the value is true if string value equals to "true"
+ * ignoring the case. If boolean values are not set to array the first string
+ * value is considered to be the result. Finally, the result may be placed to
+ * json Object.
  */
 public class OIDCStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
 
@@ -55,45 +56,12 @@ public class OIDCStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(OIDCStringAttributeEncoder.class);
 
-    @SuppressWarnings("rawtypes")
     @Override
     public JSONObject encode(IdPAttribute idpAttribute) throws AttributeEncodingException {
         Constraint.isNotNull(idpAttribute, "Attribute to encode cannot be null");
-        String attributeString = "";
+        log.debug("Encoding attribute {}", idpAttribute.getId());
         JSONObject obj = new JSONObject();
-        JSONArray array = new JSONArray();
-        for (IdPAttributeValue value : idpAttribute.getValues()) {
-            if (value instanceof StringAttributeValue && value.getValue() != null) {
-                Object objValue = getValue((StringAttributeValue) value);
-                if (getAsArray()) {
-                    if (objValue != null) {
-                        // adding string or int to array
-                        array.add(objValue);
-                    }
-                } else {
-                    if (getAsInt()) {
-                        if (objValue != null) {
-                            // first int value locate is returned in the case of
-                            // nonarray int
-                            obj.put(getName(), objValue);
-                            return obj;
-                        }
-                    } else {
-                        // strings parsed together
-                        if (attributeString.length() > 0 && getStringDelimiter() != null) {
-                            attributeString += getStringDelimiter();
-                        }
-                        attributeString += value.getValue();
-                    }
-                }
-            }
-        }
-        if (getAsArray()) {
-            obj.put(getName(), array.size() == 0 ? null : array);
-        } else {
-            // returning string item or nonfound int in nonarray case (null)
-            obj.put(getName(), attributeString.toString().isEmpty() ? null : attributeString.toString());
-        }
+        obj.put(getName(), encodeValues(getValues(idpAttribute.getValues())));
         return obj;
     }
 

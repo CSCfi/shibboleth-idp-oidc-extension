@@ -28,13 +28,12 @@
 
 package org.geant.idpextension.oidc.attribute.encoding.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.IdPAttribute;
@@ -84,27 +83,14 @@ public class OIDCScopedStringAttributeEncoder extends AbstractOIDCAttributeEncod
     public JSONObject encode(IdPAttribute idpAttribute) throws AttributeEncodingException {
         Constraint.isNotNull(idpAttribute, "Attribute to encode cannot be null");
         Constraint.isNotNull(scopeDelimiter, "Scope delimiter cannot be null");
-        StringBuilder attributeString = new StringBuilder();
         JSONObject obj = new JSONObject();
-        JSONArray array = new JSONArray();
+        List<String> values = new ArrayList<String>();
         for (IdPAttributeValue value : idpAttribute.getValues()) {
             if (value instanceof ScopedStringAttributeValue && value.getValue() != null) {
-                if (attributeString.length() > 0) {
-                    attributeString.append(getStringDelimiter());
-                }
-                attributeString.append(value.getValue()).append(scopeDelimiter)
-                        .append(((ScopedStringAttributeValue) value).getScope());
-                if (getAsArray()) {
-                    array.add(attributeString.toString());
-                    attributeString.setLength(0);
-                }
+                values.add(value.getValue()+scopeDelimiter+((ScopedStringAttributeValue) value).getScope());
             }
         }
-        if (getAsArray()) {
-            obj.put(getName(), array.size() == 0 ? null : array);
-        } else {
-            obj.put(getName(), attributeString.toString().isEmpty() ? null : attributeString.toString());
-        }
+        obj.put(getName(), values.isEmpty() ? null : encodeValues(values));
         return obj;
     }
 
