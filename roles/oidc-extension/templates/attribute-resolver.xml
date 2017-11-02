@@ -146,6 +146,11 @@
         <AttributeEncoder xsi:type="oidcext:OIDCString" name="profile" />
     </AttributeDefinition>
     
+    <AttributeDefinition id="website" xsi:type="Simple" sourceAttributeID="website">
+        <Dependency ref="staticAttributes" />
+        <AttributeEncoder xsi:type="oidcext:OIDCString" name="website" />
+    </AttributeDefinition>
+    
     <AttributeDefinition id="picture" xsi:type="Simple" sourceAttributeID="picture">
         <Dependency ref="staticAttributes" />
         <AttributeEncoder xsi:type="oidcext:OIDCString" name="picture" />
