@@ -114,7 +114,15 @@ public class CheckRedirectUrisTest extends BaseOIDCRegistrationRequestTest {
         initializeActionWithBuilder(initializeMockBuilder(""));
         assertEvent(OidcEventIds.INVALID_REDIRECT_URIS, metadata, redirectUri1);
     }
-    
+
+    @Test
+    public void testInvalidJsonSectorIdUri() throws Exception {
+        OIDCClientMetadata metadata = new OIDCClientMetadata();
+        metadata.setSectorIDURI(new URI("https://invalid.scheme.org/cb"));
+        initializeActionWithBuilder(initializeMockBuilder("Not_JSON"));
+        assertEvent(OidcEventIds.INVALID_REDIRECT_URIS, metadata, redirectUri1);
+    }
+
     @Test
     public void testInvalidSectorIdUriContents() throws Exception {
         OIDCClientMetadata metadata = new OIDCClientMetadata();
