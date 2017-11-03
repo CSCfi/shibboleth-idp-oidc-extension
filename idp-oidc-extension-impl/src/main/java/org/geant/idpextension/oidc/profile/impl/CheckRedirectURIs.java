@@ -51,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.openid.connect.sdk.rp.ApplicationType;
@@ -222,7 +223,13 @@ public class CheckRedirectURIs extends AbstractProfileAction {
         }
         log.trace("{} Fetched the following response body: {}", getLogPrefix(), output);
         final Type listType = new TypeToken<ArrayList<URI>>(){}.getType();
-        final List<URI> parsedUris = new Gson().fromJson(output, listType);
+        final List<URI> parsedUris;
+        try {
+            parsedUris = new Gson().fromJson(output, listType);
+        } catch (JsonSyntaxException e) {
+            log.error("{} Could not parse the sector_identifier_uri contents from {}", getLogPrefix(), sectorIdUri);
+            return false;            
+        }
         if (parsedUris == null) {
             log.error("{} sector_identifier_uris contents is empty, no URLs included: {}", getLogPrefix(), output);
             return false;
