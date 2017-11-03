@@ -221,8 +221,12 @@ public class CheckRedirectURIs extends AbstractProfileAction {
             EntityUtils.consumeQuietly(response.getEntity());
         }
         log.trace("{} Fetched the following response body: {}", getLogPrefix(), output);
-        Type listType = new TypeToken<ArrayList<URI>>(){}.getType();
-        List<URI> parsedUris = new Gson().fromJson(output, listType);
+        final Type listType = new TypeToken<ArrayList<URI>>(){}.getType();
+        final List<URI> parsedUris = new Gson().fromJson(output, listType);
+        if (parsedUris == null) {
+            log.error("{} sector_identifier_uris contents is empty, no URLs included: {}", getLogPrefix(), output);
+            return false;
+        }
         for (final URI redirectUri : redirectURIs) {
             if (!parsedUris.contains(redirectUri)) {
                 log.error("{} Redirect URI {} was not found from the sector_identifier_uris", getLogPrefix(), 
