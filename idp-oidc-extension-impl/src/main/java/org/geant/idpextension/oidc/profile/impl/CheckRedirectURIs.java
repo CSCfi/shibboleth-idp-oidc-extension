@@ -204,7 +204,7 @@ public class CheckRedirectURIs extends AbstractProfileAction {
             final HttpUriRequest get = RequestBuilder.get().setUri(sectorIdUri).build();
             response = clientBuilder.buildClient().execute(get);
         } catch (Exception e) {
-            log.error("{} Could not get the sector_identifier_uri contents from {}", getLogPrefix(), sectorIdUri);
+            log.error("{} Could not get the sector_identifier_uri contents from {}", getLogPrefix(), sectorIdUri, e);
             return false;
         }
         if (response == null) {
