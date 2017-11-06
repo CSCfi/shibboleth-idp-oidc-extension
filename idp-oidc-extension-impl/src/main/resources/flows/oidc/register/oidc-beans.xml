@@ -65,6 +65,10 @@
         class="org.geant.idpextension.oidc.profile.impl.AddScopeToClientMetadata"
         scope="prototype" />
 
+    <bean id="AddContactsToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddContactsToClientMetadata"
+        scope="prototype" />
+
     <bean id="ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
         scope="prototype" p:id="cim" p:storageService-ref="shibboleth.JPAStorageService"/>
