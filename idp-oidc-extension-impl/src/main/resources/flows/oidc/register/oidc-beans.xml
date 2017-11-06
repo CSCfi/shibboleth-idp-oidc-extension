@@ -53,16 +53,16 @@
         class="org.geant.idpextension.oidc.profile.impl.GenerateClientID"
         scope="prototype" />
 
-    <bean id="AddRedirectUrisToClientRegistrationResponse"
-        class="org.geant.idpextension.oidc.profile.impl.AddRedirectUrisToClientRegistrationResponse"
+    <bean id="AddRedirectUrisToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddRedirectUrisToClientMetadata"
         scope="prototype" />
 
-    <bean id="AddApplicationTypeToClientRegistrationResponse"
-        class="org.geant.idpextension.oidc.profile.impl.AddApplicationTypeToClientRegistrationResponse"
+    <bean id="AddApplicationTypeToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddApplicationTypeToClientMetadata"
         scope="prototype" />
         
-    <bean id="AddScopeToClientRegistrationResponse"
-        class="org.geant.idpextension.oidc.profile.impl.AddScopeToClientRegistrationResponse"
+    <bean id="AddScopeToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddScopeToClientMetadata"
         scope="prototype" />
 
     <bean id="ClientInformationManager"

@@ -30,27 +30,36 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 
+import org.geant.idpextension.oidc.messaging.context.OIDCClientRegistrationResponseContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
+import com.nimbusds.openid.connect.sdk.rp.ApplicationType;
 
 /**
- * Adds the (mandatory) redirect_uris to the output {@link OIDCClientMetadata}. The values are expected to be already
- * validated.
+ * <p>Adds the application_type to the {@link OIDCClientRegistrationResponseContext}. The default, it the value does
+ * not exists from the request, is web (as defined in the specification).</p>
  */
 @SuppressWarnings("rawtypes")
-public class AddRedirectUrisToClientRegistrationResponse extends AbstractOIDCClientRegistrationResponseAction {
+public class AddApplicationTypeToClientMetadata extends AbstractOIDCClientMetadataPopulationAction {
 
     /** Class logger. */
     @Nonnull
-    private final Logger log = LoggerFactory.getLogger(AddRedirectUrisToClientRegistrationResponse.class);
+    private final Logger log = LoggerFactory.getLogger(AddApplicationTypeToClientMetadata.class);
     
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        getOutputMetadata().setRedirectionURIs(getInputMetadata().getRedirectionURIs());
+        final ApplicationType requestType = getInputMetadata().getApplicationType();
+        if (requestType == null) {
+            log.debug("{} application_type was not defined, defining it as {}", getLogPrefix(), 
+                    ApplicationType.getDefault());
+            getOutputMetadata().setApplicationType(ApplicationType.getDefault());
+        } else {
+            getOutputMetadata().setApplicationType(requestType);
+            log.debug("{} application_type set as {}", getLogPrefix(), requestType);
+        }
     }
 
 }

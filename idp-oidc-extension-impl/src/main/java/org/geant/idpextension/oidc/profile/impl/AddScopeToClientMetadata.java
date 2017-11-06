@@ -45,17 +45,17 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
  * or empty, the configurable default {@link Scope} is set. By default, its value is 'openid'.
  */
 @SuppressWarnings("rawtypes")
-public class AddScopeToClientRegistrationResponse extends AbstractOIDCClientRegistrationResponseAction {
+public class AddScopeToClientMetadata extends AbstractOIDCClientMetadataPopulationAction {
 
     /** Class logger. */
     @Nonnull
-    private final Logger log = LoggerFactory.getLogger(AddRedirectUrisToClientRegistrationResponse.class);
+    private final Logger log = LoggerFactory.getLogger(AddRedirectUrisToClientMetadata.class);
     
     /** The default {@link Scope} if it was not defined in the request. */
     private Scope defaultScope;
 
     /** Constructor. */
-    public AddScopeToClientRegistrationResponse() {
+    public AddScopeToClientMetadata() {
         defaultScope = new Scope();
         defaultScope.add(OIDCScopeValue.OPENID);
     }

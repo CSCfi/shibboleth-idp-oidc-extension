@@ -50,11 +50,11 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
  * message.
  */
 @SuppressWarnings("rawtypes")
-public abstract class AbstractOIDCClientRegistrationResponseAction extends AbstractProfileAction {
+public abstract class AbstractOIDCClientMetadataPopulationAction extends AbstractProfileAction {
 
     /** Class logger. */
     @Nonnull
-    private final Logger log = LoggerFactory.getLogger(AbstractOIDCClientRegistrationResponseAction.class);
+    private final Logger log = LoggerFactory.getLogger(AbstractOIDCClientMetadataPopulationAction.class);
 
     /**
      * Strategy used to locate the {@link OIDCClientMetadata} associated with the request (input).
@@ -73,7 +73,7 @@ public abstract class AbstractOIDCClientRegistrationResponseAction extends Abstr
     @Nullable private OIDCClientMetadata outputMetadata;
     
     /** Constructor. */
-    public AbstractOIDCClientRegistrationResponseAction() {
+    public AbstractOIDCClientMetadataPopulationAction() {
         oidcInputMetadataLookupStrategy = new OIDCClientRegistrationRequestMetadataLookupFunction();
         oidcOutputMetadataLookupStrategy = new OIDCClientRegistrationResponseMetadataLookupFunction();
     }
