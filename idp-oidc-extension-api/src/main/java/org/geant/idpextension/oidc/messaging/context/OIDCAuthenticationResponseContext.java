@@ -62,7 +62,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     private URI redirectURI;
 
     /** Authentication time of the end user. */
-    private Date auth_time;
+    private Date authTime;
 
     /** Expiration time of the id token. */
     private Date exp;
@@ -82,7 +82,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Set validated scope values.
      * 
-     * @param validated
+     * @param scope
      *            scope values
      */
     public void setScope(Scope scope) {
@@ -96,7 +96,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
      */
     @Nullable
     public Date getAuthTime() {
-        return auth_time;
+        return authTime;
     }
 
     /**
@@ -107,7 +107,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
      *            authentication time.
      */
     public void setAuthTime(long time) {
-        auth_time = new Date(time);
+        authTime = new Date(time);
     }
 
     /**
@@ -144,7 +144,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Sets a validated redirect uri for the response.
      * 
-     * @param uri
+     * @param uri validated redirect uri for the response
      */
     public void setRedirectURI(@Nullable URI uri) {
         redirectURI = uri;
@@ -208,10 +208,10 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Set the signed id token.
      * 
-     * @param idToken
+     * @param token
      *            The signed id token
      */
-    public void setSignedIDToken(@Nullable SignedJWT idToken) {
-        this.signedIDToken = idToken;
+    public void setSignedIDToken(@Nullable SignedJWT token) {
+        signedIDToken = token;
     }
 }

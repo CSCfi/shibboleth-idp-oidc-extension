@@ -44,7 +44,7 @@ public class BasicJWKCredential extends BasicCredential implements JWKCredential
     /**
      * Set the kid of jwk.
      * 
-     * @param kid
+     * @param kid kid of jwk
      */
     public void setKid(String kid) {
         jwkKid = kid;
@@ -59,7 +59,7 @@ public class BasicJWKCredential extends BasicCredential implements JWKCredential
     /**
      * Set the algorithm of jwk.
      * 
-     * @param algorithm
+     * @param algorithm algorithm of jwk.
      */
     public void setAlgorithm(Algorithm algorithm) {
         jwkAlgorithm = algorithm;
