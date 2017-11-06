@@ -60,6 +60,10 @@
     <bean id="AddApplicationTypeToClientRegistrationResponse"
         class="org.geant.idpextension.oidc.profile.impl.AddApplicationTypeToClientRegistrationResponse"
         scope="prototype" />
+        
+    <bean id="AddScopeToClientRegistrationResponse"
+        class="org.geant.idpextension.oidc.profile.impl.AddScopeToClientRegistrationResponse"
+        scope="prototype" />
 
     <bean id="ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"

@@ -32,6 +32,7 @@
         <evaluate expression="GenerateClientID" />
         <evaluate expression="AddRedirectUrisToClientRegistrationResponse" />
         <evaluate expression="AddApplicationTypeToClientRegistrationResponse" />
+        <evaluate expression="AddScopeToClientRegistrationResponse" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="HandleOutboundMessage" />
     </action-state>

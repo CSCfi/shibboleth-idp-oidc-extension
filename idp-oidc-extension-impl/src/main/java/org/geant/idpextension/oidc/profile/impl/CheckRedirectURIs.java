@@ -51,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.openid.connect.sdk.rp.ApplicationType;
@@ -155,9 +156,10 @@ public class CheckRedirectURIs extends AbstractProfileAction {
         }
         final ApplicationType applicationType = metadata.getApplicationType();
         if (applicationType == null || applicationType.equals(ApplicationType.WEB)) {
+            final Set<GrantType> grantTypes = metadata.getGrantTypes();
             // if implicit, only https
-            if (metadata.getGrantTypes().contains(GrantType.IMPLICIT) 
-                    && checkForbiddenScheme(redirectURIs, "https")) {
+            if (grantTypes != null && grantTypes.contains(GrantType.IMPLICIT) 
+                    && !checkScheme(redirectURIs, "https")) {
                 log.warn("{} Only https-scheme is allowed for implicit flow", getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REDIRECT_URIS);
                 return;
@@ -190,13 +192,20 @@ public class CheckRedirectURIs extends AbstractProfileAction {
         log.debug("{} Redirect URIs ({}) checked", getLogPrefix(), redirectURIs.size());
     }
     
+    /**
+     * Verifies that all the given redirect URIs are found from the contents of the given sector identifier URI.
+     * @param sectorIdUri The sector identifier URI.
+     * @param redirectURIs The redirect URIs to be verified.
+     * @return true if redirect URIs were found from the contents, false otherwise or if the contents could not be
+     * fetched.
+     */
     protected boolean verifySectorIdUri(final URI sectorIdUri, final Set<URI> redirectURIs) {
         final HttpResponse response;
         try {
             final HttpUriRequest get = RequestBuilder.get().setUri(sectorIdUri).build();
             response = clientBuilder.buildClient().execute(get);
         } catch (Exception e) {
-            log.error("{} Could not get the sector_identifier_uri contents from {}", getLogPrefix(), sectorIdUri);
+            log.error("{} Could not get the sector_identifier_uri contents from {}", getLogPrefix(), sectorIdUri, e);
             return false;
         }
         if (response == null) {
@@ -213,8 +222,18 @@ public class CheckRedirectURIs extends AbstractProfileAction {
             EntityUtils.consumeQuietly(response.getEntity());
         }
         log.trace("{} Fetched the following response body: {}", getLogPrefix(), output);
-        Type listType = new TypeToken<ArrayList<URI>>(){}.getType();
-        List<URI> parsedUris = new Gson().fromJson(output, listType);
+        final Type listType = new TypeToken<ArrayList<URI>>(){}.getType();
+        final List<URI> parsedUris;
+        try {
+            parsedUris = new Gson().fromJson(output, listType);
+        } catch (JsonSyntaxException e) {
+            log.error("{} Could not parse the sector_identifier_uri contents from {}", getLogPrefix(), sectorIdUri);
+            return false;            
+        }
+        if (parsedUris == null) {
+            log.error("{} sector_identifier_uris contents is empty, no URLs included: {}", getLogPrefix(), output);
+            return false;
+        }
         for (final URI redirectUri : redirectURIs) {
             if (!parsedUris.contains(redirectUri)) {
                 log.error("{} Redirect URI {} was not found from the sector_identifier_uris", getLogPrefix(), 
@@ -226,6 +245,23 @@ public class CheckRedirectURIs extends AbstractProfileAction {
         return true;
     }
 
+    /**
+     * Checks whether a given scheme is used by every item in the given set of URIs.
+     * @param redirectURIs The URIs to check from.
+     * @param scheme The scheme to check.
+     * @return true if scheme was used in all URIs, false otherwise.
+     */
+    protected boolean checkScheme(final Set<URI> redirectURIs, final String scheme) {
+        for (final URI redirectUri : redirectURIs) {
+            if (!redirectUri.getScheme().equals(scheme)) {
+                log.trace("{} Found '{}' as the scheme in the redirect URI, all should be {}", getLogPrefix(), 
+                        redirectUri.getScheme(), scheme);
+                return false;
+            }
+        }
+        return true;
+    }
+    
     /**
      * Checks whether a given scheme is found from the given set of URIs.
      * @param redirectURIs The URIs to check from.
