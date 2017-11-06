@@ -65,11 +65,12 @@ public class AttributeOIDCScopePolicyRule extends AbstractStringPolicyRule {
         if (ctx == null) {
             return null;
         }
-        while (ctx.getParent() != null) {
-            ctx = ctx.getParent();
+        BaseContext ctxRunner = ctx;
+        while (ctxRunner.getParent() != null) {
+            ctxRunner = ctxRunner.getParent();
         }
-        if (ctx instanceof ProfileRequestContext) {
-            return ((ProfileRequestContext) ctx).getOutboundMessageContext().getSubcontext(
+        if (ctxRunner instanceof ProfileRequestContext) {
+            return ((ProfileRequestContext) ctxRunner).getOutboundMessageContext().getSubcontext(
                     OIDCAuthenticationResponseContext.class, false);
         }
         return null;

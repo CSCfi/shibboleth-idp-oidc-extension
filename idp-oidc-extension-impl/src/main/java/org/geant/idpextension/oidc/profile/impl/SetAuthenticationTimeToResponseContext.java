@@ -31,7 +31,6 @@ package org.geant.idpextension.oidc.profile.impl;
 import javax.annotation.Nonnull;
 import net.shibboleth.idp.authn.AuthenticationResult;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
-import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -52,7 +51,7 @@ public class SetAuthenticationTimeToResponseContext extends AbstractOIDCAuthenti
     private Logger log = LoggerFactory.getLogger(SetAuthenticationTimeToResponseContext.class);
 
     /** Authentication result. */
-    AuthenticationResult authResult;
+    private AuthenticationResult authResult;
 
     /** {@inheritDoc} */
     @Override

@@ -35,8 +35,6 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
-
 /**
  * Action that adds acr claim to a {@link IDTokenClaimsSet}.
  * 

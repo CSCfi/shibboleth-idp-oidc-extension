@@ -32,7 +32,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.shibboleth.idp.saml.profile.config.navigate.SessionLifetimeLookupFunction;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
-import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.joda.time.DateTime;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;

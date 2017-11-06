@@ -40,8 +40,6 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.core.io.Resource;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.text.ParseException;
 import java.util.List;
 
@@ -50,12 +48,10 @@ import net.shibboleth.idp.profile.spring.factory.AbstractCredentialFactoryBean;
 import org.geant.security.jwk.BasicJWKCredential;
 
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.AssymetricJWK;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.KeyType;
-import com.nimbusds.jose.jwk.RSAKey;
 import com.google.common.io.ByteStreams;
 
 /** factory bean for Basic JSON Web Keys (JWK). */
@@ -119,7 +115,8 @@ public class BasicJWKCredentialFactoryBean extends AbstractCredentialFactoryBean
                 throw new FatalBeanException("Unsupported KeyFile at " + jwkResource.getDescription());
             }
         } catch (IOException | ParseException | JOSEException e) {
-            log.error("{}: Could not decode KeyFile at {}: {}", getConfigDescription(), jwkResource.getDescription(), e);
+            log.error("{}: Could not decode KeyFile at {}: {}", 
+                    getConfigDescription(), jwkResource.getDescription(), e);
             throw new FatalBeanException("Could not decode provided KeyFile " + jwkResource.getDescription(), e);
         }
         jwkCredential.setUsageType(getUsageType(jwk));

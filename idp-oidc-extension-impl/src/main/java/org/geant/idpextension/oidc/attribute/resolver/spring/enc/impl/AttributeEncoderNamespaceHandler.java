@@ -32,7 +32,6 @@ import javax.annotation.Nonnull;
 
 import net.shibboleth.ext.spring.util.BaseSpringNamespaceHandler;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
-import org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl.OIDCStringEncoderParser;
 
 /** Namespace handler for the oidc attribute resolver. */
 public class AttributeEncoderNamespaceHandler extends BaseSpringNamespaceHandler {

@@ -142,7 +142,8 @@ public class AddClaimsToIDToken extends AbstractOIDCAuthenticationResponseAction
 
                     }
                 } catch (AttributeEncodingException e) {
-                    log.warn("{} Unable to encode attribute {} as OIDC attribute", getLogPrefix(), attribute.getId(), e);
+                    log.warn("{} Unable to encode attribute {} as OIDC attribute", 
+                            getLogPrefix(), attribute.getId(), e);
                 }
             }
         }

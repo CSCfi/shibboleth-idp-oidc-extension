@@ -38,7 +38,6 @@ import net.shibboleth.utilities.java.support.component.ComponentInitializationEx
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal;
-import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -61,7 +60,7 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
 
     /** requested principal context. */
     @Nullable
-    RequestedPrincipalContext requestedPrincipalContext;
+    private RequestedPrincipalContext requestedPrincipalContext;
 
     /** Strategy used to determine the AuthnContextClassRef. */
     @NonnullAfterInit
@@ -114,8 +113,10 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         String name = null;
-        if (requestedPrincipalContext != null && requestedPrincipalContext.getMatchingPrincipal() != null
-                && requestedPrincipalContext.getMatchingPrincipal() instanceof AuthenticationContextClassReferencePrincipal) {
+        if (requestedPrincipalContext != null
+                && requestedPrincipalContext.getMatchingPrincipal() != null
+                && requestedPrincipalContext.getMatchingPrincipal() instanceof 
+                AuthenticationContextClassReferencePrincipal) {
             name = requestedPrincipalContext.getMatchingPrincipal().getName();
             log.debug("{} Setting acr based on requested ctx", getLogPrefix());
         } else {

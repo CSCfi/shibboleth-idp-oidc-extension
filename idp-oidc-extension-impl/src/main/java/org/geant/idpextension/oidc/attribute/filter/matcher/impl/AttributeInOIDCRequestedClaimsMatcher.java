@@ -53,6 +53,7 @@ import net.shibboleth.idp.attribute.filter.context.AttributeFilterContext;
 import net.shibboleth.utilities.java.support.component.AbstractIdentifiableInitializableComponent;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 
+/** Class for matching attribute to requested claims. */
 public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableInitializableComponent implements
         Matcher {
 
@@ -172,6 +173,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
 
     }
 
+// Checkstyle: CyclomaticComplexity OFF
     @Override
     public Set<IdPAttributeValue<?>> getMatchingValues(@Nonnull IdPAttribute attribute,
             @Nonnull AttributeFilterContext filtercontext) {
@@ -189,7 +191,8 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
             return null;
         }
         if (request.getClaims() == null
-                || (request.getClaims().getIDTokenClaims() == null && request.getClaims().getUserInfoClaims() == null)) {
+                || (request.getClaims().getIDTokenClaims() == null && 
+                request.getClaims().getUserInfoClaims() == null)) {
             log.debug("{} No claims in request", getLogPrefix());
             if (getMatchIRequestedClaimsSilent()) {
                 log.debug("{} all values matched as in silent mode", getLogPrefix());
@@ -201,10 +204,10 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
         }
         if (request.getClaims().getIDTokenClaimNames(false) != null && !getMatchOnlyUserInfo()) {
             if (!Collections.disjoint(request.getClaims().getIDTokenClaimNames(false), names)) {
-                log.debug("{} all values matched as {} is requested id token claims", getLogPrefix(), attribute.getId());
+                log.debug("{} all values matched as {} is requested id token claims", 
+                        getLogPrefix(), attribute.getId());
                 log.warn("{} Essential checking not implemented yet", getLogPrefix());
-                // TODO: value based filtering with options onlyEssential,
-                // onlyValue
+                // TODO: value based filtering with option onlyEssential
                 return ImmutableSet.copyOf(attribute.getValues());
             }
         }
@@ -213,8 +216,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
                 log.debug("{} all values matched as {} is requested user info claims", getLogPrefix(),
                         attribute.getId());
                 log.warn("{} Essential checking not implemented yet", getLogPrefix());
-                // TODO: value based filtering with options onlyEssential,
-                // onlyValue
+                // TODO: value based filtering with option onlyEssential
                 return ImmutableSet.copyOf(attribute.getValues());
             }
         }
@@ -222,6 +224,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
                 attribute.getId());
         return null;
     }
+// Checkstyle: CyclomaticComplexity ON
 
     /**
      * return a string which is to be prepended to all log messages.
@@ -256,11 +259,12 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
         if (ctx == null) {
             return null;
         }
-        while (ctx.getParent() != null) {
-            ctx = ctx.getParent();
+        BaseContext ctxRunner = ctx;
+        while (ctxRunner.getParent() != null) {
+            ctxRunner = ctxRunner.getParent();
         }
-        if (ctx instanceof ProfileRequestContext) {
-            return ((ProfileRequestContext) ctx).getInboundMessageContext();
+        if (ctxRunner instanceof ProfileRequestContext) {
+            return ((ProfileRequestContext) ctxRunner).getInboundMessageContext();
         }
         return null;
     }

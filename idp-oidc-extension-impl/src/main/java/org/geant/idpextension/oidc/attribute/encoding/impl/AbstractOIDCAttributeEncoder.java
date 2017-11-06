@@ -83,6 +83,15 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     private String fieldName;
     /** Whether to to interpret value as boolean. */
     private boolean asBoolean;
+    /** Condition for use of this encoder. */
+    @SuppressWarnings("rawtypes")
+    @Nonnull
+    private Predicate<ProfileRequestContext> activationCondition;
+    
+    /** Default constructor. */
+    public AbstractOIDCAttributeEncoder() {
+        stringDelimiter = " ";
+    }
 
     /**
      * Gets whether to wrap the value to JSON Object.
@@ -113,13 +122,13 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     }
 
     /**
-     * Sets name of the key field if the value is wrapped into JSON Object
+     * Sets name of the key field if the value is wrapped into JSON Object.
      * 
-     * @param name
+     * @param field
      *            of the key field if the value is wrapped into JSON Object
      */
-    public void setFieldName(String name) {
-        fieldName = name;
+    public void setFieldName(String field) {
+        fieldName = field;
     }
 
     /**
@@ -141,15 +150,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
         asBoolean = flag;
     }
 
-    /** Condition for use of this encoder. */
-    @SuppressWarnings("rawtypes")
-    @Nonnull
-    private Predicate<ProfileRequestContext> activationCondition;
-
-    public AbstractOIDCAttributeEncoder() {
-        stringDelimiter = " ";
-    }
-
+   
     /**
      * Gets whether to set value to array.
      * 
@@ -290,11 +291,14 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
         return obj;
     }
 
+// Checkstyle: CyclomaticComplexity OFF
     /**
      * Either catenates a list of string or places them to array depending on
      * configuration. The result may still be wrapped to JSON object depending
      * on configuration.
      * 
+     * @param <T> 
+     *            Integer, Boolean or String
      * @param values
      *            list of strings
      * @return String, JSON Array or JSON Object
@@ -331,6 +335,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
             return attributeString.length() != 0 ? wrapToJSONObject(attributeString) : null;
         }
     }
+ // Checkstyle: CyclomaticComplexity ON
 
     /**
      * Converts string idp attribute values to List of Integer, String or

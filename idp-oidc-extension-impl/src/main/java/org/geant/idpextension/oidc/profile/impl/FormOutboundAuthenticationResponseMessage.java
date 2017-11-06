@@ -68,12 +68,13 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
     private Logger log = LoggerFactory.getLogger(FormOutboundAuthenticationResponseMessage.class);
 
     /** if id token should be signed or not. */
-    boolean signedToken = true;
+    private boolean signedToken = true;
 
     /** Strategy function to lookup RelyingPartyContext. */
     @Nonnull
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
 
+    /** Default constructor. */
     public FormOutboundAuthenticationResponseMessage() {
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
 
@@ -153,7 +154,8 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
                     return;
                 }
                 resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(), null, getIdToken(),
-                        null, getAuthenticationRequest().getState(), null, getAuthenticationRequest().getResponseMode());
+                        null, getAuthenticationRequest().getState(), null, 
+                        getAuthenticationRequest().getResponseMode());
                 log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
             }
         }

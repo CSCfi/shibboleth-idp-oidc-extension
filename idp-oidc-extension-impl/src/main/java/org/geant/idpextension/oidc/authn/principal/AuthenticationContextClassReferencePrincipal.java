@@ -40,13 +40,14 @@ import com.google.common.base.MoreObjects;
 /** Principal based on a OIDC Authentication Context Class Reference. */
 public final class AuthenticationContextClassReferencePrincipal implements CloneablePrincipal {
 
+    /** unspecified auth ctx class.*/
+    public static final String UNSPECIFIED = "org.geant.idpextension.oidc.authn.principal.string.unspecified";
+
     /** The class ref. */
     @Nonnull
     @NotEmpty
     private String authnContextClassReference;
-
-    public static final String UNSPECIFIED = "org.geant.idpextension.oidc.authn.principal.string.unspecified";
-
+    
     /**
      * Constructor.
      * 

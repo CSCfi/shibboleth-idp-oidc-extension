@@ -53,7 +53,6 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import org.opensaml.xmlsec.context.SecurityParametersContext;
 
 /**
@@ -68,7 +67,7 @@ public class SignIDToken extends AbstractOIDCAuthenticationResponseAction {
     private Logger log = LoggerFactory.getLogger(SignIDToken.class);
 
     /** resolved credential. */
-    Credential credential;
+    private Credential credential;
 
     /**
      * Strategy used to locate the {@link SecurityParametersContext} to use for
@@ -135,13 +134,11 @@ public class SignIDToken extends AbstractOIDCAuthenticationResponseAction {
      * 
      * @param jwsAlgorithm
      *            JWS algorithm
-     * @param Credential
-     *            credential used
      * @return signer for algorithm and private key
      * @throws JOSEException
      *             if algorithm cannot be supported
      */
-    private JWSSigner getSigner(Algorithm jwsAlgorithm, Credential credential) throws JOSEException {
+    private JWSSigner getSigner(Algorithm jwsAlgorithm) throws JOSEException {
         if (JWSAlgorithm.Family.EC.contains(jwsAlgorithm)) {
             return new ECDSASigner((ECPrivateKey) credential.getPrivateKey());
         }
@@ -158,11 +155,9 @@ public class SignIDToken extends AbstractOIDCAuthenticationResponseAction {
      * Resolves kid from key name. If there is no key name and the credential is
      * JWK, the kid is read from JWK.
      * 
-     * @param credential
-     *            with key names.
      * @return key names or null if not found.
      */
-    private String resolveKid(Credential credential) {
+    private String resolveKid() {
         if (credential.getKeyNames() != null) {
             for (String keyName : credential.getKeyNames()) {
                 return keyName;
@@ -177,13 +172,9 @@ public class SignIDToken extends AbstractOIDCAuthenticationResponseAction {
     /**
      * Resolves JWS algorithm from signature signing parameters.
      * 
-     * @param credential
-     *            used for signing
-     * @param signatureSigningParameters
-     *            containing algorithm name
      * @return JWS algorithm
      */
-    private JWSAlgorithm resolveAlgorithm(Credential credential, SignatureSigningParameters signatureSigningParameters) {
+    private JWSAlgorithm resolveAlgorithm() {
 
         JWSAlgorithm algorithm = new JWSAlgorithm(signatureSigningParameters.getSignatureAlgorithm());
         if (credential instanceof JWKCredential) {
@@ -201,11 +192,11 @@ public class SignIDToken extends AbstractOIDCAuthenticationResponseAction {
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         SignedJWT jwt = null;
-        Algorithm jwsAlgorithm = resolveAlgorithm(credential, signatureSigningParameters);
-        String kid = resolveKid(credential);
+        Algorithm jwsAlgorithm = resolveAlgorithm();
+        String kid = resolveKid();
 
         try {
-            JWSSigner signer = getSigner(jwsAlgorithm, credential);
+            JWSSigner signer = getSigner(jwsAlgorithm);
             jwt = new SignedJWT(new JWSHeader.Builder(new JWSAlgorithm(jwsAlgorithm.getName())).keyID(kid).build(),
                     getOidcResponseContext().getIDToken().toJWTClaimsSet());
             jwt.sign(signer);

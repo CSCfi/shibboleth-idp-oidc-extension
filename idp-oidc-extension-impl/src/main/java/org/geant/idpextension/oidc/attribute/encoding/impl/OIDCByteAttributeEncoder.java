@@ -56,6 +56,7 @@ public class OIDCByteAttributeEncoder extends AbstractOIDCAttributeEncoder {
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(OIDCByteAttributeEncoder.class);
 
+// Checkstyle: CyclomaticComplexity OFF
     @SuppressWarnings("rawtypes")
     @Override
     public JSONObject encode(IdPAttribute idpAttribute) throws AttributeEncodingException {
@@ -95,5 +96,6 @@ public class OIDCByteAttributeEncoder extends AbstractOIDCAttributeEncoder {
         }
         return obj;
     }
+ // Checkstyle: CyclomaticComplexity ON
 
 }
