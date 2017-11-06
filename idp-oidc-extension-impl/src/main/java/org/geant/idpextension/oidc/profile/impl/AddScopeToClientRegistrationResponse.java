@@ -30,20 +30,18 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 
-import org.geant.idpextension.oidc.messaging.context.OIDCClientRegistrationResponseContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nimbusds.oauth2.sdk.Scope;
-import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Adds the {@link Scope} from the request metadata to the {@link OIDCClientRegistrationResponseContext}. If it is null
+ * Adds the {@link Scope} from the input metadata to the output {@link OIDCClientMetadata}. If the scope is null
  * or empty, the configurable default {@link Scope} is set. By default, its value is 'openid'.
  */
 @SuppressWarnings("rawtypes")
@@ -73,14 +71,12 @@ public class AddScopeToClientRegistrationResponse extends AbstractOIDCClientRegi
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        final ClientMetadata requestMetadata = getOidcClientRegistrationRequest().getClientMetadata();
-        final OIDCClientMetadata metadata = getOidcClientRegistrationResponseContext().getClientMetadata();
-        final Scope requestScope = requestMetadata.getScope();
+        final Scope requestScope = getInputMetadata().getScope();
         if (requestScope == null || requestScope.isEmpty()) {
             log.debug("{} Scope in the request was null, adding default scope", getLogPrefix());
-            metadata.setScope(defaultScope);
+            getOutputMetadata().setScope(defaultScope);
         } else {
-            metadata.setScope(requestMetadata.getScope());
+            getOutputMetadata().setScope(requestScope);
         }
     }
 

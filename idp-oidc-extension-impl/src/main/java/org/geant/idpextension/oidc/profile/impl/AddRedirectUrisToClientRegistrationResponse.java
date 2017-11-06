@@ -30,16 +30,15 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 
-import org.geant.idpextension.oidc.messaging.context.OIDCClientRegistrationResponseContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nimbusds.oauth2.sdk.client.ClientMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 /**
- * Adds the (mandatory) redirect_uris to the {@link OIDCClientRegistrationResponseContext}.
+ * Adds the (mandatory) redirect_uris to the output {@link OIDCClientMetadata}. The values are expected to be already
+ * validated.
  */
 @SuppressWarnings("rawtypes")
 public class AddRedirectUrisToClientRegistrationResponse extends AbstractOIDCClientRegistrationResponseAction {
@@ -51,9 +50,7 @@ public class AddRedirectUrisToClientRegistrationResponse extends AbstractOIDCCli
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        final ClientMetadata requestMetadata = getOidcClientRegistrationRequest().getClientMetadata();
-        final OIDCClientMetadata metadata = getOidcClientRegistrationResponseContext().getClientMetadata();
-        metadata.setRedirectionURIs(requestMetadata.getRedirectionURIs());
+        getOutputMetadata().setRedirectionURIs(getInputMetadata().getRedirectionURIs());
     }
 
 }

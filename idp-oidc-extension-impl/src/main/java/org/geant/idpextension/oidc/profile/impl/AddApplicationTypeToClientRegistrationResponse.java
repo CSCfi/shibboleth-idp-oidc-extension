@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nimbusds.openid.connect.sdk.rp.ApplicationType;
-import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 /**
  * <p>Adds the application_type to the {@link OIDCClientRegistrationResponseContext}. The default, it the value does
@@ -52,15 +51,13 @@ public class AddApplicationTypeToClientRegistrationResponse extends AbstractOIDC
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        final OIDCClientMetadata requestMetadata = getOidcClientRegistrationRequest().getOIDCClientMetadata();
-        final OIDCClientMetadata metadata = getOidcClientRegistrationResponseContext().getClientMetadata();
-        final ApplicationType requestType = requestMetadata.getApplicationType();
+        final ApplicationType requestType = getInputMetadata().getApplicationType();
         if (requestType == null) {
             log.debug("{} application_type was not defined, defining it as {}", getLogPrefix(), 
                     ApplicationType.getDefault());
-            metadata.setApplicationType(ApplicationType.getDefault());
+            getOutputMetadata().setApplicationType(ApplicationType.getDefault());
         } else {
-            metadata.setApplicationType(requestType);
+            getOutputMetadata().setApplicationType(requestType);
             log.debug("{} application_type set as {}", getLogPrefix(), requestType);
         }
     }

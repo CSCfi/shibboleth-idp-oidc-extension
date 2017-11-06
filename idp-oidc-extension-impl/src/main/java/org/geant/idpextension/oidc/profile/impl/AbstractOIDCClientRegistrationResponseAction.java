@@ -31,9 +31,8 @@ package org.geant.idpextension.oidc.profile.impl;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.geant.idpextension.oidc.messaging.context.OIDCClientRegistrationResponseContext;
-import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.messaging.context.navigate.ChildContextLookup;
+import org.geant.idpextension.oidc.messaging.context.navigate.OIDCClientRegistrationRequestMetadataLookupFunction;
+import org.geant.idpextension.oidc.messaging.context.navigate.OIDCClientRegistrationResponseMetadataLookupFunction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -41,15 +40,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
-import com.nimbusds.openid.connect.sdk.rp.OIDCClientRegistrationRequest;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Abstract action for populating data from the {@link ClientRegistrationRequest} message to the 
- * {@link OIDCClientRegistrationResponseContext}.
+ * Abstract action for populating metadata from the {@link ClientRegistrationRequest} message to the response
+ * message.
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractOIDCClientRegistrationResponseAction extends AbstractProfileAction {
@@ -59,51 +57,63 @@ public abstract class AbstractOIDCClientRegistrationResponseAction extends Abstr
     private final Logger log = LoggerFactory.getLogger(AbstractOIDCClientRegistrationResponseAction.class);
 
     /**
-     * Strategy used to locate the {@link OIDCClientRegistrationResponseContext} associated with a given 
-     * {@link MessageContext}.
+     * Strategy used to locate the {@link OIDCClientMetadata} associated with the request (input).
      */
-    @Nonnull private Function<MessageContext,OIDCClientRegistrationResponseContext> oidcResponseContextLookupStrategy;
+    @Nonnull private Function<ProfileRequestContext,OIDCClientMetadata> oidcInputMetadataLookupStrategy;
 
-    /** The OIDCClientRegistrationResponseContext to populate metadata to. */
-    @Nullable private OIDCClientRegistrationResponseContext oidcResponseCtx;
+    /**
+     * Strategy used to locate the {@link OIDCClientMetadata} associated with the response (output).
+     */
+    @Nonnull private Function<ProfileRequestContext,OIDCClientMetadata> oidcOutputMetadataLookupStrategy;
 
-    /** The ClientRegistrationRequest to populate metadata from. */
-    @Nullable private OIDCClientRegistrationRequest request;
+    /** The OIDCClientMetadata to populate metadata from. */
+    @Nullable private OIDCClientMetadata inputMetadata;
+    
+    /** The OIDCClientMetadata to populate metadata to. */
+    @Nullable private OIDCClientMetadata outputMetadata;
     
     /** Constructor. */
     public AbstractOIDCClientRegistrationResponseAction() {
-        oidcResponseContextLookupStrategy = new ChildContextLookup<>(OIDCClientRegistrationResponseContext.class);
+        oidcInputMetadataLookupStrategy = new OIDCClientRegistrationRequestMetadataLookupFunction();
+        oidcOutputMetadataLookupStrategy = new OIDCClientRegistrationResponseMetadataLookupFunction();
     }
 
     /**
-     * Set the strategy used to locate the {@link OIDCClientRegistrationResponseContext} associated with a given
-     * {@link MessageContext}.
+     * Set the strategy used to locate the {@link OIDCClientMetadata} associated with the request (input).
      * 
-     * @param strategy strategy used to locate the {@link OIDCClientRegistrationResponseContext} associated with a 
-     *         given {@link MessageContext}
+     * @param strategy The strategy used to locate the {@link OIDCClientMetadata} associated with the request (input).
      */
-    public void setOidcResponseContextLookupStrategy(
-            @Nonnull final Function<MessageContext,OIDCClientRegistrationResponseContext> strategy) {
-        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        
-        oidcResponseContextLookupStrategy = Constraint.isNotNull(strategy,
-                "OIDCClientRegistrationResponseContext lookup strategy cannot be null");
+    public void setOidcInputMetadataLookupStrategy(@Nonnull final Function<ProfileRequestContext,OIDCClientMetadata>
+        strategy) {
+        oidcInputMetadataLookupStrategy = Constraint.isNotNull(strategy, 
+                "The input OIDCClientMetadata lookup strategy cannot be null");
     }
     
     /**
-     * Get the OIDCClientRegistrationResponseContext to populate metadata to.
-     * @return The OIDCClientRegistrationResponseContext to populate metadata to.
+     * Set the strategy used to locate the {@link OIDCClientMetadata} associated with the request (output).
+     * 
+     * @param strategy The strategy used to locate the {@link OIDCClientMetadata} associated with the request (output).
      */
-    protected OIDCClientRegistrationResponseContext getOidcClientRegistrationResponseContext() {
-        return oidcResponseCtx;
+    public void setOidcOutputMetadataLookupStrategy(@Nonnull final Function<ProfileRequestContext,OIDCClientMetadata>
+        strategy) {
+        oidcOutputMetadataLookupStrategy = Constraint.isNotNull(strategy, 
+                "The output OIDCClientMetadata lookup strategy cannot be null");
     }
     
     /**
-     * Get the ClientRegistrationRequest to populate metadata from.
-     * @return The ClientRegistrationRequest to populate metadata from.
+     * Get the OIDCClientMetadata to populate metadata from.
+     * @return The OIDCClientMetadata to populate metadata from.
      */
-    protected OIDCClientRegistrationRequest getOidcClientRegistrationRequest() {
-        return request;
+    protected OIDCClientMetadata getInputMetadata() {
+        return inputMetadata;
+    }
+    
+    /**
+     * Get the OIDCClientMetadata to populate metadata to.
+     * @return The OIDCClientMetadata to populate metadata to.
+     */
+    protected OIDCClientMetadata getOutputMetadata() {
+        return outputMetadata;
     }
     
     /** {@inheritDoc} */
@@ -113,33 +123,21 @@ public abstract class AbstractOIDCClientRegistrationResponseAction extends Abstr
         if (!super.doPreExecute(profileRequestContext)) {
             return false;
         }
-        if (profileRequestContext.getInboundMessageContext() == null) {
-            log.debug("{} No inbound message context associated with this profile request", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-            return false;            
-        }
-        Object message = profileRequestContext.getInboundMessageContext().getMessage();
-        if (message == null || !(message instanceof OIDCClientRegistrationRequest)) {
-            log.debug("{} No inbound message associated with this profile request", getLogPrefix());
+        
+        inputMetadata = oidcInputMetadataLookupStrategy.apply(profileRequestContext);
+        if (inputMetadata == null) {
+            log.debug("{} No input OIDCMetadata associated with this profile request", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;                        
         }
-        request = (OIDCClientRegistrationRequest) message;
-
-        if (profileRequestContext.getOutboundMessageContext() == null) {
-            log.debug("{} No outbound message context associated with this profile request", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-            return false;            
-        }
-
-        oidcResponseCtx = oidcResponseContextLookupStrategy.apply(profileRequestContext.getOutboundMessageContext());
-        if (oidcResponseCtx == null) {
-            log.debug("{} No OIDC client registration response context associated with this profile request", 
-                    getLogPrefix());
+        
+        outputMetadata = oidcOutputMetadataLookupStrategy.apply(profileRequestContext);
+        if (outputMetadata == null) {
+            log.debug("{} No output OIDCMetadata associated with this profile request", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;            
+            return false;                        
         }
-
+        
         return true;
     }
 
