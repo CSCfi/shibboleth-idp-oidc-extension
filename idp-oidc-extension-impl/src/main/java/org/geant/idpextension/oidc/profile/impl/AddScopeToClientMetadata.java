@@ -68,6 +68,14 @@ public class AddScopeToClientMetadata extends AbstractOIDCClientMetadataPopulati
         defaultScope = Constraint.isNotNull(scope, "The default scope cannot be null");
     }
     
+    /**
+     * Get the default {@link Scope} to be used if it was not defined in the request.
+     * @return The default {@link Scope} to be used if it was not defined in the request.
+     */
+    public Scope getDefaultScope() {
+        return defaultScope;
+    }
+    
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
