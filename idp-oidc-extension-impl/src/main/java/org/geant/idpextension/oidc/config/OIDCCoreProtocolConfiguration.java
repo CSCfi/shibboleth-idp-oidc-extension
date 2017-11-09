@@ -100,6 +100,10 @@ public class OIDCCoreProtocolConfiguration extends AbstractProfileConfiguration
     /** Predicate used to determine if the generated id token should be signed. Default returns true. */
     @SuppressWarnings("rawtypes")
     @Nonnull private Predicate<ProfileRequestContext> signIDTokensPredicate;
+    
+    /** Predicate used to determine if the generated subject is pairwise. Default returns false. */
+    @SuppressWarnings("rawtypes")
+    @Nonnull private Predicate<ProfileRequestContext> pairwiseSubject;
 
     /**
      * Constructor.
@@ -120,6 +124,7 @@ public class OIDCCoreProtocolConfiguration extends AbstractProfileConfiguration
         defaultAuthenticationContexts = Collections.emptyList();
         nameIDFormatPrecedence = Collections.emptyList();
         signIDTokensPredicate = Predicates.alwaysTrue();
+        pairwiseSubject = Predicates.alwaysFalse();
     }
 
     /** {@inheritDoc} */
@@ -163,6 +168,30 @@ public class OIDCCoreProtocolConfiguration extends AbstractProfileConfiguration
         signIDTokensPredicate = Constraint.isNotNull(predicate,
                 "Predicate to determine if id tokens should be signed cannot be null");
     }
+    
+    /**
+     * Get the predicate used to determine if subject should be pairwise.
+     * 
+     * @return predicate to determine if subject should be pairwise.
+     */
+    @SuppressWarnings("rawtypes")
+    @Nonnull
+    public Predicate<ProfileRequestContext> getPairwiseSubject() {
+        return pairwiseSubject;
+    }
+
+    /**
+     * Set the predicate used to determine if subject should be pairwise.
+     * 
+     * @param predicate
+     *            predicate used to determine if subject should be pairwise
+     */
+    @SuppressWarnings("rawtypes")
+    public void setPairwiseSubject(@Nonnull final Predicate<ProfileRequestContext> predicate) {
+        pairwiseSubject = Constraint.isNotNull(predicate,
+                "Predicate to determine if if subject should be pairwise cannot be null");
+    }
+
 
     /**
      * Checks whether the attributes are set to be resolved with this profile.
