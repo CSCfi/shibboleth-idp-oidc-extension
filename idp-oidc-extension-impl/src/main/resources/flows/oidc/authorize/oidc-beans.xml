@@ -92,6 +92,20 @@
 		</property>
 	</bean>
 
+    <!--  TBD constant for 'pairwise' and 'public' -->
+    <bean id="SetNameIDToResponseContext"
+            class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext" scope="prototype">
+        <property name="formatLookupStrategy">
+            <bean class="org.geant.idpextension.oidc.profile.logic.DefaultSubjectTypeStrategy"
+                p:defaultFormat="%{idp.oidc.subject.default:pairwise}" />
+        </property>
+        <property name="nameIDGenerator">
+            <bean class="net.shibboleth.idp.saml.nameid.impl.ProxySAML2NameIDGenerator"
+                c:service-ref="shibboleth.oidc.NameIdentifierGenerationService" />
+        </property>
+    </bean>
+
+    
     <bean id="SetAuthenticationTimeToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationTimeToResponseContext"
         scope="prototype">
