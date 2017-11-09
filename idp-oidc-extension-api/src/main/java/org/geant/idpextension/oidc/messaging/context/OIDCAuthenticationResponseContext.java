@@ -30,9 +30,8 @@ package org.geant.idpextension.oidc.messaging.context;
 
 import java.net.URI;
 import java.util.Date;
-
 import javax.annotation.Nullable;
-
+import org.opensaml.saml.saml2.core.NameID;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
@@ -69,6 +68,25 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
 
     /** Validated scope values. */
     private Scope requestedScope;
+    
+    /** Name ID generated for response. */
+    private NameID nameId;
+
+    /**
+     * Gets Name ID generated for response.
+     * @return Name ID generated for response
+     */
+    public NameID getNameId() {
+        return nameId;
+    }
+
+    /**
+     * Sets Name ID generated for response.
+     * @param id Name ID generated for response
+     */
+    public void setNameId(NameID id) {
+        nameId = id;
+    }
 
     /**
      * Get validated scope values.
