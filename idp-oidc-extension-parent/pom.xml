@@ -50,8 +50,13 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>oauth2-oidc-sdk</artifactId>
-				<version>5.36</version>
+				<version>5.41</version>
 			</dependency>
+                        <dependency>
+                                <groupId>org.opensaml</groupId>
+                                <artifactId>opensaml-saml-api</artifactId>
+                                <version>${opensaml.version}</version>
+                        </dependency>
 			<dependency>
 				<groupId>org.opensaml</groupId>
 				<artifactId>opensaml-security-api</artifactId>
@@ -72,6 +77,11 @@
 				<version>${shib.idp.version}</version>
 				<artifactId>idp-authn-api</artifactId>
 			</dependency>
+                        <dependency>
+                                <groupId>net.shibboleth.idp</groupId>
+                                <version>${shib.idp.version}</version>
+                                <artifactId>idp-profile-api</artifactId>
+                        </dependency>
 			<dependency>
 				<groupId>net.shibboleth.idp</groupId>
 				<version>${shib.idp.version}</version>
