@@ -152,7 +152,7 @@ public class AddIDTokenShell extends AbstractOIDCAuthenticationResponseAction {
          * characters in length. The sub value is a case sensitive string.
          * 
          * 
-         * Note. We use principalname as the sub.
+         * Note. We use Name ID as the sub.
          * 
          */
 
@@ -163,8 +163,8 @@ public class AddIDTokenShell extends AbstractOIDCAuthenticationResponseAction {
          * 
          * Note. We consider time of idtoken shell generation as iat.
          */
-        IDTokenClaimsSet idToken = new IDTokenClaimsSet(new Issuer(issuerId),
-                new Subject(subjectCtx.getPrincipalName()), aud, exp, new Date());
+        IDTokenClaimsSet idToken = new IDTokenClaimsSet(new Issuer(issuerId), new Subject(getOidcResponseContext()
+                .getNameId().getValue()), aud, exp, new Date());
         log.debug("{} Setting id token shell to response context {}", getLogPrefix(), idToken.toJSONObject()
                 .toJSONString());
         getOidcResponseContext().setIDToken(idToken);
