@@ -91,7 +91,7 @@
 		</property>
 	</bean>
 
-	<!-- TBD constant for 'pairwise' and 'public' -->
+	
 	<bean id="SetNameIDToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext"
 		scope="prototype">
