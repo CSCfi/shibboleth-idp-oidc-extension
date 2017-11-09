@@ -51,6 +51,7 @@
     </action-state>
 
     <action-state id="BuildResponse">
+        <evaluate expression="SetNameIDToResponseContext" />
         <evaluate expression="SetAuthenticationTimeToResponseContext" />
         <evaluate expression="SetExpirationTimeToResponseContext" />
         <evaluate
