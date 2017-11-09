@@ -354,6 +354,43 @@
             <value>/opt/shibboleth-idp/conf/oidc-metadata-providers.xml</value>
         </util:list>
 
+
+- name: Add OIDC name identifier generation service to services-system.xml  - SYSTEM DIRECTORY CHANGE!!
+  blockinfile:
+    dest: "{{ idp_home }}/system/conf/services-system.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK  for OIDC NameIdentifierGenerationService -->"
+    insertbefore: "<bean id=\"shibboleth.NameIdentifierGenerationService"
+    content: |
+        <bean id="shibboleth.oidc.NameIdentifierGenerationService" class="net.shibboleth.ext.spring.service.ReloadableSpringService"
+        c:claz="net.shibboleth.idp.saml.nameid.NameIdentifierGenerationService"
+        p:serviceConfigurations-ref="#{'%{idp.service.oidc.nameidGeneration.resources:shibboleth.oidc.NameIdentifierGenerationResources}'.trim()}"
+        p:failFast="%{idp.service.oidc.nameidGeneration.failFast:%{idp.service.failFast:false}}"
+        p:reloadCheckDelay="%{idp.service.oidc.nameidGeneration.checkInterval:PT0S}"
+        p:beanPostProcessors-ref="shibboleth.IdentifiableBeanPostProcessor"
+        p:beanFactoryPostProcessors-ref="shibboleth.PropertySourcesPlaceholderConfigurer" />
+
+- name: Add OIDC name identifier generation resources to services.xml
+  blockinfile:
+    dest: "{{ idp_home }}/conf/services.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK  for OIDC NameIdentifierGenerationResources -->"
+    insertbefore: "list id =\"shibboleth.NameIdentifierGenerationResources"
+    content: |
+        <util:list id ="shibboleth.oidc.NameIdentifierGenerationResources">
+            <value>%{idp.home}/conf/oidc-subject.xml</value>
+            <value>%{idp.home}/system/conf/oidc-subject-system.xml</value>
+        </util:list>
+
+- name: Copy oidc-subject.xml
+  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
+  with_items:
+    - "oidc-subject.xml"
+    - "oidc-subject.properties"
+
+- name: Copy oidc-subject-system.xml - SYSTEM DIRECTORY CHANGE!!
+  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/system/conf/{{item}}
+  with_items:
+    - "oidc-subject-system.xml"
+
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "logback.xml"
