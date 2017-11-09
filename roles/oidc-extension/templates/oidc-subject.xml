@@ -4,8 +4,7 @@
     <!-- ========================= OIDC Generation ========================= -->
 
     <!--
-    These generator lists handle OIDC subject generation going forward. 
-    
+    This generator list handles OIDC subject generation going forward. 
     -->
     
     <!-- OIDC Subject Generation -->
