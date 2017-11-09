@@ -45,7 +45,7 @@
             class="org.geant.idpextension.oidc.profile.context.navigate.SectorIdentifierLookupFunction"/>
     
     <!--
-    These are strategy implementations for generating transient and persistent identifiers.
+    These are strategy implementations for generating persistent subject identifiers.
     They're configured using properties, and usually selected for injection into the actual
     generation plugins by other properties, so they aren't all in use in a given system,
     but are all defined to simplify configuration.
@@ -72,7 +72,7 @@
         class="net.shibboleth.idp.saml.nameid.impl.JDBCPersistentIdStoreEx" />
     
     <!--
-    This is the actual service being exposed, and it takes a pair of generators that are
+    This is the actual service being exposed, and it takes generators that are
     actually wrappers around generator lists defined by the deployer.
     -->
     
