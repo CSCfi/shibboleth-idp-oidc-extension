@@ -27,8 +27,6 @@
  */
 package org.geant.idpextension.oidc.profile.logic;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.shibboleth.utilities.java.support.logic.Constraint;
@@ -48,7 +46,7 @@ import com.nimbusds.openid.connect.sdk.SubjectType;
  * 
  */
 @SuppressWarnings("rawtypes")
-public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContext, List<String>> {
+public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContext, SubjectType> {
 
     /** Class logger. */
     @Nonnull
@@ -80,21 +78,17 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
     /** {@inheritDoc} */
     @Override
     @Nullable
-    public List<String> apply(@Nullable final ProfileRequestContext input) {
+    public SubjectType apply(@Nullable final ProfileRequestContext input) {
 
-        final List<String> subjectType = new ArrayList<>();
+        SubjectType type = null;
         OIDCMetadataContext ctx = oidcMetadataContextLookupStrategy.apply(input);
         if (ctx != null && ctx.getClientInformation() != null && ctx.getClientInformation().getOIDCMetadata() != null) {
-            SubjectType type = ctx.getClientInformation().getOIDCMetadata().getSubjectType();
-            if (type != null) {
-                subjectType.add(type.toString());
-            }
-        } else {
-            subjectType.add(new PairwiseSubjectPredicate().apply(input) ? SubjectType.PAIRWISE.toString()
-                    : SubjectType.PUBLIC.toString());
+            type = ctx.getClientInformation().getOIDCMetadata().getSubjectType();
         }
-        return subjectType;
-
+        if (type == null) {
+            type = new PairwiseSubjectPredicate().apply(input) ? SubjectType.PAIRWISE : SubjectType.PUBLIC;
+        }
+        return type;
     }
 
 }

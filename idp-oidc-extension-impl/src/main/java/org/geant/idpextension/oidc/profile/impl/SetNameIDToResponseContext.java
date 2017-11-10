@@ -38,6 +38,7 @@ import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElemen
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -48,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.nimbusds.openid.connect.sdk.SubjectType;
 
 /**
  * Uses saml2 name id generator to form name id for response context.
@@ -68,12 +70,12 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
 
     /** Strategy used to determine the formats to try. */
     @Nonnull
-    private Function<ProfileRequestContext, List<String>> subjectTypeStrategy;
+    private Function<ProfileRequestContext, SubjectType> subjectTypeStrategy;
 
-    /** Formats to try. */
+    /** Subject type */
     @Nonnull
     @NonnullElements
-    private List<String> formats;
+    private SubjectType subjectType;
 
     /**
      * Set the generator to use.
@@ -93,7 +95,7 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
      * @param strategy
      *            format lookup strategy
      */
-    public void setSubjectTypeLookupStrategy(@Nonnull final Function<ProfileRequestContext, List<String>> strategy) {
+    public void setSubjectTypeLookupStrategy(@Nonnull final Function<ProfileRequestContext, SubjectType> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
         subjectTypeStrategy = Constraint.isNotNull(strategy, "Format lookup strategy cannot be null");
     }
@@ -113,8 +115,8 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        formats = subjectTypeStrategy.apply(profileRequestContext);
-        if (formats == null || formats.isEmpty()) {
+        subjectType = subjectTypeStrategy.apply(profileRequestContext);
+        if (subjectType == null) {
             log.error("{} No oidc subject identifier type defined", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
@@ -124,8 +126,8 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
     }
 
     /**
-     * Attempt to generate a {@link NameID} using each of the candidate Formats
-     * and plugins.
+     * Attempt to generate a {@link NameID} using each of the candidate and
+     * plugins.
      * 
      * @param profileRequestContext
      *            current profile request context
@@ -135,20 +137,16 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
     @Nullable
     private NameID generateNameID(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        // See if we can generate one.
-        for (final String format : formats) {
-            log.debug("{} Trying to generate NameID with Format {}", getLogPrefix(), format);
-            try {
-                final NameID nameId = generator.generate(profileRequestContext, format);
-                if (nameId != null) {
-                    log.debug("{} Successfully generated NameID with Format {}", getLogPrefix(), format);
-                    return nameId;
-                }
-            } catch (final SAMLException e) {
-                log.error("{} Error while generating NameID", getLogPrefix(), e);
+        log.debug("{} Trying to generate NameID with Format {}", getLogPrefix(), subjectType.toString());
+        try {
+            final NameID nameId = generator.generate(profileRequestContext, subjectType.toString());
+            if (nameId != null) {
+                log.debug("{} Successfully generated NameID with Format {}", getLogPrefix(), subjectType.toString());
+                return nameId;
             }
+        } catch (final SAMLException e) {
+            log.error("{} Error while generating NameID", getLogPrefix(), e);
         }
-
         return null;
     }
 
