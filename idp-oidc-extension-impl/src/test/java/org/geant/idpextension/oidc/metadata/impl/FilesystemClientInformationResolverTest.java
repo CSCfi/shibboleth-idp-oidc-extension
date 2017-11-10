@@ -35,8 +35,11 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 
@@ -68,8 +71,16 @@ public class FilesystemClientInformationResolverTest {
     @Test
     public void testSuccess() throws Exception {
         final ClientIDCriterion criterion = new ClientIDCriterion(new ClientID(clientId));
-        final ClientInformation clientInfo = resolver.resolveSingle(new CriteriaSet(criterion));
+        final OIDCClientInformation clientInfo = resolver.resolveSingle(new CriteriaSet(criterion));
         Assert.assertNotNull(clientInfo);
         Assert.assertEquals(clientInfo.getID().getValue(), clientId);
+        final Scope scope = clientInfo.getOIDCMetadata().getScope();
+        Assert.assertEquals(scope.size(), 6);
+        Assert.assertTrue(scope.contains(OIDCScopeValue.OPENID));
+        Assert.assertTrue(scope.contains(OIDCScopeValue.ADDRESS));
+        Assert.assertTrue(scope.contains(OIDCScopeValue.EMAIL));
+        Assert.assertTrue(scope.contains(OIDCScopeValue.PHONE));
+        Assert.assertTrue(scope.contains(OIDCScopeValue.PROFILE));
+        Assert.assertTrue(scope.contains("info"));
     }
 }
