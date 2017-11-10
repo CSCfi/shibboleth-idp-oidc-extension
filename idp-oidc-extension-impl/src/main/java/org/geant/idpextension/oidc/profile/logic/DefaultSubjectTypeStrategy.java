@@ -71,7 +71,7 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
      * @param strategy
      *            lookup function to use
      */
-    public void setRelyingPartyContextLookupStrategy(
+    public void setOIDCMetadataContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, OIDCMetadataContext> strategy) {
         oidcMetadataContextLookupStrategy = Constraint.isNotNull(strategy,
                 "OIDCMetadata lookup strategy cannot be null");
