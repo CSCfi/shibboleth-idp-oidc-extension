@@ -82,18 +82,18 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
     @Nullable
     public List<String> apply(@Nullable final ProfileRequestContext input) {
 
-        final List<String> fromConfig = new ArrayList<>();
+        final List<String> subjectType = new ArrayList<>();
         OIDCMetadataContext ctx = oidcMetadataContextLookupStrategy.apply(input);
         if (ctx != null && ctx.getClientInformation() != null && ctx.getClientInformation().getOIDCMetadata() != null) {
             SubjectType type = ctx.getClientInformation().getOIDCMetadata().getSubjectType();
             if (type != null) {
-                fromConfig.add(type.toString());
+                subjectType.add(type.toString());
             }
         } else {
-            fromConfig.add(new PairwiseSubjectPredicate().apply(input) ? SubjectType.PAIRWISE.toString()
+            subjectType.add(new PairwiseSubjectPredicate().apply(input) ? SubjectType.PAIRWISE.toString()
                     : SubjectType.PUBLIC.toString());
         }
-        return fromConfig;
+        return subjectType;
 
     }
 
