@@ -48,7 +48,8 @@ public class OIDCWebFingerRequestImpl implements OIDCWebFingerRequest {
      * @param rl The URI identifying the type of service whose location is being requested.
      */
     public OIDCWebFingerRequestImpl(final String resrc, final String rl) {
-        
+        resource = resrc;
+        rel = rl;
     }
     
     /** {@inheritDoc} */
