@@ -28,8 +28,6 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -68,7 +66,7 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
     @NonnullAfterInit
     private SAML2NameIDGenerator generator;
 
-    /** Strategy used to determine the formats to try. */
+    /** Strategy used to determine the subject type to try. */
     @Nonnull
     private Function<ProfileRequestContext, SubjectType> subjectTypeStrategy;
 
@@ -93,11 +91,11 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
      * Set the strategy function to use to obtain the subject type.
      * 
      * @param strategy
-     *            format lookup strategy
+     *            subject type lookup strategy
      */
     public void setSubjectTypeLookupStrategy(@Nonnull final Function<ProfileRequestContext, SubjectType> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        subjectTypeStrategy = Constraint.isNotNull(strategy, "Format lookup strategy cannot be null");
+        subjectTypeStrategy = Constraint.isNotNull(strategy, "Subject type lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -108,7 +106,7 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
             throw new ComponentInitializationException("SAML2NameIDGenerator cannot be null");
         }
         if (subjectTypeStrategy == null) {
-            throw new ComponentInitializationException("Name ID format lookup strategy cannot be null");
+            throw new ComponentInitializationException("Subject type lookup strategy cannot be null");
         }
     }
 
@@ -137,15 +135,15 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
     @Nullable
     private NameID generateNameID(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        log.debug("{} Trying to generate NameID with Format {}", getLogPrefix(), subjectType.toString());
+        log.debug("{} Trying to generate Subject with Type {}", getLogPrefix(), subjectType.toString());
         try {
             final NameID nameId = generator.generate(profileRequestContext, subjectType.toString());
             if (nameId != null) {
-                log.debug("{} Successfully generated NameID with Format {}", getLogPrefix(), subjectType.toString());
+                log.debug("{} Successfully generated Subject with Type {}", getLogPrefix(), subjectType.toString());
                 return nameId;
             }
         } catch (final SAMLException e) {
-            log.error("{} Error while generating NameID", getLogPrefix(), e);
+            log.error("{} Error while generating Subject", getLogPrefix(), e);
         }
         return null;
     }
@@ -156,12 +154,12 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
 
         final NameID nameId = generateNameID(profileRequestContext);
         if (nameId == null) {
-            log.error("{} Name ID may not be null", getLogPrefix());
+            log.error("{} Subject may not be null", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return;
         }
         getOidcResponseContext().setNameId(nameId);
-        log.debug("{} Name ID of format {} set to {}", getLogPrefix(), nameId.getFormat(), nameId.getValue());
+        log.debug("{} Subject of type {} set to {}", getLogPrefix(), nameId.getFormat(), nameId.getValue());
 
     }
 
