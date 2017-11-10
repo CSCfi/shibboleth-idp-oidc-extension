@@ -43,6 +43,10 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 /**
  * Implementation of {@link NameIdentifierGenerationService}.
  * 
+ * OIDC Subject generation takes advantage of saml2 persistent id generators.
+ * This class enables a more convenient naming for user to configure the
+ * list.
+ * 
  * Based on
  * {@link net.shibboleth.idp.saml.nameid.impl.NameIdentifierGenerationServiceImpl}
  * .
