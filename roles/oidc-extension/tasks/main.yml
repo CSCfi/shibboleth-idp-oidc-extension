@@ -422,6 +422,16 @@
     src: static.xml 
     dest: "{{ idp_home }}/jetty-base/webapps/static.xml"
 
+- name: Enable rewrite module in Jetty
+  template:
+    src: rewrite.ini
+    dest: "{{ idp_home }}/jetty-base/start.d/rewrite.ini"
+
+- name: Setting jetty-rewrite.xml for jetty to rewrite webfinger
+  template:
+    src: jetty-rewrite.xml
+    dest: "{{ idp_home }}/jetty-base/etc/jetty-rewrite.xml"
+
 - name: Setting modified attribute-resolver.xml
   template:
     src: attribute-resolver.xml
