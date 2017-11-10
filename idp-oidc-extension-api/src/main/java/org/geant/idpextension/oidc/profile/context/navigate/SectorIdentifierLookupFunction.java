@@ -95,7 +95,7 @@ public class SectorIdentifierLookupFunction extends AbstractIdentifiableInitiali
         if (ctx.getClientInformation().getOIDCMetadata().getSectorIDURI() != null) {
             sectorIdentifier = ctx.getClientInformation().getOIDCMetadata().getSectorIDURI().getHost();
             log.debug("sector identifier by sector uri {}", sectorIdentifier);
-        } else if (ctx.getClientInformation().getOIDCMetadata().getRedirectionURIs().size() > 0) {
+        } else if (ctx.getClientInformation().getOIDCMetadata().getRedirectionURIs().size() > 1) {
             log.error("multiple registered redirection uris, unable to determine sector identifier");
             return null;
         } else {
