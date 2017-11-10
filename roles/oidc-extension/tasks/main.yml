@@ -380,11 +380,18 @@
             <value>%{idp.home}/system/conf/oidc-subject-system.xml</value>
         </util:list>
 
-- name: Copy oidc-subject.xml
+- name: Copy oidc-subject.xml and oidc-subject.properties
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "oidc-subject.xml"
     - "oidc-subject.properties"
+
+- name: Add oidc-subject.properties to included confs in idp.properties
+  lineinfile:
+    dest: /opt/shibboleth-idp/conf/idp.properties
+    regexp: '(idp.additionalProperties.*)'
+    line: '\1, /conf/oidc-subject.properties'
+    backrefs: yes
 
 - name: Copy oidc-subject-system.xml - SYSTEM DIRECTORY CHANGE!!
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/system/conf/{{item}}
