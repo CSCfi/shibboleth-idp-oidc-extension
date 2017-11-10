@@ -19,7 +19,7 @@
             class="net.shibboleth.idp.saml.nameid.impl.PersistentSAML2NameIDGenerator"
             p:format="public"
             p:omitQualifiers="true"
-            p:sPNameQualifier="public"
+            p:sPNameQualifier="%{idp.oidc.subject.publicqualifier:public}"
             p:useUnfilteredAttributes="%{idp.oidc.subject.useUnfilteredAttributes:true}"
             p:persistentIdGenerator-ref="#{'%{idp.oidc.subject.generator:shibboleth.oidc.subject.ComputedPersistentIdGenerator}'.trim()}">
         <property name="defaultSPNameQualifierLookupStrategy">
