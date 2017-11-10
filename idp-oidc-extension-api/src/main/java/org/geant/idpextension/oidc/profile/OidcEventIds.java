@@ -47,5 +47,10 @@ public final class OidcEventIds {
      * ID of event returned if the mandatory redirect_uris is invalid.
      */
     @Nonnull @NotEmpty public static final String INVALID_REDIRECT_URIS = "InvalidRedirectionURIs";
+    
+    /**
+     * ID of event returned if the WebFinger rel is invalid / not supported.
+     */
+    @Nonnull @NotEmpty public static final String INVALID_WEBFINGER_REL = "InvalidWebFingerRel";
 
 }
