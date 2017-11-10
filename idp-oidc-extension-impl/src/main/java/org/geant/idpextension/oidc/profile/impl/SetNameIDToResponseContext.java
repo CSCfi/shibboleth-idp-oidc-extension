@@ -68,7 +68,7 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
 
     /** Strategy used to determine the formats to try. */
     @Nonnull
-    private Function<ProfileRequestContext, List<String>> formatLookupStrategy;
+    private Function<ProfileRequestContext, List<String>> subjectTypeStrategy;
 
     /** Formats to try. */
     @Nonnull
@@ -88,14 +88,14 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
     }
 
     /**
-     * Set the strategy function to use to obtain the formats to try.
+     * Set the strategy function to use to obtain the subject type.
      * 
      * @param strategy
      *            format lookup strategy
      */
-    public void setFormatLookupStrategy(@Nonnull final Function<ProfileRequestContext, List<String>> strategy) {
+    public void setSubjectTypeLookupStrategy(@Nonnull final Function<ProfileRequestContext, List<String>> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        formatLookupStrategy = Constraint.isNotNull(strategy, "Format lookup strategy cannot be null");
+        subjectTypeStrategy = Constraint.isNotNull(strategy, "Format lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -105,7 +105,7 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
         if (generator == null) {
             throw new ComponentInitializationException("SAML2NameIDGenerator cannot be null");
         }
-        if (formatLookupStrategy == null) {
+        if (subjectTypeStrategy == null) {
             throw new ComponentInitializationException("Name ID format lookup strategy cannot be null");
         }
     }
@@ -113,7 +113,7 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        formats = formatLookupStrategy.apply(profileRequestContext);
+        formats = subjectTypeStrategy.apply(profileRequestContext);
         if (formats == null || formats.isEmpty()) {
             log.error("{} No oidc subject identifier type defined", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);

@@ -95,7 +95,7 @@
 	<bean id="SetNameIDToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext"
 		scope="prototype">
-		<property name="formatLookupStrategy">
+		<property name="subjectTypeLookupStrategy">
 			<bean
 				class="org.geant.idpextension.oidc.profile.logic.DefaultSubjectTypeStrategy" />
 		</property>
