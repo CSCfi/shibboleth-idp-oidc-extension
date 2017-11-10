@@ -102,7 +102,13 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
             log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
-        signedToken = new SignIDTokensPredicate().apply(profileRequestContext);
+        final RelyingPartyContext rpc = relyingPartyContextLookupStrategy.apply(profileRequestContext);
+        if (rpc != null) {
+            final ProfileConfiguration pc = rpc.getProfileConfig();
+            if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
+                signedToken = ((OIDCCoreProtocolConfiguration) pc).getSignIDTokens().apply(profileRequestContext);
+            }
+        }
         return true;
     }
 

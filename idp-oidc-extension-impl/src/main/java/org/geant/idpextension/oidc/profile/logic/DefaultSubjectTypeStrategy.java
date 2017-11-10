@@ -29,10 +29,16 @@ package org.geant.idpextension.oidc.profile.logic;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import net.shibboleth.idp.profile.config.ProfileConfiguration;
+import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+
+import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.geant.idpextension.oidc.config.logic.PairwiseSubjectPredicate;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultOIDCMetadataContextLookupFunction;
+import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,12 +61,30 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
     /** Strategy function to lookup OIDC metadata context . */
     @Nonnull
     private Function<ProfileRequestContext, OIDCMetadataContext> oidcMetadataContextLookupStrategy;
+    
+    /** Strategy function to lookup RelyingPartyContext. */
+    @Nonnull
+    private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
 
     /**
      * Constructor.
      */
     public DefaultSubjectTypeStrategy() {
         oidcMetadataContextLookupStrategy = new DefaultOIDCMetadataContextLookupFunction();
+        relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
+    }
+    
+    /**
+     * Set the lookup strategy to use to locate the {@link RelyingPartyContext}.
+     * 
+     * @param strategy
+     *            lookup function to use
+     */
+    public void setRelyingPartyContextLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
+
+        relyingPartyContextLookupStrategy = Constraint.isNotNull(strategy,
+                "RelyingPartyContext lookup strategy cannot be null");
     }
 
     /**
@@ -74,6 +98,8 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
         oidcMetadataContextLookupStrategy = Constraint.isNotNull(strategy,
                 "OIDCMetadata lookup strategy cannot be null");
     }
+    
+    
 
     /** {@inheritDoc} */
     @Override
@@ -86,7 +112,15 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
             type = ctx.getClientInformation().getOIDCMetadata().getSubjectType();
         }
         if (type == null) {
-            type = new PairwiseSubjectPredicate().apply(input) ? SubjectType.PAIRWISE : SubjectType.PUBLIC;
+            boolean pairwise = false;
+            final RelyingPartyContext rpc = relyingPartyContextLookupStrategy.apply(input);
+            if (rpc != null) {
+                final ProfileConfiguration pc = rpc.getProfileConfig();
+                if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
+                    pairwise = ((OIDCCoreProtocolConfiguration) pc).getSignIDTokens().apply(input);
+                }
+            }
+            type = pairwise ? SubjectType.PAIRWISE : SubjectType.PUBLIC;
         }
         return type;
     }
