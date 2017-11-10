@@ -102,7 +102,6 @@ public class SectorIdentifierLookupFunction extends AbstractIdentifiableInitiali
             sectorIdentifier = ctx.getClientInformation().getOIDCMetadata().getRedirectionURI().getHost();
             log.debug("sector identifier by redirect uri {}", sectorIdentifier);
         }
-        log.debug("5");
         return sectorIdentifier;
     }
 
