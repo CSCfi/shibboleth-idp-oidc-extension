@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:c="http://www.springframework.org/schema/c" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+    default-init-method="initialize" default-destroy-method="destroy">
+
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
+        p:placeholderPrefix="%{" p:placeholderSuffix="}" />
+
+    <bean class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
+    <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
+
+    <bean id="PopulateMetricContext"
+        class="org.opensaml.profile.action.impl.PopulateMetricContext" scope="prototype"
+        p:metricStrategy="#{getObject('shibboleth.metrics.MetricStrategy')}" />
+
+    <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
+    <import resource="../../../system/conf/audit-system.xml" />
+
+    <!-- The profile and logging id used as arguments are for development 
+        phase only -->
+    <bean id="InitializeProfileRequestContext"
+        class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
+        scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/webfinger"
+        p:loggingId="%{idp.service.logging.saml2sso:SSO}"
+        p:browserProfile="true" />
+
+    <bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage"
+        scope="prototype">
+        <constructor-arg>
+            <bean
+                class="org.geant.idpextension.oidc.decoding.impl.OIDCWebFingerRequestDecoder"
+                scope="prototype" p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
+        </constructor-arg>
+    </bean>
+
+    <bean id="CheckWebFingerRel"
+        class="org.geant.idpextension.oidc.profile.impl.CheckWebFingerRel"
+        scope="prototype" />
+
+    <bean id="CheckWebFingerResource"
+        class="org.geant.idpextension.oidc.profile.impl.CheckWebFingerResource"
+        scope="prototype" />
+
+    <bean id="SetResponseStatusCodeFromEvent" class="org.geant.idpextension.oidc.profile.impl.SetResponseStatusCodeFromEvent"
+        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>
+        <property name="mappedErrors">
+            <map value-type="java.lang.Integer">
+                <entry key="#{T(org.opensaml.profile.action.EventIds).UNABLE_TO_DECODE}" value="400" />
+            </map>        
+        </property>
+    </bean>
+
+    <bean id="BuildWebFingerResponse" class="org.geant.idpextension.oidc.profile.impl.BuildWebFingerResponse"
+        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse"
+        p:issuer="%{idp.oidc.issuer}"/>
+
+    <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
+            p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>
+    </bean>
+
+    <bean id="RecordResponseComplete"
+        class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
+        scope="prototype" />
+
+</beans>

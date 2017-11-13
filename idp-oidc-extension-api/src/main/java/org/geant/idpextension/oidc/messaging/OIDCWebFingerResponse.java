@@ -26,31 +26,42 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.geant.idpextension.oidc.profile;
+package org.geant.idpextension.oidc.messaging;
 
-import javax.annotation.Nonnull;
-
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+import java.util.List;
 
 /**
- * OpenID Connect -specific constants to use for {@link org.opensaml.profile.action.ProfileAction}
- * {@link org.opensaml.profile.context.EventContext}s.
+ * An interface for Web Finger responses related to OIDC.
  */
-public final class OidcEventIds {
+public interface OIDCWebFingerResponse {
 
     /**
-     * ID of event returned if the mandatory redirect_uris is missing.
+     * Get the identifier for the target End-User that is the subject of the discovery links.
+     * @return The identifier for the target End-User that is the subject of the discovery links.
      */
-    @Nonnull @NotEmpty public static final String MISSING_REDIRECT_URIS = "MissingRedirectionURIs";
-
-    /**
-     * ID of event returned if the mandatory redirect_uris is invalid.
-     */
-    @Nonnull @NotEmpty public static final String INVALID_REDIRECT_URIS = "InvalidRedirectionURIs";
+    public String getSubject();
     
     /**
-     * ID of event returned if the WebFinger rel is invalid / not supported.
+     * Get the links for services being able to authenticate the target End-User.
+     * @return The links for services being able to authenticate the target End-User.
      */
-    @Nonnull @NotEmpty public static final String INVALID_WEBFINGER_REL = "InvalidWebFingerRel";
-
+    public List<Link> getLinks();
+    
+    /**
+     * An interface for a link in a Web Finger response related to OIDC.
+     */
+    public interface Link {
+        
+        /**
+         * Get the URI identifying the type of service.
+         * @return The URI identifying the type of service.
+         */
+        public String getRel();
+        
+        /**
+         * Get the link to the service.
+         * @return The link to the service.
+         */
+        public String getHref();
+    }
 }

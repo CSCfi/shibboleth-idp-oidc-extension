@@ -26,31 +26,23 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.geant.idpextension.oidc.profile;
-
-import javax.annotation.Nonnull;
-
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+package org.geant.idpextension.oidc.messaging;
 
 /**
- * OpenID Connect -specific constants to use for {@link org.opensaml.profile.action.ProfileAction}
- * {@link org.opensaml.profile.context.EventContext}s.
+ * An interface for Web Finger requests related to OIDC.
  */
-public final class OidcEventIds {
-
-    /**
-     * ID of event returned if the mandatory redirect_uris is missing.
-     */
-    @Nonnull @NotEmpty public static final String MISSING_REDIRECT_URIS = "MissingRedirectionURIs";
-
-    /**
-     * ID of event returned if the mandatory redirect_uris is invalid.
-     */
-    @Nonnull @NotEmpty public static final String INVALID_REDIRECT_URIS = "InvalidRedirectionURIs";
+public interface OIDCWebFingerRequest {
     
     /**
-     * ID of event returned if the WebFinger rel is invalid / not supported.
+     * Get the identifier for the target End-User that is the subject of the discovery request.
+     * @return The identifier for the target End-User that is the subject of the discovery request.
      */
-    @Nonnull @NotEmpty public static final String INVALID_WEBFINGER_REL = "InvalidWebFingerRel";
+    public String getResource();
+    
+    /**
+     * Get the URI identifying the type of service whose location is being requested.
+     * @return The URI identifying the type of service whose location is being requested.
+     */
+    public String getRel();
 
 }

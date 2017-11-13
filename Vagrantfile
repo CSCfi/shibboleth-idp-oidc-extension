@@ -16,7 +16,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             ansible.playbook = "oidcshibop.yml"
             ansible.galaxy_role_file = "requirements.yml"
             ansible.extra_vars = {
-              service_name: "gn43-oidcshibop-devel.local",
+#              service_name: "gn43-oidcshibop-devel.local",
+              service_name: "192.168.0.150",
               host_name: "gn43-oidcshibop-devel"
             }
         end

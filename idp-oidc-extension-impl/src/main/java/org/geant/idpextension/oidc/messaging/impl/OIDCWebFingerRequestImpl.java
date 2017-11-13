@@ -26,31 +26,39 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.geant.idpextension.oidc.profile;
+package org.geant.idpextension.oidc.messaging.impl;
 
-import javax.annotation.Nonnull;
-
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+import org.geant.idpextension.oidc.messaging.OIDCWebFingerRequest;
 
 /**
- * OpenID Connect -specific constants to use for {@link org.opensaml.profile.action.ProfileAction}
- * {@link org.opensaml.profile.context.EventContext}s.
+ * A simple implementation for {@link OIDCWebFingerRequest}.
  */
-public final class OidcEventIds {
-
-    /**
-     * ID of event returned if the mandatory redirect_uris is missing.
-     */
-    @Nonnull @NotEmpty public static final String MISSING_REDIRECT_URIS = "MissingRedirectionURIs";
-
-    /**
-     * ID of event returned if the mandatory redirect_uris is invalid.
-     */
-    @Nonnull @NotEmpty public static final String INVALID_REDIRECT_URIS = "InvalidRedirectionURIs";
+public class OIDCWebFingerRequestImpl implements OIDCWebFingerRequest {
+    
+    /** The identifier for the target End-User that is the subject of the discovery request. */
+    private String resource;
+    
+    /** The URI identifying the type of service whose location is being requested. */
+    private String rel;
     
     /**
-     * ID of event returned if the WebFinger rel is invalid / not supported.
+     * Constructor.
+     *
+     * @param resrc The identifier for the target End-User that is the subject of the discovery request.
+     * @param rl The URI identifying the type of service whose location is being requested.
      */
-    @Nonnull @NotEmpty public static final String INVALID_WEBFINGER_REL = "InvalidWebFingerRel";
-
+    public OIDCWebFingerRequestImpl(final String resrc, final String rl) {
+        resource = resrc;
+        rel = rl;
+    }
+    
+    /** {@inheritDoc} */
+    public String getResource() {
+        return resource;
+    }
+    
+    /** {@inheritDoc} */
+    public String getRel() {
+        return rel;
+    }    
 }

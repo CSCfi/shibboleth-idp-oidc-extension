@@ -26,31 +26,43 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.geant.idpextension.oidc.profile;
+package org.geant.idpextension.oidc.messaging.impl;
 
-import javax.annotation.Nonnull;
+import java.util.List;
 
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+import org.geant.idpextension.oidc.messaging.OIDCWebFingerResponse;
 
 /**
- * OpenID Connect -specific constants to use for {@link org.opensaml.profile.action.ProfileAction}
- * {@link org.opensaml.profile.context.EventContext}s.
+ * A simple implementation for {@link OIDCWebFingerResponse}.
  */
-public final class OidcEventIds {
+public class OIDCWebFingerResponseImpl implements OIDCWebFingerResponse {
 
-    /**
-     * ID of event returned if the mandatory redirect_uris is missing.
-     */
-    @Nonnull @NotEmpty public static final String MISSING_REDIRECT_URIS = "MissingRedirectionURIs";
-
-    /**
-     * ID of event returned if the mandatory redirect_uris is invalid.
-     */
-    @Nonnull @NotEmpty public static final String INVALID_REDIRECT_URIS = "InvalidRedirectionURIs";
+    /** The identifier for the target End-User that is the subject of the discovery links. */
+    private String subject;
     
-    /**
-     * ID of event returned if the WebFinger rel is invalid / not supported.
-     */
-    @Nonnull @NotEmpty public static final String INVALID_WEBFINGER_REL = "InvalidWebFingerRel";
+    /** The links for services being able to authenticate the target End-User. */
+    private List<Link> links;
 
+    /**
+     * Constructor.
+     *
+     * @param sub The identifier for the target End-User that is the subject of the discovery links.
+     * @param lnks The links for services being able to authenticate the target End-User.
+     */
+    public OIDCWebFingerResponseImpl(final String sub, final List<Link> lnks) {
+        subject = sub;
+        links = lnks;
+    }
+    
+    /** {@inheritDoc} */
+    @Override
+    public String getSubject() {
+        return subject;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<Link> getLinks() {
+        return links;
+    }
 }

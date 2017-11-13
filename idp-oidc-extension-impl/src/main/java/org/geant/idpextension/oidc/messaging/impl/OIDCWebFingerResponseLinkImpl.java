@@ -26,31 +26,42 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.geant.idpextension.oidc.profile;
+package org.geant.idpextension.oidc.messaging.impl;
 
-import javax.annotation.Nonnull;
-
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+import org.geant.idpextension.oidc.messaging.OIDCWebFingerResponse.Link;
 
 /**
- * OpenID Connect -specific constants to use for {@link org.opensaml.profile.action.ProfileAction}
- * {@link org.opensaml.profile.context.EventContext}s.
+ * A simple implementation for {@link Link}.
  */
-public final class OidcEventIds {
+public class OIDCWebFingerResponseLinkImpl implements Link {
 
-    /**
-     * ID of event returned if the mandatory redirect_uris is missing.
-     */
-    @Nonnull @NotEmpty public static final String MISSING_REDIRECT_URIS = "MissingRedirectionURIs";
 
+    /** The URI identifying the type of service. */
+    private String rel;
+        
+    /** The link to the service. */
+    private String href;
+        
     /**
-     * ID of event returned if the mandatory redirect_uris is invalid.
+     * Constructor.
+     *
+     * @param rl The URI identifying the type of service.
+     * @param ref The link to the service.
      */
-    @Nonnull @NotEmpty public static final String INVALID_REDIRECT_URIS = "InvalidRedirectionURIs";
-    
-    /**
-     * ID of event returned if the WebFinger rel is invalid / not supported.
-     */
-    @Nonnull @NotEmpty public static final String INVALID_WEBFINGER_REL = "InvalidWebFingerRel";
+    public OIDCWebFingerResponseLinkImpl(final String rl, final String ref) {
+        rel = rl;
+        href = ref;
+    }
+        
+    /** {@inheritDoc} */
+    @Override
+    public String getRel() {
+        return rel;
+    }
 
+    /** {@inheritDoc} */
+    @Override
+    public String getHref() {
+        return href;
+    }
 }
