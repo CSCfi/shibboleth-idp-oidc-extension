@@ -7,7 +7,8 @@
   "id_token"
  ],
  "subject_types_supported": [
-  "public"
+  "public",
+  "pairwise"
  ],
  "grant_types_supported": [
         "implicit"
