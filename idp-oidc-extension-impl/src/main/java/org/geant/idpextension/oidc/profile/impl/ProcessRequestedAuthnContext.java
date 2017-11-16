@@ -29,8 +29,10 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
+
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.RequestedPrincipalContext;
+
 import org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -38,7 +40,11 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.nimbusds.openid.connect.sdk.ClaimsRequest.Entry;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
+import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
+
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +56,19 @@ import java.util.List;
  * <p>
  * If the incoming message contains acr values we create requested principal
  * context populated with matching
- * {@AuthenticationContextClassReferencePrincipal}.
+ * {@AuthenticationContextClassReferencePrincipal
+ * 
+ * 
+ * }.
+ * 
+ * Acr values may be be given as authentication request parameter (acr_values)
+ * or as requested id token claim (acr) in requested claims parameter. If they
+ * are given in both, the outcome is unspecified.
+ * 
+ * NOTE! This action fails the specification in a sense that all acr values are
+ * considered essential. "If the Claim is not Essential and a requested value
+ * cannot be provided, the Authorization Server SHOULD return the session's
+ * current acr as the value of the acr Claim."
  * </p>
  */
 @SuppressWarnings("rawtypes")
@@ -63,6 +81,11 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
     /** Authentication context. */
     private AuthenticationContext authenticationContext;
 
+    /** acr values parameter. */
+    private List<ACR> acrValues;
+    /** requested acr claim. */
+    private Entry acrClaim;
+
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -70,8 +93,18 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
             log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
-        if (getAuthenticationRequest().getACRValues() == null) {
-            log.debug("No acr values in request, nothing to do");
+        acrValues = getAuthenticationRequest().getACRValues();
+        if (getAuthenticationRequest().getClaims() != null
+                && getAuthenticationRequest().getClaims().getIDTokenClaims() != null) {
+            for (Entry entry : getAuthenticationRequest().getClaims().getIDTokenClaims()) {
+                if (IDTokenClaimsSet.ACR_CLAIM_NAME.equals(entry.getClaimName())) {
+                    acrClaim = entry;
+                    break;
+                }
+            }
+        }
+        if ((acrValues == null || acrValues.isEmpty()) && (acrClaim == null || acrClaim.getValues().isEmpty())) {
+            log.debug("No acr values nor acr claim values in request, nothing to do");
             return false;
         }
         authenticationContext = profileRequestContext.getSubcontext(AuthenticationContext.class, false);
@@ -81,19 +114,25 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
             return false;
         }
         return true;
-
     }
 
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        // TODO: Consider adding a check for allowed acr values per relying party
-        // configuration
         final List<Principal> principals = new ArrayList<>();
-        for (ACR acr : getAuthenticationRequest().getACRValues()) {
-            log.debug("{} Located acr {} in request", getLogPrefix(), acr.getValue());
-            principals.add(new AuthenticationContextClassReferencePrincipal(acr.getValue()));
+        if (acrValues != null && !acrValues.isEmpty()) {
+            for (ACR acr : acrValues) {
+                log.debug("{} Located acr value {} in request", getLogPrefix(), acr.getValue());
+                principals.add(new AuthenticationContextClassReferencePrincipal(acr.getValue()));
+            }
+        }
+        if (acrClaim != null && !acrClaim.getValues().isEmpty()) {
+            for (String acr : acrClaim.getValues()) {
+                log.debug("{} Located {} acr claim {} in id token of request", getLogPrefix(), acrClaim
+                        .getClaimRequirement().toString(), acr);
+                principals.add(new AuthenticationContextClassReferencePrincipal(acr));
+            }
         }
         if (principals.isEmpty()) {
             log.debug("{} request did not contain any acr values, nothing to do", getLogPrefix());
@@ -103,7 +142,7 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
         rpCtx.setOperator(AuthnContextComparisonTypeEnumeration.EXACT.toString());
         rpCtx.setRequestedPrincipals(principals);
         authenticationContext.addSubcontext(rpCtx, true);
-        log.debug("{} Created requested principal context: {}", getLogPrefix());
+        log.debug("{} Created requested principal context", getLogPrefix());
     }
 
 }
