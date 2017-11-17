@@ -49,7 +49,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
  *
  */
 @SuppressWarnings("rawtypes")
-abstract class AbstractOIDCAuthenticationRequestAction extends AbstractProfileAction {
+public abstract class AbstractOIDCAuthenticationRequestAction extends AbstractProfileAction {
 
     /** Class logger. */
     @Nonnull
