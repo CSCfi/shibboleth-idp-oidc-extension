@@ -274,15 +274,19 @@
               p:securityConfiguration-ref="%{idp.security.config:shibboleth.DefaultSecurityConfiguration}"
               p:servletRequest-ref="shibboleth.HttpServletRequest" />
 
-- name: Add FilterActiveAuthenticationResultsByMaxAge bean to authn-beans.xml. SYSTEM FILE CHANGE!!
+- name: Add FilterActiveAuthenticationResultsByMaxAge and OIDCSelectAuthenticationFlow beans to authn-beans.xml. SYSTEM FILE CHANGE!!
   blockinfile:
     dest: "{{ idp_home }}/system/flows/authn/authn-beans.xml"
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
     insertafter: "net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor"
     content: |
         <bean id="FilterActiveAuthenticationResultsByMaxAge"
-            class="org.geant.idpextension.oidc.profile.impl.FilterActiveAuthenticationResultsByMaxAge"
+            class="org.geant.idpextension.oidc.authn.impl.FilterActiveAuthenticationResultsByMaxAge"
             scope="prototype" />
+            
+        <bean id="OIDCSelectAuthenticationFlow"
+            class="org.geant.idpextension.oidc.authn.impl.SelectAuthenticationFlow" scope="prototype"
+            p:favorSSO="%{idp.authn.favorSSO:false}" />
 
 - name: Copy authn-flow.xml to authn-oidc-flow.xml. SYSTEM DIRECTORY CHANGE!!
   copy:
@@ -297,6 +301,12 @@
     insertafter: "ExtractActiveAuthenticationResults"
     content: |
         <evaluate expression="FilterActiveAuthenticationResultsByMaxAge" />
+
+- name: Replace SelectAuthenticationFlow with OIDCSelectAuthenticationFlow in authn-oidc-flow.xml. SYSTEM DIRECTORY CHANGE!!        
+  replace:
+    dest: "{{ idp_home }}/system/flows/authn/authn-oidc-flow.xml"
+    regexp: "expression=\"SelectAuthenticationFlow\""
+    replace: "expression=\"OIDCSelectAuthenticationFlow\""
 
 - name: Activate the new authn-oidc flow. SYSTEM FILE CHANGE!!
   blockinfile:
