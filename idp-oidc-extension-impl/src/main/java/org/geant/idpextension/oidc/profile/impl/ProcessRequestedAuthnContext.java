@@ -34,6 +34,7 @@ import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.RequestedPrincipalContext;
 
 import org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal;
+import org.geant.idpextension.oidc.messaging.context.OIDCRequestedPrincipalContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -43,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import com.nimbusds.openid.connect.sdk.ClaimsRequest.Entry;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
+import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 import java.security.Principal;
@@ -65,10 +67,6 @@ import java.util.List;
  * or as requested id token claim (acr) in requested claims parameter. If they
  * are given in both, the outcome is unspecified.
  * 
- * NOTE! This action fails the specification in a sense that all acr values are
- * considered essential. "If the Claim is not Essential and a requested value
- * cannot be provided, the Authorization Server SHOULD return the session's
- * current acr as the value of the acr Claim."
  * </p>
  */
 @SuppressWarnings("rawtypes")
@@ -121,6 +119,7 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         final List<Principal> principals = new ArrayList<>();
+        boolean isEssential=false;
         if (acrValues != null && !acrValues.isEmpty()) {
             for (ACR acr : acrValues) {
                 log.debug("{} Located acr value {} in request", getLogPrefix(), acr.getValue());
@@ -128,6 +127,7 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
             }
         }
         if (acrClaim != null && !acrClaim.getValues().isEmpty()) {
+            isEssential=acrClaim.getClaimRequirement().equals(ClaimRequirement.ESSENTIAL);
             for (String acr : acrClaim.getValues()) {
                 log.debug("{} Located {} acr claim {} in id token of request", getLogPrefix(), acrClaim
                         .getClaimRequirement().toString(), acr);
@@ -141,6 +141,9 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
         final RequestedPrincipalContext rpCtx = new RequestedPrincipalContext();
         rpCtx.setOperator(AuthnContextComparisonTypeEnumeration.EXACT.toString());
         rpCtx.setRequestedPrincipals(principals);
+        // we need oidc context for storing essential flag
+        final OIDCRequestedPrincipalContext oidcRPCtx = authenticationContext.getSubcontext(OIDCRequestedPrincipalContext.class, true);
+        oidcRPCtx.setEssential(isEssential);
         authenticationContext.addSubcontext(rpCtx, true);
         log.debug("{} Created requested principal context", getLogPrefix());
     }
