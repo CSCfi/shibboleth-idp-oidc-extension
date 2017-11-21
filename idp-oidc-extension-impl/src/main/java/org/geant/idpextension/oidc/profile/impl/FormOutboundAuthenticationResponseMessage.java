@@ -35,7 +35,6 @@ import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
-import org.geant.idpextension.oidc.config.logic.SignIDTokensPredicate;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
