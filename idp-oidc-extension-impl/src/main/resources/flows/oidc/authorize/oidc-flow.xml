@@ -67,12 +67,13 @@
     </action-state>
 
     <action-state id="HandleOutboundMessage">
-        <evaluate expression="FormOutboundMessage" />
-        <!-- will be activated id encoder is implemented <evaluate expression="RecordResponseComplete" 
-            /> -->
-        <evaluate expression="'proceed'" />
-        <transition on="proceed" to="end" />
+	    <evaluate expression="FormOutboundMessage" />
+	    <evaluate expression="EncodeMessage" />
+	    <evaluate expression="RecordResponseComplete" />
+	    <evaluate expression="'proceed'" />
+	    <transition on="proceed" to="end" />
     </action-state>
+
 
     <!-- Error views, handling and end states -->
     <view-state id="DisplayError"
@@ -92,6 +93,7 @@
                 result="viewScope.response" />
         </on-render>
         <transition to="HandleErrorLocally" />
+        <exception-handler bean="RethrowingFlowExecutionExceptionHandler"/>
     </view-state>
 
     <!-- Passthrough state if an exception is thrown. -->
@@ -104,11 +106,8 @@
         <transition to="DisplayError" />
     </action-state>
 
-
-    <!-- may be replaced by a encoder setting the redirect -->
-    <end-state id="end"
-        view="externalRedirect:#{opensamlProfileRequestContext.getOutboundMessageContext().getMessage().toURI()}"></end-state>
-
+    <end-state id="end" />
+    
     <!-- end state after error display -->
     <end-state id="HandleErrorLocally">
         <on-entry>

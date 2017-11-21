@@ -178,6 +178,14 @@
 		scope="prototype" c:filterService-ref="shibboleth.AttributeFilterService"
 		p:maskFailures="%{idp.service.attribute.filter.maskFailures:true}" />
 
+    <bean id="shibboleth.Encoders.OIDCResponseEncoder"
+        class="org.geant.idpextension.oidc.encoding.impl.OIDCAuthenticationResponseEncoder"
+        scope="prototype" init-method="" p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
+
+	<bean id="EncodeMessage"
+        class="org.geant.idpextension.oidc.profile.action.impl.EncodeMessage"
+        scope="prototype" p:messageEncoder-ref="shibboleth.Encoders.OIDCResponseEncoder" />
+       
 	<bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
 		scope="prototype" />
 
