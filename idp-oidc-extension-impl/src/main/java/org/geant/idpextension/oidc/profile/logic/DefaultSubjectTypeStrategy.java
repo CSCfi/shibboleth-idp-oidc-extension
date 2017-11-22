@@ -117,7 +117,7 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
             if (rpc != null) {
                 final ProfileConfiguration pc = rpc.getProfileConfig();
                 if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
-                    pairwise = ((OIDCCoreProtocolConfiguration) pc).getSignIDTokens().apply(input);
+                    pairwise = ((OIDCCoreProtocolConfiguration) pc).getPairwiseSubject().apply(input);
                 }
             }
             type = pairwise ? SubjectType.PAIRWISE : SubjectType.PUBLIC;
