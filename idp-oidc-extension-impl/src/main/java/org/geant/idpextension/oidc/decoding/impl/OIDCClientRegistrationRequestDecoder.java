@@ -43,6 +43,8 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientRegistrationRequest;
 
+import net.minidev.json.JSONObject;
+
 /**
  * Message decoder decoding OpenID Connect {@link ClientRegistrationRequest}s.
  */
@@ -60,6 +62,17 @@ public class OIDCClientRegistrationRequestDecoder
         final MessageContext<OIDCClientRegistrationRequest> messageContext = new MessageContext<>();
         try {
             final HTTPRequest httpRequest = ServletUtils.createHTTPRequest(getHttpServletRequest());
+            log.trace("Raw query: {}", httpRequest.getQuery());
+            final JSONObject requestJson = httpRequest.getQueryAsJSONObject();
+            //TODO: Nimbus seems to be interpreting scope in different way as many RPs, currently the scope
+            //is removed in this phase, better solution TODO.
+            if (requestJson.containsKey("scope")) {
+                log.debug("Removed 'scope'");
+                requestJson.remove("scope");
+                httpRequest.setQuery(requestJson.toJSONString());
+            }
+            
+            log.trace("JSON object: {}", httpRequest.getQueryAsJSONObject().toJSONString());
             final OIDCClientRegistrationRequest request = OIDCClientRegistrationRequest.parse(httpRequest);
             messageContext.setMessage(request);
         } catch (IOException e) {
