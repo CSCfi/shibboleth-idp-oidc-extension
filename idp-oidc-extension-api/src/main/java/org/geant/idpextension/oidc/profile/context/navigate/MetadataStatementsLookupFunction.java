@@ -35,7 +35,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
+import org.geant.idpextension.oidc.messaging.context.navigate.OIDCClientRegistrationRequestMetadataLookupFunction;
 import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
@@ -65,23 +65,23 @@ public class MetadataStatementsLookupFunction extends AbstractIdentifiableInitia
 
     /** Strategy function to lookup OIDC metadata context . */
     @Nonnull
-    private Function<ProfileRequestContext, OIDCMetadataContext> oidcMetadataContextLookupStrategy;
+    private Function<ProfileRequestContext, OIDCClientMetadata> oidcMetadataLookupStrategy;
 
     /**
      * Constructor.
      */
     public MetadataStatementsLookupFunction() {
-        oidcMetadataContextLookupStrategy = new DefaultOIDCMetadataContextLookupFunction();
+        oidcMetadataLookupStrategy = new OIDCClientRegistrationRequestMetadataLookupFunction();
     }
 
     /**
-     * Set the lookup strategy to use to locate the {@link OIDCMetadataContext}.
+     * Set the lookup strategy to use to locate the {@link OIDCClientMetadata}.
      * 
      * @param strategy The lookup function to use.
      */
-    public void setRelyingPartyContextLookupStrategy(
-            @Nonnull final Function<ProfileRequestContext, OIDCMetadataContext> strategy) {
-        oidcMetadataContextLookupStrategy = Constraint.isNotNull(strategy,
+    public void setMetadataLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, OIDCClientMetadata> strategy) {
+        oidcMetadataLookupStrategy = Constraint.isNotNull(strategy,
                 "OIDCMetadata lookup strategy cannot be null");
     }
 
@@ -89,13 +89,7 @@ public class MetadataStatementsLookupFunction extends AbstractIdentifiableInitia
     @Override
     @Nullable
     public Map<String, String> apply(@Nullable final ProfileRequestContext input) {
-        final OIDCMetadataContext ctx = oidcMetadataContextLookupStrategy.apply(input);
-        if (ctx == null || ctx.getClientInformation() == null 
-                || ctx.getClientInformation().getOIDCMetadata() == null) {
-            log.error("The OIDC metadata context not available");
-            return null;
-        }
-        final OIDCClientMetadata metadata = ctx.getClientInformation().getOIDCMetadata();
+        final OIDCClientMetadata metadata = oidcMetadataLookupStrategy.apply(input);
         final Object rawStatements = metadata.getCustomField("metadata_statements");
         if (rawStatements != null && rawStatements instanceof JSONObject) {
             final JSONObject statements = (JSONObject) rawStatements;
