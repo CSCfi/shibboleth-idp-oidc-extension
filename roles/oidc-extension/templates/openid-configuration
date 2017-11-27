@@ -1,3 +1,4 @@
+
 {
  "issuer": "https://{{ service_name }}",
  "authorization_endpoint": "https://{{ service_name }}/idp/profile/oidc/authorize",
@@ -38,6 +39,6 @@
   "eduPersonPrincipalName",
   "eduPersonAffiliation",
   "mail"
- ]
+ ],
+ "signing_keys":{"keys":[{"kty":"RSA","e":"AQAB","use":"sig","kid":"testkey","n":"pNf03ghVzMAw5sWrwDAMAZdSYNY2q7OVlxMInljMgz8XB5mf8XKH3EtP7AKrb8IAf7rGhfuH3T1N1C7F-jwIeYjXxMm2nIAZ0hXApgbccvBpf4n2H7IZflMjt4A3tt587QQSxQ069drCP4sYevxhTcLplJy6RWA0cLj-5CHyWy94zPeeA4GRd6xgHFLz0RNiSF0pF0kE4rmRgQVZ-b4_BmD9SsWnIpwhms5Ihciw36WyAGQUeZqULGsfwAMwlNLIaTCBLAoRgv370p-XsLrgz86pTkNBJqXP5GwI-ZfgiLmJuHjQ9l85KqHM87f-QdsqiV8KoRcslgXPqb6VOTJBVw"}]}
 }
-
