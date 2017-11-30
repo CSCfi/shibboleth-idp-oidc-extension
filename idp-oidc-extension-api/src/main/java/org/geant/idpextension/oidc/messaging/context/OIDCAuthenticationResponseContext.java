@@ -69,7 +69,31 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /** Validated scope values. */
     private Scope requestedScope;
     
-    /** Name ID generated for response. */
+    /** Requested sub value. */
+    @Nullable
+    private String requestedSubject;
+    
+    /**
+     * Gets requested sub value.
+     * 
+     * @return requested sub value
+     */
+    @Nullable
+    public String getRequestedSubject() {
+        return requestedSubject;
+    }
+
+    /**
+     * Set requested sub value.
+     * 
+     * @param sub
+     *            requested sub value.
+     */
+    public void setRequestedSubject(@Nullable String sub) {
+        this.requestedSubject = sub;
+    }
+
+    /** Name ID generated for response. Value is set to sub claim. */
     private NameID nameId;
 
     /**
