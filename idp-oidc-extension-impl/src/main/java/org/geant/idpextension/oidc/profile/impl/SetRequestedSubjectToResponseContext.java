@@ -43,7 +43,7 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 /**
  * Action that sets requested sub value to response context. Value may be in id
  * token hint or in claims parameter. If value is in both, claims value will be
- * used.
+ * used. Multiple values for subject in claims parameter will be ignored.
  *
  */
 @SuppressWarnings("rawtypes")
@@ -84,6 +84,7 @@ public class SetRequestedSubjectToResponseContext extends AbstractOIDCAuthentica
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         try {
             if (idTokenHint != null && idTokenHint.getJWTClaimsSet() != null) {
+                log.debug("{} Using requested sub claim value", getLogPrefix());
                 getOidcResponseContext().setRequestedSubject(idTokenHint.getJWTClaimsSet().getSubject());
             }
         } catch (ParseException e) {
@@ -94,6 +95,7 @@ public class SetRequestedSubjectToResponseContext extends AbstractOIDCAuthentica
         if (idTokenClaims != null && !idTokenClaims.isEmpty()) {
             for (Entry entry : idTokenClaims) {
                 if (IDTokenClaimsSet.SUB_CLAIM_NAME.equals(entry.getClaimName())) {
+                    log.debug("{} Setting requested sub claim value {} ", getLogPrefix(), entry.getValue());
                     getOidcResponseContext().setRequestedSubject(entry.getValue());
                 }
             }

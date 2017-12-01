@@ -64,6 +64,7 @@ public class VerifyRequestedSubjectIdentifier extends AbstractOIDCAuthentication
             getOidcResponseContext().setErrorDescription("unable to produce requested subject " + requestedSubject);
             ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.INVALID_SUBJECT);
         }
+        log.debug("{} Requested subject matched the generated subject {}", getLogPrefix(), generatedSubject);
     }
 
 }
