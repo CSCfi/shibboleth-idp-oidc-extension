@@ -25,6 +25,7 @@
         <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="ValidateRedirectURI" />
         <evaluate expression="ValidateScope" />
+        <evaluate expression="SetRequestedSubjectToResponseContext" />
         <evaluate expression="PopulateIDTokenSignatureSigningParameters" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="PostInitialSetup" />
@@ -46,12 +47,13 @@
     <action-state id="AttributeResolution">
         <evaluate expression="ResolveAttributes" />
         <evaluate expression="FilterAttributes" />
+        <evaluate expression="SetNameIDToResponseContext" />
+        <evaluate expression="VerifyRequestedSubjectIdentifier" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="BuildResponse" />
     </action-state>
 
     <action-state id="BuildResponse">
-        <evaluate expression="SetNameIDToResponseContext" />
         <evaluate expression="SetAuthenticationTimeToResponseContext" />
         <evaluate expression="SetExpirationTimeToResponseContext" />
         <evaluate
