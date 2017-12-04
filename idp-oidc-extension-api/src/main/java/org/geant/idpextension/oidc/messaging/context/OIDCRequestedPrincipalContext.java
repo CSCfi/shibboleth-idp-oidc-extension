@@ -30,8 +30,8 @@ package org.geant.idpextension.oidc.messaging.context;
 import org.opensaml.messaging.context.BaseContext;
 
 /**
- * Context extending requested principal context to have a flag for principal
- * essentiality and for hiding RequestedPrincipalContext.
+ * Context providing additional information to requested principal context.
+ * Indicates for essentiality of requested principal.
  */
 public class OIDCRequestedPrincipalContext extends BaseContext {
 
