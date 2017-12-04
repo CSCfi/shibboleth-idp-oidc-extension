@@ -42,7 +42,7 @@ public class DefaultOIDCMetadataContextLookupFunction implements
     @Override
     @Nullable
     public OIDCMetadataContext apply(@Nullable final ProfileRequestContext input) {
-        if (input == null) {
+        if (input == null || input.getInboundMessageContext() == null) {
             return null;
         }
         return input.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, false);
