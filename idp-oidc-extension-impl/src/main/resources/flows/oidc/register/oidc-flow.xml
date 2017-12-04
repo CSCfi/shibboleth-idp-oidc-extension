@@ -24,6 +24,7 @@
         <evaluate expression="CheckRedirectURIs" />
         <!--  token_endpoint_auth_method? -->
         <!--  userinfo_encrypted_response_* -->
+        <evaluate expression="PopulateIDTokenSignatureSigningParameters" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="BuildResponse" />
     </action-state>
@@ -34,12 +35,16 @@
         <evaluate expression="AddApplicationTypeToClientMetadata" />
         <evaluate expression="AddScopeToClientMetadata" />
         <evaluate expression="AddContactsToClientMetadata" />
+<!--        <evaluate expression="AddTokenEndpointAuthMethodToClientMetadata" />-->
+        <evaluate expression="AddMetadataStatementToClientMetadata" />
+        <evaluate expression="AddResponseTypesToClientMetadata" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="HandleOutboundMessage" />
     </action-state>
 
     <action-state id="HandleOutboundMessage">
         <evaluate expression="BuildClientInformation" />
+            <evaluate expression="SignRegistrationResponse" />
         <evaluate expression="StoreClientInformation" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="CommitResponse" />

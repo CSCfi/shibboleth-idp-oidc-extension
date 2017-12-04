@@ -69,6 +69,24 @@
         class="org.geant.idpextension.oidc.profile.impl.AddContactsToClientMetadata"
         scope="prototype" />
 
+<!--    <bean id="AddTokenEndpointAuthMethodToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddTokenEndpointAuthMethodToClientMetadata"
+        scope="prototype" />-->
+        
+    <bean id="AddResponseTypesToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddResponseTypesToClientMetadata"
+        scope="prototype" />
+
+    <bean id="AddMetadataStatementToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddMetadataStatementToClientMetadata"
+        scope="prototype">
+        <property name="metadataStatements">
+            <map value-type="java.lang.String">
+                <entry key="https://swamid.sunet.se" value="eyJraWQiOiJPRkhkbldLVHE5SmltdEo2ZW93aTMzVXNzeDB0VEY1VnVhMVNQd2hobEE4IiwiYWxnIjoiUlMyNTYifQ.eyJqdGkiOiAiZGY5MDM1YzZhMDFmNDdhN2EyZjIxOTcxYmVlMjFiMDAiLCAiaXNzIjogImh0dHBzOi8vc3VuZXQuc2UiLCAiaWF0IjogMTUxMTc4NTMxMSwgImV4cCI6IDE1MTE3ODg5MTEsICJtZXRhZGF0YV9zdGF0ZW1lbnRzIjogeyJodHRwczovL3N3YW1pZC5zdW5ldC5zZSI6ICJleUpoYkdjaU9pSlNVekkxTmlJc0ltdHBaQ0k2SWpkWldqQjVUR3cwTFVOd1MxTXhabmxhZDBkWE4wSkNjMVU1UVV0VFRtWlVka3QyVUdwaFgyODNSR3NpZlEuZXlKemFXZHVhVzVuWDJ0bGVYTWlPaUI3SW10bGVYTWlPaUJiZXlKcmFXUWlPaUFpVDBaSVpHNVhTMVJ4T1VwcGJYUktObVZ2ZDJrek0xVnpjM2d3ZEZSR05WWjFZVEZUVUhkb2FHeEJPQ0lzSUNKbElqb2dJa0ZSUVVJaUxDQWlhM1I1SWpvZ0lsSlRRU0lzSUNKMWMyVWlPaUFpYzJsbklpd2dJbTRpT2lBaWNFcGpOR1EwUWpOWVJVRmtVemhIVmpBMlZtMTBiMkowVjBveGFsQk1WV1ZvVVVGNVdtTmFiVk42U0ZWNWJFUkxXbEJHTFhoUmNsZENPRE5STjNsdE0xWlpRbEk0ZWtkaVNUSlhWM0ZEUjAxeFZHWlNSR1J1YW5JM05IVjJhVTVZY1hOSWFsVkdaVlkzUzB3MlJVdEVRVmhGU21aalEwUlhhVUZaV0MxWlIyTkJiREIxU0RBM1pGOWFia1JOTmxCS1RHVlpWV2Q2TUZGMFZHb3RkVFUxUlU1aGIyOTNURk52Y25CUVNUTTRSbFJrYURCdE5rY3dNM2s1WDAxYU1WQlBWVnBJT1hock9IZFlhUzEyYUdKNWVXVjFUREpMVGxKcmNqSmxZbDlEY0ZGblpEVTRRbVV4VlVGd1RXdEZRM2QwTmpGb1MwTmZMV3d6VFdGc1ZYcENSRzlUTjNGd1RuTTFPRXcwUzJoVk1XTnpiVGRTZDFSWGJrVnhVbXh2UTI5VFRWQnRaWHBpUjBsb1NWa3dXSEk0TUdKWVdUWkdUV2RYU1RWRFVuSjNNVE40Y21aa1IyMWtjR2hxYkRaZlZUUTVMVEJWVGxOUkluMHNJSHNpZFhObElqb2dJbk5wWnlJc0lDSjVJam9nSW10TmNERXlTME5SY2pGMlZIWjBYMlF6YldSUFdEQlVSVlJRY2pKamFubFNVMUEzY2pOR1RXSXdMVkVpTENBaWVDSTZJQ0pUU0dKNlJGQlZUeTFCT1hJeVRuVlRaR3MxVVd0TE9FaE5RM2RFU1ROSmMwUmlhMjlHWW1jMmFqZFZJaXdnSW10cFpDSTZJQ0pUWlRsV1ZUZHNRbnBxUkVOUk16YzNXVXRvWjFkVFZqaE9WVmhhVlZBemFsTnRNVkUxVDAxclJHUnpJaXdnSW10MGVTSTZJQ0pGUXlJc0lDSmpjbllpT2lBaVVDMHlOVFlpZlYxOUxDQWlabVZrWlhKaGRHbHZibDkxYzJGblpTSTZJQ0p5WlhOd2IyNXpaU0lzSUNKaGRXUWlPaUJiSW1oMGRIQnpPaTh2YzNWdVpYUXVjMlVpWFN3Z0ltcDBhU0k2SUNJM1pXVTRPVFl4WkdReVpqZzBPRFEwWVdRMVl6STJZell4TkRJM1l6azVZU0lzSUNKcGMzTWlPaUFpYUhSMGNITTZMeTl6ZDJGdGFXUXVjM1Z1WlhRdWMyVWlMQ0FpWlhod0lqb2dNVFV4TVRnMU5qWTVOU3dnSW10cFpDSTZJQ0kzV1Zvd2VVeHNOQzFEY0V0VE1XWjVXbmRIVnpkQ1FuTlZPVUZMVTA1bVZIWkxkbEJxWVY5dk4wUnJJaXdnSW1saGRDSTZJREUxTVRFM056QXlPVFY5LkJkQkFEUWE3amVtZnFJTmVScWxqVVg4ampFZk4wT3ZDRnIybHRjd2Ywemo4NnR0QTR3d1FJUk00TFRSTkVhNXVFWnZPbEVaeUw5Rmp4NlBTeTRvTHktVllLR2g2Nkg0TktwR1VGelBTb1VhcHdIOHlnVHZ6ZUk1Nk1JdjRxN3dJUVZxWXRBcTF0b1JXQ1FEVkFhbzZDdWs0angwbHNpWXRKOXZhLUFyQUhzZ3ZCdzdEbm9vZEdMcGp6V0JZX0hFMnd4QmstUWFSaENHNjl3ejE0WWZCTDdNUk95RjI3WjBWRWs5RUNsZEprcWd4aHdFR01SWVdhb0p6dU1pSnNYbE9nMFZBQVFRN0FKU2Zkcy1OSUxLMU15T1JUNzZrR2tMLUQ0ZHdpRkNPdE54ZF9qZEU3dUd2TWhrNzBocmtOTEx3Vm5DbkFHaFRtQnhiMHZ5dzBUYVFqUSJ9LCAia2lkIjogIk9GSGRuV0tUcTlKaW10SjZlb3dpMzNVc3N4MHRURjVWdWExU1B3aGhsQTgiLCAic2lnbmluZ19rZXlzIjogeyJrZXlzIjogW3sidXNlIjogInNpZyIsICJuIjogInBOZjAzZ2hWek1BdzVzV3J3REFNQVpkU1lOWTJxN09WbHhNSW5sak1nejhYQjVtZjhYS0gzRXRQN0FLcmI4SUFmN3JHaGZ1SDNUMU4xQzdGLWp3SWVZalh4TW0ybklBWjBoWEFwZ2JjY3ZCcGY0bjJIN0laZmxNanQ0QTN0dDU4N1FRU3hRMDY5ZHJDUDRzWWV2eGhUY0xwbEp5NlJXQTBjTGotNUNIeVd5OTR6UGVlQTRHUmQ2eGdIRkx6MFJOaVNGMHBGMGtFNHJtUmdRVlotYjRfQm1EOVNzV25JcHdobXM1SWhjaXczNld5QUdRVWVacVVMR3Nmd0FNd2xOTElhVENCTEFvUmd2MzcwcC1Yc0xyZ3o4NnBUa05CSnFYUDVHd0ktWmZnaUxtSnVIalE5bDg1S3FITTg3Zi1RZHNxaVY4S29SY3NsZ1hQcWI2Vk9USkJWdyIsICJlIjogIkFRQUIiLCAia3R5IjogIlJTQSIsICJraWQiOiAidGVzdGtleSJ9XX19.bCY-kajLGyS2VWZA_jYfJkAN5uVNr1J7207TjfZt2toMziVhec4y7Bo0dt6MG7FgOUE-RITshD3ZXfQM0tc0UAnhnaijhGUYMVQf0LorXpJDYEioPaBWMwUmgXUTlIVa-1AYlatmeffnn3vaBiPlvV6Pk-SUu7S1Zn0mp8AMM_NmeuVwpRYFNLZvQ5m0oL9gY3wGt7GvIWdX99zStmZtr4HIHUzlsc-Mld0bgeIs7vK_ii2EiC495PZ81_hpLNAdljens3pUddQGcEY-UBu2i2s6pxAag2aaOl4SNRX-_7GUf_dqzIaRO8h5CmjvUCncK5CbEncDzGAG0kjuA8gcZQ" />
+            </map>        
+        </property>
+    </bean>
+
     <bean id="ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
         scope="prototype" p:id="cim" p:storageService-ref="shibboleth.JPAStorageService"/>
@@ -112,6 +130,15 @@
     <bean id="BuildRegistrationResponse" class="org.geant.idpextension.oidc.profile.impl.BuildRegistrationResponse"
         scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
 
+    <bean id="SignRegistrationResponse" class="org.geant.idpextension.oidc.profile.impl.SignRegistrationResponse"
+        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" p:issuer="%{idp.oidc.issuer}">
+        <property name="securityParametersLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+    </bean>
+
+
     <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
             p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
         <property name="eventContextLookupStrategy">
@@ -122,5 +149,22 @@
     <bean id="RecordResponseComplete"
         class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
         scope="prototype" />
+
+    <bean id="PopulateIDTokenSignatureSigningParameters"
+        class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters"
+        scope="prototype" p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
+        p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
+        <property name="activationCondition">
+                <bean class="com.google.common.base.Predicates" factory-method="alwaysTrue"/>
+        </property>
+        <property name="securityParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+        <property name="existingParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
+        </property>
+    </bean>
 
 </beans>
