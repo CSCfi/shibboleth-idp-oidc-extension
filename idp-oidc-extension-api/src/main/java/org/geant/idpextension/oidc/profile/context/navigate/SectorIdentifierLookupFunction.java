@@ -28,15 +28,20 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
+import java.net.URI;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import net.shibboleth.utilities.java.support.component.AbstractIdentifiableInitializableComponent;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Function;
 
 /**
@@ -76,7 +81,7 @@ public class SectorIdentifierLookupFunction extends AbstractIdentifiableInitiali
      * @param strategy
      *            lookup function to use
      */
-    public void setRelyingPartyContextLookupStrategy(
+    public void setOIDCMetadataContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, OIDCMetadataContext> strategy) {
         oidcMetadataContextLookupStrategy = Constraint.isNotNull(strategy,
                 "OIDCMetadata lookup strategy cannot be null");
@@ -86,21 +91,24 @@ public class SectorIdentifierLookupFunction extends AbstractIdentifiableInitiali
     @Override
     @Nullable
     public String apply(@Nullable final ProfileRequestContext input) {
-        String sectorIdentifier;
+        String sectorIdentifier = null;
         OIDCMetadataContext ctx = oidcMetadataContextLookupStrategy.apply(input);
         if (ctx == null || ctx.getClientInformation() == null || ctx.getClientInformation().getOIDCMetadata() == null) {
-            log.error("oidc metadata context not available");
-            return null;
-        }
-        if (ctx.getClientInformation().getOIDCMetadata().getSectorIDURI() != null) {
+            log.warn("oidc metadata context not available");
+        } else if (ctx.getClientInformation().getOIDCMetadata().getSectorIDURI() != null) {
             sectorIdentifier = ctx.getClientInformation().getOIDCMetadata().getSectorIDURI().getHost();
             log.debug("sector identifier by sector uri {}", sectorIdentifier);
-        } else if (ctx.getClientInformation().getOIDCMetadata().getRedirectionURIs().size() > 1) {
-            log.error("multiple registered redirection uris, unable to determine sector identifier");
-            return null;
+        } else if (ctx.getClientInformation().getOIDCMetadata().getRedirectionURIs() != null
+                && ctx.getClientInformation().getOIDCMetadata().getRedirectionURIs().size() > 1) {
+            log.warn("multiple registered redirection uris, unable to determine sector identifier");
         } else {
-            sectorIdentifier = ctx.getClientInformation().getOIDCMetadata().getRedirectionURI().getHost();
-            log.debug("sector identifier by redirect uri {}", sectorIdentifier);
+            URI redirection = ctx.getClientInformation().getOIDCMetadata().getRedirectionURI();
+            if (redirection != null) {
+                sectorIdentifier = redirection.getHost();
+                log.debug("sector identifier by redirect uri {}", sectorIdentifier);
+            } else {
+                log.warn("redirection uri not available");
+            }
         }
         return sectorIdentifier;
     }
