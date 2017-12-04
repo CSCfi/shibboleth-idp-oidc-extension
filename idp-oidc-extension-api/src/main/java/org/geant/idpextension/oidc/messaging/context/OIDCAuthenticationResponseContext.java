@@ -73,6 +73,9 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     @Nullable
     private String requestedSubject;
     
+    /** Name ID generated for response. Value is set to sub claim. */
+    private NameID nameId;
+    
     /**
      * Gets requested sub value.
      * 
@@ -92,10 +95,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     public void setRequestedSubject(@Nullable String sub) {
         this.requestedSubject = sub;
     }
-
-    /** Name ID generated for response. Value is set to sub claim. */
-    private NameID nameId;
-
+    
     /**
      * Gets Name ID generated for response.
      * @return Name ID generated for response
