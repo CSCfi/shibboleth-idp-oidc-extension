@@ -1,0 +1,6 @@
+<AttributeFilterPolicy id="MostBasicExample" xmlns="urn:mace:shibboleth:2.0:afp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:oidcext="org.geant.idpextension.oidc.attribute.filter" xsi:schemaLocation="urn:mace:shibboleth:2.0:afp http://shibboleth.net/schema/idp/shibboleth-afp.xsd                             urn:mace:shibboleth:2.0:mf:basic http://shibboleth.net/schema/idp/shibboleth-afp-mf-basic.xsd org.geant.idpextension.oidc.attribute.filter classpath:/schema/idp-oidc-extension-afp.xsd">
+    <PolicyRequirementRule xsi:type="NumberOfAttributeValues" attributeID="uid" minimum="1" maximum="3" />
+    <AttributeRule attributeID="test">
+        <PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" onlyIfEssential="true" matchIfRequestedClaimsSilent="true" matchOnlyUserInfo="true" matchOnlyIDToken="false" />
+    </AttributeRule>
+</AttributeFilterPolicy>
