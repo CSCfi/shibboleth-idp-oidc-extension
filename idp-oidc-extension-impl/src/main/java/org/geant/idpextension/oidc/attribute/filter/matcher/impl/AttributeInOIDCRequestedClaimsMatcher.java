@@ -212,7 +212,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
             }
         }
         if (request.getClaims().getUserInfoClaimNames(false) != null && !getMatchOnlyIDToken()) {
-            if (!Collections.disjoint(request.getClaims().getIDTokenClaimNames(false), names)) {
+            if (!Collections.disjoint(request.getClaims().getUserInfoClaimNames(false), names)) {
                 log.debug("{} all values matched as {} is requested user info claims", getLogPrefix(),
                         attribute.getId());
                 log.warn("{} Essential checking not implemented yet", getLogPrefix());
