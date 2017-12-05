@@ -121,6 +121,20 @@
             </dependency>
             <!-- Test Dependencies -->
             <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-core</artifactId>
+                <version>${opensaml.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.shibboleth.idp</groupId>
+                <version>${shib.idp.version}</version>
+                <artifactId>idp-attribute-filter-spring</artifactId>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>net.shibboleth.idp</groupId>
                 <version>${shib.idp.version}</version>
                 <artifactId>idp-profile-api</artifactId>

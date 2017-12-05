@@ -30,12 +30,6 @@
             <artifactId>opensaml-storage-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>net.shibboleth.idp</groupId>
-            <artifactId>idp-profile-api</artifactId>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.geant</groupId>
             <artifactId>idp-oidc-extension-api</artifactId>
         </dependency>
@@ -55,12 +49,30 @@
             <groupId>org.geant.fedoidc</groupId>
             <artifactId>oidcfederatedmetadatastatement</artifactId>
         </dependency>
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-profile-api</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-attribute-filter-spring</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+           <groupId>org.opensaml</groupId>
+           <artifactId>opensaml-core</artifactId>
+           <type>test-jar</type>
+           <scope>test</scope>
+       </dependency>
     </dependencies>
     <build>
         <plugins>
