@@ -50,7 +50,7 @@ public class OIDCScopedStringEncoderParser extends AbstractOIDCEncoderParser {
     public static final QName TYPE_NAME = new QName(AttributeEncoderNamespaceHandler.NAMESPACE, "OIDCScopedString");
 
     /** Local name of scope delimeter attribute. */
-    @Nonnull @NotEmpty public static final String SCOPE_DELIMETER_ATTRIBUTE_NAME = "scopeDelimeter";
+    @Nonnull @NotEmpty public static final String SCOPE_DELIMETER_ATTRIBUTE_NAME = "scopeDelimiter";
    
     /** Constructor. */
     public OIDCScopedStringEncoderParser() {
