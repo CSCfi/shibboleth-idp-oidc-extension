@@ -79,6 +79,23 @@
            <type>test-jar</type>
            <scope>test</scope>
        </dependency>
+       <dependency>
+           <groupId>net.shibboleth.idp</groupId>
+           <artifactId>idp-authn-impl</artifactId>
+           <type>test-jar</type>
+           <scope>test</scope>
+       </dependency>
+       <dependency>
+           <groupId>net.shibboleth.idp</groupId>
+           <artifactId>idp-authn-impl</artifactId>
+           <scope>test</scope>
+       </dependency>
+       <dependency>
+           <groupId>net.shibboleth.idp</groupId>
+           <artifactId>idp-authn-api</artifactId>
+           <type>test-jar</type>
+           <scope>test</scope>
+       </dependency>
     </dependencies>
     <build>
         <plugins>
