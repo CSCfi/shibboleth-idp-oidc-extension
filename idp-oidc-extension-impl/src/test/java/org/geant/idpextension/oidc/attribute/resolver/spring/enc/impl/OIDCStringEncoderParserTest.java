@@ -35,28 +35,24 @@ import org.springframework.context.support.GenericApplicationContext;
 import net.shibboleth.idp.attribute.AttributeEncoder;
 import net.shibboleth.idp.attribute.resolver.spring.BaseAttributeDefinitionParserTest;
 
-public class OIDCStringEncoderParserTest extends BaseAttributeDefinitionParserTest{
-    
-    public static final String ENCODER_FILE_PATH="org/geant/idpextension/oidc/attribute/resolver/spring/enc/";    
-    
-    
-    @Test public void resolver() {
-        final OIDCStringAttributeEncoder encoder =
-                getAttributeEncoder("oidcstring.xml", OIDCStringAttributeEncoder.class);
+public class OIDCStringEncoderParserTest extends BaseAttributeDefinitionParserTest {
+
+    public static final String ENCODER_FILE_PATH = "org/geant/idpextension/oidc/attribute/resolver/spring/enc/";
+
+    @Test
+    public void resolver() {
+        final OIDCStringAttributeEncoder encoder = getAttributeEncoder("oidcstring.xml",
+                OIDCStringAttributeEncoder.class);
 
         Assert.assertEquals(encoder.getName(), "OIDCString_ATTRIBUTE_NAME");
-        Assert.assertEquals(encoder.getAsArray(),true);
-        Assert.assertEquals(encoder.getAsBoolean(),true);
-        Assert.assertEquals(encoder.getAsInt(),false);
-        Assert.assertEquals(encoder.getAsObject(),true);
-        Assert.assertEquals(encoder.getFieldName(),"field");
-        Assert.assertEquals(encoder.getStringDelimiter(),"|");
-        
-        
-        //Assert.assertEquals(encoder.getFriendlyName(),"Saml2String_ATTRIBUTE_FRIENDLY_NAME"); 
-        //Assert.assertEquals(encoder.getNameFormat(),"Saml2String_ATTRIBUTE_NAME_FORMAT");
+        Assert.assertEquals(encoder.getAsArray(), true);
+        Assert.assertEquals(encoder.getAsBoolean(), true);
+        Assert.assertEquals(encoder.getAsInt(), false);
+        Assert.assertEquals(encoder.getAsObject(), true);
+        Assert.assertEquals(encoder.getFieldName(), "field");
+        Assert.assertEquals(encoder.getStringDelimiter(), "|");
     }
-    
+
     @SuppressWarnings("rawtypes")
     @Override
     protected <Type extends AttributeEncoder> Type getAttributeEncoder(final String fileName, final Class<Type> claz,
