@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An action that removed active results from {@link AuthenticationContext} if
+ * An action that removes active results from {@link AuthenticationContext} if
  * they are older than max age parameter expects.
  * 
  */
