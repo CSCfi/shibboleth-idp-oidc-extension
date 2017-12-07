@@ -52,8 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Based on Based on
- * {@link net.shibboleth.idp.authn.impl.AbstractAuthenticationAction}.
+ * Based on {@link net.shibboleth.idp.authn.impl.SelectAuthenticationFlow}.
  * Modifications to original is related to handling non essential requested
  * principal.
  * 
