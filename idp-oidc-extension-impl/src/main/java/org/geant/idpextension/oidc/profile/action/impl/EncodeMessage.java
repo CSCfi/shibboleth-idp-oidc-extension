@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * 
  * The difference is having encoder also directly injected without factory.
  * TODO: Consider if we want to apply message encoder factory and loose the
- * direct injection.
+ * direct injection. In the long run we should get rid of this copied class.
  * 
  * Action that encodes an outbound response from the outbound
  * {@link MessageContext}.
