@@ -40,12 +40,18 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
+/**
+ * A {@link ClientInfomationManager} exploiting {@link StorageService} for storing the data.
+ */
 public class StorageServiceClientInformationManager extends BaseStorageServiceClientInformationComponent 
     implements ClientInformationManager {
     
     /** Class logger. */
     @Nonnull private final Logger log = LoggerFactory.getLogger(StorageServiceClientInformationResolver.class);
-        
+
+    /**
+     * Constructor.
+     */
     public StorageServiceClientInformationManager() {
         super();
     }

@@ -50,6 +50,9 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
+/**
+ * A {@link ClientInformationResolver} exploiting {@link StorageService} for fetching the stored data.
+ */
 public class StorageServiceClientInformationResolver extends BaseStorageServiceClientInformationComponent 
     implements ClientInformationResolver {
     
