@@ -56,7 +56,7 @@ import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
- *
+ * A base class for {@link ClientInformationResolver}s.
  */
 public abstract class AbstractClientInformationResolver extends AbstractIdentifiableInitializableComponent 
     implements ClientInformationResolver {
