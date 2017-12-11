@@ -59,6 +59,7 @@ public class StorageServiceClientInformationResolver extends BaseStorageServiceC
     /** Class logger. */
     @Nonnull private final Logger log = LoggerFactory.getLogger(StorageServiceClientInformationResolver.class);
     
+    /** Constructor. */
     public StorageServiceClientInformationResolver() {
         super();
     }
