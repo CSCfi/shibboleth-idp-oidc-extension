@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd" default-init-method="initialize" default-destroy-method="destroy">
+  
+    <!--
+    Unverified RP configuration, defaults to support only registration flow. Add <ref> elements to the list
+    to enable specific default profile settings (as below), or create new beans inline to override defaults.
+
+    "Unverified" typically means the OP has no metadata, or equivalent way of assuring the identity and
+    legitimacy of a requesting system. To run an "open" OP, you can enable profiles here.
+    -->
+  
+    <bean id="shibboleth.oidc.UnverifiedRelyingParty" parent="OIDCRelyingParty">
+        <property name="profileConfigurations">
+            <list>
+                <bean parent="OIDC.Registration" />
+            </list>
+        </property>
+    </bean>
+  
+  
+    <!--
+    Default configuration, with default settings applied for all profiles, and enables
+    the attribute-release consent flow.
+    -->
+  
+    <bean id="shibboleth.oidc.DefaultRelyingParty" parent="OIDCRelyingParty">
+        <property name="profileConfigurations">
+            <list>
+                <bean parent="OIDC.SSO" p:postAuthenticationFlows="attribute-release" />
+            </list>
+        </property>
+    </bean>
+  
+  
+    <!-- Container for any overrides you want to add. -->
+  
+    <util:list id="shibboleth.oidc.RelyingPartyOverrides">
+        <!--
+	     Override example that identifies a single RP by name and configures it
+        for OIDC SSO without signing id token. This is a common "vendor" scenario.
+        -->
+        <!--
+	    <bean parent="OIDCRelyingPartyByName" c:relyingPartyIds="demo_rp">
+            <property name="profileConfigurations">
+                <list>
+                    <bean parent="OIDC.SSO" p:signIDTokens="false" />
+                </list>
+            </property>
+        </bean>
+        -->
+    </util:list>
+    
+</beans>

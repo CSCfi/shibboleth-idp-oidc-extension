@@ -115,116 +115,6 @@
              class="org.geant.idpextension.oidc.profile.spring.factory.BasicJWKCredentialFactoryBean"
              p:jWKResource="%{idp.signing.oidc.key}" />
 
-- name: Add new signing configurations and default oidc security configuration shibboleth.oidc.DefaultSecurityConfiguration to relying-party.xml
-  blockinfile:
-    dest: "{{ idp_home }}/conf/relying-party.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertafter: "default-destroy-method"
-    content: |
-         <bean id="shibboleth.SigningConfiguration.RS256" parent="shibboleth.BasicSignatureSigningConfiguration"
-             p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-             <property name="signatureAlgorithms">
-                 <list>
-                     <util:constant
-                        static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_256" />
-                 </list>
-             </property>
-         </bean>
-         <bean id="shibboleth.SigningConfiguration.RS384" parent="shibboleth.BasicSignatureSigningConfiguration"
-             p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-             <property name="signatureAlgorithms">
-                 <list>
-                     <util:constant
-                        static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_384" />
-                 </list>
-             </property>
-         </bean>
-         <bean id="shibboleth.SigningConfiguration.RS512" parent="shibboleth.BasicSignatureSigningConfiguration"
-             p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-             <property name="signatureAlgorithms">
-                 <list>
-                     <util:constant
-                        static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_512" />
-                 </list>
-             </property>
-         </bean>
-         <bean id="shibboleth.SigningConfiguration.ES256" parent="shibboleth.BasicSignatureSigningConfiguration"
-             p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-             <property name="signatureAlgorithms">
-                 <list>
-                     <util:constant
-                        static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_256" />
-                 </list>
-             </property>
-         </bean>
-         <bean id="shibboleth.SigningConfiguration.ES384" parent="shibboleth.BasicSignatureSigningConfiguration"
-             p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-             <property name="signatureAlgorithms">
-                 <list>
-                     <util:constant
-                        static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_384" />
-                 </list>
-             </property>
-         </bean>
-         <bean id="shibboleth.SigningConfiguration.ES512" parent="shibboleth.BasicSignatureSigningConfiguration"
-             p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-             <property name="signatureAlgorithms">
-                 <list>
-                     <util:constant
-                        static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_512" />
-                 </list>
-             </property>
-         </bean>
-         <bean id="shibboleth.SigningConfiguration.HS256" parent="shibboleth.BasicSignatureSigningConfiguration"
-             p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-             <property name="signatureAlgorithms">
-                 <list>
-                     <util:constant
-                        static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_256" />
-                 </list>
-             </property>
-         </bean>
-         <bean id="shibboleth.SigningConfiguration.HS384" parent="shibboleth.BasicSignatureSigningConfiguration"
-             p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-             <property name="signatureAlgorithms">
-                 <list>
-                     <util:constant
-                        static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_384" />
-                 </list>
-             </property>
-         </bean>
-         <bean id="shibboleth.SigningConfiguration.HS512" parent="shibboleth.BasicSignatureSigningConfiguration"
-             p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-             <property name="signatureAlgorithms">
-                 <list>
-                     <util:constant
-                        static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_512" />
-                 </list>
-             </property>
-         </bean>
-
-         <bean id="shibboleth.oidc.DefaultSecurityConfiguration" class="net.shibboleth.idp.profile.config.SecurityConfiguration">
-             <property name="signatureSigningConfiguration">
-                <ref bean="#{'%{idp.oidc.signing.config:shibboleth.SigningConfiguration.RS256}'.trim()}" />
-             </property>
-         </bean>        
-
-- name: Add OIDC.Registration profile configuration to relying-party.xml, using UnverifiedRelyingParty
-  blockinfile:
-    dest: "{{ idp_home }}/conf/relying-party.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK 3 -->"
-    insertafter: "<!-- <bean parent=\"SAML2.SSO\" p:encryptAssertions=\"false\" /> -->"
-    content: |
-         <bean parent="OIDC.Registration" p:securityConfiguration-ref="shibboleth.oidc.DefaultSecurityConfiguration" />
-
-- name: Add OIDC.SSO profile configuration to relying-party.xml, override sec. conf with shibboleth.oidc.DefaultSecurityConfiguration
-  blockinfile:
-    dest: "{{ idp_home }}/conf/relying-party.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK 2 -->"
-    insertafter: "SSOS"
-    content: |
-         <bean parent="OIDC.SSO" p:securityConfiguration-ref="shibboleth.oidc.DefaultSecurityConfiguration" p:postAuthenticationFlows="attribute-release" />
-
 - name: Set oidc credential to idp.properties       
   blockinfile:
     dest: "{{ idp_home }}/conf/idp.properties"
@@ -257,22 +147,6 @@
                  <PermitValueRule xsi:type="ANY" />
              </AttributeRule>
          </AttributeFilterPolicy>
-
-- name: Add OIDC.SSO profile configuration to relying-party-system.xml. SYSTEM FILE CHANGE!!
-  blockinfile:
-    dest: "{{ idp_home }}/system/conf/relying-party-system.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertbefore: "<bean id=\"CAS.LoginConfiguration\""
-    content: |
-          <bean id="OIDC.SSO"
-              class="org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration"
-              p:securityConfiguration-ref="%{idp.security.config:shibboleth.DefaultSecurityConfiguration}"
-              p:servletRequest-ref="shibboleth.HttpServletRequest" />
-
-          <bean id="OIDC.Registration"
-              class="org.geant.idpextension.oidc.config.OIDCDynamicRegistrationConfiguration"
-              p:securityConfiguration-ref="%{idp.security.config:shibboleth.DefaultSecurityConfiguration}"
-              p:servletRequest-ref="shibboleth.HttpServletRequest" />
 
 - name: Add FilterActiveAuthenticationResultsByMaxAge and OIDCSelectAuthenticationFlow beans to authn-beans.xml. SYSTEM FILE CHANGE!!
   blockinfile:
@@ -343,21 +217,39 @@
         </util:list>
 
 
-- name: Add OIDC name identifier generation service to services-system.xml  - SYSTEM DIRECTORY CHANGE!!
+- name: Add OIDC name identifier generation and oidc relying party services to services-system.xml  - SYSTEM DIRECTORY CHANGE!!
   blockinfile:
     dest: "{{ idp_home }}/system/conf/services-system.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK  for OIDC NameIdentifierGenerationService -->"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK  for OIDC NameIdentifierGenerationService and OIDC relying party -->"
     insertbefore: "<bean id=\"shibboleth.NameIdentifierGenerationService"
     content: |
         <bean id="shibboleth.oidc.NameIdentifierGenerationService" class="net.shibboleth.ext.spring.service.ReloadableSpringService"
-        c:claz="net.shibboleth.idp.saml.nameid.NameIdentifierGenerationService"
-        p:serviceConfigurations-ref="#{'%{idp.service.oidc.nameidGeneration.resources:shibboleth.oidc.NameIdentifierGenerationResources}'.trim()}"
-        p:failFast="%{idp.service.oidc.nameidGeneration.failFast:%{idp.service.failFast:false}}"
-        p:reloadCheckDelay="%{idp.service.oidc.nameidGeneration.checkInterval:PT0S}"
-        p:beanPostProcessors-ref="shibboleth.IdentifiableBeanPostProcessor"
-        p:beanFactoryPostProcessors-ref="shibboleth.PropertySourcesPlaceholderConfigurer" />
+            c:claz="net.shibboleth.idp.saml.nameid.NameIdentifierGenerationService"
+            p:serviceConfigurations-ref="#{'%{idp.service.oidc.nameidGeneration.resources:shibboleth.oidc.NameIdentifierGenerationResources}'.trim()}"
+            p:failFast="%{idp.service.oidc.nameidGeneration.failFast:%{idp.service.failFast:false}}"
+            p:reloadCheckDelay="%{idp.service.oidc.nameidGeneration.checkInterval:PT0S}"
+            p:beanPostProcessors-ref="shibboleth.IdentifiableBeanPostProcessor"
+            p:beanFactoryPostProcessors-ref="shibboleth.PropertySourcesPlaceholderConfigurer" />
 
-- name: Add OIDC name identifier generation resources to services.xml
+        <bean id="shibboleth.oidc.RelyingPartyResolverService" class="net.shibboleth.ext.spring.service.ReloadableSpringService"
+            p:serviceConfigurations-ref="#{'%{idp.service.relyingparty.oidc.resources:shibboleth.oidc.RelyingPartyResolverResources}'.trim()}"
+            p:failFast="%{idp.service.relyingparty.failFast:%{idp.service.failFast:false}}"
+            p:reloadCheckDelay="%{idp.service.relyingparty.checkInterval:PT0S}"
+            p:beanPostProcessors-ref="shibboleth.IdentifiableBeanPostProcessor"
+            p:beanFactoryPostProcessors-ref="shibboleth.PropertySourcesPlaceholderConfigurer">
+        <constructor-arg name="claz" value="net.shibboleth.idp.relyingparty.RelyingPartyConfigurationResolver" />
+        <constructor-arg name="strategy">
+            <bean class="net.shibboleth.ext.spring.service.ClassBasedServiceStrategy"
+                c:serviceableClaz="net.shibboleth.idp.relyingparty.impl.DefaultRelyingPartyConfigurationResolver" />
+        </constructor-arg>
+        </bean>
+
+        <bean id="shibboleth.oidc.RelyingPartyConfigurationResolver"
+            class="net.shibboleth.idp.relyingparty.impl.ReloadingRelyingPartyConfigurationResolver"
+            c:resolverService-ref="shibboleth.oidc.RelyingPartyResolverService" />
+
+
+- name: Add OIDC name identifier generation and oidc relying party resources to services.xml
   blockinfile:
     dest: "{{ idp_home }}/conf/services.xml"
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK  for OIDC NameIdentifierGenerationResources -->"
@@ -367,12 +259,20 @@
             <value>%{idp.home}/conf/oidc-subject.xml</value>
             <value>%{idp.home}/system/conf/oidc-subject-system.xml</value>
         </util:list>
+   
+        <util:list id="shibboleth.oidc.RelyingPartyResolverResources">
+            <value>%{idp.home}/conf/oidc-relying-party.xml</value>
+            <value>%{idp.home}/conf/credentials.xml</value>
+            <value>%{idp.home}/system/conf/oidc-relying-party-system.xml</value>
+        </util:list>
+     
 
-- name: Copy oidc-subject.xml and oidc-subject.properties
+- name: Copy oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "oidc-subject.xml"
     - "oidc-subject.properties"
+    - "oidc-relying-party.xml"
 
 - name: Add oidc-subject.properties to included confs in idp.properties
   lineinfile:
@@ -381,10 +281,11 @@
     line: '\1, /conf/oidc-subject.properties'
     backrefs: yes
 
-- name: Copy oidc-subject-system.xml - SYSTEM DIRECTORY CHANGE!!
+- name: Copy oidc-relying-party-system.xml and oidc-subject-system.xml - SYSTEM DIRECTORY CHANGE!!
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/system/conf/{{item}}
   with_items:
     - "oidc-subject-system.xml"
+    - "oidc-relying-party-system.xml"
 
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
