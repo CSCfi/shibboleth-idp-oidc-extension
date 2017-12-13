@@ -4,11 +4,9 @@
 
 The goal of the project is to provide a [OpenID Connect](http://openid.net/connect/) OP extension to [Shibboleth IdP V3](https://wiki.shibboleth.net/confluence/display/IDP30/Home). The work is done as part of task T3.1A OpenID Connect Federation in GN4-2 JRA3 project.
 
-The development has gone through few development cycles now and goal is to pilot it early 2018. 
+The goal is to make alpha release by the end of the year 2017 and a pilot early 2018. 
 
-This far the primary goal has been on understanding how [Nimbus library](https://connect2id.com/products/nimbus-oauth-openid-connect-sdk) should be integrated with [Shibboleth IdP V3](https://wiki.shibboleth.net/confluence/display/IDP30/Home) and no effort has yet been made on areas beyond that.
-
-The Shibboleth IdP installed by this project is able to act as a *noncompliant* [OpenID Connect](http://openid.net/connect/) provider for implicit flow.  
+The Shibboleth IdP installed by this project is able to act as a [OpenID Connect](http://openid.net/connect/) provider for implicit flow.  
 
 
 ## Prerequisites
