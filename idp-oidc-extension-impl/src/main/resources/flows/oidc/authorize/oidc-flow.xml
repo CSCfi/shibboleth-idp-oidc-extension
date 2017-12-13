@@ -80,12 +80,14 @@
 	</action-state>
 
 	<action-state id="HandleOutboundMessage">
-		<evaluate expression="FormOutboundMessage" />
-		<evaluate expression="EncodeMessage" />
-		<evaluate expression="RecordResponseComplete" />
-		<evaluate expression="'proceed'" />
-		<transition on="proceed" to="end" />
-	</action-state>
+	    <evaluate expression="FormOutboundMessage" />
+	    <evaluate expression="EncodeMessage" />
+	    <evaluate expression="RecordResponseComplete" />
+	    <evaluate expression="'proceed'" />
+	    <transition on="proceed" to="end" />
+	    <transition to="DisplayError" />
+	    <exception-handler bean="RethrowingFlowExecutionExceptionHandler" />
+    </action-state>
 
 
 	<!-- Error views, handling and end states -->
@@ -116,6 +118,14 @@
 		<evaluate expression="'RuntimeException'" />
 		<transition to="DisplayError" />
 	</action-state>
+	
+	<!-- Select to show local error or oidc error response -->
+    <decision-state id="SelectErrorMedia">
+	    <if
+		    test="opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false) != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false).getRedirectURI() != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false).getErrorCode() != null"
+		    then="HandleOutboundMessage" else="DisplayError" />
+    </decision-state>
+	
 
 	<end-state id="end" />
 
@@ -129,7 +139,7 @@
 	<!-- all unhandled non proceed results are turned into errors -->
 	<global-transitions>
 		<transition on-exception="java.lang.RuntimeException" to="LogRuntimeException" />
-		<transition on="#{!'proceed'.equals(currentEvent.id)}" to="DisplayError" />
+		<transition on="#{!'proceed'.equals(currentEvent.id)}" to="SelectErrorMedia" />
 	</global-transitions>
 
 	<bean-import resource="../../../system/flows/saml/security-beans.xml" />
