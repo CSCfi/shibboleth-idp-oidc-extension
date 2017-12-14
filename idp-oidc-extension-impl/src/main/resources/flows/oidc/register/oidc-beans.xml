@@ -69,13 +69,14 @@
         class="org.geant.idpextension.oidc.profile.impl.AddContactsToClientMetadata"
         scope="prototype" />
 
-    <bean id="ClientInformationManager"
+    <bean id="shibboleth.oidc.ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
-        scope="prototype" p:id="cim" p:storageService-ref="shibboleth.JPAStorageService"/>
+        scope="prototype" p:id="OIDCClientInformationManager"
+        p:storageService-ref="#{'%{idp.oidc.dynreg.StorageService:shibboleth.JPAStorageService}'.trim()}"/>
 
     <bean id="StoreClientInformation"
         class="org.geant.idpextension.oidc.profile.impl.StoreClientInformation"
-        scope="prototype" p:clientInformationManager-ref="ClientInformationManager"
+        scope="prototype" p:clientInformationManager-ref="shibboleth.oidc.ClientInformationManager"
         p:defaultRegistrationValidityPeriod="PT24H">
         <property name="registrationValidityPeriodStrategy">
             <bean class="org.geant.idpextension.oidc.config.navigate.RegistrationValidityPeriodLookupFunction" />
@@ -84,7 +85,7 @@
     
     <bean id="SelectRelyingPartyConfiguration"
         class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
-        scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+        scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.oidc.RelyingPartyConfigurationResolver" />
 
     <bean id="SelectProfileConfiguration"
         class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
