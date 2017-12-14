@@ -90,13 +90,14 @@
     content: |
          idp.oidc.issuer= https://{{ service_name }}
 
-- name: Set oidc registration storage service to idp.properties
+- name: Set oidc registration properties to idp.properties
   blockinfile:
     dest: "{{ idp_home }}/conf/idp.properties"
     marker: "# {mark} ANSIBLE MANAGER BLOCK 2"
     insertafter: "idp.oidc.issuer"
     content: |
          idp.oidc.dynreg.StorageService = shibboleth.JPAStorageService
+         idp.oidc.dynreg.defaultValidity = PT24H
 
 - name: Add one trusted test SP
   blockinfile:
