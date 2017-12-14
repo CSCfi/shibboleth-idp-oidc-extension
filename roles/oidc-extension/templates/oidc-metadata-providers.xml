@@ -12,36 +12,41 @@
        default-init-method="initialize"
        default-destroy-method="destroy">
 
-    <bean id="RelyingPartyClientInformationProvider"
-        class="org.geant.idpextension.oidc.metadata.resolver.RelyingPartyClientInformationProvider" p:embeddedResolver-ref="ChainingClientInformationResolver">
+    <!-- Generic beans for configuring the OIDC metadata system, in most cases don't need any modifications. -->
+
+    <bean id="shibboleth.oidc.RelyingPartyClientInformationProvider"
+        class="org.geant.idpextension.oidc.metadata.resolver.RelyingPartyClientInformationProvider"
+        p:embeddedResolver-ref="shibboleth.oidc.ChainingClientInformationResolver">
     </bean>
 
-    <bean id="ChainingClientInformationResolver"
-        class="org.geant.idpextension.oidc.metadata.impl.ChainingClientInformationResolver" p:id="chainresolver">
-        <property name="resolvers">
-            <ref bean="OIDCResolvers" />
-        </property>
-    </bean>
+    <bean id="shibboleth.oidc.ChainingClientInformationResolver"
+        class="org.geant.idpextension.oidc.metadata.impl.ChainingClientInformationResolver"
+        p:id="InternalEmbeddedChainResolver" 
+        p:resolvers-ref="shibboleth.oidc.ClientInformationResolvers"/>
 
-    <util:list id="OIDCResolvers"
+    <!-- Generic beans end, in most cases only edit after this line. -->
+
+    <!-- The following example contains two OIDC client information resolvers: first one reading a single client information from a JSON file, and the
+         second one fetchs the OIDC client informations from the configured StorageService. -->
+
+    <util:list id="shibboleth.oidc.ClientInformationResolvers"
         value-type="org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver">
-        <ref bean="OIDCFileResolver" />
-        <ref bean="StorageClientInformationResolver" />
+        <ref bean="ExampleFileResolver" />
+        <ref bean="ExampleStorageClientInformationResolver" />
     </util:list>
 
-    <bean id="OIDCFileResolver"
-        class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" p:id="fileresolver">
+    <bean id="ExampleFileResolver"
+        class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" p:id="ExampleFileResolver1">
         <constructor-arg>
-            <bean class="java.io.File" id="file1">
-                <constructor-arg type="String"
-                    value="/opt/shibboleth-idp/metadata/oidc-client.json" />
+            <bean class="java.io.File" id="ExampleFile">
+                <constructor-arg type="String" value="/opt/shibboleth-idp/metadata/oidc-client.json" />
             </bean>
         </constructor-arg>
     </bean>
 
-    <bean id="StorageClientInformationResolver"
+    <bean id="ExampleStorageClientInformationResolver"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationResolver"
-        p:id="cimresolver" p:storageService-ref="shibboleth.JPAStorageService"/>
+        p:id="ExampleStorageResolver1" p:storageService-ref="shibboleth.JPAStorageService"/>
     
 </beans>
 
