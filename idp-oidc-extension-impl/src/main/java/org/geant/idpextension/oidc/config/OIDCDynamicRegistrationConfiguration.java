@@ -34,8 +34,6 @@ import javax.annotation.Nullable;
 import org.opensaml.profile.context.ProfileRequestContext;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 
 import net.shibboleth.idp.profile.config.AbstractProfileConfiguration;
 import net.shibboleth.utilities.java.support.annotation.Duration;
@@ -59,11 +57,6 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractProfileConfigu
     /** Initialization flag. */
     private boolean initialized;
 
-    /** Predicate used to determine if the open (not authenticated) registration is allowed. Default returns true. */
-    @SuppressWarnings("rawtypes")
-    @Nonnull
-    private Predicate<ProfileRequestContext> allowOpenRegistrationPredicate;
-    
     /** Lookup function to supply {@link #registrationValidityPeriod} property. */
     @Nullable private Function<ProfileRequestContext, Long> registrationValidityPeriodLookupStrategy;
 
@@ -85,7 +78,6 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractProfileConfigu
     public OIDCDynamicRegistrationConfiguration(@Nonnull @NotEmpty final String profileId) {
         super(profileId);
         setRegistrationValidityPeriod(0);
-        allowOpenRegistrationPredicate = Predicates.alwaysTrue();
     }
 
     /** {@inheritDoc} */
@@ -103,29 +95,6 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractProfileConfigu
         return initialized;
     }
 
-    /**
-     * Get the predicate used to determine if the open (not authenticated) registration is allowed.
-     * 
-     * @return predicate to determine the open (not authenticated) registration is allowed.
-     */
-    @SuppressWarnings("rawtypes")
-    @Nonnull
-    public Predicate<ProfileRequestContext> getAllowOpenRegistration() {
-        return allowOpenRegistrationPredicate;
-    }
-
-    /**
-     * Set the predicate used to determine if the open (not authenticated) registration is allowed.
-     * 
-     * @param predicate predicate used to determine if the open (not authenticated) registration is allowed.
-     */
-    @SuppressWarnings("rawtypes")
-    public void setAllowOpenRegistration(@Nonnull final Predicate<ProfileRequestContext> predicate) {
-        allowOpenRegistrationPredicate =
-                Constraint.isNotNull(predicate, 
-                    "Predicate to determine if open registration is allowed cannot be null");
-    }
-    
     /**
      * Get dynamic registration validity period.
      * 
