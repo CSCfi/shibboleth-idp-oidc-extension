@@ -122,7 +122,7 @@
 	<!-- Select to show local error or oidc error response -->
 	<decision-state id="SelectErrorMedia">
 		<if
-			test="opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false) != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false).getRedirectURI() != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false).getErrorCode() != null"
+			test="opensamlProfileRequestContext.getOutboundMessageContext() != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false) != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false).getRedirectURI() != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false).getErrorCode() != null"
 			then="HandleOutboundMessage" else="DisplayError" />
 	</decision-state>
 
