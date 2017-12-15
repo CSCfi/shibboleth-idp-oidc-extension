@@ -45,7 +45,7 @@
                 <ref bean="SAML2.AttributeQuery" />
                 <ref bean="SAML2.ArtifactResolution" />
                 <ref bean="Liberty.SSOS" />
-       	       	<bean parent="OIDC.Registration" p:postAuthenticationFlows="attribute-release" />
+       	       	<bean parent="OIDC.SSO" p:postAuthenticationFlows="attribute-release" />
             </list>
         </property>
     </bean>
