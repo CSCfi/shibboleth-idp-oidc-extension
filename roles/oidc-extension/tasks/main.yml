@@ -252,36 +252,13 @@
         </util:list>
      
 
-- name: Copy oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
+- name: Copy relying-party.xml, oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "oidc-subject.xml"
     - "oidc-subject.properties"
     - "oidc-relying-party.xml"
-
-- name: Import oidc-relying-party to relying-party.xml
-  blockinfile:
-    dest: "{{ idp_home }}/conf/relying-party.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK IMPORT OIDC BEANS -->"
-    insertafter: "default-destroy-method"
-    content: |
-         <import resource="oidc-relying-party.xml"/>
-    
-- name: Add OIDC.Registration profile configuration to relying-party.xml
-  blockinfile:
-    dest: "{{ idp_home }}/conf/relying-party.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK OIDC REG -->"
-    insertafter: "<!-- <bean parent=\"SAML2.SSO\" p:encryptAssertions=\"false\" /> -->"
-    content: |
-         <bean parent="OIDC.Registration" />
-
-- name: Add OIDC.SSO profile configuration to relying-party.xml
-  blockinfile:
-    dest: "{{ idp_home }}/conf/relying-party.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK OIDC SSO -->"
-    insertafter: "SSOS"
-    content: |
-         <bean parent="OIDC.SSO" p:postAuthenticationFlows="attribute-release" />
+    - "relying-party.xml"
 
 - name: Add oidc-subject.properties to included confs in idp.properties
   lineinfile:
