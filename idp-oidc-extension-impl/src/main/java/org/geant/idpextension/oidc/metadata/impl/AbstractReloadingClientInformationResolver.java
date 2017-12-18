@@ -53,6 +53,7 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 import net.shibboleth.utilities.java.support.annotation.Duration;
 import net.shibboleth.utilities.java.support.annotation.constraint.Positive;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
@@ -72,9 +73,6 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
     /** Current task to refresh metadata. */
     private RefreshMetadataTask refreshMetadataTask;
     
-    /** Factor used to compute when the next refresh interval will occur. Default value: 0.75 */
-    private float refreshDelayFactor = 0.75f;
-    
     /**
      * Refresh interval used when metadata does not contain any validUntil or cacheDuration information. Default value:
      * 14400000ms
@@ -83,9 +81,6 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
 
     /** Floor, in milliseconds, for the refresh interval. Default value: 300000ms */
     @Duration @Positive private long minRefreshDelay = 300000;
-
-    /** Time when the currently cached metadata file expires. */
-    private DateTime expirationTime;
 
     /** Last time the metadata was updated. */
     private DateTime lastUpdate;
@@ -138,14 +133,46 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
     }
     
     /**
+     * Sets the minimum amount of time, in milliseconds, between refreshes.
+     * 
+     * @param delay minimum amount of time, in milliseconds, between refreshes
+     */
+    @Duration public void setMinRefreshDelay(@Duration @Positive final long delay) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
+
+        if (delay < 0) {
+            throw new IllegalArgumentException("Minimum refresh delay must be greater than 0");
+        }
+        minRefreshDelay = delay;
+    }
+    
+    /**
+     * Sets the maximum amount of time, in milliseconds, between refresh intervals.
+     * 
+     * @param delay maximum amount of time, in milliseconds, between refresh intervals
+     */
+    @Duration public void setMaxRefreshDelay(@Duration @Positive final long delay) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
+        
+        if (delay < 0) {
+            throw new IllegalArgumentException("Maximum refresh delay must be greater than 0");
+        }
+        maxRefreshDelay = delay;
+    }
+    
+    /**
      * Refreshes the metadata from its source.
      * 
      * @throws ResolverException thrown is there is a problem retrieving and processing the metadata
      */
     public synchronized void refresh() throws ResolverException {
-        DateTime now = new DateTime(ISOChronology.getInstanceUTC());
-        String mdId = getMetadataIdentifier();
+        final DateTime now = new DateTime(ISOChronology.getInstanceUTC());
+        final String mdId = getMetadataIdentifier();
 
+        long refreshDelay = 0;
+        
         log.debug("Beginning refresh of metadata from '{}'", mdId);
         try {
             byte[] mdBytes = fetchMetadata();
@@ -171,7 +198,7 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
             }
         } catch (Throwable t) {
             log.error("Error occurred while attempting to refresh metadata from '" + mdId + "'", t);
-            nextRefresh = new DateTime(ISOChronology.getInstanceUTC()).plus(minRefreshDelay);
+            refreshDelay = minRefreshDelay;
             if (t instanceof Exception) {
                 throw new ResolverException((Exception) t);
             } else {
@@ -180,10 +207,12 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
             }
         } finally {
             refreshMetadataTask = new RefreshMetadataTask();
-            long nextRefreshDelay = minRefreshDelay;
-            //TODO: refresh-delays should be defined better
-            nextRefresh = new DateTime(ISOChronology.getInstanceUTC()).plus(minRefreshDelay);
-            
+            if (refreshDelay == 0) {
+                refreshDelay = maxRefreshDelay;
+            }
+            nextRefresh = new DateTime(ISOChronology.getInstanceUTC()).plus(refreshDelay);
+            final long nextRefreshDelay = nextRefresh.getMillis() - System.currentTimeMillis();
+
             taskTimer.schedule(refreshMetadataTask, nextRefreshDelay);
             log.info("Next refresh cycle for metadata provider '{}' will occur on '{}' ('{}' local time)",
                     new Object[] {mdId, nextRefresh, nextRefresh.toDateTime(DateTimeZone.getDefault()),});
