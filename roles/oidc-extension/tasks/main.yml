@@ -90,6 +90,15 @@
     content: |
          idp.oidc.issuer= https://{{ service_name }}
 
+- name: Set oidc registration properties to idp.properties
+  blockinfile:
+    dest: "{{ idp_home }}/conf/idp.properties"
+    marker: "# {mark} ANSIBLE MANAGER BLOCK 2"
+    insertafter: "idp.oidc.issuer"
+    content: |
+         idp.oidc.dynreg.StorageService = shibboleth.JPAStorageService
+         idp.oidc.dynreg.defaultValidity = PT24H
+
 - name: Add one trusted test SP
   blockinfile:
     dest: "{{ idp_home }}/conf/metadata-providers.xml"
@@ -217,7 +226,7 @@
         </util:list>
 
 
-- name: Add OIDC name identifier generation and oidc relying party services to services-system.xml  - SYSTEM DIRECTORY CHANGE!!
+- name: Add OIDC name identifier generation to services-system.xml  - SYSTEM DIRECTORY CHANGE!!
   blockinfile:
     dest: "{{ idp_home }}/system/conf/services-system.xml"
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK  for OIDC NameIdentifierGenerationService and OIDC relying party -->"
@@ -231,25 +240,7 @@
             p:beanPostProcessors-ref="shibboleth.IdentifiableBeanPostProcessor"
             p:beanFactoryPostProcessors-ref="shibboleth.PropertySourcesPlaceholderConfigurer" />
 
-        <bean id="shibboleth.oidc.RelyingPartyResolverService" class="net.shibboleth.ext.spring.service.ReloadableSpringService"
-            p:serviceConfigurations-ref="#{'%{idp.service.relyingparty.oidc.resources:shibboleth.oidc.RelyingPartyResolverResources}'.trim()}"
-            p:failFast="%{idp.service.relyingparty.failFast:%{idp.service.failFast:false}}"
-            p:reloadCheckDelay="%{idp.service.relyingparty.checkInterval:PT0S}"
-            p:beanPostProcessors-ref="shibboleth.IdentifiableBeanPostProcessor"
-            p:beanFactoryPostProcessors-ref="shibboleth.PropertySourcesPlaceholderConfigurer">
-        <constructor-arg name="claz" value="net.shibboleth.idp.relyingparty.RelyingPartyConfigurationResolver" />
-        <constructor-arg name="strategy">
-            <bean class="net.shibboleth.ext.spring.service.ClassBasedServiceStrategy"
-                c:serviceableClaz="net.shibboleth.idp.relyingparty.impl.DefaultRelyingPartyConfigurationResolver" />
-        </constructor-arg>
-        </bean>
-
-        <bean id="shibboleth.oidc.RelyingPartyConfigurationResolver"
-            class="net.shibboleth.idp.relyingparty.impl.ReloadingRelyingPartyConfigurationResolver"
-            c:resolverService-ref="shibboleth.oidc.RelyingPartyResolverService" />
-
-
-- name: Add OIDC name identifier generation and oidc relying party resources to services.xml
+- name: Add OIDC name identifier generation to services.xml
   blockinfile:
     dest: "{{ idp_home }}/conf/services.xml"
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK  for OIDC NameIdentifierGenerationResources -->"
@@ -259,20 +250,15 @@
             <value>%{idp.home}/conf/oidc-subject.xml</value>
             <value>%{idp.home}/system/conf/oidc-subject-system.xml</value>
         </util:list>
-   
-        <util:list id="shibboleth.oidc.RelyingPartyResolverResources">
-            <value>%{idp.home}/conf/oidc-relying-party.xml</value>
-            <value>%{idp.home}/conf/credentials.xml</value>
-            <value>%{idp.home}/system/conf/oidc-relying-party-system.xml</value>
-        </util:list>
      
 
-- name: Copy oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
+- name: Copy relying-party.xml, oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "oidc-subject.xml"
     - "oidc-subject.properties"
     - "oidc-relying-party.xml"
+    - "relying-party.xml"
 
 - name: Add oidc-subject.properties to included confs in idp.properties
   lineinfile:
@@ -281,12 +267,11 @@
     line: '\1, /conf/oidc-subject.properties'
     backrefs: yes
 
-- name: Copy oidc-relying-party-system.xml and oidc-subject-system.xml - SYSTEM DIRECTORY CHANGE!!
+- name: Copy oidc-subject-system.xml - SYSTEM DIRECTORY CHANGE!!
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/system/conf/{{item}}
   with_items:
     - "oidc-subject-system.xml"
-    - "oidc-relying-party-system.xml"
-
+    
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "logback.xml"

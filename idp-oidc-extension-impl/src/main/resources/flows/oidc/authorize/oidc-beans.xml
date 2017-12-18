@@ -36,7 +36,7 @@
 
 	<bean id="SelectRelyingPartyConfiguration"
 		class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
-		scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.oidc.RelyingPartyConfigurationResolver" />
+		scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
 
 	<bean id="SelectProfileConfiguration"
 		class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
