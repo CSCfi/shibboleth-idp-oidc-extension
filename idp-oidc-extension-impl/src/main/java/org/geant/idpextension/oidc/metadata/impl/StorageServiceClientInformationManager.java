@@ -56,6 +56,7 @@ public class StorageServiceClientInformationManager extends BaseStorageServiceCl
         super();
     }
     
+    /** {@inheritDoc} */
     @Override
     public void storeClientInformation(final OIDCClientInformation clientInformation, final Long expiration)
             throws ClientInformationManagerException {
@@ -72,10 +73,18 @@ public class StorageServiceClientInformationManager extends BaseStorageServiceCl
         log.info("Successfully stored the client information for id {}", clientId);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroyClientInformation(ClientID clientId) {
-        // TODO Auto-generated method stub
-        
+        if (clientId == null) {
+            log.warn("The null clientId cannot be destroyed, nothing to do");
+            return;
+        }
+        try {
+            getStorageService().delete(CONTEXT_NAME, clientId.getValue());
+        } catch (IOException e) {
+            log.error("Could not delete the client ID {}", clientId.getValue(), e);
+        }
     }
 
 }
