@@ -170,16 +170,22 @@
             </dependency>
             <dependency>
                 <groupId>org.opensaml</groupId>
-                <version>${shib.idp.version}</version>
+                <version>${opensaml.version}</version>
                 <artifactId>opensaml-profile-impl</artifactId>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.opensaml</groupId>
-                <version>${shib.idp.version}</version>
+                <version>${opensaml.version}</version>
                 <artifactId>opensaml-profile-api</artifactId>
                 <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-storage-impl</artifactId>
+                <version>${opensaml.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

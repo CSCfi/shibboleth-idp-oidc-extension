@@ -108,6 +108,11 @@
            <type>test-jar</type>
            <scope>test</scope>
        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-storage-impl</artifactId>
+           <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
