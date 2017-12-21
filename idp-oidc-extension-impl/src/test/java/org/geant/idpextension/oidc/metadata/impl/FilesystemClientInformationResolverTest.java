@@ -29,15 +29,18 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
+import java.util.Set;
 
 import org.geant.idpextension.oidc.criterion.ClientIDCriterion;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
@@ -82,5 +85,8 @@ public class FilesystemClientInformationResolverTest {
         Assert.assertTrue(scope.contains(OIDCScopeValue.PHONE));
         Assert.assertTrue(scope.contains(OIDCScopeValue.PROFILE));
         Assert.assertTrue(scope.contains("info"));
+        final Set<ResponseType> responseTypes = clientInfo.getOIDCMetadata().getResponseTypes();
+        Assert.assertEquals(responseTypes.size(), 1);
+        Assert.assertTrue(responseTypes.contains(new ResponseType(OIDCResponseTypeValue.ID_TOKEN)));
     }
 }
