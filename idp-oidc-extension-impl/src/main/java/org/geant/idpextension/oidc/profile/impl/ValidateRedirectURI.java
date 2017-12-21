@@ -32,9 +32,6 @@ import java.net.URI;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
-import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
-import org.opensaml.profile.action.ActionSupport;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,28 +48,11 @@ public class ValidateRedirectURI extends AbstractOIDCAuthenticationResponseActio
     @Nonnull
     private Logger log = LoggerFactory.getLogger(ValidateRedirectURI.class);
 
-    /** oidc response context. */
-    @Nonnull
-    private OIDCMetadataContext oidcMetadataContext;
-
-    /** {@inheritDoc} */
-    @Override
-    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        oidcMetadataContext = profileRequestContext.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class,
-                false);
-        if (oidcMetadataContext == null) {
-            log.error("{} No metadata found for relying party", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        return super.doPreExecute(profileRequestContext);
-    }
-
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        final Set<URI> redirectionURIs = oidcMetadataContext.getClientInformation().getMetadata().getRedirectionURIs();
+        final Set<URI> redirectionURIs = 
+                getMetadataContext().getClientInformation().getMetadata().getRedirectionURIs();
         if (redirectionURIs != null && redirectionURIs.contains(getAuthenticationRequest().getRedirectionURI())) {
             getOidcResponseContext().setRedirectURI(getAuthenticationRequest().getRedirectionURI());
             log.debug("{} redirect uri validated {}", getLogPrefix(), getAuthenticationRequest().getRedirectionURI());

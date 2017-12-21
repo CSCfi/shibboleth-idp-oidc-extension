@@ -37,6 +37,7 @@ import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileR
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -111,6 +112,7 @@ public class FormOutboundAuthenticationResponseMessageTest extends BaseOIDCRespo
         prc.setOutboundMessageContext(msgCtx);
         respCtx = new OIDCAuthenticationResponseContext();
         prc.getOutboundMessageContext().addSubcontext(respCtx);
+        prc.getInboundMessageContext().addSubcontext(new OIDCMetadataContext());
         init();
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_MESSAGE);

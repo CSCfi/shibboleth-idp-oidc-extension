@@ -61,6 +61,7 @@ public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
     @Test
     public void testNoCtx() throws ComponentInitializationException {
         init();
+        profileRequestCtx.getInboundMessageContext().removeSubcontext(OIDCMetadataContext.class);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_MSG_CTX);
     }

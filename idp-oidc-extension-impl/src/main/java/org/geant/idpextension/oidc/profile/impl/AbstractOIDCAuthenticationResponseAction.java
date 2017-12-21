@@ -30,6 +30,7 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -55,6 +56,10 @@ abstract class AbstractOIDCAuthenticationResponseAction extends AbstractOIDCAuth
     @Nonnull
     private OIDCAuthenticationResponseContext oidcResponseContext;
 
+    /** OIDC Metadata context. */
+    @Nonnull
+    private OIDCMetadataContext oidcMetadataContext;
+
     /**
      * Returns oidc response context.
      * 
@@ -65,6 +70,14 @@ abstract class AbstractOIDCAuthenticationResponseAction extends AbstractOIDCAuth
         return oidcResponseContext;
     }
 
+    /**
+     * Returns the OIDC Metadata context.
+     * @return The OIDC Metadata context.
+     */
+    public OIDCMetadataContext getMetadataContext() {
+        return oidcMetadataContext;
+    }
+    
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -82,6 +95,13 @@ abstract class AbstractOIDCAuthenticationResponseAction extends AbstractOIDCAuth
         oidcResponseContext = outboundMessageCtx.getSubcontext(OIDCAuthenticationResponseContext.class, false);
         if (oidcResponseContext == null) {
             log.error("{} No oidc response context", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return false;
+        }
+        oidcMetadataContext = profileRequestContext.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class,
+                false);
+        if (oidcMetadataContext == null) {
+            log.error("{} No metadata found for relying party", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }

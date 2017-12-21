@@ -30,6 +30,7 @@ package org.geant.idpextension.oidc.profile.impl;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -58,6 +59,7 @@ public class AbstractOIDCAuthenticationResponseActionTest {
         requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
         final MessageContext<AuthenticationResponse> msgCtx = new MessageContext<AuthenticationResponse>();
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+        prc.getInboundMessageContext().addSubcontext(new OIDCMetadataContext());
         prc.setOutboundMessageContext(msgCtx);
         action.initialize();
     }
