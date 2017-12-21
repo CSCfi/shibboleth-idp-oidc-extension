@@ -85,6 +85,10 @@
 		class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
 		scope="prototype" />
 
+    <bean id="ValidateResponseType"
+        class="org.geant.idpextension.oidc.profile.impl.ValidateResponseType"
+        scope="prototype" />
+
 	<bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope"
 		scope="prototype" />
 

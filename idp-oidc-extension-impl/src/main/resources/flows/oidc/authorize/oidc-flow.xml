@@ -23,6 +23,7 @@
 	<action-state id="OutboundContextsAndSecurityParameters">
 		<evaluate expression="InitializeOutboundMessageContext" />
 		<evaluate expression="ValidateRedirectURI" />
+        <evaluate expression="ValidateResponseType" />
 		<evaluate expression="ValidateScope" />
 		<evaluate expression="SetRequestedSubjectToResponseContext" />
 		<evaluate expression="PopulateIDTokenSignatureSigningParameters" />
