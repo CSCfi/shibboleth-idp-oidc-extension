@@ -98,6 +98,7 @@
     content: |
          idp.oidc.dynreg.StorageService = shibboleth.JPAStorageService
          idp.oidc.dynreg.defaultValidity = PT24H
+         idp.oidc.dynreg.defaultScope = openid
 
 - name: Add one trusted test SP
   blockinfile:
