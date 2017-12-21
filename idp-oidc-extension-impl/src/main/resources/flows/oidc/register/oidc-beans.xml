@@ -74,6 +74,14 @@
         class="org.geant.idpextension.oidc.profile.impl.AddContactsToClientMetadata"
         scope="prototype" />
 
+    <bean id="AddGrantTypeToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddGrantTypeToClientMetadata"
+        scope="prototype" />
+
+    <bean id="AddResponseTypesToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddResponseTypesToClientMetadata"
+        scope="prototype" />
+
     <bean id="shibboleth.oidc.ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
         scope="prototype" p:id="OIDCClientInformationManager"

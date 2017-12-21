@@ -33,6 +33,8 @@
         <evaluate expression="AddRedirectUrisToClientMetadata" />
         <evaluate expression="AddApplicationTypeToClientMetadata" />
         <evaluate expression="AddScopeToClientMetadata" />
+        <evaluate expression="AddGrantTypeToClientMetadata" />
+        <evaluate expression="AddResponseTypesToClientMetadata" />
         <evaluate expression="AddContactsToClientMetadata" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="HandleOutboundMessage" />
