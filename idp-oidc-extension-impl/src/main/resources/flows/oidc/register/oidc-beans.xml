@@ -63,7 +63,12 @@
         
     <bean id="AddScopeToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddScopeToClientMetadata"
-        scope="prototype" />
+        scope="prototype" p:defaultScope-ref="shibboleth.oidc.DefaultScope"/>
+        
+    <bean id="shibboleth.oidc.DefaultScope"
+        class="com.nimbusds.oauth2.sdk.Scope" factory-method="parse">
+        <constructor-arg type="java.lang.String" value="#{'%{idp.oidc.dynreg.defaultScope:openid}'.trim()}"/>
+    </bean>
 
     <bean id="AddContactsToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddContactsToClientMetadata"
