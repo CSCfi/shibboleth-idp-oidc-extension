@@ -145,7 +145,7 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
                     getAuthenticationRequest().getState(), getAuthenticationRequest().getResponseMode());
             log.debug("constructed response:" + ((AuthenticationErrorResponse) resp).toURI());
         } else {
-
+            //TODO: change this to use client metadata
             if (getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
                 JWT idToken = getIdToken();
                 if (idToken == null) {
