@@ -78,6 +78,15 @@
         class="org.geant.idpextension.oidc.profile.impl.AddGrantTypeToClientMetadata"
         scope="prototype" />
 
+    <bean id="AddSubjectTypeToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddSubjectTypeToClientMetadata"
+        scope="prototype" p:defaultSubjectType-ref="shibboleth.oidc.DefaultSubjectType" />
+
+    <bean id="shibboleth.oidc.DefaultSubjectType"
+        class="com.nimbusds.openid.connect.sdk.SubjectType" factory-method="parse">
+        <constructor-arg type="java.lang.String" value="#{'%{idp.oidc.dynreg.defaultSubjectType:public}'.trim()}"/>
+    </bean>
+
     <bean id="AddResponseTypesToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddResponseTypesToClientMetadata"
         scope="prototype" />
