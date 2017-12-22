@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
+import java.net.URI;
 import java.util.Set;
 
 import org.geant.idpextension.oidc.criterion.ClientIDCriterion;
@@ -54,6 +55,7 @@ public class FilesystemClientInformationResolverTest {
     FilesystemClientInformationResolver resolver;
     
     String clientId;
+    URI redirectUri;
     
     @BeforeMethod
     public void initTests() throws Exception {
@@ -62,6 +64,7 @@ public class FilesystemClientInformationResolverTest {
         resolver = new FilesystemClientInformationResolver(file);
         resolver.setId("mockId");
         resolver.initialize();
+        redirectUri = new URI("https://192.168.0.150/static");
     }
     
     @Test
@@ -77,6 +80,9 @@ public class FilesystemClientInformationResolverTest {
         final OIDCClientInformation clientInfo = resolver.resolveSingle(new CriteriaSet(criterion));
         Assert.assertNotNull(clientInfo);
         Assert.assertEquals(clientInfo.getID().getValue(), clientId);
+        final Set<URI> redirectUris = clientInfo.getOIDCMetadata().getRedirectionURIs();
+        Assert.assertEquals(redirectUris.size(), 1);
+        Assert.assertTrue(redirectUris.contains(redirectUri));
         final Scope scope = clientInfo.getOIDCMetadata().getScope();
         Assert.assertEquals(scope.size(), 6);
         Assert.assertTrue(scope.contains(OIDCScopeValue.OPENID));
