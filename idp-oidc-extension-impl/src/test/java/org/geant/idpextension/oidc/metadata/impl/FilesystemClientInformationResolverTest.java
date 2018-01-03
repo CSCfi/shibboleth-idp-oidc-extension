@@ -92,7 +92,7 @@ public class FilesystemClientInformationResolverTest {
         Assert.assertTrue(scope.contains(OIDCScopeValue.PROFILE));
         Assert.assertTrue(scope.contains("info"));
         final Set<ResponseType> responseTypes = clientInfo.getOIDCMetadata().getResponseTypes();
-        Assert.assertEquals(responseTypes.size(), 1);
+        Assert.assertEquals(responseTypes.size(), 2);
         Assert.assertTrue(responseTypes.contains(new ResponseType(OIDCResponseTypeValue.ID_TOKEN)));
     }
 }
