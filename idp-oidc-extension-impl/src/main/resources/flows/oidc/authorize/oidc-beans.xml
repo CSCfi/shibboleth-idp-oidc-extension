@@ -110,6 +110,10 @@
 		</property>
 	</bean>
 
+    <bean id="AddAuthzCodeClaimSet"
+		class="org.geant.idpextension.oidc.profile.impl.AddAuthzCodeClaimSet"
+		scope="prototype" />
+                
 	<bean id="SetNameIDToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext"
 		scope="prototype">
