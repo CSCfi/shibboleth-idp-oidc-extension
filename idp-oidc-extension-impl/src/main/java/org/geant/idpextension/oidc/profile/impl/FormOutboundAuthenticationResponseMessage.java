@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.PlainJWT;
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
@@ -112,8 +113,8 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
     }
 
     /**
-     * Returns signed (preferred) or non signed id token. Returns null if signed token is
-     * expected but not available.
+     * Returns signed (preferred) or non signed id token. Returns null if signed
+     * token is expected but not available.
      * 
      * @return id token.
      */
@@ -140,12 +141,13 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
         }
         AuthenticationResponse resp = null;
         if (getOidcResponseContext().getErrorCode() != null) {
-            resp = new AuthenticationErrorResponse(getOidcResponseContext().getRedirectURI(), new ErrorObject(
-                    getOidcResponseContext().getErrorCode(), getOidcResponseContext().getErrorDescription()),
+            resp = new AuthenticationErrorResponse(getOidcResponseContext().getRedirectURI(),
+                    new ErrorObject(getOidcResponseContext().getErrorCode(),
+                            getOidcResponseContext().getErrorDescription()),
                     getAuthenticationRequest().getState(), getAuthenticationRequest().getResponseMode());
             log.debug("constructed response:" + ((AuthenticationErrorResponse) resp).toURI());
         } else {
-            //TODO: change this to use client metadata
+            // TODO: change this to use client metadata
             if (getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
                 JWT idToken = getIdToken();
                 if (idToken == null) {
@@ -153,8 +155,13 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
                     ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
                     return;
                 }
-                resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(), null, getIdToken(),
-                        null, getAuthenticationRequest().getState(), null, 
+                // TODO: We return now bare auth code without sign and crypto.
+                // Replace with signed and encrypted code.
+                resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
+                        getOidcResponseContext().getAuthzCodeClaims() == null ? null
+                                : new AuthorizationCode(
+                                        new PlainJWT(getOidcResponseContext().getAuthzCodeClaims()).serialize()),
+                        getIdToken(), null, getAuthenticationRequest().getState(), null,
                         getAuthenticationRequest().getResponseMode());
                 log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
             }
@@ -163,8 +170,8 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
             /**
              * We support now only forming implicit response.
              */
-            log.error("{} unsupported response type {}", getLogPrefix(), getAuthenticationRequest().getResponseType()
-                    .toString());
+            log.error("{} unsupported response type {}", getLogPrefix(),
+                    getAuthenticationRequest().getResponseType().toString());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
             return;
         }
