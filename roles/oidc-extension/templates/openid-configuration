@@ -20,7 +20,6 @@
  "request_parameter_supported": false,
  "request_uri_parameter_supported": false,
  "require_request_uri_registration": false,
- "request_uri_parameter_supported": false,
  "scopes_supported": [
   "openid",
   "profile",
