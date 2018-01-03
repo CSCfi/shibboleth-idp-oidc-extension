@@ -46,10 +46,10 @@
 
 	<action-state id="AddAuthzCode">
 		<evaluate expression="AddAuthzCodeClaimSet" />
+		<evaluate expression="SignAuthzCodeClaimSet" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="AttributeResolution" />
 	</action-state>
-
 
 	<action-state id="AttributeResolution">
 		<evaluate expression="ResolveAttributes" />
