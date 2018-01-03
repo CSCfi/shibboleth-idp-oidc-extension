@@ -356,4 +356,38 @@
   ignore_errors: yes
   when: aci is defined
 
+- name: Apache | mod_auth_openidc
+  package: name=mod_auth_openidc state=present
 
+- name: Apache | mod_php
+  package: name=mod_php state=present
+
+- name: Set mod_auth_openidc properties
+  blockinfile:
+    dest: "/etc/httpd/conf.d/auth_openidc.conf"
+    marker: "# {mark} ANSIBLE MANAGER BLOCK"
+    insertafter: "#OIDCUserInfoRefreshInterval <seconds>"
+    content: |
+         OIDCOAuthSSLValidateServer Off
+         OIDCSSLValidateServer Off
+         OIDCRedirectURI https://192.168.0.150:8443/protected/redirect_uri
+         OIDCCryptoPassphrase secret
+         OIDCMetadataDir /var/cache/httpd/mod_auth_openidc/metadata
+         OIDCResponseType "id_token"
+         <Location /protected/>
+             authtype openid-connect
+             require valid-user
+         </Location>
+
+- name: Ensure /var/www/html/protected dir exists
+  file: path="/var/www/html/protected" state=directory
+
+- name: Copy relying-party.xml, oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
+  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/var/www/html/protected/{{item}}
+  with_items:
+    - "index.php"
+
+- name: Restart httpd
+  service:
+    name: httpd
+    state: restarted
