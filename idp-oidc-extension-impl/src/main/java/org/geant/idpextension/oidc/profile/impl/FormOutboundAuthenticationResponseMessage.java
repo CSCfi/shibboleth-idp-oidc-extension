@@ -120,7 +120,7 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
      */
     private JWT getIdToken() {
         JWT jwt = getOidcResponseContext().getSignedIDToken();
-        if (jwt == null && !signedToken) {
+        if (!signedToken) {
             try {
                 jwt = new PlainJWT(getOidcResponseContext().getIDToken().toJWTClaimsSet());
             } catch (ParseException e) {
@@ -147,12 +147,21 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
                     getAuthenticationRequest().getState(), getAuthenticationRequest().getResponseMode());
             log.debug("constructed response:" + ((AuthenticationErrorResponse) resp).toURI());
         } else {
-            // TODO: We return now auth code that is only signed.
-            // Replace with signed and encrypted code.
+            JWT idToken = null;
+            if (getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
+                // implicit implies id token is returned now
+                idToken = getIdToken();
+                if (idToken == null) {
+                    log.error("{} unable to provide id token (required)", getLogPrefix());
+                    ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+                    return;
+                }
+            } // TODO: We return now auth code that is only signed.
+              // Replace with signed and encrypted code.
             resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
                     getOidcResponseContext().getSignedAuthzCode() == null ? null
                             : new AuthorizationCode(getOidcResponseContext().getSignedAuthzCode().serialize()),
-                    getIdToken(), null, getAuthenticationRequest().getState(), null,
+                    idToken, null, getAuthenticationRequest().getState(), null,
                     getAuthenticationRequest().getResponseMode());
             log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
         }
