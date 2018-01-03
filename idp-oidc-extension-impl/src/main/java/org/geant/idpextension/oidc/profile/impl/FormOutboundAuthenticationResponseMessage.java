@@ -147,33 +147,14 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
                     getAuthenticationRequest().getState(), getAuthenticationRequest().getResponseMode());
             log.debug("constructed response:" + ((AuthenticationErrorResponse) resp).toURI());
         } else {
-            // TODO: change this to use client metadata
-            if (getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
-                JWT idToken = getIdToken();
-                if (idToken == null) {
-                    log.error("{} unable to provide id token (required)", getLogPrefix());
-                    ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-                    return;
-                }
-                // TODO: We return now bare auth code without sign and crypto.
-                // Replace with signed and encrypted code.
-                resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
-                        getOidcResponseContext().getAuthzCodeClaims() == null ? null
-                                : new AuthorizationCode(
-                                        new PlainJWT(getOidcResponseContext().getAuthzCodeClaims()).serialize()),
-                        getIdToken(), null, getAuthenticationRequest().getState(), null,
-                        getAuthenticationRequest().getResponseMode());
-                log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
-            }
-        }
-        if (resp == null) {
-            /**
-             * We support now only forming implicit response.
-             */
-            log.error("{} unsupported response type {}", getLogPrefix(),
-                    getAuthenticationRequest().getResponseType().toString());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
-            return;
+            // TODO: We return now auth code that is only signed.
+            // Replace with signed and encrypted code.
+            resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
+                    getOidcResponseContext().getSignedAuthzCode() == null ? null
+                            : new AuthorizationCode(getOidcResponseContext().getSignedAuthzCode().serialize()),
+                    getIdToken(), null, getAuthenticationRequest().getState(), null,
+                    getAuthenticationRequest().getResponseMode());
+            log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
         }
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
