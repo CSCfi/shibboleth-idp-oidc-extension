@@ -32,6 +32,8 @@ import java.net.URI;
 import java.util.Date;
 import javax.annotation.Nullable;
 import org.opensaml.saml.saml2.core.NameID;
+
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
@@ -68,14 +70,37 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
 
     /** Validated scope values. */
     private Scope requestedScope;
-    
+
     /** Requested sub value. */
     @Nullable
     private String requestedSubject;
-    
+
     /** Name ID generated for response. Value is set to sub claim. */
     private NameID nameId;
-    
+
+    /** claim set to form authz code. */
+    @Nullable
+    private JWTClaimsSet authzCodeClaims;
+
+    /**
+     * Get claims to form authz code.
+     * 
+     * @return claims to form authz code
+     */
+    public JWTClaimsSet getAuthzCodeClaims() {
+        return authzCodeClaims;
+    }
+
+    /**
+     * Set claims to form authz code.
+     * 
+     * @param claims
+     *            claims to form authz code
+     */
+    public void setAuthzCodeClaims(JWTClaimsSet claims) {
+        authzCodeClaims = claims;
+    }
+
     /**
      * Gets requested sub value.
      * 
@@ -95,9 +120,10 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     public void setRequestedSubject(@Nullable String sub) {
         this.requestedSubject = sub;
     }
-    
+
     /**
      * Gets Name ID generated for response.
+     * 
      * @return Name ID generated for response
      */
     public NameID getNameId() {
@@ -106,7 +132,9 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
 
     /**
      * Sets Name ID generated for response.
-     * @param id Name ID generated for response
+     * 
+     * @param id
+     *            Name ID generated for response
      */
     public void setNameId(NameID id) {
         nameId = id;
@@ -142,8 +170,8 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     }
 
     /**
-     * Set authentication time of the end user in millis from 1970-01-01T0:0:0Z
-     * as measured in UTC until the date/time.
+     * Set authentication time of the end user in millis from 1970-01-01T0:0:0Z as
+     * measured in UTC until the date/time.
      * 
      * @param time
      *            authentication time.
@@ -186,7 +214,8 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Sets a validated redirect uri for the response.
      * 
-     * @param uri validated redirect uri for the response
+     * @param uri
+     *            validated redirect uri for the response
      */
     public void setRedirectURI(@Nullable URI uri) {
         redirectURI = uri;
