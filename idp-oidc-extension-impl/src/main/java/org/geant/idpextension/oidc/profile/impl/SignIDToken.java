@@ -28,189 +28,71 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.security.interfaces.ECPrivateKey;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import net.shibboleth.utilities.java.support.component.ComponentSupport;
-import net.shibboleth.utilities.java.support.logic.Constraint;
-import org.geant.security.jwk.JWKCredential;
-import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
-import org.opensaml.security.credential.Credential;
-import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.base.Function;
-import com.nimbusds.jose.Algorithm;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSSigner;
-import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
-import org.opensaml.xmlsec.context.SecurityParametersContext;
 
 /**
- * Action that signs {@link IDTokenClaimsSet}.
+ * Action that signs {@link IDTokenClaimsSet} and sets it to
+ * {@link OidcResponseContext#getSignedIDToken}
  *
  */
-@SuppressWarnings("rawtypes")
-public class SignIDToken extends AbstractOIDCAuthenticationResponseAction {
+public class SignIDToken extends AbstractSignJWTAction {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(SignIDToken.class);
 
-    /** resolved credential. */
-    private Credential credential;
-
-    /**
-     * Strategy used to locate the {@link SecurityParametersContext} to use for
-     * signing.
-     */
-    @Nonnull
-    private Function<ProfileRequestContext, SecurityParametersContext> securityParametersLookupStrategy;
-
-    /** The signature signing parameters. */
-    @Nullable
-    private SignatureSigningParameters signatureSigningParameters;
-
-    /** Constructor. */
-    public SignIDToken() {
-        securityParametersLookupStrategy = new ChildContextLookup<>(SecurityParametersContext.class);
-    }
-
-    /**
-     * Set the strategy used to locate the {@link SecurityParametersContext} to
-     * use.
-     * 
-     * @param strategy
-     *            lookup strategy
-     */
-    public void setSecurityParametersLookupStrategy(
-            @Nonnull final Function<ProfileRequestContext, SecurityParametersContext> strategy) {
-        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-
-        securityParametersLookupStrategy = Constraint.isNotNull(strategy,
-                "SecurityParameterContext lookup strategy cannot be null");
-    }
+    private JWTClaimsSet idTokenClaims;
 
     /** {@inheritDoc} */
     @Override
-    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+    protected boolean doPreExecute(@SuppressWarnings("rawtypes") @Nonnull final ProfileRequestContext profileRequestContext) {
 
         if (!super.doPreExecute(profileRequestContext)) {
             return false;
         }
-
-        final SecurityParametersContext secParamCtx = securityParametersLookupStrategy.apply(profileRequestContext);
-        if (secParamCtx == null) {
-            log.debug("{} Will not sign id token because no security parameters context is available", getLogPrefix());
-            return false;
-        }
-
-        signatureSigningParameters = secParamCtx.getSignatureSigningParameters();
-        if (signatureSigningParameters == null || signatureSigningParameters.getSigningCredential() == null) {
-            log.debug("{} Will not sign id token because no signature signing credentials available", getLogPrefix());
-            return false;
-        }
-        credential = signatureSigningParameters.getSigningCredential();
-
         if (getOidcResponseContext().getIDToken() == null) {
             log.error("{} No id token available", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return false;
+        }
+        try {
+            idTokenClaims = getOidcResponseContext().getIDToken().toJWTClaimsSet();
+        } catch (ParseException e) {
+            log.error("{} id token parsing failed {}", getLogPrefix(), e.getMessage());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
         return true;
     }
 
+    
     /**
-     * Returns correct implementation of signer based on algorithm type.
+     * Sets id token claims as input for signing.
      * 
-     * @param jwsAlgorithm
-     *            JWS algorithm
-     * @return signer for algorithm and private key
-     * @throws JOSEException
-     *             if algorithm cannot be supported
+     * @return id token claims.
      */
-    private JWSSigner getSigner(Algorithm jwsAlgorithm) throws JOSEException {
-        if (JWSAlgorithm.Family.EC.contains(jwsAlgorithm)) {
-            return new ECDSASigner((ECPrivateKey) credential.getPrivateKey());
-        }
-        if (JWSAlgorithm.Family.RSA.contains(jwsAlgorithm)) {
-            return new RSASSASigner(credential.getPrivateKey());
-        }
-        if (JWSAlgorithm.Family.HMAC_SHA.contains(jwsAlgorithm)) {
-            return new MACSigner(credential.getSecretKey());
-        }
-        throw new JOSEException("Unsupported algorithm " + jwsAlgorithm.getName());
-    }
-
-    /**
-     * Resolves kid from key name. If there is no key name and the credential is
-     * JWK, the kid is read from JWK.
-     * 
-     * @return key names or null if not found.
-     */
-    private String resolveKid() {
-        if (credential.getKeyNames() != null) {
-            for (String keyName : credential.getKeyNames()) {
-                return keyName;
-            }
-        }
-        if (credential instanceof JWKCredential) {
-            return ((JWKCredential) credential).getKid();
-        }
-        return null;
-    }
-
-    /**
-     * Resolves JWS algorithm from signature signing parameters.
-     * 
-     * @return JWS algorithm
-     */
-    private JWSAlgorithm resolveAlgorithm() {
-
-        JWSAlgorithm algorithm = new JWSAlgorithm(signatureSigningParameters.getSignatureAlgorithm());
-        if (credential instanceof JWKCredential) {
-            if (!algorithm.equals(((JWKCredential) credential).getAlgorithm())) {
-                log.warn("{} Signature signing algorithm {} differs from JWK algorithm {}", getLogPrefix(),
-                        algorithm.getName(), ((JWKCredential) credential).getAlgorithm());
-            }
-        }
-        log.debug("{} Algorithm resolved {}", getLogPrefix(), algorithm.getName());
-        return algorithm;
-    }
-
-    /** {@inheritDoc} */
     @Override
-    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        SignedJWT jwt = null;
-        Algorithm jwsAlgorithm = resolveAlgorithm();
-        String kid = resolveKid();
-
-        try {
-            JWSSigner signer = getSigner(jwsAlgorithm);
-            jwt = new SignedJWT(new JWSHeader.Builder(new JWSAlgorithm(jwsAlgorithm.getName())).keyID(kid).build(),
-                    getOidcResponseContext().getIDToken().toJWTClaimsSet());
-            jwt.sign(signer);
-        } catch (ParseException e) {
-            log.error("{} Error parsing claimset: {}", getLogPrefix(), e.getMessage());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return;
-        } catch (JOSEException e) {
-            log.error("{} Error signing id token: {}", getLogPrefix(), e.getMessage());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_SIGN);
-            return;
-        }
+    protected JWTClaimsSet getClaimsSetToSign() {
+        return idTokenClaims;
+    }
+    
+    /**
+     * Set signed id token to response context.
+     * 
+     * @param jwt
+     *            signed id token.
+     */
+    @Override
+    protected void setSignedJWT(SignedJWT jwt) {
         getOidcResponseContext().setSignedIDToken(jwt);
-        log.debug("{} signed id token stored to context", getLogPrefix());
 
     }
 
