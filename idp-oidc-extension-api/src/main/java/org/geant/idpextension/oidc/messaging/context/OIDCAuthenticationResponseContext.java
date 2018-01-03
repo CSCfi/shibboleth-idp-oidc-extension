@@ -82,6 +82,30 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     @Nullable
     private JWTClaimsSet authzCodeClaims;
 
+    /** Signed authz code. */
+    @Nullable
+    private SignedJWT signedAuthzCode;
+
+    /**
+     * Get signed authz code.
+     * 
+     * @return signed authz code.
+     */
+    @Nullable
+    public SignedJWT getSignedAuthzCode() {
+        return signedAuthzCode;
+    }
+
+    /**
+     * Set signed authz code.
+     * 
+     * @param code
+     *            signed authz code.
+     */
+    public void setSignedAuthzCode(@Nullable SignedJWT code) {
+        signedAuthzCode = code;
+    }
+
     /**
      * Get claims to form authz code.
      * 
