@@ -94,29 +94,7 @@ public class FormOutboundAuthenticationResponseMessageTest extends BaseOIDCRespo
         Assert.assertTrue(resp instanceof AuthenticationErrorResponse);
     }
 
-    /**
-     * Test that action is able to cope with unsupported flow.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws ParseException
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test
-    public void testUnsupportedFlow() throws ComponentInitializationException, URISyntaxException, ParseException {
-        request = AuthenticationRequest
-                .parse("response_type=code&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
-        requestCtx = new RequestContextBuilder().setInboundMessage(request).buildRequestContext();
-        final MessageContext<AuthenticationResponse> msgCtx = new MessageContext<AuthenticationResponse>();
-        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        prc.setOutboundMessageContext(msgCtx);
-        respCtx = new OIDCAuthenticationResponseContext();
-        prc.getOutboundMessageContext().addSubcontext(respCtx);
-        prc.getInboundMessageContext().addSubcontext(new OIDCMetadataContext());
-        init();
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertEvent(event, EventIds.INVALID_MESSAGE);
-    }
+    
 
     /**
      * Test that action is able to form success message.
