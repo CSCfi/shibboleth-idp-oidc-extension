@@ -23,7 +23,22 @@
         class="org.geant.idpextension.oidc.metadata.impl.ChainingClientInformationResolver"
         p:id="InternalEmbeddedChainResolver" 
         p:resolvers-ref="shibboleth.oidc.ClientInformationResolvers"/>
+        
+    <bean id="shibboleth.oidc.ServiceableProviderMetadataProvider"
+        class="org.geant.idpextension.oidc.metadata.resolver.ServiceableProviderMetadataProvider"
+        p:embeddedResolver-ref="shibboleth.oidc.OwnProviderMetadataResolver">
+    </bean>
 
+    <bean id="shibboleth.oidc.OwnProviderMetadataResolver"
+        class="org.geant.idpextension.oidc.metadata.impl.FilesystemProviderMetadataResolver"
+        p:id="OwnMetadata">
+        <constructor-arg>
+            <bean class="java.io.File" id="OwnConfigurationFile">
+                <constructor-arg type="String" value="src/test/resources/org/geant/idpextension/oidc/metadata/impl/openid-configuration.json" />
+            </bean>
+        </constructor-arg>
+    </bean>
+        
     <!-- Generic beans end, in most cases only edit after this line. -->
 
     <!-- The following example contains two OIDC client information resolvers: first one reading a single client information from a JSON file, and the
