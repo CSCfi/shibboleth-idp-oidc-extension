@@ -49,6 +49,7 @@ public class OIDCAuthenticationRequestDecoderTest {
 	@BeforeMethod
 	protected void setUp() throws Exception {
 		httpRequest = new MockHttpServletRequest();
+		httpRequest.setMethod("GET");
 		decoder = new OIDCAuthenticationRequestDecoder();
 		decoder.setHttpServletRequest(httpRequest);
 		decoder.initialize();
