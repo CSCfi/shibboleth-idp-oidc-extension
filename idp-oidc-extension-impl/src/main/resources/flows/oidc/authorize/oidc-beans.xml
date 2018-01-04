@@ -110,19 +110,17 @@
 		</property>
 	</bean>
 
-	<bean id="AddAuthzCodeClaimSet"
-		class="org.geant.idpextension.oidc.profile.impl.AddAuthzCodeClaimSet"
-		scope="prototype" />
+	<bean id="SetAuthorizationCodeToResponseContext"
+	class="org.geant.idpextension.oidc.profile.impl.SetAuthorizationCodeToResponseContext"
+	scope="prototype" c:sealer-ref="authorizeCodeSealer" />
 
-	<bean id="SignAuthzCodeClaimSet"
-		class="org.geant.idpextension.oidc.profile.impl.SignAuthzCodeClaimSet"
-		scope="prototype">
-		<property name="securityParametersLookupStrategy">
-			<bean class="com.google.common.base.Functions" factory-method="compose"
-				c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
-		</property>
-	</bean>
+	<bean id="authorizeCodeSealer" lazy-init="true"
+		class="net.shibboleth.utilities.java.support.security.DataSealer"
+		p:keyStrategy-ref="shibboleth.DataSealerKeyStrategy" p:encoder-ref="acBase64Codec"
+		p:decoder-ref="acBase64Codec" />
 
+	<bean id="acBase64Codec" class="org.apache.commons.codec.binary.Base64"
+		c:lineLength="0" c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
 
 	<bean id="SetNameIDToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext"
