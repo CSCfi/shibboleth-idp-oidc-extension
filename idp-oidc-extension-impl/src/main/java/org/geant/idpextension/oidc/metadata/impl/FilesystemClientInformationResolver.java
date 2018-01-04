@@ -29,32 +29,36 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.util.Iterator;
 import java.util.Timer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.joda.time.DateTime;
-import org.joda.time.chrono.ISOChronology;
+import org.geant.idpextension.oidc.criterion.ClientIDCriterion;
+import org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver;
+import org.geant.idpextension.oidc.metadata.resolver.RefreshableClientInformationResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
-import net.shibboleth.utilities.java.support.logic.Constraint;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
  * Based on {@link org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver}.
  */
-public class FilesystemClientInformationResolver extends AbstractReloadingClientInformationResolver {
+public class FilesystemClientInformationResolver 
+    extends AbstractFileOIDCEntityResolver<ClientID, OIDCClientInformation> 
+    implements ClientInformationResolver, RefreshableClientInformationResolver {
 
     /** Class logger. */
     private final Logger log = LoggerFactory.getLogger(FilesystemClientInformationResolver.class);
-
-    /** The metadata file. */
-    @Nonnull private File metadataFile;
 
     /**
      * Constructor.
@@ -64,8 +68,7 @@ public class FilesystemClientInformationResolver extends AbstractReloadingClient
      * @throws ResolverException  this exception is no longer thrown
      */
     public FilesystemClientInformationResolver(@Nonnull final File metadata) throws ResolverException {
-        super();
-        setMetadataFile(metadata);
+        super(metadata);
     }
 
     /**
@@ -78,75 +81,47 @@ public class FilesystemClientInformationResolver extends AbstractReloadingClient
      */
     public FilesystemClientInformationResolver(@Nullable final Timer backgroundTaskTimer, @Nonnull final File metadata)
             throws ResolverException {
-        super(backgroundTaskTimer);
-        setMetadataFile(metadata);
+        super(backgroundTaskTimer, metadata);
     }
 
-    /**
-     * Sets the file from which metadata is read.
-     * 
-     * @param file path to the metadata file
-     * 
-     * @throws ResolverException this exception is no longer thrown
-     */
-    protected void setMetadataFile(@Nonnull final File file) throws ResolverException {
-        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+    /** {@inheritDoc} */
+    @Override
+    public Iterable<OIDCClientInformation> resolve(CriteriaSet criteria) throws ResolverException {
+        ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
         ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
 
-        metadataFile = Constraint.isNotNull(file, "Metadata file cannot be null");
+        final ClientIDCriterion clientIdCriterion = criteria.get(ClientIDCriterion.class);
+        if (clientIdCriterion == null || clientIdCriterion.getClientID() == null) {
+            log.trace("No client ID criteria found, returning all");
+            return getBackingStore().getOrderedInformation();
+        }
+        //TODO: support other criterion
+        return lookupIdentifier(clientIdCriterion.getClientID());
     }
 
     /** {@inheritDoc} */
     @Override
-    protected void doDestroy() {
-        metadataFile = null;
-          
-        super.doDestroy();
-    }
-    
-    /** {@inheritDoc} */
-    @Override
-    protected String getMetadataIdentifier() {
-        return metadataFile.getAbsolutePath();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected byte[] fetchMetadata() throws ResolverException {
-        try {
-            validateMetadataFile(metadataFile);
-            DateTime metadataUpdateTime = new DateTime(metadataFile.lastModified(), ISOChronology.getInstanceUTC());
-            if (getLastRefresh() == null || getLastUpdate() == null || metadataUpdateTime.isAfter(getLastRefresh())) {
-                log.debug("Returning the contents of {} as byte array", metadataFile.toPath());
-                return inputstreamToByteArray(new FileInputStream(metadataFile));
+    public OIDCClientInformation resolveSingle(CriteriaSet criteria) throws ResolverException {
+        final Iterable<OIDCClientInformation> iterable = resolve(criteria);
+        if (iterable != null) {
+            final Iterator<OIDCClientInformation> iterator = iterable.iterator();
+            if (iterator != null && iterator.hasNext()) {
+                return iterator.next();
             }
-
-            return null;
-        } catch (IOException e) {
-            String errMsg = "Unable to read metadata file " + metadataFile.getAbsolutePath();
-            log.error(errMsg, e);
-            throw new ResolverException(errMsg, e);
         }
+        log.warn("Could not find any clients with the given criteria");
+        return null;
     }
     
-    /**
-     * Validate the basic properties of the specified metadata file, for example that it exists; 
-     * that it is a file; and that it is readable.
-     *
-     * @param file the file to evaluate
-     * @throws ResolverException if file does not pass basic properties required of a metadata file
-     */
-    protected void validateMetadataFile(@Nonnull final File file) throws ResolverException {
-        if (!file.exists()) {
-            throw new ResolverException("Metadata file '" + file.getAbsolutePath() + "' does not exist");
-        }
+    /** {@inheritDoc} */
+    @Override
+    protected OIDCClientInformation parse(byte[] bytes) throws ParseException {
+        return OIDCClientInformation.parse(JSONObjectUtils.parse(new String(bytes)));
+    }
 
-        if (!file.isFile()) {
-            throw new ResolverException("Metadata file '" + file.getAbsolutePath() + "' is not a file");
-        }
-
-        if (!file.canRead()) {
-            throw new ResolverException("Metadata file '" + file.getAbsolutePath() + "' is not readable");
-        }
+    /** {@inheritDoc} */
+    @Override
+    protected ClientID getKey(OIDCClientInformation value) {
+        return value.getID();
     }
 }
