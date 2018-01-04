@@ -127,6 +127,9 @@ public class AddIDTokenShell extends AbstractOIDCAuthenticationResponseAction {
          * 
          * NOTE. We set here exp to +180s unless set in response context.
          */
+        
+        //NOTE: There is no control for id token exp, always +180s
+        //TODO: The purpose and mechanism how to control id token exp
         Date exp = getOidcResponseContext().getExp();
         if (exp == null) {
             Calendar calExp = Calendar.getInstance();
