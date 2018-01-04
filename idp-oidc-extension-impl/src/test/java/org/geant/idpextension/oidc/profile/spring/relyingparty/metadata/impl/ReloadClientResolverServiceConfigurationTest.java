@@ -68,7 +68,7 @@ import net.shibboleth.utilities.java.support.service.ServiceableComponent;
  * 
  * Mostly based on <pre>net.shibboleth.idp.profile.spring.relyingparty.metadata.ReloadServiceConfigurationTest</pre>.
  */
-public class ReloadServiceConfigurationTest {
+public class ReloadClientResolverServiceConfigurationTest {
 
     /** The service. */
     private ReloadableSpringService<RefreshableClientInformationResolver> service;
@@ -139,20 +139,25 @@ public class ReloadServiceConfigurationTest {
 
         final MockHttpServletResponse response = new MockHttpServletResponse();
         
-        final ReloadServiceConfiguration action = new ReloadServiceConfiguration();
-        action.setHttpServletResponse(response);
-        action.setServiceLookupStrategy(new Function<ProfileRequestContext,ReloadableService>() {
-            public ReloadableService apply(ProfileRequestContext input) {
-                return service;
-            }
-        });
-        action.initialize();
-
+        final ReloadServiceConfiguration action = initializeAction(service, response);
         final Event event = action.execute(src);
         ActionTestingSupport.assertProceedEvent(event);
 
         Assert.assertNotEquals(time, service.getLastReloadAttemptInstant());
         Assert.assertEquals(response.getStatus(), HttpServletResponse.SC_OK);
+    }
+    
+    protected static ReloadServiceConfiguration initializeAction(final ReloadableService reloadableService, 
+            final HttpServletResponse response) throws ComponentInitializationException {
+        final ReloadServiceConfiguration action = new ReloadServiceConfiguration();
+        action.setHttpServletResponse(response);
+        action.setServiceLookupStrategy(new Function<ProfileRequestContext,ReloadableService>() {
+            public ReloadableService apply(ProfileRequestContext input) {
+                return reloadableService;
+            }
+        });
+        action.initialize();
+        return action;
     }
     
     @AfterClass public void teardown() {
