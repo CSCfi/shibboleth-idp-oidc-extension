@@ -46,12 +46,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.PlainJWT;
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
+import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 
 /**
  * Action that forms outbound message based on request and response context.
@@ -148,21 +148,17 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
             log.debug("constructed response:" + ((AuthenticationErrorResponse) resp).toURI());
         } else {
             JWT idToken = null;
-            if (getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
-                // implicit implies id token is returned now
+            if (getAuthenticationRequest().getResponseType().contains(OIDCResponseTypeValue.ID_TOKEN)) {
                 idToken = getIdToken();
                 if (idToken == null) {
                     log.error("{} unable to provide id token (required)", getLogPrefix());
                     ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
                     return;
                 }
-            } // TODO: We return now auth code that is only signed.
-              // Replace with signed and encrypted code.
+            }
             resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
-                    getOidcResponseContext().getSignedAuthzCode() == null ? null
-                            : new AuthorizationCode(getOidcResponseContext().getSignedAuthzCode().serialize()),
-                    idToken, null, getAuthenticationRequest().getState(), null,
-                    getAuthenticationRequest().getResponseMode());
+                    getOidcResponseContext().getAuthorizationCode(), idToken, null,
+                    getAuthenticationRequest().getState(), null, getAuthenticationRequest().getResponseMode());
             log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
         }
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
