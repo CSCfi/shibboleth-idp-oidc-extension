@@ -1,2 +1,1 @@
-{"id":{"value":"demo_rp"},"issueDate":"Apr 24, 2017 1:20:56 PM","metadata":{"scope":[{"value":"openid"},{"value":"info"},{"value":"profile"},{"value":"email"},{"value":"address"},{"value":"phone"}],"redirectURIs":["https://192.168.0.150/static"],"nameEntries":{},"logoURIEntries":{},"uriEntries":{},"policyURIEntries":{},"tosURIEntries":{},"customFields":{}},"secret":{"value":[115,101,99,114,101,116]}}
-
+{"scope":"openid info profile email address phone","redirect_uris":["https://192.168.0.150/static"],"client_id":"demo_rp","response_types":["id_token", "id_token token"]}
