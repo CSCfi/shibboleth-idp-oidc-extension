@@ -143,8 +143,6 @@ public class AddIDTokenShell extends AbstractOIDCAuthenticationResponseAction {
          * contains scheme, host, and optionally, port number and path
          * components and no query or fragment components.
          * 
-         * NOTE! TODO. We set the "entity id" as issuer. No scheme validation is
-         * in place.
          */
 
         /**
@@ -155,7 +153,7 @@ public class AddIDTokenShell extends AbstractOIDCAuthenticationResponseAction {
          * characters in length. The sub value is a case sensitive string.
          * 
          * 
-         * Note. We use Name ID as the sub.
+         * Note. We use Name ID based value as the sub.
          * 
          */
 
