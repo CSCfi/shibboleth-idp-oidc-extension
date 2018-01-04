@@ -44,9 +44,8 @@ import org.joda.time.chrono.ISOChronology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.id.Identifier;
 
 import net.shibboleth.utilities.java.support.annotation.Duration;
 import net.shibboleth.utilities.java.support.annotation.constraint.Positive;
@@ -57,10 +56,11 @@ import net.shibboleth.utilities.java.support.resolver.ResolverException;
 /**
  * Based on {@link org.opensaml.saml.metadata.resolver.impl.AbstractReloadingMetadataResolver}.
  */
-public abstract class AbstractReloadingClientInformationResolver extends AbstractClientInformationResolver {
-    
+public abstract class AbstractReloadingOIDCEntityResolver<Key extends Identifier, Value> 
+    extends AbstractOIDCEntityResolver<Key, Value> {
+
     /** Class logger. */
-    private final Logger log = LoggerFactory.getLogger(AbstractReloadingClientInformationResolver.class);
+    private final Logger log = LoggerFactory.getLogger(AbstractReloadingOIDCEntityResolver.class);
     
     /** Timer used to schedule background metadata update tasks. */
     private Timer taskTimer;
@@ -90,7 +90,7 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
     private DateTime nextRefresh;
 
     /** Constructor. */
-    protected AbstractReloadingClientInformationResolver() {
+    protected AbstractReloadingOIDCEntityResolver() {
         this(null);
     }
 
@@ -99,7 +99,7 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
      * 
      * @param backgroundTaskTimer time used to schedule background refresh tasks
      */
-    protected AbstractReloadingClientInformationResolver(@Nullable final Timer backgroundTaskTimer) {
+    protected AbstractReloadingOIDCEntityResolver(@Nullable final Timer backgroundTaskTimer) {
         super();
         
         if (backgroundTaskTimer == null) {
@@ -110,13 +110,13 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
         }
     }
 
-    protected void initClientInformationResolver() throws ComponentInitializationException {
-        super.initClientInformationResolver();
+    protected void initOIDCResolver() throws ComponentInitializationException {
+        super.initOIDCResolver();
         try {
             refresh();
         } catch (ResolverException e) {
-            log.error("Could not refresh the client information", e);
-            throw new ComponentInitializationException("Could not refresh the client information", e);
+            log.error("Could not refresh the entity information", e);
+            throw new ComponentInitializationException("Could not refresh the entity information", e);
         }
     }
 
@@ -178,15 +178,14 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
                 log.debug("Metadata from '{}' has not changed since last refresh", mdId);
             } else {
                 log.debug("Processing new metadata from '{}'", mdId);
-                final OIDCClientInformation clientInformation = 
-                        OIDCClientInformation.parse(JSONObjectUtils.parse(new String(mdBytes)));
-                final ClientID clientId = clientInformation.getID();
-                log.info("Parsed client information for client ID {}", clientId);
-                final ClientBackingStore newBackingStore = new ClientBackingStore();
-                List<OIDCClientInformation> allInformation = new ArrayList<>();
-                allInformation.add(clientInformation);
-                newBackingStore.getIndexedInformation().put(clientId, allInformation);
-                newBackingStore.getOrderedInformation().add(clientInformation);
+                final Value information = parse(mdBytes);
+                final Key id = getKey(information);
+                log.info("Parsed entity information for {}", id);
+                final JsonBackingStore newBackingStore = new JsonBackingStore();
+                List<Value> allInformation = new ArrayList<>();
+                allInformation.add(information);
+                newBackingStore.getIndexedInformation().put(id, allInformation);
+                newBackingStore.getOrderedInformation().add(information);
                 setBackingStore(newBackingStore);
                 lastUpdate = now;
             }
@@ -213,6 +212,22 @@ public abstract class AbstractReloadingClientInformationResolver extends Abstrac
             lastRefresh = now;
         }
     }
+    
+    /**
+     * Parses an entity from the byte array.
+     * 
+     * @param bytes The encoded entity.
+     * @return The parsed entity.
+     */
+    protected abstract Value parse(final byte[] bytes) throws ParseException;
+    
+    /**
+     * Gets the identifier for the given entity.
+     * 
+     * @param value The entity whose identifier will be returned.
+     * @return The identifier for the given entity.
+     */
+    protected abstract Key getKey(final Value value);
     
     /**
      * Gets an identifier which may be used to distinguish this metadata in logging statements.
