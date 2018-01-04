@@ -1,0 +1,41 @@
+{
+ "issuer": "https://op.example.org",
+ "authorization_endpoint": "https://op.example.org/idp/profile/oidc/authorize",
+ "registration_endpoint": "https://op.example.org/idp/profile/oidc/register",
+ "jwks_uri": "https://op.example.org/oidc/keyset.jwk",
+ "response_types_supported": [
+  "id_token"
+ ],
+ "subject_types_supported": [
+  "public",
+  "pairwise"
+ ],
+ "grant_types_supported": [
+  "implicit"
+ ],
+ "id_token_signing_alg_values_supported": [
+  "RS256"
+ ],
+ "request_parameter_supported": false,
+ "request_uri_parameter_supported": false,
+ "require_request_uri_registration": false,
+ "scopes_supported": [
+  "openid",
+  "profile",
+  "email",
+  "address",
+  "phone",
+  "info"
+ ],
+ "claims_supported": [
+  "aud",
+  "acr",
+  "exp",
+  "iat",
+  "iss",
+  "sub",
+  "eduPersonPrincipalName",
+  "eduPersonAffiliation",
+  "mail"
+ ]
+}
