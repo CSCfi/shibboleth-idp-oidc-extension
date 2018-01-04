@@ -28,6 +28,8 @@
 
 package org.geant.idpextension.oidc.decoding.impl;
 
+import java.io.IOException;
+
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 
@@ -37,29 +39,27 @@ import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.messaging.decoder.servlet.AbstractHttpServletRequestMessageDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
  * Message decoder decoding OpenID Connect {@link AuthenticationRequest}s.
  */
 public class OIDCAuthenticationRequestDecoder extends AbstractHttpServletRequestMessageDecoder<AuthenticationRequest>
-    implements MessageDecoder<AuthenticationRequest> {
+        implements MessageDecoder<AuthenticationRequest> {
 
     /** Class logger. */
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(OIDCAuthenticationRequestDecoder.class);
 
     /** {@inheritDoc} */
-
     @Override
     protected void doDecode() throws MessageDecodingException {
         MessageContext<AuthenticationRequest> messageContext = new MessageContext<>();
-        HttpServletRequest request = getHttpServletRequest();
         AuthenticationRequest req = null;
         try {
-            req = AuthenticationRequest.parse(request.getQueryString());
-        } catch (com.nimbusds.oauth2.sdk.ParseException e) {
+            req = AuthenticationRequest.parse(ServletUtils.createHTTPRequest(getHttpServletRequest()));
+        } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
             log.error("Unable to decode oidc request: {}", e.getMessage());
             throw new MessageDecodingException(e);
         }
