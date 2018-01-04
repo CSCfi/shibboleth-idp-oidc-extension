@@ -29,42 +29,27 @@
 package org.geant.idpextension.oidc.encoding.impl;
 
 import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-import net.shibboleth.utilities.java.support.net.HttpServletSupport;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.messaging.encoder.servlet.AbstractHttpServletResponseMessageEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
-import com.nimbusds.oauth2.sdk.AuthorizationResponse;
+import com.nimbusds.oauth2.sdk.http.ServletUtils;
 
 /**
  * OIDC Authentication Response Decoder.
  */
-public class OIDCAuthenticationResponseEncoder extends
-        AbstractHttpServletResponseMessageEncoder<AuthenticationResponse> {
-
-    /** Class logger. */
-    private final Logger log = LoggerFactory.getLogger(OIDCAuthenticationResponseEncoder.class);
+public class OIDCAuthenticationResponseEncoder
+        extends AbstractHttpServletResponseMessageEncoder<AuthenticationResponse> {
 
     /** {@inheritDoc} */
     protected void doEncode() throws MessageEncodingException {
 
         MessageContext<AuthenticationResponse> messageContext = getMessageContext();
         AuthenticationResponse resp = messageContext.getMessage();
-        String redirect = ((AuthorizationResponse) resp).toURI().toString();
-
-        HttpServletResponse response = getHttpServletResponse();
-        HttpServletSupport.addNoCacheHeaders(response);
-        HttpServletSupport.setUTF8Encoding(response);
-
         try {
-            log.debug("Redirect set to {}", redirect);
-            response.sendRedirect(redirect);
+            ServletUtils.applyHTTPResponse(resp.toHTTPResponse(), getHttpServletResponse());
         } catch (IOException e) {
-            throw new MessageEncodingException("Problem sending HTTP redirect", e);
+            throw new MessageEncodingException("Problem sending response", e);
         }
     }
 
