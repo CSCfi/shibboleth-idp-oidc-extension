@@ -134,9 +134,10 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
     @SuppressWarnings("unchecked")
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+        //Should not ever happen
         if (getOidcResponseContext().getRedirectURI() == null) {
             log.error("{} redirect uri must be validated to form response", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
             return;
         }
         AuthenticationResponse resp = null;

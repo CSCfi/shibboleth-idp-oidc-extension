@@ -32,6 +32,9 @@ import java.net.URI;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+
+import org.opensaml.profile.action.ActionSupport;
+import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +61,9 @@ public class ValidateRedirectURI extends AbstractOIDCAuthenticationResponseActio
             log.debug("{} redirect uri validated {}", getLogPrefix(), getAuthenticationRequest().getRedirectionURI());
             return;
         }
-        log.warn("{} unable to validate redirect uri {}", getLogPrefix(), getAuthenticationRequest()
-                .getRedirectionURI());
+        log.error("{} redirect uri must be validated to form response", getLogPrefix());
+        ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+        return;
+        
     }
 }

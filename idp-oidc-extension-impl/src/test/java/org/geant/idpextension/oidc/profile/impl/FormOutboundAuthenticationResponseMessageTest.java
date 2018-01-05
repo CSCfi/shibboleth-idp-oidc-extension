@@ -74,7 +74,7 @@ public class FormOutboundAuthenticationResponseMessageTest extends BaseOIDCRespo
         init();
         respCtx.setRedirectURI(null);
         final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertEvent(event, EventIds.INVALID_MSG_CTX);
+        ActionTestingSupport.assertEvent(event, EventIds.INVALID_MESSAGE);
 
     }
 
