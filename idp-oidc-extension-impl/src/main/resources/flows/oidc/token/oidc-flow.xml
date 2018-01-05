@@ -14,14 +14,17 @@
 		<evaluate expression="InitializeRelyingPartyContext" />
 		<evaluate expression="SelectRelyingPartyConfiguration" />
 		<evaluate expression="'proceed'" />
-		<transition on="proceed" to="ValidateRequest" />
+		<transition on="proceed" to="OutboundContextsAndSecurityParameters" />
 	</action-state>
 
-	<action-state id="ValidateRequest">
+	<action-state id="OutboundContextsAndSecurityParameters">
+		<evaluate expression="InitializeOutboundMessageContext" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="end" />
 	</action-state>
+
 	<end-state id="end" />
+
 
 	<bean-import resource="../../../system/flows/saml/security-beans.xml" />
 	<bean-import resource="oidc-beans.xml" />

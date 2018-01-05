@@ -47,4 +47,8 @@
 		class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
 		scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
 
+	<bean id="InitializeOutboundMessageContext"
+		class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundAuthenticationResponseMessageContext"
+		scope="prototype" />
+
 </beans>
