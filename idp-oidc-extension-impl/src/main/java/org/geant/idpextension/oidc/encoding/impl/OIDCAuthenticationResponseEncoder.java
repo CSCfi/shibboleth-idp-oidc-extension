@@ -32,6 +32,9 @@ import java.io.IOException;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.messaging.encoder.servlet.AbstractHttpServletResponseMessageEncoder;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
+
+import net.shibboleth.utilities.java.support.net.HttpServletSupport;
+
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
 
 /**
@@ -46,6 +49,8 @@ public class OIDCAuthenticationResponseEncoder
 
         try {
             ServletUtils.applyHTTPResponse(getMessageContext().getMessage().toHTTPResponse(), getHttpServletResponse());
+            HttpServletSupport.addNoCacheHeaders(getHttpServletResponse());
+            HttpServletSupport.setUTF8Encoding(getHttpServletResponse());
         } catch (IOException e) {
             throw new MessageEncodingException("Problem sending response", e);
         }
