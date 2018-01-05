@@ -31,8 +31,6 @@ package org.geant.idpextension.oidc.decoding.impl;
 import java.io.IOException;
 
 import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.decoder.MessageDecodingException;
