@@ -43,4 +43,8 @@
 		class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext"
 		scope="prototype" />
 
+	<bean id="SelectRelyingPartyConfiguration"
+		class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
+		scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+
 </beans>

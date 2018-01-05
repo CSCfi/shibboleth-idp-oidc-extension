@@ -12,6 +12,7 @@
 		<evaluate expression="DecodeMessage" />
 		<evaluate expression="OIDCMetadataLookup" />
 		<evaluate expression="InitializeRelyingPartyContext" />
+		<evaluate expression="SelectRelyingPartyConfiguration" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="ValidateRequest" />
 	</action-state>
