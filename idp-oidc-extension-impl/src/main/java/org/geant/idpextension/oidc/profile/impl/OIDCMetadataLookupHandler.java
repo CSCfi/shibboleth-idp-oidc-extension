@@ -43,11 +43,12 @@ import org.opensaml.messaging.handler.MessageHandlerException;
 import org.geant.idpextension.oidc.criterion.ClientIDCriterion;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver;
+import org.geant.idpextension.util.RequestFieldResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nimbusds.oauth2.sdk.AbstractRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 /**
@@ -92,9 +93,8 @@ public class OIDCMetadataLookupHandler extends AbstractMessageHandler {
     @Override
     protected void doInvoke(@Nonnull final MessageContext messageContext) throws MessageHandlerException {
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
-        final AuthenticationRequest message = (AuthenticationRequest) messageContext.getMessage();
         // Resolve client id from inbound message
-        final ClientID clientId = message.getClientID();
+        final ClientID clientId = RequestFieldResolver.getClientID((AbstractRequest) messageContext.getMessage());
         // Resolve metadata for client id
         final ClientIDCriterion clientCriterion = new ClientIDCriterion(clientId);
         final CriteriaSet criteria = new CriteriaSet(clientCriterion);
