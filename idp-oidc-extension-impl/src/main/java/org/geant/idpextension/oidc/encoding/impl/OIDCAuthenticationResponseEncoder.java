@@ -29,14 +29,14 @@
 package org.geant.idpextension.oidc.encoding.impl;
 
 import java.io.IOException;
-import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.messaging.encoder.servlet.AbstractHttpServletResponseMessageEncoder;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
 
 /**
- * OIDC Authentication Response Decoder.
+ * OIDC Authentication Response Encoder. Assumes message context to exist and
+ * contain oidc authentication response message.
  */
 public class OIDCAuthenticationResponseEncoder
         extends AbstractHttpServletResponseMessageEncoder<AuthenticationResponse> {
@@ -44,10 +44,8 @@ public class OIDCAuthenticationResponseEncoder
     /** {@inheritDoc} */
     protected void doEncode() throws MessageEncodingException {
 
-        MessageContext<AuthenticationResponse> messageContext = getMessageContext();
-        AuthenticationResponse resp = messageContext.getMessage();
         try {
-            ServletUtils.applyHTTPResponse(resp.toHTTPResponse(), getHttpServletResponse());
+            ServletUtils.applyHTTPResponse(getMessageContext().getMessage().toHTTPResponse(), getHttpServletResponse());
         } catch (IOException e) {
             throw new MessageEncodingException("Problem sending response", e);
         }
