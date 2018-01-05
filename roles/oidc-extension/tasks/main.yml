@@ -8,6 +8,9 @@
 
 - name: Ensure "{{ idp_home }}/flows/oidc/authorize" dir exists
   file: path="{{ idp_home }}/flows/oidc/authorize" state=directory
+  
+- name: Ensure "{{ idp_home }}/flows/oidc/token" dir exists
+  file: path="{{ idp_home }}/flows/oidc/token" state=directory
 
 - name: Ensure "{{ idp_home }}/flows/oidc/register" dir exists
   file: path="{{ idp_home }}/flows/oidc/register" state=directory
@@ -35,6 +38,8 @@
   with_items:
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/authorize/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/authorize/oidc-flow.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/authorize/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/authorize/oidc-beans.xml" }
+    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/token/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/token/oidc-flow.xml" }
+    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/token/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/token/oidc-beans.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/register/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/register/oidc-flow.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/register/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/register/oidc-beans.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/webfinger/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/webfinger/oidc-flow.xml" }
