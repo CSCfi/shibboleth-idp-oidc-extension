@@ -61,7 +61,6 @@ public class OIDCTokenRequestDecoder extends AbstractHttpServletRequestMessageDe
             throw new MessageDecodingException(e);
         }
         messageContext.setMessage(req);
-        log.debug("Decoded oidc token request {}", req.toString());
         setMessageContext(messageContext);
     }
 
