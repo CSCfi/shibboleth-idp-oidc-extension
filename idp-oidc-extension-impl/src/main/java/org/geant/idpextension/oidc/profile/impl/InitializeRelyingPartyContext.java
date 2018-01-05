@@ -42,14 +42,15 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
+import org.geant.idpextension.util.RequestFieldResolver;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
+import com.nimbusds.oauth2.sdk.AbstractRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
  * Action that adds a {@link RelyingPartyContext} to the current
@@ -68,8 +69,8 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(InitializeRelyingPartyContext.class);
 
-    /** OIDC Authentication request. */
-    private AuthenticationRequest request;
+    /** OIDC client id. */
+    private ClientID clientId;
 
     /** Strategy that will return or create a {@link RelyingPartyContext}. */
     @Nonnull
@@ -87,8 +88,7 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
     }
 
     /**
-     * Set the strategy used to return or create the {@link RelyingPartyContext}
-     * .
+     * Set the strategy used to return or create the {@link RelyingPartyContext} .
      * 
      * @param strategy
      *            creation strategy
@@ -129,15 +129,19 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
             return false;
         }
         Object message = profileRequestContext.getInboundMessageContext().getMessage();
-
-        if (message == null || !(message instanceof AuthenticationRequest)) {
+        if (message == null || !(message instanceof AbstractRequest)) {
             log.error("{} Unable to locate inbound message", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        request = (AuthenticationRequest) message;
+        clientId = RequestFieldResolver.getClientID((AbstractRequest)message);
+        if (clientId == null) {
+            //TODO: Verify we do get client id always with token requests also
+            log.error("{} Unable to locate client id from inbound message", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return false;
+        }
         return true;
-
     }
 
     /** {@inheritDoc} */
@@ -150,9 +154,7 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
             return;
         }
-
-        final ClientID clientId = request.getClientID();
-        log.debug("{} Attaching RelyingPartyContext for rp {}", getLogPrefix(), clientId.getValue());
+        log.debug("Attaching RelyingPartyContext for rp {}", clientId.getValue());
         rpContext.setRelyingPartyId(clientId.getValue());
         final OIDCMetadataContext oidcContext = oidcMetadataContextLookupStrategy.apply(profileRequestContext);
         if (oidcContext != null && oidcContext.getClientInformation() != null
