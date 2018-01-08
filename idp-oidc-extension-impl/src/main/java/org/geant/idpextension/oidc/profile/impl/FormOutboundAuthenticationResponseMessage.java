@@ -48,6 +48,8 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
@@ -129,6 +131,19 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
         }
         return jwt;
     }
+    
+    /**
+     * TODO
+     * To create a mock access token. We do not use it for anything yet. 
+     * 
+     * @return mock access token.
+     */
+    private AccessToken getMockAccessToken() {
+        if (!getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
+            return new BearerAccessToken();
+        }
+        return null;
+    }
 
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
@@ -158,7 +173,7 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
                 }
             }
             resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
-                    getOidcResponseContext().getAuthorizationCode(), idToken, null,
+                    getOidcResponseContext().getAuthorizationCode(), idToken, getMockAccessToken(),
                     getAuthenticationRequest().getState(), null, getAuthenticationRequest().getResponseMode());
             log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
         }
