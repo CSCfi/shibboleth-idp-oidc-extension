@@ -88,4 +88,13 @@
 		</property>
 	</bean>
 
+	<bean id="AddIDTokenShell"
+		class="org.geant.idpextension.oidc.profile.impl.AddIDTokenShell"
+		scope="prototype" p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple"></bean>
+
+	<bean id="AddAttributeClaimsToIDToken"
+		class="org.geant.idpextension.oidc.profile.impl.AddClaimsToIDToken"
+		scope="prototype"></bean>
+
+
 </beans>
