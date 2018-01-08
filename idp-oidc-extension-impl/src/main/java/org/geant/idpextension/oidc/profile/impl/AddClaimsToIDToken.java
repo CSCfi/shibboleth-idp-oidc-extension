@@ -60,7 +60,7 @@ import com.google.common.base.Functions;
  *
  */
 @SuppressWarnings("rawtypes")
-public class AddClaimsToIDToken extends AbstractOIDCAuthenticationResponseAction {
+public class AddClaimsToIDToken extends AbstractOIDCResponseAction {
 
     /** Class logger. */
     @Nonnull
