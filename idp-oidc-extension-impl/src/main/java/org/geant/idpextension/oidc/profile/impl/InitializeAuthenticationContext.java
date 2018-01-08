@@ -69,6 +69,12 @@ public class InitializeAuthenticationContext extends AbstractOIDCAuthenticationR
         if (getAuthenticationRequest().getLoginHint() != null) {
             authnCtx.setHintedName(getAuthenticationRequest().getLoginHint());
         }
+        final AuthenticationContext initialAuthnContext =
+                profileRequestContext.getSubcontext(AuthenticationContext.class);
+        if (initialAuthnContext != null) {
+            authnCtx.setInitialAuthenticationResult(initialAuthnContext.getAuthenticationResult());
+        }
+        
         profileRequestContext.addSubcontext(authnCtx, true);
         log.debug("{} Created authentication context: {}", getLogPrefix(), authnCtx);
     }
