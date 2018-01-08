@@ -63,4 +63,12 @@
 	<bean id="acBase64Codec" class="org.apache.commons.codec.binary.Base64"
 		c:lineLength="0" c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
 
+	<bean id="InitializeSubjectContext"
+		class="org.geant.idpextension.oidc.profile.impl.InitializeSubjectContext"
+		scope="prototype" />
+
+	<bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes"
+		scope="prototype" c:resolverService-ref="shibboleth.AttributeResolverService"
+		p:maskFailures="%{idp.service.attribute.resolver.maskFailures:true}" />
+
 </beans>

@@ -21,6 +21,18 @@
 		<evaluate expression="InitializeOutboundMessageContext" />
 		<evaluate expression="ValidateAuthorizeCode" />
 		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="PostInitialSetup" />
+	</action-state>
+
+	<action-state id="PostInitialSetup">
+		<evaluate expression="InitializeSubjectContext" />
+		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="AttributeResolution" />
+	</action-state>
+
+	<action-state id="AttributeResolution">
+		<evaluate expression="ResolveAttributes" />
+		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="end" />
 	</action-state>
 
