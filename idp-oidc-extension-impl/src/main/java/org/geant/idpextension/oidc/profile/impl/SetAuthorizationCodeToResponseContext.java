@@ -122,7 +122,7 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        if (!getAuthenticationRequest().getResponseType().equals(new ResponseType(OIDCResponseTypeValue.ID_TOKEN))) {
+        if (!getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
             Date dateNow = new Date();
             Date dateExp = new Date(dateNow.getTime() + authCodeExp);
             JWTClaimsSet authzCodeClaims = new JWTClaimsSet.Builder()
