@@ -3,8 +3,10 @@
  "issuer": "https://{{ service_name }}",
  "authorization_endpoint": "https://{{ service_name }}/idp/profile/oidc/authorize",
  "registration_endpoint": "https://{{ service_name }}/idp/profile/oidc/register",
+ "token_endpoint": "https://{{ service_name }}/idp/profile/oidc/token",
  "jwks_uri": "https://{{ service_name }}/oidc/keyset.jwk",
  "response_types_supported": [
+  "code",
   "id_token"
  ],
  "subject_types_supported": [
@@ -12,6 +14,7 @@
   "pairwise"
  ],
  "grant_types_supported": [
+        "authorization_code",
         "implicit"
  ],
  "id_token_signing_alg_values_supported": [
