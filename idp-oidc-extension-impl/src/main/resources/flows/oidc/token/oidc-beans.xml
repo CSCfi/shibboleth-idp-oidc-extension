@@ -51,4 +51,16 @@
 		class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundAuthenticationResponseMessageContext"
 		scope="prototype" />
 
+	<bean id="ValidateAuthorizeCode"
+		class="org.geant.idpextension.oidc.profile.impl.ValidateAuthorizeCode"
+		scope="prototype" c:sealer-ref="authorizeCodeSealer" />
+
+	<bean id="authorizeCodeSealer" lazy-init="true"
+		class="net.shibboleth.utilities.java.support.security.DataSealer"
+		p:keyStrategy-ref="shibboleth.DataSealerKeyStrategy" p:encoder-ref="acBase64Codec"
+		p:decoder-ref="acBase64Codec" />
+
+	<bean id="acBase64Codec" class="org.apache.commons.codec.binary.Base64"
+		c:lineLength="0" c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
+
 </beans>

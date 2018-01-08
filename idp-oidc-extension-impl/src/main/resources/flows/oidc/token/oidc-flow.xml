@@ -19,6 +19,7 @@
 
 	<action-state id="OutboundContextsAndSecurityParameters">
 		<evaluate expression="InitializeOutboundMessageContext" />
+		<evaluate expression="ValidateAuthorizeCode" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="end" />
 	</action-state>
