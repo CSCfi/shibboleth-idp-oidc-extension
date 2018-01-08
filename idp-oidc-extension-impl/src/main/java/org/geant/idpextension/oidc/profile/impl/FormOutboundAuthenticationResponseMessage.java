@@ -48,6 +48,7 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
@@ -139,7 +140,7 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
      * @return mock access token.
      */
     private AccessToken getMockAccessToken() {
-        if (!getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
+        if (getAuthenticationRequest().getResponseType().contains(ResponseType.Value.TOKEN)){
             return new BearerAccessToken();
         }
         return null;
