@@ -28,9 +28,6 @@
 
 package org.geant.idpextension.oidc.metadata.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -199,18 +196,28 @@ public abstract class AbstractReloadingOIDCEntityResolver<Key extends Identifier
                         t.getClass().getName(), t.getMessage()));
             }
         } finally {
-            refreshMetadataTask = new RefreshMetadataTask();
-            if (refreshDelay == 0) {
-                refreshDelay = maxRefreshDelay;
-            }
-            nextRefresh = new DateTime(ISOChronology.getInstanceUTC()).plus(refreshDelay);
-            final long nextRefreshDelay = nextRefresh.getMillis() - System.currentTimeMillis();
-
-            taskTimer.schedule(refreshMetadataTask, nextRefreshDelay);
-            log.info("Next refresh cycle for metadata provider '{}' will occur on '{}' ('{}' local time)",
-                    new Object[] {mdId, nextRefresh, nextRefresh.toDateTime(DateTimeZone.getDefault()),});
+            scheduleNextRefresh(refreshDelay);
             lastRefresh = now;
         }
+    }
+    
+    /**
+     * Schedules the next refresh. If the given delay is 0, then {@link maxRefreshDelay} is used.
+     * @param delay The delay before the next refresh.
+     */
+    protected void scheduleNextRefresh(final long delay) {
+        refreshMetadataTask = new RefreshMetadataTask();
+        long refreshDelay = delay;
+        if (delay == 0) {
+            refreshDelay = maxRefreshDelay;
+        }
+        nextRefresh = new DateTime(ISOChronology.getInstanceUTC()).plus(refreshDelay);
+        final long nextRefreshDelay = nextRefresh.getMillis() - System.currentTimeMillis();
+
+        taskTimer.schedule(refreshMetadataTask, nextRefreshDelay);
+        log.info("Next refresh cycle for metadata provider '{}' will occur on '{}' ('{}' local time)",
+                new Object[] {getMetadataIdentifier(), nextRefresh, 
+                        nextRefresh.toDateTime(DateTimeZone.getDefault()),});
     }
     
     /**
@@ -244,33 +251,6 @@ public abstract class AbstractReloadingOIDCEntityResolver<Key extends Identifier
      * @throws ResolverException thrown if there is a problem fetching the metadata
      */
     protected abstract byte[] fetchMetadata() throws ResolverException;
-    
-    /**
-     * Converts an InputStream into a byte array.
-     * 
-     * @param ins input stream to convert
-     * 
-     * @return resultant byte array
-     * 
-     * @throws ResolverException thrown if there is a problem reading the resultant byte array
-     */
-    protected byte[] inputstreamToByteArray(InputStream ins) throws ResolverException {
-        try {
-            // 1 MB read buffer
-            byte[] buffer = new byte[1024 * 1024];
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-            int n = 0;
-            while (-1 != (n = ins.read(buffer))) {
-                output.write(buffer, 0, n);
-            }
-
-            ins.close();
-            return output.toByteArray();
-        } catch (IOException e) {
-            throw new ResolverException(e);
-        }
-    }
     
     /** Background task that refreshes metadata. */
     private class RefreshMetadataTask extends TimerTask {

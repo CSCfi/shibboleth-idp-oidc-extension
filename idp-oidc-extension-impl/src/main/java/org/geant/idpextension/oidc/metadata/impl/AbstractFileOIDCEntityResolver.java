@@ -117,39 +117,17 @@ public abstract class AbstractFileOIDCEntityResolver<Key extends Identifier, Val
     @Override
     protected byte[] fetchMetadata() throws ResolverException {
         try {
-            validateMetadataFile(metadataFile);
+            ResolverHelper.validateMetadataFile(metadataFile);
             DateTime metadataUpdateTime = new DateTime(metadataFile.lastModified(), ISOChronology.getInstanceUTC());
             if (getLastRefresh() == null || getLastUpdate() == null || metadataUpdateTime.isAfter(getLastRefresh())) {
                 log.debug("Returning the contents of {} as byte array", metadataFile.toPath());
-                return inputstreamToByteArray(new FileInputStream(metadataFile));
+                return ResolverHelper.inputstreamToByteArray(new FileInputStream(metadataFile));
             }
-
             return null;
         } catch (IOException e) {
             String errMsg = "Unable to read metadata file " + metadataFile.getAbsolutePath();
             log.error(errMsg, e);
             throw new ResolverException(errMsg, e);
-        }
-    }
-    
-    /**
-     * Validate the basic properties of the specified metadata file, for example that it exists; 
-     * that it is a file; and that it is readable.
-     *
-     * @param file the file to evaluate
-     * @throws ResolverException if file does not pass basic properties required of a metadata file
-     */
-    protected void validateMetadataFile(@Nonnull final File file) throws ResolverException {
-        if (!file.exists()) {
-            throw new ResolverException("Metadata file '" + file.getAbsolutePath() + "' does not exist");
-        }
-
-        if (!file.isFile()) {
-            throw new ResolverException("Metadata file '" + file.getAbsolutePath() + "' is not a file");
-        }
-
-        if (!file.canRead()) {
-            throw new ResolverException("Metadata file '" + file.getAbsolutePath() + "' is not readable");
         }
     }
 }
