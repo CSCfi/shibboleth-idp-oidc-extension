@@ -32,6 +32,8 @@ import java.net.URI;
 import java.util.Date;
 import javax.annotation.Nullable;
 import org.opensaml.saml.saml2.core.NameID;
+
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -80,6 +82,29 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /** Authorization code. */
     @Nullable
     private AuthorizationCode authorizationCode;
+
+    /** Authorization code claims. */
+    @Nullable
+    private JWTClaimsSet authorizationCodeClaims;
+
+    /**
+     * Get authorization code claims.
+     * 
+     * @return authorization code claims
+     */
+    public JWTClaimsSet getAuthorizationCodeClaims() {
+        return authorizationCodeClaims;
+    }
+
+    /**
+     * Set authorization code claims.
+     * 
+     * @param claims
+     *            authorization code claims
+     */
+    public void setAuthorizationCodeClaims(JWTClaimsSet claims) {
+        authorizationCodeClaims = claims;
+    }
 
     /**
      * Get authorization code.
