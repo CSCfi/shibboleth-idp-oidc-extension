@@ -38,8 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
 import org.opensaml.profile.action.ActionSupport;
