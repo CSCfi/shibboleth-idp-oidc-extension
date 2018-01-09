@@ -42,6 +42,14 @@
 		<evaluate expression="AddIDTokenShell" />
 		<evaluate expression="AddAttributeClaimsToIDToken" />
 		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="HandleOutboundMessage" />
+	</action-state>
+	
+	<action-state id="HandleOutboundMessage">
+		<evaluate expression="FormOutboundMessage" />
+		<evaluate expression="EncodeMessage" />
+		<evaluate expression="RecordResponseComplete" />
+		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="end" />
 	</action-state>
 
