@@ -49,6 +49,7 @@ public class OIDCAuthenticationResponseEncoder
 
         try {
             ServletUtils.applyHTTPResponse(getMessageContext().getMessage().toHTTPResponse(), getHttpServletResponse());
+            // TODO: Check correctness and relevance of following
             HttpServletSupport.addNoCacheHeaders(getHttpServletResponse());
             HttpServletSupport.setUTF8Encoding(getHttpServletResponse());
         } catch (IOException e) {
