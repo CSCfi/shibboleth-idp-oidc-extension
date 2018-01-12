@@ -30,11 +30,17 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import java.util.Iterator;
 import javax.annotation.Nonnull;
+
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestedScopeLookupFunction;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.Scope;
+
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
+import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
  * Action that validates requested scopes are registered ones. Validated scopes
@@ -48,17 +54,38 @@ public class ValidateScope extends AbstractOIDCAuthenticationResponseAction {
     @Nonnull
     private Logger log = LoggerFactory.getLogger(ValidateScope.class);
 
+    /** Strategy used to obtain the requested scope value. */
+    @Nonnull
+    private Function<ProfileRequestContext, Scope> scopeLookupStrategy;
+
+    /**
+     * Constructor.
+     */
+    public ValidateScope() {
+        scopeLookupStrategy = new DefaultRequestedScopeLookupFunction();
+    }
+
+    /**
+     * Set the strategy used to locate the requested scope to use.
+     * 
+     * @param strategy
+     *            lookup strategy
+     */
+    public void setScopeLookupStrategy(@Nonnull final Function<ProfileRequestContext, Scope> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        scopeLookupStrategy = Constraint.isNotNull(strategy, "ScopeLookupStrategy lookup strategy cannot be null");
+    }
+
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         Scope registeredScopes = getMetadataContext().getClientInformation().getMetadata().getScope();
         if (registeredScopes == null || registeredScopes.isEmpty()) {
-            log.debug("{} No registered scopes for client {}, nothing to do", getLogPrefix(), getMetadataContext()
-                    .getClientInformation().getID());
+            log.debug("{} No registered scopes for client {}, nothing to do", getLogPrefix(),
+                    getMetadataContext().getClientInformation().getID());
             return;
         }
-        Scope requestedScopes = new Scope();
-        requestedScopes.addAll(getAuthenticationRequest().getScope());
+        Scope requestedScopes = scopeLookupStrategy.apply(profileRequestContext);
         for (Iterator<Scope.Value> i = requestedScopes.iterator(); i.hasNext();) {
             Scope.Value scope = i.next();
             if (!registeredScopes.contains(scope)) {
