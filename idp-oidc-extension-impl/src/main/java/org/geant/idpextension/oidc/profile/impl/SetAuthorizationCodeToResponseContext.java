@@ -124,11 +124,22 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
             Date dateNow = new Date();
             Date dateExp = new Date(dateNow.getTime() + authCodeExp);
             JWTClaimsSet authzCodeClaims = new JWTClaimsSet.Builder()
+                    // This is authorization code
+                    .claim("type", "ac")
+                    // The rp the code was created for
                     .audience(getAuthenticationRequest().getClientID().getValue())
-                    .subject(subjectCtx.getPrincipalName()).issuer(issuerLookupStrategy.apply(profileRequestContext))
+                    // The op that created the code
+                    .issuer(issuerLookupStrategy.apply(profileRequestContext))
+                    // User Principal of the authenticated user
+                    .subject(subjectCtx.getPrincipalName())
+                    // Issued at, valid until expires
                     .issueTime(dateNow).expirationTime(dateExp)
-                    // TODO: scope and claims field values to constants
-                    .claim("scope", getAuthenticationRequest().getScope().toArray())
+                    // TODO: type, ac, redirect_uri, scope and claims field values to constants
+                    // Validated redirect uri of the request
+                    .claim("redirect_uri", getOidcResponseContext().getRedirectURI().toString())
+                    // Original scope of the request
+                    .claim("scope", getAuthenticationRequest().getScope().toString())
+                    // Original claims of the request
                     .claim("claims", getAuthenticationRequest().getClaims() == null ? null
                             : getAuthenticationRequest().getClaims().toJSONObject())
                     .build();
