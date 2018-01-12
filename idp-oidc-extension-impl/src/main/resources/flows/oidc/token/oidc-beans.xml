@@ -55,6 +55,13 @@
 		class="org.geant.idpextension.oidc.profile.impl.ValidateAuthorizeCode"
 		scope="prototype" c:sealer-ref="authorizeCodeSealer" />
 
+	<bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope"
+		scope="prototype" p:scopeLookupStrategy-ref="shibboleth.TokenRequestScopeLookupStrategy" />
+
+	<bean id="shibboleth.TokenRequestScopeLookupStrategy"
+		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestScopeLookupFunction"
+		scope="prototype" />
+
 	<bean id="authorizeCodeSealer" lazy-init="true"
 		class="net.shibboleth.utilities.java.support.security.DataSealer"
 		p:keyStrategy-ref="shibboleth.DataSealerKeyStrategy" p:encoder-ref="acBase64Codec"
