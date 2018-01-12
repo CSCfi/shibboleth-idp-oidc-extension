@@ -34,6 +34,7 @@ import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileR
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
+import org.geant.idpextension.oidc.profile.OidcEventIds;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
@@ -83,7 +84,7 @@ public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
         OIDCClientInformation information = new OIDCClientInformation(new ClientID("test"), null, metaData, null, null, null);
         oidcCtx.setClientInformation(information);
         final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertEvent(event, EventIds.INVALID_MESSAGE);
+        ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REDIRECT_URIS);
         Assert.assertNull(respCtx.getRedirectURI());
     }
 

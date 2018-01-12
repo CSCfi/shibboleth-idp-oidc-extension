@@ -54,6 +54,19 @@
 	<bean id="ValidateAuthorizeCode"
 		class="org.geant.idpextension.oidc.profile.impl.ValidateAuthorizeCode"
 		scope="prototype" c:sealer-ref="authorizeCodeSealer" />
+		
+	<bean id="ValidateRedirectURI"
+		class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
+		scope="prototype" p:redirectURILookupStrategy-ref="shibboleth.TokenRequestRedirectURILookupStrategy" 
+		p:validRedirectURIsLookupStrategy-ref="shibboleth.TokenRequestValidRequestUrisLookupStrategy"/>
+		
+	<bean id="shibboleth.TokenRequestRedirectURILookupStrategy"
+		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestRedirectURILookupFunction"
+		scope="prototype" />
+		
+	<bean id="shibboleth.TokenRequestValidRequestUrisLookupStrategy"
+		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestValidRequestURIsLookupFunction"
+		scope="prototype" />
 
 	<bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope"
 		scope="prototype" p:scopeLookupStrategy-ref="shibboleth.TokenRequestScopeLookupStrategy" />

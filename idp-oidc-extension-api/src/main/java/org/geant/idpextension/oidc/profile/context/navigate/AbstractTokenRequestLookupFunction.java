@@ -28,37 +28,35 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
-import java.text.ParseException;
 import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.oauth2.sdk.Scope;
+import javax.annotation.Nullable;
+import net.shibboleth.utilities.java.support.component.AbstractIdentifiableInitializableComponent;
+import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
+import org.opensaml.profile.context.ProfileRequestContext;
+import com.nimbusds.oauth2.sdk.TokenRequest;
 
 /**
- * A function that returns copy of requested scope via a lookup function. This
- * lookup locates scope from oidc authz code for token request handling. If
- * authz code claims are not available, null is returned.
+ * A Abstract function extended by lookups searching fields from authentication
+ * request.
  */
-public class TokenRequestScopeLookupFunction extends AbstractAuthzCodeLookupFunction<Scope> {
+@SuppressWarnings("rawtypes")
+public abstract class AbstractTokenRequestLookupFunction<T> extends AbstractIdentifiableInitializableComponent
+        implements ContextDataLookupFunction<ProfileRequestContext, T> {
 
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(TokenRequestScopeLookupFunction.class);
+    /** Implemented to perform the actual lookup. */
+    abstract T doLookup(@Nonnull TokenRequest req);
 
+    /** {@inheritDoc} */
     @Override
-    Scope doLookup(@Nonnull JWTClaimsSet authzCodeClaims) {
-        // TODO: add constant for scope claim name
-        if (authzCodeClaims.getClaim("scope") == null) {
+    @Nullable
+    public T apply(@Nullable final ProfileRequestContext input) {
+        if (input == null || input.getInboundMessageContext() == null) {
             return null;
         }
-        Scope scope = null;
-        try {
-            scope = Scope.parse((authzCodeClaims.getStringClaim("scope")));
-        } catch (ParseException e) {
-            log.error("Unable to parse scope from authz code claim {}", authzCodeClaims.getClaim("scope").toString());
+        Object message = input.getInboundMessageContext().getMessage();
+        if (message == null || !(message instanceof TokenRequest)) {
+            return null;
         }
-        return scope;
+        return doLookup((TokenRequest) message);
     }
-
 }

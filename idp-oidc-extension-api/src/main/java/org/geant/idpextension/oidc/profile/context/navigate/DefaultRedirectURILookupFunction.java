@@ -28,37 +28,20 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
-import java.text.ParseException;
+import java.net.URI;
+
 import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
- * A function that returns copy of requested scope via a lookup function. This
- * lookup locates scope from oidc authz code for token request handling. If
- * authz code claims are not available, null is returned.
+ * A function that returns redirect uri of the request via a lookup function.
+ * This default lookup locates redirect uri from oidc authentication request if
+ * available. If information is not available, null is returned.
  */
-public class TokenRequestScopeLookupFunction extends AbstractAuthzCodeLookupFunction<Scope> {
-
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(TokenRequestScopeLookupFunction.class);
+public class DefaultRedirectURILookupFunction extends AbstractAuthenticationRequestLookupFunction<URI> {
 
     @Override
-    Scope doLookup(@Nonnull JWTClaimsSet authzCodeClaims) {
-        // TODO: add constant for scope claim name
-        if (authzCodeClaims.getClaim("scope") == null) {
-            return null;
-        }
-        Scope scope = null;
-        try {
-            scope = Scope.parse((authzCodeClaims.getStringClaim("scope")));
-        } catch (ParseException e) {
-            log.error("Unable to parse scope from authz code claim {}", authzCodeClaims.getClaim("scope").toString());
-        }
-        return scope;
+    URI doLookup(@Nonnull AuthenticationRequest req) {
+        return req.getRedirectionURI();
     }
-
 }

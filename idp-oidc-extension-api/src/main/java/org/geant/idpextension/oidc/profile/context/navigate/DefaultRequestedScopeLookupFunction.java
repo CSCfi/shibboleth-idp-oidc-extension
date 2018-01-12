@@ -28,10 +28,7 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
-import javax.annotation.Nullable;
-import net.shibboleth.utilities.java.support.component.AbstractIdentifiableInitializableComponent;
-import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
-import org.opensaml.profile.context.ProfileRequestContext;
+import javax.annotation.Nonnull;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
@@ -40,23 +37,12 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
  * default lookup locates scope from oidc authentication request if available.
  * If information is not available, null is returned.
  */
-@SuppressWarnings("rawtypes")
-public class DefaultRequestedScopeLookupFunction extends AbstractIdentifiableInitializableComponent
-        implements ContextDataLookupFunction<ProfileRequestContext, Scope> {
+public class DefaultRequestedScopeLookupFunction extends AbstractAuthenticationRequestLookupFunction<Scope> {
 
-    /** {@inheritDoc} */
     @Override
-    @Nullable
-    public Scope apply(@Nullable final ProfileRequestContext input) {
-        if (input == null || input.getInboundMessageContext() == null) {
-            return null;
-        }
-        Object message = input.getInboundMessageContext().getMessage();
-        if (message == null || !(message instanceof AuthenticationRequest)) {
-            return null;
-        }
+    Scope doLookup(@Nonnull AuthenticationRequest req) {
         Scope scope = new Scope();
-        scope.addAll(((AuthenticationRequest) message).getScope());
+        scope.addAll(req.getScope());
         return scope;
     }
 }

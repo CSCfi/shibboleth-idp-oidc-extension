@@ -28,37 +28,31 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
-import java.text.ParseException;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.oauth2.sdk.Scope;
+import java.net.URI;
+import java.util.Set;
 
-/**
- * A function that returns copy of requested scope via a lookup function. This
- * lookup locates scope from oidc authz code for token request handling. If
- * authz code claims are not available, null is returned.
- */
-public class TokenRequestScopeLookupFunction extends AbstractAuthzCodeLookupFunction<Scope> {
+import javax.annotation.Nullable;
+import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
+import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
+import org.opensaml.profile.context.ProfileRequestContext;
 
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(TokenRequestScopeLookupFunction.class);
+/** A function that returns registered redirection uris from metadata. */
+@SuppressWarnings("rawtypes")
+public class DefaultValidRedirectUrisLookupFunction
+        implements ContextDataLookupFunction<ProfileRequestContext, Set<URI>> {
 
+    /** {@inheritDoc} */
     @Override
-    Scope doLookup(@Nonnull JWTClaimsSet authzCodeClaims) {
-        // TODO: add constant for scope claim name
-        if (authzCodeClaims.getClaim("scope") == null) {
+    @Nullable
+    public Set<URI> apply(@Nullable final ProfileRequestContext input) {
+        if (input == null || input.getInboundMessageContext() == null) {
             return null;
         }
-        Scope scope = null;
-        try {
-            scope = Scope.parse((authzCodeClaims.getStringClaim("scope")));
-        } catch (ParseException e) {
-            log.error("Unable to parse scope from authz code claim {}", authzCodeClaims.getClaim("scope").toString());
+        OIDCMetadataContext ctx = input.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, false);
+        if (ctx == null || ctx.getClientInformation() == null || ctx.getClientInformation().getMetadata() == null) {
+            return null;
         }
-        return scope;
+        return ctx.getClientInformation().getMetadata().getRedirectionURIs();
     }
 
 }
