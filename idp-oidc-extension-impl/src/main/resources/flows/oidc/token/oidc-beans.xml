@@ -13,7 +13,7 @@
 		only -->
 	<bean id="InitializeProfileRequestContext"
 		class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
-		scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/token"
+		scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/sso/browser"
 		p:loggingId="%{idp.service.logging.saml2sso:SSO}" />
 
 	<bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage"
@@ -46,6 +46,10 @@
 	<bean id="SelectRelyingPartyConfiguration"
 		class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
 		scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+		
+	<bean id="SelectProfileConfiguration"
+		class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
+		scope="prototype" />
 
 	<bean id="InitializeOutboundMessageContext"
 		class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundTokenResponseMessageContext"
@@ -70,6 +74,24 @@
 
 	<bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope"
 		scope="prototype" p:scopeLookupStrategy-ref="shibboleth.TokenRequestScopeLookupStrategy" />
+		
+	<bean id="PopulateIDTokenSignatureSigningParameters"
+		class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters"
+		scope="prototype" p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
+		p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
+		<property name="activationCondition">
+			<bean
+				class="org.geant.idpextension.oidc.config.logic.SignIDTokensPredicate" />
+		</property>
+		<property name="securityParametersContextLookupStrategy">
+			<bean class="com.google.common.base.Functions" factory-method="compose"
+				c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+		</property>
+		<property name="existingParametersContextLookupStrategy">
+			<bean class="com.google.common.base.Functions" factory-method="compose"
+				c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
+		</property>
+	</bean>
 
 	<bean id="shibboleth.TokenRequestScopeLookupStrategy"
 		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestScopeLookupFunction"
