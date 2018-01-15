@@ -122,8 +122,7 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
      */
     private JWT getIdToken() {
         JWT jwt = getOidcResponseContext().getSignedIDToken();
-        // TODO: We do not have signed tokens yet from token endpoint
-        if (true/* !signedToken */) {
+        if (!signedToken) {
             try {
                 jwt = new PlainJWT(getOidcResponseContext().getIDToken().toJWTClaimsSet());
             } catch (ParseException e) {
@@ -152,9 +151,9 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
                 return;
             }
             // TODO: refresh token handling is missing totally
-            // TODO: access token handling is missing totally, only a dummy is created
+            // TODO: access token handling is missing, only a dummy is created
             // TODO: id token signing is now coupled with implicit flow response signing
-            // predicate, study how it should be done
+            // basically always on(default)/off. This is not propably what the spec says. 
             // TODO: refactoring..has duplicate functionality to
             // FormOutboundAuthenticationResponseMessage.. well, this is first version...
             resp = new OIDCTokenResponse(
