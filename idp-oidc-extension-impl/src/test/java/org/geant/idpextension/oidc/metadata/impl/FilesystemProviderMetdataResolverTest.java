@@ -31,6 +31,7 @@ package org.geant.idpextension.oidc.metadata.impl;
 import java.io.File;
 
 import org.geant.idpextension.oidc.criterion.IssuerCriterion;
+import org.geant.idpextension.oidc.metadata.resolver.ProviderMetadataResolver;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -45,17 +46,19 @@ import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
  */
 public class FilesystemProviderMetdataResolverTest {
 
-    FilesystemProviderMetadataResolver resolver;
+    ProviderMetadataResolver resolver;
+    
+    File file;
     
     String issuer;
-    
+        
     @BeforeMethod
     public void initTests() throws Exception {
         issuer = "https://op.example.org";
-        final File file = new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/openid-configuration.json");
+        file = new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/openid-configuration.json");
         resolver = new FilesystemProviderMetadataResolver(file);
-        resolver.setId("mockId");
-        resolver.initialize();
+        ((FilesystemProviderMetadataResolver)resolver).setId("mockId");
+        ((FilesystemProviderMetadataResolver)resolver).initialize();
     }
     
     @Test
@@ -71,6 +74,5 @@ public class FilesystemProviderMetdataResolverTest {
         final OIDCProviderMetadata metadata = resolver.resolveSingle(new CriteriaSet(criterion));
         Assert.assertNotNull(metadata);
         Assert.assertEquals(metadata.getIssuer().getValue(), issuer);
-    }
-    
+    }    
 }
