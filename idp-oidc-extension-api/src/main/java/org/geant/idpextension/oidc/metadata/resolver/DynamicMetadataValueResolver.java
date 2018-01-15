@@ -28,6 +28,10 @@
 
 package org.geant.idpextension.oidc.metadata.resolver;
 
+import javax.annotation.Nullable;
+
+import org.joda.time.DateTime;
+
 import net.shibboleth.utilities.java.support.component.IdentifiedComponent;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.Resolver;
@@ -51,4 +55,20 @@ public interface DynamicMetadataValueResolver extends Resolver<Object, CriteriaS
      */
     void refresh() throws ResolverException;
 
+    /**
+     * Gets the time the last refresh cycle occurred.
+     * 
+     * @return time the last refresh cycle occurred
+     */
+    @Nullable DateTime getLastRefresh();
+
+    /**
+     * Get the time that the currently available client information was last updated. Note, this may be different than
+     * the time retrieved by {@link #getLastRefresh()} is the client information was known not to have changed during
+     * the last refresh cycle.
+     * 
+     * @return time when the currently client information was last updated, null if it has never successfully been read
+     * in
+     */
+    @Nullable DateTime getLastUpdate();
 }
