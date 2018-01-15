@@ -131,12 +131,20 @@
 	</bean>
 
 	<bean id="AddIDTokenShell"
-		class="org.geant.idpextension.oidc.profile.impl.AddIDTokenShell"
-		scope="prototype" p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple"></bean>
+		class="org.geant.idpextension.oidc.profile.impl.AddIDTokenShell" scope="prototype"
+		p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple"></bean>
 
 	<bean id="AddAttributeClaimsToIDToken"
 		class="org.geant.idpextension.oidc.profile.impl.AddClaimsToIDToken"
 		scope="prototype"></bean>
+
+	<bean id="SignIDToken" class="org.geant.idpextension.oidc.profile.impl.SignIDToken"
+		scope="prototype">
+		<property name="securityParametersLookupStrategy">
+			<bean class="com.google.common.base.Functions" factory-method="compose"
+				c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+		</property>
+	</bean>
 
 	<bean id="FormOutboundMessage"
 		class="org.geant.idpextension.oidc.profile.impl.FormOutboundTokenResponseMessage"
