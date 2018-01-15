@@ -52,16 +52,16 @@ public class TokenRequestRedirectURILookupFunction extends AbstractTokenRequestL
     @Override
     URI doLookup(TokenRequest req) {
         // TODO: constant to replace redirect_uri key
-        if (req.getAuthorizationGrant().toParameters().get("redirect_uri") == null) {
+        String redirect_uri = req.getAuthorizationGrant().toParameters().get("redirect_uri");
+        if (redirect_uri == null) {
             log.warn("No redirect_uri parameter");
             return null;
         }
         URI uri = null;
         try {
-            uri = new URI(req.getAuthorizationGrant().toParameters().get("redirect_uri"));
+            uri = new URI(redirect_uri);
         } catch (URISyntaxException e) {
-            log.error("Unable to parse uri from token request redirect_uri {}",
-                    req.getAuthorizationGrant().toParameters().get("redirect_uri"));
+            log.error("Unable to parse uri from token request redirect_uri {}", redirect_uri);
         }
         return uri;
 
