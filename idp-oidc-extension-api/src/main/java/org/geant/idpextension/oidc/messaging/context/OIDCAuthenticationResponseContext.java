@@ -37,6 +37,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
@@ -86,6 +87,30 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /** Authorization code claims. */
     @Nullable
     private JWTClaimsSet authorizationCodeClaims;
+
+    /** Requested claims. */
+    @Nullable
+    private ClaimsRequest requestedClaims;
+
+    /**
+     * Get requested claims.
+     * 
+     * @return requested claims
+     */
+    @Nullable
+    public ClaimsRequest getRequestedClaims() {
+        return requestedClaims;
+    }
+
+    /**
+     * Set requested claims.
+     * 
+     * @param claims
+     *            requested claims
+     */
+    public void setRequestedClaims(@Nullable ClaimsRequest claims) {
+        requestedClaims = claims;
+    }
 
     /**
      * Get authorization code claims.
