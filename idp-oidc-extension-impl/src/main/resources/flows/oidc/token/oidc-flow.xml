@@ -23,6 +23,7 @@
 		<evaluate expression="ValidateAuthorizeCode" />
 		<evaluate expression="ValidateRedirectURI" />
 		<evaluate expression="ValidateScope" />
+		<evaluate expression="SetRequestedClaimsToResponseContext" />
 		<evaluate expression="PopulateIDTokenSignatureSigningParameters" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="PostInitialSetup" />
@@ -49,7 +50,7 @@
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="HandleOutboundMessage" />
 	</action-state>
-	
+
 	<action-state id="HandleOutboundMessage">
 		<evaluate expression="FormOutboundMessage" />
 		<evaluate expression="EncodeMessage" />

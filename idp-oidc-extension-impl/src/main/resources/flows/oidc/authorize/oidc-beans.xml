@@ -64,6 +64,10 @@
 		class="org.geant.idpextension.oidc.profile.impl.SetRequestedSubjectToResponseContext"
 		scope="prototype" />
 
+	<bean id="SetRequestedClaimsToResponseContext"
+		class="org.geant.idpextension.oidc.profile.impl.SetRequestedClaimsToResponseContext"
+		scope="prototype" />
+
 	<bean id="VerifyRequestedSubjectIdentifier"
 		class="org.geant.idpextension.oidc.profile.impl.VerifyRequestedSubjectIdentifier"
 		scope="prototype" />
@@ -111,8 +115,8 @@
 	</bean>
 
 	<bean id="SetAuthorizationCodeToResponseContext"
-	class="org.geant.idpextension.oidc.profile.impl.SetAuthorizationCodeToResponseContext"
-	scope="prototype" c:sealer-ref="authorizeCodeSealer" />
+		class="org.geant.idpextension.oidc.profile.impl.SetAuthorizationCodeToResponseContext"
+		scope="prototype" c:sealer-ref="authorizeCodeSealer" />
 
 	<bean id="authorizeCodeSealer" lazy-init="true"
 		class="net.shibboleth.utilities.java.support.security.DataSealer"

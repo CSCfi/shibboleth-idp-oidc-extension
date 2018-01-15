@@ -26,6 +26,7 @@
 		<evaluate expression="ValidateResponseType" />
 		<evaluate expression="ValidateScope" />
 		<evaluate expression="SetRequestedSubjectToResponseContext" />
+		<evaluate expression="SetRequestedClaimsToResponseContext" />
 		<evaluate expression="PopulateIDTokenSignatureSigningParameters" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="PostInitialSetup" />
