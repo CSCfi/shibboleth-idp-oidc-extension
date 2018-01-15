@@ -40,6 +40,7 @@ import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 
 import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCStringAttributeEncoder;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.junit.Assert;
 import org.opensaml.messaging.context.MessageContext;
@@ -75,18 +76,23 @@ public class AttributeInOIDCRequestedClaimsMatcherTest {
         final RequestContext requestCtx = new RequestContextBuilder().buildRequestContext();
         prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
         msgCtx = new MessageContext<AuthenticationRequest>();
-
+        prc.setInboundMessageContext(msgCtx);
+        //We use the same ctx for outbonud, outbound is olnly used here for fetching response context.
+        prc.setOutboundMessageContext(msgCtx);
+        OIDCAuthenticationResponseContext respCtx = new OIDCAuthenticationResponseContext();
+        msgCtx.addSubcontext(respCtx);
         if (!idtoken && !userinfo) {
             msgCtx.setMessage(new AuthenticationRequest(new URI("htts://example.org"), ResponseType.getDefault(),
                     new Scope("openid"), new ClientID(), new URI("htts://example.org"), new State(), new Nonce()));
+            
         } else {
 
             msgCtx.setMessage(new AuthenticationRequest(new URI("htts://example.org"), ResponseType.getDefault(), null,
                     new Scope("openid"), new ClientID(), new URI("htts://example.org"), new State(), new Nonce(), null,
                     null, 0, null, null, null, null, null, getClaimsRequest(idtoken, userinfo), null, null, null, null));
+            respCtx.setRequestedClaims(getClaimsRequest(idtoken, userinfo));
         }
-
-        prc.setInboundMessageContext(msgCtx);
+        
         // shortcut, may break the test
         filtercontext = prc.getSubcontext(AttributeFilterContext.class, true);
         ctx = new OIDCMetadataContext();

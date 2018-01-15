@@ -36,15 +36,14 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 
 import org.geant.idpextension.oidc.attribute.encoding.impl.AbstractOIDCAttributeEncoder;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.BaseContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.ImmutableSet;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-
+import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import net.shibboleth.idp.attribute.AttributeEncoder;
 import net.shibboleth.idp.attribute.IdPAttribute;
 import net.shibboleth.idp.attribute.IdPAttributeValue;
@@ -54,8 +53,8 @@ import net.shibboleth.utilities.java.support.component.AbstractIdentifiableIniti
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 
 /** Class for matching attribute to requested claims. */
-public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableInitializableComponent implements
-        Matcher {
+public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableInitializableComponent
+        implements Matcher {
 
     /** Class logger. */
     @Nonnull
@@ -76,7 +75,6 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
     /** The String used to prefix log message. */
     private String logPrefix;
 
-   
     /**
      * Gets whether to drop non essential claims.
      * 
@@ -173,7 +171,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
 
     }
 
-// Checkstyle: CyclomaticComplexity OFF
+    // Checkstyle: CyclomaticComplexity OFF
     @Override
     public Set<IdPAttributeValue<?>> getMatchingValues(@Nonnull IdPAttribute attribute,
             @Nonnull AttributeFilterContext filtercontext) {
@@ -184,15 +182,15 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
             log.debug("{} No oidc encoders attached to attribute", getLogPrefix());
             return null;
         }
-        AuthenticationRequest request = getAuthenticationRequest(getInboundMessageContext(filtercontext));
-        if (request == null) {
+        OIDCAuthenticationResponseContext respCtx = getOIDCAuthenticationResponseContext(
+                getOutboundMessageContext(filtercontext));
+        if (respCtx == null) {
             // This is always a failure.
-            log.debug("{} No oidc request found for this comparison", getLogPrefix());
+            log.debug("{} No oidc response ctx for this comparison", getLogPrefix());
             return null;
         }
-        if (request.getClaims() == null
-                || (request.getClaims().getIDTokenClaims() == null && 
-                request.getClaims().getUserInfoClaims() == null)) {
+        ClaimsRequest request = respCtx.getRequestedClaims();
+        if (request == null || (request.getIDTokenClaims() == null && request.getUserInfoClaims() == null)) {
             log.debug("{} No claims in request", getLogPrefix());
             if (getMatchIRequestedClaimsSilent()) {
                 log.debug("{} all values matched as in silent mode", getLogPrefix());
@@ -202,17 +200,17 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
                 return null;
             }
         }
-        if (request.getClaims().getIDTokenClaimNames(false) != null && !getMatchOnlyUserInfo()) {
-            if (!Collections.disjoint(request.getClaims().getIDTokenClaimNames(false), names)) {
-                log.debug("{} all values matched as {} is requested id token claims", 
-                        getLogPrefix(), attribute.getId());
+        if (request.getIDTokenClaimNames(false) != null && !getMatchOnlyUserInfo()) {
+            if (!Collections.disjoint(request.getIDTokenClaimNames(false), names)) {
+                log.debug("{} all values matched as {} is requested id token claims", getLogPrefix(),
+                        attribute.getId());
                 log.warn("{} Essential checking not implemented yet", getLogPrefix());
                 // TODO: value based filtering with option onlyEssential
                 return ImmutableSet.copyOf(attribute.getValues());
             }
         }
-        if (request.getClaims().getUserInfoClaimNames(false) != null && !getMatchOnlyIDToken()) {
-            if (!Collections.disjoint(request.getClaims().getUserInfoClaimNames(false), names)) {
+        if (request.getUserInfoClaimNames(false) != null && !getMatchOnlyIDToken()) {
+            if (!Collections.disjoint(request.getUserInfoClaimNames(false), names)) {
                 log.debug("{} all values matched as {} is requested user info claims", getLogPrefix(),
                         attribute.getId());
                 log.warn("{} Essential checking not implemented yet", getLogPrefix());
@@ -224,7 +222,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
                 attribute.getId());
         return null;
     }
-// Checkstyle: CyclomaticComplexity ON
+    // Checkstyle: CyclomaticComplexity ON
 
     /**
      * return a string which is to be prepended to all log messages.
@@ -233,7 +231,6 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
      */
     @Nonnull
     protected String getLogPrefix() {
-        // local cache of cached entry to allow unsynchronised clearing.
         String prefix = logPrefix;
         if (null == prefix) {
             final StringBuilder builder = new StringBuilder("Attribute Filter '").append(getId()).append("':");
@@ -248,14 +245,14 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
     // TODO: move these 2 following helpers to some common code.
 
     /**
-     * Helper method to locate inbound message context.
+     * Helper method to locate outbound message context.
      * 
      * @param ctx
-     *            any context decendant from profile request context,
-     * @return Inbound message context or null if not found.
+     *            any context child of profile request context,
+     * @return Outbound message context or null if not found.
      */
     @SuppressWarnings("rawtypes")
-    private MessageContext getInboundMessageContext(BaseContext ctx) {
+    private MessageContext getOutboundMessageContext(BaseContext ctx) {
         if (ctx == null) {
             return null;
         }
@@ -264,28 +261,25 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
             ctxRunner = ctxRunner.getParent();
         }
         if (ctxRunner instanceof ProfileRequestContext) {
-            return ((ProfileRequestContext) ctxRunner).getInboundMessageContext();
+            return ((ProfileRequestContext) ctxRunner).getOutboundMessageContext();
         }
         return null;
     }
 
     /**
-     * Returns oidc authentication request from message context.
+     * Returns oidc response context.
      * 
      * @param msgCtx
-     *            Inbound message context.
-     * @return authentication request or null if not found.
+     *            Outbound message context.
+     * @return requested claims or null if not found.
      */
     @SuppressWarnings("rawtypes")
-    private AuthenticationRequest getAuthenticationRequest(MessageContext msgCtx) {
+    private OIDCAuthenticationResponseContext getOIDCAuthenticationResponseContext(MessageContext msgCtx) {
         if (msgCtx == null) {
             return null;
         }
-        Object message = msgCtx.getMessage();
-        if (message == null || !(message instanceof AuthenticationRequest)) {
-            return null;
-        }
-        return (AuthenticationRequest) message;
+        return msgCtx.getSubcontext(OIDCAuthenticationResponseContext.class, false);
+
     }
 
 }
