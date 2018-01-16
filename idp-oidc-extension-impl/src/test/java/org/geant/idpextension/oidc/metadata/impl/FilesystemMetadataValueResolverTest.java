@@ -36,13 +36,13 @@ import org.testng.annotations.Test;
 import net.minidev.json.JSONObject;
 
 /**
- * Unit tests for {@link DynamicFilesystemMetadataValueResolver}.
+ * Unit tests for {@link FilesystemMetadataValueResolver}.
  */
-public class DynamicFilesystemMetadataValueResolverTest {
+public class FilesystemMetadataValueResolverTest {
     
-    public FilesystemDynamicMetadataValueResolver initTests(final String filename) throws Exception {
+    public FilesystemMetadataValueResolver initTests(final String filename) throws Exception {
         final File file = new File(filename);
-        final FilesystemDynamicMetadataValueResolver resolver = new FilesystemDynamicMetadataValueResolver(file);
+        final FilesystemMetadataValueResolver resolver = new FilesystemMetadataValueResolver(file);
         resolver.setId("mockId");
         resolver.initialize();
         return resolver;
@@ -50,7 +50,7 @@ public class DynamicFilesystemMetadataValueResolverTest {
     
     @Test
     public void testString() throws Exception {
-        final FilesystemDynamicMetadataValueResolver resolver = 
+        final FilesystemMetadataValueResolver resolver = 
                 initTests("src/test/resources/org/geant/idpextension/oidc/metadata/impl/dyn-value1.json");
         final Object value = resolver.resolveSingle(null);
         Assert.assertNotNull(value);
@@ -60,7 +60,7 @@ public class DynamicFilesystemMetadataValueResolverTest {
 
     @Test
     public void testJson() throws Exception {
-        final FilesystemDynamicMetadataValueResolver resolver = 
+        final FilesystemMetadataValueResolver resolver = 
                 initTests("src/test/resources/org/geant/idpextension/oidc/metadata/impl/dyn-value2.json");
         final Object value = resolver.resolveSingle(null);
         Assert.assertNotNull(value);

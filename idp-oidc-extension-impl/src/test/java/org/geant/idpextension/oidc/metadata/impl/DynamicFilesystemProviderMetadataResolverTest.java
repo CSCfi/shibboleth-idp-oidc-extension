@@ -32,7 +32,7 @@ import java.io.File;
 import java.util.HashMap;
 
 import org.geant.idpextension.oidc.criterion.IssuerCriterion;
-import org.geant.idpextension.oidc.metadata.resolver.DynamicMetadataValueResolver;
+import org.geant.idpextension.oidc.metadata.resolver.RefreshableMetadataValueResolver;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -59,11 +59,11 @@ public class DynamicFilesystemProviderMetadataResolverTest extends FilesystemPro
         ((DynamicFilesystemProviderMetadataResolver)resolver).initialize();
         name = "mockName";
         value = "mockValue";
-        FilesystemDynamicMetadataValueResolver valueResolver = new FilesystemDynamicMetadataValueResolver(
+        FilesystemMetadataValueResolver valueResolver = new FilesystemMetadataValueResolver(
                 new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/dyn-value1.json"));
         valueResolver.setId("mock");
         valueResolver.initialize();
-        final HashMap<String, DynamicMetadataValueResolver> map = new HashMap<>();
+        final HashMap<String, RefreshableMetadataValueResolver> map = new HashMap<>();
         map.put(name, valueResolver);
         ((DynamicFilesystemProviderMetadataResolver)resolver).setDynamicValueResolvers(map);
     }

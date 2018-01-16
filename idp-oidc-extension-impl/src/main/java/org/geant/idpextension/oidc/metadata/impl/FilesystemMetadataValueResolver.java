@@ -34,7 +34,7 @@ import java.util.Timer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.geant.idpextension.oidc.metadata.resolver.DynamicMetadataValueResolver;
+import org.geant.idpextension.oidc.metadata.resolver.RefreshableMetadataValueResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,13 +47,13 @@ import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
- * An implementation to {@link DynamicMetadataValueResolver} that fetches the information from a file.
+ * An implementation to {@link RefreshableMetadataValueResolver} that fetches the information from a file.
  */
-public class FilesystemDynamicMetadataValueResolver extends AbstractFileOIDCEntityResolver<Identifier, Object> 
-    implements DynamicMetadataValueResolver {
+public class FilesystemMetadataValueResolver extends AbstractFileOIDCEntityResolver<Identifier, Object> 
+    implements RefreshableMetadataValueResolver {
     
     /** Class logger. */
-    private final Logger log = LoggerFactory.getLogger(FilesystemDynamicMetadataValueResolver.class);
+    private final Logger log = LoggerFactory.getLogger(FilesystemMetadataValueResolver.class);
 
     /**
      * Constructor.
@@ -62,7 +62,7 @@ public class FilesystemDynamicMetadataValueResolver extends AbstractFileOIDCEnti
      * 
      * @throws ResolverException this exception is no longer thrown
      */
-    public FilesystemDynamicMetadataValueResolver(@Nonnull final File metadata) throws ResolverException {
+    public FilesystemMetadataValueResolver(@Nonnull final File metadata) throws ResolverException {
         super(metadata);
     }
     
@@ -74,7 +74,7 @@ public class FilesystemDynamicMetadataValueResolver extends AbstractFileOIDCEnti
      * 
      * @throws ResolverException this exception is no longer thrown
      */
-    public FilesystemDynamicMetadataValueResolver(@Nullable final Timer backgroundTaskTimer, 
+    public FilesystemMetadataValueResolver(@Nullable final Timer backgroundTaskTimer, 
             @Nonnull final File metadata) throws ResolverException {
         super(backgroundTaskTimer, metadata);
     }

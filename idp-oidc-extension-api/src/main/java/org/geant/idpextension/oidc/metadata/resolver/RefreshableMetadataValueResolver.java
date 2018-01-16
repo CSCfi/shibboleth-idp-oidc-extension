@@ -32,16 +32,13 @@ import javax.annotation.Nullable;
 
 import org.joda.time.DateTime;
 
-import net.shibboleth.utilities.java.support.component.IdentifiedComponent;
-import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
-import net.shibboleth.utilities.java.support.resolver.Resolver;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
  * A resolver that is capable of resolving dynamic metadata values (as {@link Object}s) which meet certain supplied 
  * criteria.
  */
-public interface DynamicMetadataValueResolver extends Resolver<Object, CriteriaSet>, IdentifiedComponent {
+public interface RefreshableMetadataValueResolver extends MetadataValueResolver {
     
     /**
      * Refresh the data exposed by the resolver.
