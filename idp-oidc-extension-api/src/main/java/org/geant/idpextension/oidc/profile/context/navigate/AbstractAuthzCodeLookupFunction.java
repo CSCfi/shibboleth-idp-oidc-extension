@@ -30,8 +30,6 @@ package org.geant.idpextension.oidc.profile.context.navigate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.shibboleth.utilities.java.support.component.AbstractIdentifiableInitializableComponent;
-
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -43,7 +41,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
  * A Abstract function extended by lookups searching fields from authz code.
  */
 @SuppressWarnings("rawtypes")
-public abstract class AbstractAuthzCodeLookupFunction<T> extends AbstractIdentifiableInitializableComponent
+public abstract class AbstractAuthzCodeLookupFunction<T>
         implements ContextDataLookupFunction<ProfileRequestContext, T> {
 
     /** Class logger. */
