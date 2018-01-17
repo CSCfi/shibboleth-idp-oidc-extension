@@ -75,6 +75,7 @@ public class SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContex
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         try {
+            //TODO: authz code field constants or wrapper for it! ..
             getOidcResponseContext()
                     .setAcr(getOidcResponseContext().getAuthorizationCodeClaims().getStringClaim("acr"));
         } catch (ParseException e) {
