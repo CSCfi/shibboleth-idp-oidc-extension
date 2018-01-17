@@ -78,13 +78,21 @@
 	<bean id="SetRequestedClaimsToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetRequestedClaimsToResponseContext"
 		scope="prototype" p:requestedClaimsLookupStrategy-ref="shibboleth.TokenRequestRequestedClaimsLookupFunction" />
-		
+
+	<bean id="shibboleth.TokenRequestRequestedClaimsLookupFunction"
+		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestRequestedClaimsLookupFunction"
+		scope="prototype" />
+
 	<bean id="SetAuthenticationContextClassReferenceToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContext"
 		scope="prototype" />
 
-	<bean id="shibboleth.TokenRequestRequestedClaimsLookupFunction"
-		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestRequestedClaimsLookupFunction"
+	<bean id="SetAuthenticationTimeToResponseContext"
+		class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationTimeToResponseContext"
+		scope="prototype" p:authTimeLookupStrategy-ref="shibboleth.TokenRequestAuthTimeLookupFunction" />
+
+	<bean id="shibboleth.TokenRequestAuthTimeLookupFunction"
+		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestAuthTimeLookupFunction"
 		scope="prototype" />
 
 	<bean id="PopulateIDTokenSignatureSigningParameters"
@@ -149,7 +157,11 @@
 	<bean id="AddAttributeClaimsToIDToken"
 		class="org.geant.idpextension.oidc.profile.impl.AddClaimsToIDToken"
 		scope="prototype"></bean>
-		
+
+	<bean id="AddAuthTimeToIDToken"
+		class="org.geant.idpextension.oidc.profile.impl.AddAuthTimeToIDToken"
+		scope="prototype"></bean>
+
 	<bean id="AddAcrToIDToken"
 		class="org.geant.idpextension.oidc.profile.impl.AddAcrToIDToken"
 		scope="prototype"></bean>

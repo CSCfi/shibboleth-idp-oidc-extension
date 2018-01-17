@@ -179,12 +179,14 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
                     .claim("acr",
                             getOidcResponseContext().getAcr() == null ? null
                                     : getOidcResponseContext().getAcr().getValue())
-                    // Issued at and valid until expires fields. TODO: remove?
+                    // AC issued at and valid until expires fields. TODO: remove?
                     .issueTime(dateNow).expirationTime(dateExp)
                     // Nonce, required to form token end point response.
                     .claim("nonce",
                             getAuthenticationRequest().getNonce() == null ? null
                                     : getAuthenticationRequest().getNonce().getValue())
+                    // Authentication time. Required to build id token.
+                    .claim("auth_time", getOidcResponseContext().getAuthTime().getTime())
                     // Validated redirect uri of the request. Required to validate token request.
                     .claim("redirect_uri", getOidcResponseContext().getRedirectURI().toString())
                     // Original scope of the request. Required to re-resolve attributes.

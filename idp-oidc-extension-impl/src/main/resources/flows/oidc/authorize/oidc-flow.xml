@@ -41,12 +41,14 @@
 
 	<subflow-state id="DoAuthenticationSubflow" subflow="authn-oidc">
 		<input name="calledAsSubflow" value="true" />
-		<transition on="proceed" to="SetAuthorizationCode" />
+		<transition on="proceed"
+			to="SetAuthenticationInformationToResponseContext" />
 		<transition on="RestartAuthentication" to="PostInitialSetup" />
 	</subflow-state>
 
-	<action-state id="SetAuthorizationCode">
-	    <evaluate expression="SetAuthenticationContextClassReferenceToResponseContext" />
+	<action-state id="SetAuthenticationInformationToResponseContext">
+		<evaluate expression="SetAuthenticationContextClassReferenceToResponseContext" />
+		<evaluate expression="SetAuthenticationTimeToResponseContext" />
 		<evaluate expression="SetAuthorizationCodeToResponseContext" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="AttributeResolution" />
@@ -75,7 +77,6 @@
 	</subflow-state>
 
 	<action-state id="BuildResponse">
-		<evaluate expression="SetAuthenticationTimeToResponseContext" />
 		<evaluate expression="SetExpirationTimeToResponseContext" />
 		<evaluate expression="AddIDTokenShell" />
 		<evaluate expression="AddAttributeClaimsToIDToken" />

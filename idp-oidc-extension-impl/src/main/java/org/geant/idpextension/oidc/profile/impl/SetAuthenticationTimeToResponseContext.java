@@ -29,13 +29,15 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
-import net.shibboleth.idp.authn.AuthenticationResult;
-import net.shibboleth.idp.authn.context.AuthenticationContext;
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
+import net.shibboleth.utilities.java.support.logic.Constraint;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultAuthTimeLookupFunction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.base.Function;
 
 /**
  * Action that sets authentication instant to work context
@@ -44,38 +46,44 @@ import org.slf4j.LoggerFactory;
  *
  */
 @SuppressWarnings("rawtypes")
-public class SetAuthenticationTimeToResponseContext extends AbstractOIDCAuthenticationResponseAction {
+public class SetAuthenticationTimeToResponseContext extends AbstractOIDCResponseAction {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(SetAuthenticationTimeToResponseContext.class);
 
-    /** Authentication result. */
-    private AuthenticationResult authResult;
+    /** Strategy used to obtain the requested claims of request. */
+    @Nonnull
+    private Function<ProfileRequestContext, Long> authTimeLookupStrategy;
 
-    /** {@inheritDoc} */
-    @Override
-    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+    /**
+     * Constructor.
+     */
+    public SetAuthenticationTimeToResponseContext() {
+        authTimeLookupStrategy = new DefaultAuthTimeLookupFunction();
+    }
 
-        AuthenticationContext authCtx = profileRequestContext.getSubcontext(AuthenticationContext.class, false);
-        if (authCtx == null) {
-            log.error("{} No authentication context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-            return false;
-        }
-        authResult = authCtx.getAuthenticationResult();
-        if (authResult == null) {
-            log.error("{} No authentication result", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-            return false;
-        }
-        return super.doPreExecute(profileRequestContext);
+    /**
+     * Set the strategy used to locate the authentication time.
+     * 
+     * @param strategy
+     *            lookup strategy
+     */
+    public void setAuthTimeLookupStrategy(@Nonnull final Function<ProfileRequestContext, Long> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        authTimeLookupStrategy = Constraint.isNotNull(strategy,
+                "AuthTimeLookupStrategy lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        long value = authResult.getAuthenticationInstant();
+        Long value = authTimeLookupStrategy.apply(profileRequestContext);
+        if (value == null) {
+            log.error("{} No authentication instant available", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+            return;
+        }
         log.debug("{} Setting authentication time to {}", getLogPrefix(), value);
         getOidcResponseContext().setAuthTime(value);
     }
