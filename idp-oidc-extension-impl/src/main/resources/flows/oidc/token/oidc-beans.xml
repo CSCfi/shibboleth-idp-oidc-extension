@@ -78,6 +78,10 @@
 	<bean id="SetRequestedClaimsToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetRequestedClaimsToResponseContext"
 		scope="prototype" p:requestedClaimsLookupStrategy-ref="shibboleth.TokenRequestRequestedClaimsLookupFunction" />
+		
+	<bean id="SetAuthenticationContextClassReferenceToResponseContext"
+		class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContext"
+		scope="prototype" />
 
 	<bean id="shibboleth.TokenRequestRequestedClaimsLookupFunction"
 		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestRequestedClaimsLookupFunction"
@@ -145,6 +149,18 @@
 	<bean id="AddAttributeClaimsToIDToken"
 		class="org.geant.idpextension.oidc.profile.impl.AddClaimsToIDToken"
 		scope="prototype"></bean>
+		
+	<bean id="AddAcrToIDToken"
+		class="org.geant.idpextension.oidc.profile.impl.AddAcrToIDToken"
+		scope="prototype"></bean>
+
+	<bean id="AddNonceToIDToken"
+		class="org.geant.idpextension.oidc.profile.impl.AddNonceToIDToken"
+		scope="prototype" p:requestNonceLookupStrategy-ref="shibboleth.TokenRequestNonceLookupStrategy"></bean>
+
+	<bean id="shibboleth.TokenRequestNonceLookupStrategy"
+		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestNonceLookupFunction"
+		scope="prototype" />
 
 	<bean id="SignIDToken" class="org.geant.idpextension.oidc.profile.impl.SignIDToken"
 		scope="prototype">

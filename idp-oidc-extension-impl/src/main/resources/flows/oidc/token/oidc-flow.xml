@@ -24,6 +24,7 @@
 		<evaluate expression="ValidateRedirectURI" />
 		<evaluate expression="ValidateScope" />
 		<evaluate expression="SetRequestedClaimsToResponseContext" />
+		<evaluate expression="SetAuthenticationContextClassReferenceToResponseContext" />
 		<evaluate expression="PopulateIDTokenSignatureSigningParameters" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="PostInitialSetup" />
@@ -46,6 +47,8 @@
 	<action-state id="BuildResponse">
 		<evaluate expression="AddIDTokenShell" />
 		<evaluate expression="AddAttributeClaimsToIDToken" />
+		<evaluate expression="AddAcrToIDToken" />
+		<evaluate expression="AddNonceToIDToken" />
 		<evaluate expression="SignIDToken" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="HandleOutboundMessage" />
