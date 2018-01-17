@@ -31,6 +31,7 @@ package org.geant.idpextension.oidc.profile.impl;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -47,6 +48,8 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
+import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 
 /**
  * Action that creates a Authorization Code, and sets it to work context
@@ -76,12 +79,40 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     @Nonnull
     private final DataSealer dataSealer;
 
+    /** The generator to use. */
+    @Nullable
+    private IdentifierGenerationStrategy idGenerator;
+
+    /** Strategy used to locate the {@link IdentifierGenerationStrategy} to use. */
+    @Nonnull
+    private Function<ProfileRequestContext, IdentifierGenerationStrategy> idGeneratorLookupStrategy;
+
     /**
      * Constructor.
      */
     public SetAuthorizationCodeToResponseContext(@Nonnull @ParameterName(name = "sealer") final DataSealer sealer) {
         issuerLookupStrategy = new ResponderIdLookupFunction();
         dataSealer = Constraint.isNotNull(sealer, "DataSealer cannot be null");
+        idGeneratorLookupStrategy = new Function<ProfileRequestContext, IdentifierGenerationStrategy>() {
+            public IdentifierGenerationStrategy apply(ProfileRequestContext input) {
+                return new SecureRandomIdentifierGenerationStrategy();
+            }
+        };
+    }
+
+    /**
+     * Set the strategy used to locate the {@link IdentifierGenerationStrategy} to
+     * use.
+     * 
+     * @param strategy
+     *            lookup strategy
+     */
+    public void setIdentifierGeneratorLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, IdentifierGenerationStrategy> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        idGeneratorLookupStrategy = Constraint.isNotNull(strategy,
+                "IdentifierGenerationStrategy lookup strategy cannot be null");
     }
 
     /**
@@ -114,6 +145,12 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
         }
+        idGenerator = idGeneratorLookupStrategy.apply(profileRequestContext);
+        if (idGenerator == null) {
+            log.debug("{} No identifier generation strategy", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+            return false;
+        }
         return super.doPreExecute(profileRequestContext);
     }
 
@@ -124,22 +161,31 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
             Date dateNow = new Date();
             Date dateExp = new Date(dateNow.getTime() + authCodeExp);
             JWTClaimsSet authzCodeClaims = new JWTClaimsSet.Builder()
-                    // This is authorization code
+                    // TODO: type, ac, redirect_uri, scope, nonce and claims field values to
+                    // constants. Maybe add a wrapper for claims set.
+
+                    // States this is authorization code claims set.
                     .claim("type", "ac")
-                    // The rp the code was created for
+                    // Id for the authorization code. Value is used for replay cache. Also all
+                    // tokens granted by this code will inherit the value to allow revocation.
+                    .jwtID(idGenerator.generateIdentifier())
+                    // The rp the code was created for. TODO: remove?
                     .audience(getAuthenticationRequest().getClientID().getValue())
-                    // The op that created the code
+                    // The op that created the code. TODO: remove?
                     .issuer(issuerLookupStrategy.apply(profileRequestContext))
-                    // User Principal of the authenticated user
+                    // User Principal of the authenticated user. Required to re-resolve attributes.
                     .subject(subjectCtx.getPrincipalName())
-                    // Issued at, valid until expires
+                    // Issued at and valid until expires fields. TODO: remove?
                     .issueTime(dateNow).expirationTime(dateExp)
-                    // TODO: type, ac, redirect_uri, scope and claims field values to constants
-                    // Validated redirect uri of the request
+                    // Nonce, required to form token end point response.
+                    .claim("nonce",
+                            getAuthenticationRequest().getNonce() == null ? null
+                                    : getAuthenticationRequest().getNonce().getValue())
+                    // Validated redirect uri of the request. Required to validate token request.
                     .claim("redirect_uri", getOidcResponseContext().getRedirectURI().toString())
-                    // Original scope of the request
+                    // Original scope of the request. Required to re-resolve attributes.
                     .claim("scope", getAuthenticationRequest().getScope().toString())
-                    // Original claims of the request
+                    // Original claims of the request. Required to re-resolve attributes.
                     .claim("claims", getAuthenticationRequest().getClaims() == null ? null
                             : getAuthenticationRequest().getClaims().toJSONObject())
                     .build();

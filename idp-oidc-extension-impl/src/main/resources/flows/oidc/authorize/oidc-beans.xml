@@ -116,7 +116,13 @@
 
 	<bean id="SetAuthorizationCodeToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetAuthorizationCodeToResponseContext"
-		scope="prototype" c:sealer-ref="authorizeCodeSealer" />
+		scope="prototype" c:sealer-ref="authorizeCodeSealer">
+		<property name="identifierGeneratorLookupStrategy">
+			<bean
+				class="net.shibboleth.idp.profile.config.navigate.IdentifierGenerationStrategyLookupFunction"
+				p:defaultIdentifierGenerationStrategy-ref="shibboleth.DefaultIdentifierGenerationStrategy" />
+		</property>
+	</bean>
 
 	<bean id="authorizeCodeSealer" lazy-init="true"
 		class="net.shibboleth.utilities.java.support.security.DataSealer"
