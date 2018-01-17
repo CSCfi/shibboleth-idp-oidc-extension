@@ -29,9 +29,10 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
+import java.util.HashMap;
 
 import org.geant.idpextension.oidc.criterion.IssuerCriterion;
-import org.geant.idpextension.oidc.metadata.resolver.ProviderMetadataResolver;
+import org.geant.idpextension.oidc.metadata.resolver.RefreshableMetadataValueResolver;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -42,37 +43,40 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 
 /**
- * Unit tests for {@link FilesystemProviderMetadataResolver}.
+ * Unit tests for {@link DynamicFilesystemProviderMetadataResolver}.
  */
-public class FilesystemProviderMetdataResolverTest {
+public class DynamicFilesystemProviderMetadataResolverTest extends FilesystemProviderMetdataResolverTest {
+    
+    String name;
+    
+    String value;
 
-    ProviderMetadataResolver resolver;
-    
-    File file;
-    
-    String issuer;
-        
     @BeforeMethod
     public void initTests() throws Exception {
-        issuer = "https://op.example.org";
-        file = new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/openid-configuration.json");
-        resolver = new FilesystemProviderMetadataResolver(file);
-        ((FilesystemProviderMetadataResolver)resolver).setId("mockId");
-        ((FilesystemProviderMetadataResolver)resolver).initialize();
+        super.initTests();
+        resolver = new DynamicFilesystemProviderMetadataResolver(file);
+        ((DynamicFilesystemProviderMetadataResolver)resolver).setId("mockId");
+        ((DynamicFilesystemProviderMetadataResolver)resolver).initialize();
+        name = "mockName";
+        value = "mockValue";
+        FilesystemMetadataValueResolver valueResolver = new FilesystemMetadataValueResolver(
+                new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/dyn-value1.json"));
+        valueResolver.setId("mock");
+        valueResolver.initialize();
+        final HashMap<String, RefreshableMetadataValueResolver> map = new HashMap<>();
+        map.put(name, valueResolver);
+        ((DynamicFilesystemProviderMetadataResolver)resolver).setDynamicValueResolvers(map);
     }
     
     @Test
-    public void testNotFound() throws Exception {
-        final IssuerCriterion criterion = new IssuerCriterion(new Issuer("not_found"));
-        final OIDCProviderMetadata metadata = resolver.resolveSingle(new CriteriaSet(criterion));
-        Assert.assertNull(metadata);
-    }
-    
-    @Test
-    public void testSuccess() throws Exception {
+    public void testDynamic() throws Exception {
         final IssuerCriterion criterion = new IssuerCriterion(new Issuer(issuer));
-        final OIDCProviderMetadata metadata = resolver.resolveSingle(new CriteriaSet(criterion));
+        OIDCProviderMetadata metadata = resolver.resolveSingle(new CriteriaSet(criterion));
         Assert.assertNotNull(metadata);
         Assert.assertEquals(metadata.getIssuer().getValue(), issuer);
-    }    
+        ((DynamicFilesystemProviderMetadataResolver)resolver).refresh();
+        metadata = resolver.resolveSingle(new CriteriaSet(criterion));
+        Assert.assertNotNull(metadata.getCustomParameter(name));
+        Assert.assertEquals(metadata.getCustomParameter(name), value);
+    }
 }

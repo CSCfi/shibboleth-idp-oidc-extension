@@ -112,13 +112,21 @@ public abstract class AbstractFileOIDCEntityResolver<Key extends Identifier, Val
     protected String getMetadataIdentifier() {
         return metadataFile.getAbsolutePath();
     }
+    
+    /**
+     * Get the time for the last update/modification of the metadata file.
+     * @return The last update time.
+     */
+    protected DateTime getMetadataUpdateTime() {
+        return new DateTime(metadataFile.lastModified(), ISOChronology.getInstanceUTC());
+    }
 
     /** {@inheritDoc} */
     @Override
     protected byte[] fetchMetadata() throws ResolverException {
         try {
             ResolverHelper.validateMetadataFile(metadataFile);
-            DateTime metadataUpdateTime = new DateTime(metadataFile.lastModified(), ISOChronology.getInstanceUTC());
+            DateTime metadataUpdateTime = getMetadataUpdateTime();
             if (getLastRefresh() == null || getLastUpdate() == null || metadataUpdateTime.isAfter(getLastRefresh())) {
                 log.debug("Returning the contents of {} as byte array", metadataFile.toPath());
                 return ResolverHelper.inputstreamToByteArray(new FileInputStream(metadataFile));

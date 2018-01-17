@@ -30,49 +30,44 @@ package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
 
-import org.geant.idpextension.oidc.criterion.IssuerCriterion;
-import org.geant.idpextension.oidc.metadata.resolver.ProviderMetadataResolver;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
-
-import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import net.minidev.json.JSONObject;
 
 /**
- * Unit tests for {@link FilesystemProviderMetadataResolver}.
+ * Unit tests for {@link FilesystemMetadataValueResolver}.
  */
-public class FilesystemProviderMetdataResolverTest {
+public class FilesystemMetadataValueResolverTest {
+    
+    public FilesystemMetadataValueResolver initTests(final String filename) throws Exception {
+        final File file = new File(filename);
+        final FilesystemMetadataValueResolver resolver = new FilesystemMetadataValueResolver(file);
+        resolver.setId("mockId");
+        resolver.initialize();
+        return resolver;
+    }
+    
+    @Test
+    public void testString() throws Exception {
+        final FilesystemMetadataValueResolver resolver = 
+                initTests("src/test/resources/org/geant/idpextension/oidc/metadata/impl/dyn-value1.json");
+        final Object value = resolver.resolveSingle(null);
+        Assert.assertNotNull(value);
+        Assert.assertTrue(value instanceof String);
+        Assert.assertEquals(value, "mockValue");
+    }
 
-    ProviderMetadataResolver resolver;
-    
-    File file;
-    
-    String issuer;
-        
-    @BeforeMethod
-    public void initTests() throws Exception {
-        issuer = "https://op.example.org";
-        file = new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/openid-configuration.json");
-        resolver = new FilesystemProviderMetadataResolver(file);
-        ((FilesystemProviderMetadataResolver)resolver).setId("mockId");
-        ((FilesystemProviderMetadataResolver)resolver).initialize();
-    }
-    
     @Test
-    public void testNotFound() throws Exception {
-        final IssuerCriterion criterion = new IssuerCriterion(new Issuer("not_found"));
-        final OIDCProviderMetadata metadata = resolver.resolveSingle(new CriteriaSet(criterion));
-        Assert.assertNull(metadata);
+    public void testJson() throws Exception {
+        final FilesystemMetadataValueResolver resolver = 
+                initTests("src/test/resources/org/geant/idpextension/oidc/metadata/impl/dyn-value2.json");
+        final Object value = resolver.resolveSingle(null);
+        Assert.assertNotNull(value);
+        Assert.assertTrue(value instanceof JSONObject);
+        final JSONObject jsonValue = (JSONObject) value;
+        Assert.assertEquals(jsonValue.size(), 1);
+        Assert.assertEquals(jsonValue.get("mockKey"), "mockValue");
     }
-    
-    @Test
-    public void testSuccess() throws Exception {
-        final IssuerCriterion criterion = new IssuerCriterion(new Issuer(issuer));
-        final OIDCProviderMetadata metadata = resolver.resolveSingle(new CriteriaSet(criterion));
-        Assert.assertNotNull(metadata);
-        Assert.assertEquals(metadata.getIssuer().getValue(), issuer);
-    }    
+
 }
