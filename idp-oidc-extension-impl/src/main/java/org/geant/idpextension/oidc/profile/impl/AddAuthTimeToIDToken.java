@@ -50,7 +50,7 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
  *
  */
 @SuppressWarnings("rawtypes")
-public class AddAuthTimeToIDToken extends AbstractOIDCAuthenticationResponseAction {
+public class AddAuthTimeToIDToken extends AbstractOIDCResponseAction {
 
     /** Class logger. */
     @Nonnull
