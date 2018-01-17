@@ -161,7 +161,7 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
             Date dateNow = new Date();
             Date dateExp = new Date(dateNow.getTime() + authCodeExp);
             JWTClaimsSet authzCodeClaims = new JWTClaimsSet.Builder()
-                    // TODO: type, ac, redirect_uri, scope, nonce and claims field values to
+                    // TODO: type, ac, redirect_uri, scope, nonce, acr and claims field values to
                     // constants. Maybe add a wrapper for claims set.
 
                     // States this is authorization code claims set.
@@ -175,6 +175,10 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
                     .issuer(issuerLookupStrategy.apply(profileRequestContext))
                     // User Principal of the authenticated user. Required to re-resolve attributes.
                     .subject(subjectCtx.getPrincipalName())
+                    // ACR. Required to build id token.
+                    .claim("acr",
+                            getOidcResponseContext().getAcr() == null ? null
+                                    : getOidcResponseContext().getAcr().getValue())
                     // Issued at and valid until expires fields. TODO: remove?
                     .issueTime(dateNow).expirationTime(dateExp)
                     // Nonce, required to form token end point response.
