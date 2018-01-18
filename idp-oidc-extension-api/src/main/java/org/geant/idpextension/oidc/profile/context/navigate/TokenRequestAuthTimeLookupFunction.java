@@ -28,11 +28,8 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
-import java.text.ParseException;
 import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWTClaimsSet;
+import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 
 /**
  * A function that returns auth time via a lookup function. This lookup locates
@@ -41,24 +38,9 @@ import com.nimbusds.jwt.JWTClaimsSet;
  */
 public class TokenRequestAuthTimeLookupFunction extends AbstractAuthzCodeLookupFunction<Long> {
 
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(TokenRequestAuthTimeLookupFunction.class);
-
     @Override
-    Long doLookup(@Nonnull JWTClaimsSet authzCodeClaims) {
-        // TODO: add constant for auth_time claim name
-        if (authzCodeClaims.getClaim("auth_time") == null) {
-            return null;
-        }
-        Long authTime = null;
-        try {
-            authTime = authzCodeClaims.getLongClaim("auth_time");
-        } catch (ParseException e) {
-            log.error("Unable to parse auth_time from authz code claim {}",
-                    authzCodeClaims.getClaim("auth_time").toString());
-        }
-        return authTime;
+    Long doLookup(@Nonnull AuthorizeCodeClaimsSet authzCodeClaims) {
+        return authzCodeClaims.getAuthenticationTime().getTime();
     }
 
 }

@@ -38,9 +38,10 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
-import com.nimbusds.jwt.JWTClaimsSet;
 import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
+
+import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.opensaml.profile.action.ActionSupport;
 
 import net.shibboleth.utilities.java.support.annotation.ParameterName;
@@ -160,46 +161,16 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
         if (!getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
             Date dateNow = new Date();
             Date dateExp = new Date(dateNow.getTime() + authCodeExp);
-            JWTClaimsSet authzCodeClaims = new JWTClaimsSet.Builder()
-                    // TODO: type, ac, redirect_uri, scope, nonce, acr and claims field values to
-                    // constants. Maybe add a wrapper for claims set.
-
-                    // States this is authorization code claims set.
-                    .claim("type", "ac")
-                    // Id for the authorization code. Value is used for replay cache. Also all
-                    // tokens granted by this code will inherit the value to allow revocation.
-                    .jwtID(idGenerator.generateIdentifier())
-                    // The rp the code was created for. TODO: remove?
-                    .audience(getAuthenticationRequest().getClientID().getValue())
-                    // The op that created the code. TODO: remove?
-                    .issuer(issuerLookupStrategy.apply(profileRequestContext))
-                    // User Principal of the authenticated user. Required to re-resolve attributes.
-                    .subject(subjectCtx.getPrincipalName())
-                    // ACR. Required to build id token.
-                    .claim("acr",
-                            getOidcResponseContext().getAcr() == null ? null
-                                    : getOidcResponseContext().getAcr().getValue())
-                    // AC issued at and valid until expires fields. TODO: remove?
-                    .issueTime(dateNow).expirationTime(dateExp)
-                    // Nonce, required to form token end point response.
-                    .claim("nonce",
-                            getAuthenticationRequest().getNonce() == null ? null
-                                    : getAuthenticationRequest().getNonce().getValue())
-                    // Authentication time. Required to build id token.
-                    .claim("auth_time", getOidcResponseContext().getAuthTime().getTime())
-                    // Validated redirect uri of the request. Required to validate token request.
-                    .claim("redirect_uri", getOidcResponseContext().getRedirectURI().toString())
-                    // Original scope of the request. Required to re-resolve attributes.
-                    .claim("scope", getAuthenticationRequest().getScope().toString())
-                    // Original claims of the request. Required to re-resolve attributes.
-                    .claim("claims", getAuthenticationRequest().getClaims() == null ? null
-                            : getAuthenticationRequest().getClaims().toJSONObject())
-                    .build();
+            AuthorizeCodeClaimsSet claimsSet = new AuthorizeCodeClaimsSet(idGenerator,
+                    getAuthenticationRequest().getClientID(), issuerLookupStrategy.apply(profileRequestContext),
+                    subjectCtx.getPrincipalName(), getOidcResponseContext().getAcr(), dateNow, dateExp,
+                    getAuthenticationRequest().getNonce(), getOidcResponseContext().getAuthTime(),
+                    getOidcResponseContext().getRedirectURI(), getAuthenticationRequest().getScope(),
+                    getAuthenticationRequest().getClaims());
             try {
-                getOidcResponseContext().setAuthorizationCode(
-                        dataSealer.wrap(authzCodeClaims.toJSONObject().toJSONString(), dateExp.getTime()));
-                log.debug("{} Setting authz code {} as {} to response context ", getLogPrefix(),
-                        authzCodeClaims.toJSONObject().toJSONString(), getOidcResponseContext().getAuthorizationCode());
+                getOidcResponseContext().setAuthorizationCode(claimsSet.serialize(dataSealer));
+                log.debug("{} Setting authz code {} as {} to response context ", getLogPrefix(), claimsSet.serialize(),
+                        getOidcResponseContext().getAuthorizationCode());
             } catch (DataSealerException e) {
                 log.error("{} Authorization Code generation failed {}", getLogPrefix(), e.getMessage());
                 ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_ENCRYPT);

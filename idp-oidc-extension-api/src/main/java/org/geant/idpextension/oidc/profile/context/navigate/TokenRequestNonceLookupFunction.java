@@ -28,11 +28,8 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
-import java.text.ParseException;
 import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWTClaimsSet;
+import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import com.nimbusds.openid.connect.sdk.Nonce;
 
 /**
@@ -42,23 +39,9 @@ import com.nimbusds.openid.connect.sdk.Nonce;
  */
 public class TokenRequestNonceLookupFunction extends AbstractAuthzCodeLookupFunction<Nonce> {
 
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(TokenRequestNonceLookupFunction.class);
-
     @Override
-    Nonce doLookup(@Nonnull JWTClaimsSet authzCodeClaims) {
-        // TODO: add constant for nonce claim name
-        if (authzCodeClaims.getClaim("nonce") == null) {
-            return null;
-        }
-        Nonce nonce = null;
-        try {
-            nonce = Nonce.parse((authzCodeClaims.getStringClaim("nonce")));
-        } catch (ParseException e) {
-            log.error("Unable to parse scope from authz code claim {}", authzCodeClaims.getClaim("nonce").toString());
-        }
-        return nonce;
+    Nonce doLookup(@Nonnull AuthorizeCodeClaimsSet authzCodeClaims) {
+        return authzCodeClaims.getNonce();
     }
 
 }

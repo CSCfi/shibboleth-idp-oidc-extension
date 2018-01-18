@@ -28,11 +28,9 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
-import java.text.ParseException;
 import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWTClaimsSet;
+
+import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import com.nimbusds.oauth2.sdk.Scope;
 
 /**
@@ -42,23 +40,9 @@ import com.nimbusds.oauth2.sdk.Scope;
  */
 public class TokenRequestScopeLookupFunction extends AbstractAuthzCodeLookupFunction<Scope> {
 
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(TokenRequestScopeLookupFunction.class);
-
     @Override
-    Scope doLookup(@Nonnull JWTClaimsSet authzCodeClaims) {
-        // TODO: add constant for scope claim name
-        if (authzCodeClaims.getClaim("scope") == null) {
-            return null;
-        }
-        Scope scope = null;
-        try {
-            scope = Scope.parse((authzCodeClaims.getStringClaim("scope")));
-        } catch (ParseException e) {
-            log.error("Unable to parse scope from authz code claim {}", authzCodeClaims.getClaim("scope").toString());
-        }
-        return scope;
+    Scope doLookup(@Nonnull AuthorizeCodeClaimsSet authzCodeClaims) {
+        return authzCodeClaims.getScope();
     }
 
 }

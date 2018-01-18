@@ -29,10 +29,8 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import java.text.ParseException;
-import java.util.Date;
-
 import javax.annotation.Nonnull;
-
+import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -45,7 +43,6 @@ import net.shibboleth.utilities.java.support.annotation.ParameterName;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
-import com.nimbusds.jwt.JWTClaimsSet;
 
 /**
  * Action that validates authorization code is a valid one. Validated code is
@@ -83,25 +80,15 @@ public class ValidateAuthorizeCode extends AbstractOIDCTokenResponseAction {
             AuthorizationCodeGrant codeGrant = (AuthorizationCodeGrant) grant;
             if (codeGrant.getAuthorizationCode() != null && codeGrant.getAuthorizationCode().getValue() != null) {
                 try {
-                    JWTClaimsSet jwtCode = JWTClaimsSet
-                            .parse(dataSealer.unwrap(codeGrant.getAuthorizationCode().getValue()));
-                    log.debug("{} code {}", getLogPrefix(), jwtCode.toJSONObject().toJSONString());
-                    // We want to verify that the code actually is a authorization code and has
-                    // acceptable exp
-                    if (jwtCode.getExpirationTime().before(new Date())) {
+                    AuthorizeCodeClaimsSet authzCodeClaimsSet = AuthorizeCodeClaimsSet
+                            .parse(codeGrant.getAuthorizationCode().getValue(), dataSealer);
+                    log.debug("{} authz code unwrapped {}", getLogPrefix(), authzCodeClaimsSet.serialize());
+                    if (authzCodeClaimsSet.isExpired()) {
                         log.error("{} Authorization code exp is in the past {}", getLogPrefix(),
-                                jwtCode.getExpirationTime().getTime());
+                                authzCodeClaimsSet.getExp().getTime());
                         ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
                     }
-                    // TODO: ac and type to constants
-                    if (!"ac".equals(jwtCode.getClaim("type"))) {
-                        // TODO: token endpoint errors should be generated. THIS applies to all possible
-                        // error sources for token flow.
-                        log.error("{} code type does not match authorization code {}", getLogPrefix(),
-                                jwtCode.getClaim("type"));
-                        ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
-                    }
-                    getOidcResponseContext().setAuthorizationCodeClaims(jwtCode);
+                    getOidcResponseContext().setAuthorizationCodeClaimsSet(authzCodeClaimsSet);
                     return;
                 } catch (DataSealerException | ParseException e) {
                     log.error("{} Obtaining auhz code failed {}", getLogPrefix(), e.getMessage());

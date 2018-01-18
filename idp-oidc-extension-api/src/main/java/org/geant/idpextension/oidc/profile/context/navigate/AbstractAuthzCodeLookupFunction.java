@@ -31,11 +31,11 @@ package org.geant.idpextension.oidc.profile.context.navigate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
+import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWTClaimsSet;
 
 /**
  * A Abstract function extended by lookups searching fields from authz code.
@@ -49,7 +49,7 @@ public abstract class AbstractAuthzCodeLookupFunction<T>
     private final Logger log = LoggerFactory.getLogger(AbstractAuthzCodeLookupFunction.class);
 
     /** Implemented to perform the actual lookup. */
-    abstract T doLookup(@Nonnull JWTClaimsSet authzCodeClaims);
+    abstract T doLookup(@Nonnull AuthorizeCodeClaimsSet authzCodeClaims);
 
     @Override
     @Nullable
@@ -62,7 +62,7 @@ public abstract class AbstractAuthzCodeLookupFunction<T>
         if (oidcResponseContext == null) {
             return null;
         }
-        JWTClaimsSet authzCodeClaims = oidcResponseContext.getAuthorizationCodeClaims();
+        AuthorizeCodeClaimsSet authzCodeClaims = oidcResponseContext.getAuthorizationCodeClaims();
         if (authzCodeClaims == null) {
             return null;
         }

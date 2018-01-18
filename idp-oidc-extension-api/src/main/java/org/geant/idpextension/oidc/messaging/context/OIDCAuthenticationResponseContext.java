@@ -31,6 +31,8 @@ package org.geant.idpextension.oidc.messaging.context;
 import java.net.URI;
 import java.util.Date;
 import javax.annotation.Nullable;
+
+import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.opensaml.saml.saml2.core.NameID;
 
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -86,7 +88,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
 
     /** Authorization code claims. */
     @Nullable
-    private JWTClaimsSet authorizationCodeClaims;
+    private AuthorizeCodeClaimsSet authorizationCodeClaims;
 
     /** Requested claims. */
     @Nullable
@@ -117,7 +119,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
      * 
      * @return authorization code claims
      */
-    public JWTClaimsSet getAuthorizationCodeClaims() {
+    public AuthorizeCodeClaimsSet getAuthorizationCodeClaims() {
         return authorizationCodeClaims;
     }
 
@@ -127,7 +129,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
      * @param claims
      *            authorization code claims
      */
-    public void setAuthorizationCodeClaims(JWTClaimsSet claims) {
+    public void setAuthorizationCodeClaimsSet(AuthorizeCodeClaimsSet claims) {
         authorizationCodeClaims = claims;
     }
 

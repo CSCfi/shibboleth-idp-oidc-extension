@@ -29,39 +29,22 @@
 package org.geant.idpextension.oidc.profile.context.navigate;
 
 import java.net.URI;
-import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWTClaimsSet;
+import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 
 /**
- * A function that returns valid redirect uris  via a lookup function. This
- * lookup locates uris from oidc authz code for token request handling. If
- * authz code claims are not available, null is returned.
+ * A function that returns valid redirect uris via a lookup function. This
+ * lookup locates uris from oidc authz code for token request handling. If authz
+ * code claims are not available, null is returned.
  */
 public class TokenRequestValidRequestURIsLookupFunction extends AbstractAuthzCodeLookupFunction<Set<URI>> {
 
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(TokenRequestValidRequestURIsLookupFunction.class);
-
     @Override
-    protected Set<URI> doLookup(@Nonnull JWTClaimsSet authzCodeClaims) {
-        // TODO: add constant for redirect_uri claim name
-        if (authzCodeClaims.getClaim("redirect_uri") == null) {
-            return null;
-        }
+    protected Set<URI> doLookup(@Nonnull AuthorizeCodeClaimsSet authzCodeClaims) {
         Set<URI> uris = new HashSet<URI>();
-        try {
-            uris.add(URI.create(authzCodeClaims.getStringClaim("redirect_uri")));
-        } catch (ParseException e) {
-            log.error("Unable to parse URI from authz code claim {}", authzCodeClaims.getClaim("redirect_uri").toString());
-            return null;
-        }
+        uris.add(authzCodeClaims.getRedirectURI());
         return uris;
     }
 }
