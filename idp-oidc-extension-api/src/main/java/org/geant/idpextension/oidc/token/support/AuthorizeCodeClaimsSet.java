@@ -180,6 +180,7 @@ public final class AuthorizeCodeClaimsSet {
         if (!VALUE_TYPE_AC.equals(acClaimsSet.getClaims().get(KEY_TYPE))) {
             throw new ParseException("claim type must have value ac", 0);
         }
+        //Mandatory fields
         if (acClaimsSet.getStringClaim(KEY_ISSUER) == null) {
             throw new ParseException("claim iss must exist and not be null", 0);
         }
@@ -201,9 +202,6 @@ public final class AuthorizeCodeClaimsSet {
         if (acClaimsSet.getStringClaim(KEY_ACR) == null) {
             throw new ParseException("claim acr must exist and not be null", 0);
         }
-        if (acClaimsSet.getStringClaim(KEY_NONCE) == null) {
-            throw new ParseException("claim nonce must exist and not be null", 0);
-        }
         if (acClaimsSet.getDateClaim(KEY_AUTH_TIME) == null) {
             throw new ParseException("claim auth_time must exist and not be null", 0);
         }
@@ -213,10 +211,13 @@ public final class AuthorizeCodeClaimsSet {
         if (acClaimsSet.getStringClaim(KEY_SCOPE) == null) {
             throw new ParseException("claim scope must exist and not be null", 0);
         }
-        if (!acClaimsSet.getClaims().containsKey(KEY_CLAIMS)) {
-            throw new ParseException("claim claims must exist", 0);
+        //Voluntary fields
+        if (acClaimsSet.getClaims().containsKey(KEY_CLAIMS)) {
+            acClaimsSet.getJSONObjectClaim(KEY_CLAIMS);
         }
-        acClaimsSet.getJSONObjectClaim(KEY_CLAIMS);
+        if (acClaimsSet.getClaims().containsKey(KEY_NONCE)) {
+            acClaimsSet.getStringClaim(KEY_NONCE);
+        }
         return new AuthorizeCodeClaimsSet(acClaimsSet);
     }
 
