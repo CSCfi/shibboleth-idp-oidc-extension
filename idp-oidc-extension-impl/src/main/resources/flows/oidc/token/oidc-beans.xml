@@ -57,7 +57,7 @@
 
 	<bean id="ValidateAuthorizeCode"
 		class="org.geant.idpextension.oidc.profile.impl.ValidateAuthorizeCode"
-		scope="prototype" c:sealer-ref="authorizeCodeSealer" />
+		scope="prototype" c:sealer-ref="authorizeCodeSealer" p:replayCache-ref="shibboleth.ReplayCache"/>
 
 	<bean id="ValidateRedirectURI"
 		class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
