@@ -382,4 +382,14 @@ public final class AuthorizeCodeClaimsSet {
             return null;
         }
     }
+    
+    /**
+     * Get the id of the authz code.
+     * @return id of the authz code
+     */
+    @Nonnull
+    public String getID() {
+        return authzCodeClaims.getJWTID();
+    }
+    
 }
