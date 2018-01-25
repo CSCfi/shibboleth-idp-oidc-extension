@@ -50,60 +50,14 @@ import java.net.URI;
 import java.text.ParseException;
 
 /** Class wrapping claims set for authorize code. */
-public final class AuthorizeCodeClaimsSet {
+public final class AuthorizeCodeClaimsSet extends AbstractTokenClaimsSet {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(AuthorizeCodeClaimsSet.class);
 
-    /** Claims set for the claim. */
-    private JWTClaimsSet authzCodeClaims;
-
     /** Value of authorize code claims set type. */
     public static final String VALUE_TYPE_AC = "ac";
-
-    /** OP issuer. */
-    public static final String KEY_ISSUER = "iss";
-
-    /** User principal representing authenticated user. */
-    public static final String KEY_USER_PRINCIPAL = "sub";
-
-    /**
-     * Client Id of the rp the code is generated for. Type is string array (aud).
-     */
-    public static final String KEY_CLIENTID = "aud";
-
-    /** Expiration time of the authorize code. */
-    public static final String KEY_EXPIRATION_TIME = "exp";
-
-    /** Issue time of the authorize code. */
-    public static final String KEY_ISSUED_AT = "iat";
-
-    /** Unique identifier for the authorization code. */
-    public static final String KEY_AC_ID = "jti";
-
-    /** Type of the token. */
-    public static final String KEY_TYPE = "type";
-
-    /**
-     * Authentication context class reference value of the performed authentication.
-     */
-    public static final String KEY_ACR = "acr";
-
-    /** Nonce of the original authentication request. */
-    public static final String KEY_NONCE = "nonce";
-
-    /** Authentication time of the performed authentication. */
-    public static final String KEY_AUTH_TIME = "auth_time";
-
-    /** Redirect uri of the original authentication request. */
-    public static final String KEY_REDIRECT_URI = "redirect_uri";
-
-    /** Scope of the original authentication request. */
-    public static final String KEY_SCOPE = "scope";
-
-    /** Claims request of the original authentication request. */
-    public static final String KEY_CLAIMS = "claims";
 
     /**
      * Constructor for authorize code claims set.
@@ -136,23 +90,14 @@ public final class AuthorizeCodeClaimsSet {
      * @param claims
      *            Claims request of the authentication request. May be NULL.
      * @throws RuntimeException
-     *             if called with nnonallowed ull parameters
+     *             if called with nonallowed null parameters
      */
     public AuthorizeCodeClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
             @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirect_uri,
             @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
-        if (idGenerator == null || clientID == null || issuer == null || userPrincipal == null || acr == null
-                || iat == null || exp == null || authTime == null || redirect_uri == null || scope == null) {
-            throw new RuntimeException("Invalid parameters, programming error");
-        }
-        authzCodeClaims = new JWTClaimsSet.Builder()
-                // States this is authorization code claims set.
-                .claim(KEY_TYPE, VALUE_TYPE_AC).jwtID(idGenerator.generateIdentifier()).audience(clientID.getValue())
-                .issuer(issuer).subject(userPrincipal).claim("acr", acr.getValue()).issueTime(iat).expirationTime(exp)
-                .claim(KEY_NONCE, nonce == null ? null : nonce.getValue()).claim("auth_time", authTime)
-                .claim(KEY_REDIRECT_URI, redirect_uri.toString()).claim(KEY_SCOPE, scope.toString())
-                .claim(KEY_CLAIMS, claims == null ? null : claims.toJSONObject()).build();
+        super(VALUE_TYPE_AC, idGenerator, clientID, issuer, userPrincipal, acr, iat, exp, nonce, authTime, redirect_uri,
+                scope, claims);
     }
 
     /**
@@ -162,7 +107,7 @@ public final class AuthorizeCodeClaimsSet {
      *            authorize code claims set
      */
     private AuthorizeCodeClaimsSet(JWTClaimsSet authzCodeClaimsSet) {
-        authzCodeClaims = authzCodeClaimsSet;
+        tokenClaimsSet = authzCodeClaimsSet;
     }
 
     /**
@@ -176,48 +121,8 @@ public final class AuthorizeCodeClaimsSet {
      */
     public static AuthorizeCodeClaimsSet parse(String authorizeCodeClaimsSet) throws ParseException {
         JWTClaimsSet acClaimsSet = JWTClaimsSet.parse(authorizeCodeClaimsSet);
-        // Check existence and type of mandatory fields and values
-        if (!VALUE_TYPE_AC.equals(acClaimsSet.getClaims().get(KEY_TYPE))) {
-            throw new ParseException("claim type must have value ac", 0);
-        }
-        //Mandatory fields
-        if (acClaimsSet.getStringClaim(KEY_ISSUER) == null) {
-            throw new ParseException("claim iss must exist and not be null", 0);
-        }
-        if (acClaimsSet.getStringClaim(KEY_USER_PRINCIPAL) == null) {
-            throw new ParseException("claim sub must exist and not be null", 0);
-        }
-        if (acClaimsSet.getStringArrayClaim(KEY_CLIENTID) == null) {
-            throw new ParseException("claim aud must exist and not be null", 0);
-        }
-        if (acClaimsSet.getDateClaim(KEY_EXPIRATION_TIME) == null) {
-            throw new ParseException("claim exp must exist and not be null", 0);
-        }
-        if (acClaimsSet.getDateClaim(KEY_ISSUED_AT) == null) {
-            throw new ParseException("claim iat must exist and not be null", 0);
-        }
-        if (acClaimsSet.getStringClaim(KEY_AC_ID) == null) {
-            throw new ParseException("claim jti must exist and not be null", 0);
-        }
-        if (acClaimsSet.getStringClaim(KEY_ACR) == null) {
-            throw new ParseException("claim acr must exist and not be null", 0);
-        }
-        if (acClaimsSet.getDateClaim(KEY_AUTH_TIME) == null) {
-            throw new ParseException("claim auth_time must exist and not be null", 0);
-        }
-        if (acClaimsSet.getStringClaim(KEY_REDIRECT_URI) == null) {
-            throw new ParseException("claim redirect_uri must exist and not be null", 0);
-        }
-        if (acClaimsSet.getStringClaim(KEY_SCOPE) == null) {
-            throw new ParseException("claim scope must exist and not be null", 0);
-        }
-        //Voluntary fields
-        if (acClaimsSet.getClaims().containsKey(KEY_CLAIMS)) {
-            acClaimsSet.getJSONObjectClaim(KEY_CLAIMS);
-        }
-        if (acClaimsSet.getClaims().containsKey(KEY_NONCE)) {
-            acClaimsSet.getStringClaim(KEY_NONCE);
-        }
+        // Throws exception if parsing result is not expected one.
+        verifyParsedClaims(VALUE_TYPE_AC, acClaimsSet);
         return new AuthorizeCodeClaimsSet(acClaimsSet);
     }
 
@@ -239,157 +144,4 @@ public final class AuthorizeCodeClaimsSet {
         return parse(dataSealer.unwrap(wrappedAuthCode));
     }
 
-    /**
-     * Serialize the authz code as JSON String.
-     * 
-     * @return authz code as JSON String
-     */
-    public String serialize() {
-        log.debug("Serializing to {}", authzCodeClaims.toJSONObject().toJSONString());
-        return authzCodeClaims.toJSONObject().toJSONString();
-    }
-
-    /**
-     * Serialize the authz code as JSON String wrapped with sealer.
-     * 
-     * @param dataSealer
-     *            data sealer to wrap the JSON serialization
-     * @return authz code as JSON String wrapped with sealer
-     * @throws DataSealerException
-     *             is thrown if unwrapping fails
-     */
-    public String serialize(@Nonnull DataSealer dataSealer) throws DataSealerException {
-        String wrapped = dataSealer.wrap(serialize(), authzCodeClaims.getExpirationTime().getTime());
-        log.debug("Wrapped to {}", wrapped);
-        return wrapped;
-    }
-
-    /**
-     * Get the authorization code claims set.
-     * 
-     * @return authorization code claims set
-     */
-    @Nonnull
-    public JWTClaimsSet getClaimsSet() {
-        return authzCodeClaims;
-    }
-
-    /**
-     * Check if the authz code is expired.
-     * 
-     * @return true if the code is expired, otherwise false.
-     */
-    public boolean isExpired() {
-        return authzCodeClaims.getExpirationTime().before(new Date());
-    }
-
-    /**
-     * Get expiration time of the authz code.
-     * 
-     * @return expiration time of the authz code.
-     */
-    @Nonnull
-    public Date getExp() {
-        return authzCodeClaims.getExpirationTime();
-    }
-
-    /**
-     * Get redirect uri of the request.
-     * 
-     * @return redirect uri of the request, null if not located.
-     */
-    @Nonnull
-    public URI getRedirectURI() {
-        try {
-            return URI.create(authzCodeClaims.getStringClaim(KEY_REDIRECT_URI));
-        } catch (ParseException e) {
-            log.error("error parsing redirect uri from auth code", e.getMessage());
-        }
-        // should never happen, programming error.
-        return null;
-    }
-
-    /**
-     * Get acr of the performed authentication.
-     * 
-     * @return acr of the performed authentication.
-     */
-    @Nonnull
-    public String getACR() {
-        return (String) authzCodeClaims.getClaim(KEY_ACR);
-    }
-
-    /**
-     * Get auth time of the user.
-     * 
-     * @return auth time of the user.
-     */
-    @Nonnull
-    public Date getAuthenticationTime() {
-        try {
-            return authzCodeClaims.getDateClaim(KEY_AUTH_TIME);
-        } catch (ParseException e) {
-            log.error("Error parsing auth time {}", authzCodeClaims.getClaim(KEY_AUTH_TIME));
-            // should never happen, programming error.
-            return null;
-        }
-    }
-
-    /**
-     * Get copy of the nonce in authentication request.
-     * 
-     * @return copy of the nonce in authentication request.
-     */
-    @Nonnull
-    public Nonce getNonce() {
-        if (authzCodeClaims.getClaim(KEY_NONCE) == null) {
-            return null;
-        }
-        return new Nonce((String) authzCodeClaims.getClaim(KEY_NONCE));
-    }
-
-    /**
-     * Get copy of the claims request in authentication request.
-     * 
-     * @return copy of the claims request in authentication request, null if not
-     *         existing.
-     */
-    @Nullable
-    public ClaimsRequest getClaimsRequest() {
-        if (authzCodeClaims.getClaim(KEY_CLAIMS) == null) {
-            return null;
-        }
-        try {
-            return ClaimsRequest.parse((authzCodeClaims.getJSONObjectClaim(KEY_CLAIMS)));
-        } catch (ParseException e) {
-            log.error("Error parsing claims request {}", authzCodeClaims.getClaim(KEY_CLAIMS));
-            return null;
-        }
-    }
-
-    /**
-     * Get copy of the scope in authentication request.
-     * 
-     * @return copy of the scope in authentication request.
-     */
-    @Nonnull
-    public Scope getScope() {
-        try {
-            return Scope.parse((authzCodeClaims.getStringClaim(KEY_SCOPE)));
-        } catch (ParseException e) {
-            log.error("Error parsing scope in request {}", authzCodeClaims.getClaim(KEY_SCOPE));
-            // should never happen, programming error.
-            return null;
-        }
-    }
-    
-    /**
-     * Get the id of the authz code.
-     * @return id of the authz code
-     */
-    @Nonnull
-    public String getID() {
-        return authzCodeClaims.getJWTID();
-    }
-    
 }
