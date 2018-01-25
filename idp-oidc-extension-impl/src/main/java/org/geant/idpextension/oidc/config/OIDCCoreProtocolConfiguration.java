@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.opensaml.profile.context.ProfileRequestContext;
 
@@ -47,15 +48,18 @@ import com.google.common.collect.ImmutableSet;
 
 import net.shibboleth.idp.authn.config.AuthenticationProfileConfiguration;
 import net.shibboleth.idp.profile.config.AbstractProfileConfiguration;
+import net.shibboleth.utilities.java.support.annotation.Duration;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotLive;
+import net.shibboleth.utilities.java.support.annotation.constraint.Positive;
 import net.shibboleth.utilities.java.support.annotation.constraint.Unmodifiable;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.InitializableComponent;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 
 /**
@@ -104,12 +108,46 @@ public class OIDCCoreProtocolConfiguration extends AbstractProfileConfiguration
     /** Predicate used to determine if the generated subject is pairwise. Default returns false. */
     @SuppressWarnings("rawtypes")
     @Nonnull private Predicate<ProfileRequestContext> pairwiseSubject;
+    
+    /** Lookup function to supply {@link #idTokenLifetime} property. */
+    @SuppressWarnings("rawtypes")
+    @Nullable private Function<ProfileRequestContext,Long> idTokenLifetimeLookupStrategy;
+    
+    /** Lifetime of an id token in milliseconds. Default value: 5 minutes */
+    @Positive @Duration private long idTokenLifetime;
+    
+    /** Lookup function to supply {@link #authorizeCodeLifetime} property. */
+    @SuppressWarnings("rawtypes")
+    @Nullable private Function<ProfileRequestContext,Long> authorizeCodeLifetimeLookupStrategy;
+    
+    /** Lifetime of an authorize code  in milliseconds. Default value: 5 minutes */
+    @Positive @Duration private long authorizeCodeLifetime;
+    
+    /** Lookup function to supply {@link #accessTokenLifetime} property. */
+    @SuppressWarnings("rawtypes")
+    @Nullable private Function<ProfileRequestContext,Long> accessTokenLifetimeLookupStrategy;
+    
+    /** Lifetime of an access token in milliseconds. Default value: 5 minutes */
+    @Positive @Duration private long accessTokenLifetime;
+    
+    /** Lookup function to supply {@link #refreshTokenLifetime} property. */
+    @SuppressWarnings("rawtypes")
+    @Nullable private Function<ProfileRequestContext,Long> refreshTokenLifetimeLookupStrategy;
+    
+    /** Lifetime of an refresh token in milliseconds. Default value: 5 minutes */
+    @Positive @Duration private long refreshTokenLifetime;
+    
+    
 
     /**
      * Constructor.
      */
     public OIDCCoreProtocolConfiguration() {
         this(PROFILE_ID);
+        idTokenLifetime = 5 * 60 * 1000;
+        authorizeCodeLifetime = 5 * 60 * 1000;
+        accessTokenLifetime = 5 * 60 * 1000;
+        refreshTokenLifetime = 5 * 60 * 1000;
     }
     
     /**
@@ -329,4 +367,114 @@ public class OIDCCoreProtocolConfiguration extends AbstractProfileConfiguration
 
         nameIDFormatPrecedence = new ArrayList<>(StringSupport.normalizeStringCollection(formats));
     }
+    
+    /**
+     * Set a lookup strategy for the {@link #idTokenLifetime} property.
+     *
+     * @param strategy  lookup strategy
+     */
+    public void setIDTokenLifetimeLookupStrategy(@SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext,Long> strategy) {
+        idTokenLifetimeLookupStrategy = strategy;
+    }
+    
+    /**
+     * Set a lookup strategy for the {@link #authorizeCodeLifetimeLifetime} property.
+     *
+     * @param strategy  lookup strategy
+     */
+    public void setAuthorizeCodeLifetimeLookupStrategy(@SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext,Long> strategy) {
+        authorizeCodeLifetimeLookupStrategy = strategy;
+    }
+    
+    /**
+     * Set a lookup strategy for the {@link #accessTokenLifetime} property.
+     *
+     * @param strategy  lookup strategy
+     */
+    public void setAccessTokenLifetimeLookupStrategy(@SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext,Long> strategy) {
+        accessTokenLifetimeLookupStrategy = strategy;
+    }
+    
+    /**
+     * Set a lookup strategy for the {@link #refreshTokenLifetime} property.
+     *
+     * @param strategy  lookup strategy
+     */
+    public void setRefreshTokenLifetimeLookupStrategy(@SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext,Long> strategy) {
+        refreshTokenLifetimeLookupStrategy = strategy;
+    }
+    
+    /**
+     * Get id token lifetime.
+     * @return id token lifetime is ms.
+     */
+    @Positive @Duration public long getIDTokenLifetime() {
+        return Constraint.isGreaterThan(0, getIndirectProperty(idTokenLifetimeLookupStrategy, idTokenLifetime),
+                "id token lifetime must be greater than 0");
+    }
+    
+    /**
+     * Set the lifetime of an id token.
+     * 
+     * @param lifetime lifetime of an id token in milliseconds
+     */
+    @Duration public void setIDTokenLifetime(@Positive @Duration final long lifetime) {
+        idTokenLifetime = Constraint.isGreaterThan(0, lifetime, "id token lifetime must be greater than 0");
+    }
+
+    /**
+     * Set the lifetime of an access token.
+     * 
+     * @param lifetime lifetime of an access token in milliseconds
+     */
+    @Duration public void setAccessTokenLifetime(@Positive @Duration final long lifetime) {
+        accessTokenLifetime = Constraint.isGreaterThan(0, lifetime, "access token lifetime must be greater than 0");
+    }
+    
+    /**
+     * Get access token lifetime.
+     * 
+     * @return access token lifetime is ms.
+     */
+    @Positive @Duration public long getAccessTokenLifetime() {
+        return Constraint.isGreaterThan(0, getIndirectProperty(accessTokenLifetimeLookupStrategy, accessTokenLifetime),
+                "access token lifetime must be greater than 0");
+    }
+    
+    /**
+     * Set the lifetime of authorize code.
+     * 
+     * @param lifetime lifetime of authorize code in milliseconds
+     */
+    @Duration public void setAuthorizeCodeLifetime(@Positive @Duration final long lifetime) {
+        authorizeCodeLifetime = Constraint.isGreaterThan(0, lifetime, "authorize code lifetime must be greater than 0");
+    }
+    
+    /**
+     * Get authz code lifetime.
+     * @return authz code lifetime in ms.
+     */
+    @Positive @Duration public long getAuthorizeCodeLifetime() {
+        return Constraint.isGreaterThan(0, getIndirectProperty(authorizeCodeLifetimeLookupStrategy, authorizeCodeLifetime),
+                "authorize code lifetime must be greater than 0");
+    }
+    
+    /**
+     * Set the lifetime of an refresh token.
+     * 
+     * @param lifetime lifetime of an refresh token in milliseconds
+     */
+    @Duration public void setRefreshTokenLifetime(@Positive @Duration final long lifetime) {
+        refreshTokenLifetime = Constraint.isGreaterThan(0, lifetime, "refresh token lifetime must be greater than 0");
+    }
+    
+    /**
+     * Get refresh token lifetime.
+     * @return refresh token lifetime in ms.
+     */
+    @Positive @Duration public long getRefreshTokenLifetime() {
+        return Constraint.isGreaterThan(0, getIndirectProperty(refreshTokenLifetimeLookupStrategy, refreshTokenLifetime),
+                "refresh token lifetime must be greater than 0");
+    }
+
 }
