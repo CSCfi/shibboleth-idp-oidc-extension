@@ -148,11 +148,7 @@
 	<bean id="SetAuthenticationTimeToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationTimeToResponseContext"
 		scope="prototype"></bean>
-
-	<bean id="SetExpirationTimeToResponseContext"
-		class="org.geant.idpextension.oidc.profile.impl.SetExpirationTimeToResponseContext"
-		scope="prototype"></bean>
-
+	
 	<bean id="SetAuthenticationContextClassReferenceToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationContextClassReferenceToResponseContext"
 		scope="prototype">

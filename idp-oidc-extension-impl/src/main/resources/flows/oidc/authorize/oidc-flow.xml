@@ -77,7 +77,6 @@
 	</subflow-state>
 
 	<action-state id="BuildResponse">
-		<evaluate expression="SetExpirationTimeToResponseContext" />
 		<evaluate expression="AddIDTokenShell" />
 		<evaluate expression="AddAttributeClaimsToIDToken" />
 		<evaluate expression="AddAuthTimeToIDToken" />
