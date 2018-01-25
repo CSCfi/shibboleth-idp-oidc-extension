@@ -39,9 +39,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import net.shibboleth.idp.authn.context.SubjectContext;
+import net.shibboleth.idp.profile.IdPEventIds;
+import net.shibboleth.idp.profile.config.ProfileConfiguration;
+import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
 
+import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
+import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 
 import net.shibboleth.utilities.java.support.annotation.ParameterName;
@@ -73,8 +78,8 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     /** Subject context. */
     private SubjectContext subjectCtx;
 
-    /** Authorization code expiration time, defaults to 10min */
-    private long authCodeExp = 600000;
+    /** Authorization code lifetime. */
+    private long authCodeLifetime;
 
     /** Data sealer for handling authorization code. */
     @Nonnull
@@ -87,11 +92,19 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     /** Strategy used to locate the {@link IdentifierGenerationStrategy} to use. */
     @Nonnull
     private Function<ProfileRequestContext, IdentifierGenerationStrategy> idGeneratorLookupStrategy;
-
+    
+    /**
+     * Strategy used to locate the {@link RelyingPartyContext} associated with a
+     * given {@link ProfileRequestContext}.
+     */
+    @Nonnull
+    private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
+    
     /**
      * Constructor.
      */
     public SetAuthorizationCodeToResponseContext(@Nonnull @ParameterName(name = "sealer") final DataSealer sealer) {
+        relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
         issuerLookupStrategy = new ResponderIdLookupFunction();
         dataSealer = Constraint.isNotNull(sealer, "DataSealer cannot be null");
         idGeneratorLookupStrategy = new Function<ProfileRequestContext, IdentifierGenerationStrategy>() {
@@ -101,6 +114,22 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
         };
     }
 
+    /**
+     * Set the strategy used to locate the {@link RelyingPartyContext} associated
+     * with a given {@link ProfileRequestContext}.
+     * 
+     * @param strategy
+     *            strategy used to locate the {@link RelyingPartyContext} associated
+     *            with a given {@link ProfileRequestContext}
+     */
+    public void setRelyingPartyContextLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        relyingPartyContextLookupStrategy = Constraint.isNotNull(strategy,
+                "RelyingPartyContext lookup strategy cannot be null");
+    }
+    
     /**
      * Set the strategy used to locate the {@link IdentifierGenerationStrategy} to
      * use.
@@ -116,16 +145,7 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
                 "IdentifierGenerationStrategy lookup strategy cannot be null");
     }
 
-    /**
-     * Set authorization code expiration time.
-     * 
-     * @param exp
-     *            authorization code expiration time
-     */
-    public void setAuthCodeExp(long exp) {
-        authCodeExp = exp;
-    }
-
+    
     /**
      * Set the strategy used to locate the issuer value to use.
      * 
@@ -152,6 +172,19 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
         }
+        RelyingPartyContext rpCtx = relyingPartyContextLookupStrategy.apply(profileRequestContext);
+        if (rpCtx == null) {
+            log.debug("{} No relying party context associated with this profile request", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
+            return false;
+        }
+        final ProfileConfiguration pc = rpCtx.getProfileConfig();
+        if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
+            authCodeLifetime = ((OIDCCoreProtocolConfiguration) pc).getAuthorizeCodeLifetime();
+        } else {
+            log.debug("{} No oidc profile configuration associated with this profile request", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
+        }
         return super.doPreExecute(profileRequestContext);
     }
 
@@ -159,11 +192,10 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         if (!getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
-            Date dateNow = new Date();
-            Date dateExp = new Date(dateNow.getTime() + authCodeExp);
+            Date dateExp = new Date(System.currentTimeMillis() + authCodeLifetime);
             AuthorizeCodeClaimsSet claimsSet = new AuthorizeCodeClaimsSet(idGenerator,
                     getAuthenticationRequest().getClientID(), issuerLookupStrategy.apply(profileRequestContext),
-                    subjectCtx.getPrincipalName(), getOidcResponseContext().getAcr(), dateNow, dateExp,
+                    subjectCtx.getPrincipalName(), getOidcResponseContext().getAcr(), new Date(), dateExp,
                     getAuthenticationRequest().getNonce(), getOidcResponseContext().getAuthTime(),
                     getOidcResponseContext().getRedirectURI(), getAuthenticationRequest().getScope(),
                     getAuthenticationRequest().getClaims());
