@@ -74,7 +74,6 @@ public class OIDCAuthenticationResponseContextTest {
         Assert.assertNull(ctx.getRequestedSubject());
         Assert.assertNull(ctx.getAcr());
         Assert.assertNull(ctx.getAuthTime());
-        Assert.assertNull(ctx.getExp());
         Assert.assertNull(ctx.getIDToken());
         Assert.assertNull(ctx.getNameId());
         Assert.assertNull(ctx.getRedirectURI());
@@ -86,7 +85,6 @@ public class OIDCAuthenticationResponseContextTest {
     public void testSetters() throws URISyntaxException, ParseException {
         ctx.setAcr("acrValue");
         ctx.setAuthTime(1);
-        ctx.setExp(2);
         Issuer issuer = new Issuer("iss");
         Subject sub = new Subject("sub");
         List<Audience> aud = new ArrayList<Audience>();
@@ -107,7 +105,6 @@ public class OIDCAuthenticationResponseContextTest {
         ctx.setAcr(null);
         Assert.assertNull(ctx.getAcr());
         Assert.assertEquals(ctx.getAuthTime(), new Date(1));
-        Assert.assertEquals(ctx.getExp(), new Date(2));
         Assert.assertEquals(ctx.getIDToken(), token);
         Assert.assertEquals(ctx.getNameId(), id);
         Assert.assertEquals(ctx.getSignedIDToken(), sJWT);

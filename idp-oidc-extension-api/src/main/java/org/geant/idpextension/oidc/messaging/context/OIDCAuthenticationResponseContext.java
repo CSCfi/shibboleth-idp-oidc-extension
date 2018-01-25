@@ -68,10 +68,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
 
     /** Authentication time of the end user. */
     private Date authTime;
-
-    /** Expiration time of the id token. */
-    private Date exp;
-
+   
     /** Validated scope values. */
     private Scope requestedScope;
 
@@ -231,28 +228,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     public void setAuthTime(long time) {
         authTime = new Date(time);
     }
-
-    /**
-     * Expiration time of the id token.
-     * 
-     * @return expiration time of the id token. null if has not been set.
-     */
-    @Nullable
-    public Date getExp() {
-        return exp;
-    }
-
-    /**
-     * Set expiration time of the id token in millis from 1970-01-01T0:0:0Z as
-     * measured in UTC until the date/time.
-     * 
-     * @param expTime
-     *            authentication time.
-     */
-    public void setExp(long expTime) {
-        exp = new Date(expTime);
-    }
-
+   
     /**
      * Returns a validated redirect uri for the response.
      * 
