@@ -37,10 +37,12 @@ import javax.annotation.Nullable;
 
 import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.IdPEventIds;
+import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
+import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -169,13 +171,14 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
          * NOTE. We set here exp to +180s unless set in response context.
          */
 
-        // NOTE: There is no control for id token exp, always +180s
-        // TODO: The purpose and mechanism how to control id token exp
-        Date exp = getOidcResponseContext().getExp();
-        if (exp == null) {
-            Calendar calExp = Calendar.getInstance();
-            calExp.add(Calendar.SECOND, 180);
-            exp = calExp.getTime();
+        Date exp = null;
+        final ProfileConfiguration pc = rpCtx.getProfileConfig();
+        if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
+            long lifetime = ((OIDCCoreProtocolConfiguration) pc).getIDTokenLifetime();
+            exp = new Date(System.currentTimeMillis() + lifetime);
+        } else {
+            log.debug("{} No oidc profile configuration associated with this profile request", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
         }
 
         /**
