@@ -47,14 +47,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import net.shibboleth.idp.authn.config.AuthenticationProfileConfiguration;
-import net.shibboleth.idp.profile.config.AbstractProfileConfiguration;
 import net.shibboleth.utilities.java.support.annotation.Duration;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotLive;
 import net.shibboleth.utilities.java.support.annotation.constraint.Positive;
 import net.shibboleth.utilities.java.support.annotation.constraint.Unmodifiable;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.InitializableComponent;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
@@ -63,9 +61,9 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 
 /**
- * Base class for OIDC protocol configuration.
+ * Profile configuration for the OpenID Connect core protocol.
  */
-public class OIDCCoreProtocolConfiguration extends AbstractProfileConfiguration
+public class OIDCCoreProtocolConfiguration extends AbstractOIDCProfileConfiguration
     implements InitializableComponent, AuthenticationProfileConfiguration {
 
     /** OIDC base protocol URI. */
@@ -74,21 +72,9 @@ public class OIDCCoreProtocolConfiguration extends AbstractProfileConfiguration
     /** ID for this profile configuration. */
     public static final String PROFILE_ID = "http://csc.fi/ns/profiles/oidc/sso/browser";
     
-    /** Initialization flag. */
-    private boolean initialized;
-
     /** Flag to indicate whether attributes should be resolved for this profile. */
     private boolean resolveAttributes = true;
-    
-    /** Flag to indicate whether authorization code flow is supported by this profile. */
-    private boolean authorizationCodeFlow = true;
-    
-    /** Flag to indicate whether implicit flow is supported by this profile. */
-    private boolean implicitFlow = true;
-    
-    /** Flag to indicate whether hybrid flow is supported by this profile. */
-    private boolean hybridFlow = true;
-    
+        
     /** Selects, and limits, the authentication contexts to use for requests. */
     @Nonnull @NonnullElements private List<Principal> defaultAuthenticationContexts;
     
@@ -137,17 +123,11 @@ public class OIDCCoreProtocolConfiguration extends AbstractProfileConfiguration
     /** Lifetime of an refresh token in milliseconds. Default value: 5 minutes */
     @Positive @Duration private long refreshTokenLifetime;
     
-    
-
     /**
      * Constructor.
      */
     public OIDCCoreProtocolConfiguration() {
         this(PROFILE_ID);
-        idTokenLifetime = 5 * 60 * 1000;
-        authorizeCodeLifetime = 5 * 60 * 1000;
-        accessTokenLifetime = 5 * 60 * 1000;
-        refreshTokenLifetime = 5 * 60 * 1000;
     }
     
     /**
@@ -163,22 +143,13 @@ public class OIDCCoreProtocolConfiguration extends AbstractProfileConfiguration
         nameIDFormatPrecedence = Collections.emptyList();
         signIDTokensPredicate = Predicates.alwaysTrue();
         pairwiseSubject = Predicates.alwaysFalse();
+        idTokenLifetime = 5 * 60 * 1000;
+        authorizeCodeLifetime = 5 * 60 * 1000;
+        accessTokenLifetime = 5 * 60 * 1000;
+        refreshTokenLifetime = 5 * 60 * 1000;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void initialize() throws ComponentInitializationException {
-        Constraint.isNotNull(getSecurityConfiguration(), "Security configuration cannot be null.");
-        Constraint.isNotNull(getSecurityConfiguration().getIdGenerator(),
-                "Security configuration ID generator cannot be null.");
-        initialized = true;
-    }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isInitialized() {
-        return initialized;
-    }
     
     
     /**
@@ -248,60 +219,6 @@ public class OIDCCoreProtocolConfiguration extends AbstractProfileConfiguration
         resolveAttributes = resolve;
     }
     
-    /**
-     * Checks whether the authorization code flow is enabled for this profile.
-     * 
-     * @return True if the flow is enabled for this profile, false otherwise.
-     */
-    public boolean isAuthorizationCodeFlow() {
-        return authorizationCodeFlow;
-    }
-    
-    /**
-     * Enables or disables authorization code flow.
-     * 
-     * @param flow True to enable flow (default), false otherwise.
-     */
-    public void setAuthorizationCodeFlow(final boolean flow) {
-        authorizationCodeFlow = flow;
-    }
-
-    /**
-     * Checks whether the hybrid flow is enabled for this profile.
-     * 
-     * @return True if the flow is enabled for this profile, false otherwise.
-     */
-    public boolean isHybridFlow() {
-        return hybridFlow;
-    }
-    
-    /**
-     * Enables or disables hybrid flow.
-     * 
-     * @param flow True to enable flow (default), false otherwise.
-     */
-    public void setHybridFlow(final boolean flow) {
-        hybridFlow = flow;
-    }
-
-    /**
-     * Checks whether the implicit flow is enabled for this profile.
-     * 
-     * @return True if the flow is enabled for this profile, false otherwise.
-     */
-    public boolean isImplicitFlow() {
-        return implicitFlow;
-    }
-    
-    /**
-     * Enables or disables implicit flow.
-     * 
-     * @param flow True to enable flow (default), false otherwise.
-     */
-    public void setImplicitFlow(final boolean flow) {
-        implicitFlow = flow;
-    }
-
     /** {@inheritDoc} */
     @Override @Nonnull @NonnullElements @NotLive @Unmodifiable public Set<String> getAuthenticationFlows() {
         return ImmutableSet.copyOf(authenticationFlows);

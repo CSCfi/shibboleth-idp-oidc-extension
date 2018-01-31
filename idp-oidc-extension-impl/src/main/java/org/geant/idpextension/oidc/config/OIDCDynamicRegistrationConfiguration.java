@@ -35,7 +35,6 @@ import org.opensaml.profile.context.ProfileRequestContext;
 
 import com.google.common.base.Function;
 
-import net.shibboleth.idp.profile.config.AbstractProfileConfiguration;
 import net.shibboleth.utilities.java.support.annotation.Duration;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
@@ -45,7 +44,7 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 /**
  * Profile configuration for the OpenID Connect dynamic client registration.
  */
-public class OIDCDynamicRegistrationConfiguration extends AbstractProfileConfiguration
+public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCProfileConfiguration
         implements InitializableComponent {
 
     /** OIDC base protocol URI. */
@@ -58,6 +57,7 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractProfileConfigu
     private boolean initialized;
 
     /** Lookup function to supply {@link #registrationValidityPeriod} property. */
+    @SuppressWarnings("rawtypes")
     @Nullable private Function<ProfileRequestContext, Long> registrationValidityPeriodLookupStrategy;
 
     /** Validity time period of dynamically registered clients. Zero means valid forever. */
@@ -121,6 +121,7 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractProfileConfigu
      * 
      * @param strategy lookup strategy
      */
+    @SuppressWarnings("rawtypes")
     public void setRegistrationValidityPeriodLookupStrategy(@Nullable final Function<ProfileRequestContext, 
             Long> strategy) {
         registrationValidityPeriodLookupStrategy = strategy;
