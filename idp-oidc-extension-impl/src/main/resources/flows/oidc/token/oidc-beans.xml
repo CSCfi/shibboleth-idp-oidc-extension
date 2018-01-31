@@ -116,6 +116,11 @@
 	<bean id="shibboleth.TokenRequestScopeLookupStrategy"
 		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestScopeLookupFunction"
 		scope="prototype" />
+		
+	<bean id="SetAccessTokenToResponseContext"
+		class="org.geant.idpextension.oidc.profile.impl.SetAccessTokenToResponseContext"
+		scope="prototype" c:sealer-ref="authorizeCodeSealer">
+	</bean>
 
 	<bean id="authorizeCodeSealer" lazy-init="true"
 		class="net.shibboleth.utilities.java.support.security.DataSealer"
