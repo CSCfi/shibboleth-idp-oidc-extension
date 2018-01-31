@@ -59,6 +59,9 @@ public abstract class AbstractOIDCProfileConfiguration extends AbstractProfileCo
     
     /** Predicate used to indicate whether hybrid flow is supported by this profile. Default true. */
     @Nonnull private Predicate<ProfileRequestContext> hybridFlowPredicate;
+    
+    /** Predicate used to indicate whether refresh tokens are supported by this profile. Default true. */
+    @Nonnull private Predicate<ProfileRequestContext> refreshTokensPredicate;
 
     /**
      * Constructor.
@@ -70,6 +73,7 @@ public abstract class AbstractOIDCProfileConfiguration extends AbstractProfileCo
         authorizationCodeFlowPredicate = Predicates.alwaysTrue();
         implicitFlowPredicate = Predicates.alwaysTrue();
         hybridFlowPredicate = Predicates.alwaysTrue();
+        refreshTokensPredicate = Predicates.alwaysTrue();
     }
 
     /** {@inheritDoc} */
@@ -136,5 +140,22 @@ public abstract class AbstractOIDCProfileConfiguration extends AbstractProfileCo
     public void setImplicitFlowEnabled(final Predicate<ProfileRequestContext> predicate) {
         implicitFlowPredicate = Constraint.isNotNull(predicate, 
                 "Predicate used to indicate whether hybrid flow is supported cannot be null");
+    }
+    
+    /**
+     * Get predicate used to indicate whether refresh tokens are supported by this profile.
+     * @return Predicate used to indicate whether refresh tokens are supported by this profile.
+     */
+    public Predicate<ProfileRequestContext> getRefreshTokensEnabled() {
+        return refreshTokensPredicate;
+    }
+    
+    /**
+     * Set predicate used to indicate whether refresh tokens are supported by this profile.
+     * @param predicate What to set.
+     */
+    public void setRefreshTokensEnabled(final Predicate<ProfileRequestContext> predicate) {
+        refreshTokensPredicate = Constraint.isNotNull(predicate, 
+                "Predicate used to indicate whether refresh tokens are supported cannot be null");
     }
 }
