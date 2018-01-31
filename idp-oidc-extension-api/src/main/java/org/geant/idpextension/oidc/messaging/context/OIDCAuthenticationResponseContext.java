@@ -39,6 +39,9 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.AccessTokenType;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
@@ -68,7 +71,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
 
     /** Authentication time of the end user. */
     private Date authTime;
-   
+
     /** Validated scope values. */
     private Scope requestedScope;
 
@@ -86,6 +89,10 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /** Authorization code claims. */
     @Nullable
     private AuthorizeCodeClaimsSet authorizationCodeClaims;
+
+    /** Access token. */
+    @Nullable
+    private AccessToken accessToken;
 
     /** Requested claims. */
     @Nullable
@@ -148,6 +155,26 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
      */
     public void setAuthorizationCode(@Nullable String code) {
         authorizationCode = code == null ? null : new AuthorizationCode(code);
+    }
+
+    /**
+     * Get access token.
+     * 
+     * @return access token
+     */
+    @Nullable
+    public AccessToken getAccessToken() {
+        return accessToken;
+    }
+
+    /**
+     * Set access token.
+     * 
+     * @param token
+     *            String to form access token
+     */
+    public void setAccessToken(@Nullable String token, long lifeTime) {
+        accessToken = token == null ? null : new BearerAccessToken(token, lifeTime, null);
     }
 
     /**
@@ -228,7 +255,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     public void setAuthTime(long time) {
         authTime = new Date(time);
     }
-   
+
     /**
      * Returns a validated redirect uri for the response.
      * 
