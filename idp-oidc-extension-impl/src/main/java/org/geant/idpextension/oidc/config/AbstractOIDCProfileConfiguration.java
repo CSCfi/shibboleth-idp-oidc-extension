@@ -28,6 +28,13 @@
 
 package org.geant.idpextension.oidc.config;
 
+import javax.annotation.Nonnull;
+
+import org.opensaml.profile.context.ProfileRequestContext;
+
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+
 import net.shibboleth.idp.profile.config.AbstractProfileConfiguration;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.InitializableComponent;
@@ -37,20 +44,21 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
  * Base class for OIDC protocol configuration, containing configuration bits shared by all OIDC protocol
  * configurations.
  */
+@SuppressWarnings("rawtypes")
 public abstract class AbstractOIDCProfileConfiguration extends AbstractProfileConfiguration
     implements InitializableComponent{
     
     /** Initialization flag. */
     private boolean initialized;
 
-    /** Flag to indicate whether authorization code flow is supported by this profile. */
-    private boolean authorizationCodeFlow = true;
+    /** Predicate used to indicate whether authorization code flow is supported by this profile. Default true. */
+    @Nonnull private Predicate<ProfileRequestContext> authorizationCodeFlowPredicate;
     
-    /** Flag to indicate whether implicit flow is supported by this profile. */
-    private boolean implicitFlow = true;
+    /** Predicate used to indicate whether implicit flow is supported by this profile. Default true. */
+    @Nonnull private Predicate<ProfileRequestContext> implicitFlowPredicate;
     
-    /** Flag to indicate whether hybrid flow is supported by this profile. */
-    private boolean hybridFlow = true;
+    /** Predicate used to indicate whether hybrid flow is supported by this profile. Default true. */
+    @Nonnull private Predicate<ProfileRequestContext> hybridFlowPredicate;
 
     /**
      * Constructor.
@@ -59,6 +67,9 @@ public abstract class AbstractOIDCProfileConfiguration extends AbstractProfileCo
      */
     protected AbstractOIDCProfileConfiguration(final String profileId) {
         super(profileId);
+        authorizationCodeFlowPredicate = Predicates.alwaysTrue();
+        implicitFlowPredicate = Predicates.alwaysTrue();
+        hybridFlowPredicate = Predicates.alwaysTrue();
     }
 
     /** {@inheritDoc} */
@@ -77,56 +88,53 @@ public abstract class AbstractOIDCProfileConfiguration extends AbstractProfileCo
     }
     
     /**
-     * Checks whether the authorization code flow is enabled for this profile.
-     * 
-     * @return True if the flow is enabled for this profile, false otherwise.
+     * Get predicate used to indicate whether authorization code flow is supported by this profile.
+     * @return Predicate used to indicate whether authorization code flow is supported by this profile.
      */
-    public boolean isAuthorizationCodeFlow() {
-        return authorizationCodeFlow;
+    public Predicate<ProfileRequestContext> getAuthorizationCodeFlowEnabled() {
+        return authorizationCodeFlowPredicate;
     }
     
     /**
-     * Enables or disables authorization code flow.
-     * 
-     * @param flow True to enable flow (default), false otherwise.
+     * Set predicate used to indicate whether authorization code flow is supported by this profile.
+     * @param predicate What to set.
      */
-    public void setAuthorizationCodeFlow(final boolean flow) {
-        authorizationCodeFlow = flow;
+    public void setAuthorizationCodeFlowEnabled(final Predicate<ProfileRequestContext> predicate) {
+        authorizationCodeFlowPredicate = Constraint.isNotNull(predicate, 
+                "Predicate used to indicate whether authorization code flow is supported cannot be null");
     }
 
     /**
-     * Checks whether the hybrid flow is enabled for this profile.
-     * 
-     * @return True if the flow is enabled for this profile, false otherwise.
+     * Get predicate used to indicate whether implicit flow is supported by this profile.
+     * @return Predicate used to indicate whether implicit flow is supported by this profile.
      */
-    public boolean isHybridFlow() {
-        return hybridFlow;
+    public Predicate<ProfileRequestContext> getHybridFlowEnabled() {
+        return hybridFlowPredicate;
     }
     
     /**
-     * Enables or disables hybrid flow.
-     * 
-     * @param flow True to enable flow (default), false otherwise.
+     * Set predicate used to indicate whether implicit flow is supported by this profile.
+     * @param predicate What to set.
      */
-    public void setHybridFlow(final boolean flow) {
-        hybridFlow = flow;
+    public void setHybridFlowEnabled(final Predicate<ProfileRequestContext> predicate) {
+        hybridFlowPredicate = Constraint.isNotNull(predicate, 
+                "Predicate used to indicate whether implicit flow is supported cannot be null");
     }
 
     /**
-     * Checks whether the implicit flow is enabled for this profile.
-     * 
-     * @return True if the flow is enabled for this profile, false otherwise.
+     * Get predicate used to indicate whether hybrid flow is supported by this profile.
+     * @return Predicate used to indicate whether hybrid flow is supported by this profile.
      */
-    public boolean isImplicitFlow() {
-        return implicitFlow;
+    public Predicate<ProfileRequestContext> getImplicitFlowEnabled() {
+        return implicitFlowPredicate;
     }
     
     /**
-     * Enables or disables implicit flow.
-     * 
-     * @param flow True to enable flow (default), false otherwise.
+     * Set predicate used to indicate whether hybrid flow is supported by this profile.
+     * @param predicate What to set.
      */
-    public void setImplicitFlow(final boolean flow) {
-        implicitFlow = flow;
+    public void setImplicitFlowEnabled(final Predicate<ProfileRequestContext> predicate) {
+        implicitFlowPredicate = Constraint.isNotNull(predicate, 
+                "Predicate used to indicate whether hybrid flow is supported cannot be null");
     }
 }
