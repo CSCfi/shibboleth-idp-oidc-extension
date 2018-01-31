@@ -50,7 +50,7 @@ import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenResponse;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 
@@ -72,6 +72,9 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
 
     /** if id token should be signed or not. */
     private boolean signedToken = true;
+
+    /** access token for response. */
+    private AccessToken accessToken;
 
     /** Strategy function to lookup RelyingPartyContext. */
     @Nonnull
@@ -110,6 +113,13 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
             if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
                 signedToken = ((OIDCCoreProtocolConfiguration) pc).getSignIDTokens().apply(profileRequestContext);
             }
+        }
+        accessToken = getOidcResponseContext().getAccessToken();
+        if (accessToken == null) {
+            log.error("{} unable to provide access token (required)", getLogPrefix());
+            // TODO: set error parameters to produce oidc error response
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+            return false;
         }
         return true;
     }
@@ -151,13 +161,9 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
                 return;
             }
             // TODO: refresh token handling is missing totally
-            // TODO: access token handling is missing, only a dummy is created
-            // TODO: id token signing is now coupled with implicit flow response signing
-            // basically always on(default)/off. This is not propably what the spec says. 
             // TODO: refactoring..has duplicate functionality to
-            // FormOutboundAuthenticationResponseMessage.. well, this is first version...
-            resp = new OIDCTokenResponse(
-                    new OIDCTokens(idToken, new BearerAccessToken(), null/* RefreshToken refreshToken */));
+            // FormOutboundAuthenticationResponseMessage..
+            resp = new OIDCTokenResponse(new OIDCTokens(idToken, accessToken, null/* RefreshToken refreshToken */));
         }
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
