@@ -85,7 +85,7 @@ public final class AccessTokenClaimsSet extends AbstractTokenClaimsSet {
      * 
      * @param accessTokenClaimsSet
      *            JSON String representation of the code
-     * @return AuthorizeCodeClaimsSet instance if parsing is successful.
+     * @return AccessTokenClaimsSet instance if parsing is successful.
      * @throws ParseException
      *             if parsing fails for example due to incompatible types.
      */
