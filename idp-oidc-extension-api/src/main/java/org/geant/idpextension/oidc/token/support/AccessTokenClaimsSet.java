@@ -90,10 +90,10 @@ public final class AccessTokenClaimsSet extends AbstractTokenClaimsSet {
      *             if parsing fails for example due to incompatible types.
      */
     public static AccessTokenClaimsSet parse(String accessTokenClaimsSet) throws ParseException {
-        JWTClaimsSet acClaimsSet = JWTClaimsSet.parse(accessTokenClaimsSet);
+        JWTClaimsSet atClaimsSet = JWTClaimsSet.parse(accessTokenClaimsSet);
         // Throws exception if parsing result is not expected one.
-        verifyParsedClaims(VALUE_TYPE_AT, acClaimsSet);
-        return new AccessTokenClaimsSet(acClaimsSet);
+        verifyParsedClaims(VALUE_TYPE_AT, atClaimsSet);
+        return new AccessTokenClaimsSet(atClaimsSet);
     }
 
     /**
