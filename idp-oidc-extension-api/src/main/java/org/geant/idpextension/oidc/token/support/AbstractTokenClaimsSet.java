@@ -45,7 +45,6 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
-import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
 import java.net.URI;
 import java.text.ParseException;
 
@@ -114,8 +113,8 @@ public abstract class AbstractTokenClaimsSet {
      * 
      * @param tokenType
      *            Token type. Must not be NULL.
-     * @param idGenerator
-     *            Generator for pseudo unique identifier for the token. Must not be
+     * @param tokenID
+     *            Generated pseudo unique identifier for the token. Must not be
      *            NULL.
      * @param clientID
      *            Client Id of the rp. Must not be NULL.
@@ -144,16 +143,16 @@ public abstract class AbstractTokenClaimsSet {
      * @throws RuntimeException
      *             if called with nnonallowed ull parameters
      */
-    protected AbstractTokenClaimsSet(@Nonnull String tokenType, @Nonnull IdentifierGenerationStrategy idGenerator,
-            @Nonnull ClientID clientID, @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr,
-            @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
-            @Nonnull URI redirect_uri, @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
-        if (tokenType == null || idGenerator == null || clientID == null || issuer == null || userPrincipal == null
+    protected AbstractTokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,
+            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
+            @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirect_uri,
+            @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
+        if (tokenType == null || tokenID == null || clientID == null || issuer == null || userPrincipal == null
                 || acr == null || iat == null || exp == null || authTime == null || redirect_uri == null
                 || scope == null) {
             throw new RuntimeException("Invalid parameters, programming error");
         }
-        tokenClaimsSet = new JWTClaimsSet.Builder().claim(KEY_TYPE, tokenType).jwtID(idGenerator.generateIdentifier())
+        tokenClaimsSet = new JWTClaimsSet.Builder().claim(KEY_TYPE, tokenType).jwtID(tokenID)
                 .audience(clientID.getValue()).issuer(issuer).subject(userPrincipal).claim("acr", acr.getValue())
                 .issueTime(iat).expirationTime(exp).claim(KEY_NONCE, nonce == null ? null : nonce.getValue())
                 .claim("auth_time", authTime).claim(KEY_REDIRECT_URI, redirect_uri.toString())
@@ -224,7 +223,6 @@ public abstract class AbstractTokenClaimsSet {
      * @return token as JSON String
      */
     public String serialize() {
-        log.debug("Serializing to {}", tokenClaimsSet.toJSONObject().toJSONString());
         return tokenClaimsSet.toJSONObject().toJSONString();
     }
 
@@ -239,7 +237,6 @@ public abstract class AbstractTokenClaimsSet {
      */
     public String serialize(@Nonnull DataSealer dataSealer) throws DataSealerException {
         String wrapped = dataSealer.wrap(serialize(), tokenClaimsSet.getExpirationTime().getTime());
-        log.debug("Wrapped to {}", wrapped);
         return wrapped;
     }
 
@@ -370,6 +367,16 @@ public abstract class AbstractTokenClaimsSet {
     @Nonnull
     public String getID() {
         return tokenClaimsSet.getJWTID();
+    }
+
+    /**
+     * Get Client ID of the token.
+     * 
+     * @return Client ID of the token
+     */
+    @Nonnull
+    public ClientID getClientID() {
+        return new ClientID(tokenClaimsSet.getAudience().get(0));
     }
 
 }

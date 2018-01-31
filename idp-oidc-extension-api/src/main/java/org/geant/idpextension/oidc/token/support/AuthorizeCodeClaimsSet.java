@@ -96,8 +96,8 @@ public final class AuthorizeCodeClaimsSet extends AbstractTokenClaimsSet {
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
             @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirect_uri,
             @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
-        super(VALUE_TYPE_AC, idGenerator, clientID, issuer, userPrincipal, acr, iat, exp, nonce, authTime, redirect_uri,
-                scope, claims);
+        super(VALUE_TYPE_AC, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, acr, iat, exp, nonce,
+                authTime, redirect_uri, scope, claims);
     }
 
     /**
