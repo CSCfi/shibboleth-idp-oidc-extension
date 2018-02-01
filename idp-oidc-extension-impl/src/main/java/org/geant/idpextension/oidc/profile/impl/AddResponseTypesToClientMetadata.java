@@ -28,59 +28,116 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import org.geant.idpextension.oidc.config.logic.AuthorizationCodeFlowEnabledPredicate;
+import org.geant.idpextension.oidc.config.logic.ImplicitFlowEnabledPredicate;
+import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Predicate;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 
-import net.shibboleth.idp.profile.ActionSupport;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
  * An action that adds response_types to the OIDC client metadata.
- * 
- * TODO: how the supported types are configured.
  */
+@SuppressWarnings("rawtypes")
 public class AddResponseTypesToClientMetadata extends AbstractOIDCClientMetadataPopulationAction {
 
     /** Class logger. */
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(AddRedirectUrisToClientMetadata.class);
     
-    @Nonnull
-    private Set<ResponseType> supportedTypes;
+    /** Predicate used to indicate whether authorization code flow is enabled. */
+    @Nonnull private Predicate<ProfileRequestContext> authorizationCodeFlowPredicate;
+    
+    /** Predicate used to indicate whether implicit flow is enabled. */
+    @Nonnull private Predicate<ProfileRequestContext> implicitFlowPredicate;
+    
+    /** Map of supported response types and their corresponding predicates. */
+    @Nonnull private Map<ResponseType, Predicate<ProfileRequestContext>> supportedResponseTypes;
     
     /** Constructor. */
     public AddResponseTypesToClientMetadata() {
-        supportedTypes = new HashSet<>();
-        //TODO: revisit how this should be configured, probably in the Profile Configuration.
-        supportedTypes.add(new ResponseType(OIDCResponseTypeValue.ID_TOKEN));
+        authorizationCodeFlowPredicate = new AuthorizationCodeFlowEnabledPredicate();
+        implicitFlowPredicate = new ImplicitFlowEnabledPredicate();
     }
     
-    public void setSupportedResponseTypes(final Set<ResponseType> types) {
-        supportedTypes = Constraint.isNotNull(types, "Supported response types cannot be empty!");
+    /** {@inheritDoc} */
+    protected void doInitialize() throws ComponentInitializationException {
+        supportedResponseTypes = new HashMap<>();
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.CODE), authorizationCodeFlowPredicate);
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.TOKEN), implicitFlowPredicate);
+        supportedResponseTypes.put(new ResponseType(OIDCResponseTypeValue.ID_TOKEN), implicitFlowPredicate);        
+    }
+
+    
+    /**
+     * Get predicate used to indicate whether authorization code flow is enabled.
+     * @return Predicate used to indicate whether authorization code flow is enabled.
+     */
+    public Predicate<ProfileRequestContext> getAuthorizationCodeFlowEnabled() {
+        return authorizationCodeFlowPredicate;
+    }
+    
+    /**
+     * Set predicate used to indicate whether authorization code flow is enabled.
+     * @param predicate What to set.
+     */
+    public void setAuthorizationCodeFlowEnabled(final Predicate<ProfileRequestContext> predicate) {
+        authorizationCodeFlowPredicate = Constraint.isNotNull(predicate, 
+                "Predicate used to indicate whether authorization code flow is supported cannot be null");
+    }
+
+    /**
+     * Get predicate used to indicate whether hybrid flow is enabled.
+     * @return Predicate used to indicate whether hybrid flow is enabled.
+     */
+    public Predicate<ProfileRequestContext> getImplicitFlowEnabled() {
+        return implicitFlowPredicate;
+    }
+    
+    /**
+     * Set predicate used to indicate whether hybrid flow is enabled.
+     * @param predicate What to set.
+     */
+    public void setImplicitFlowEnabled(final Predicate<ProfileRequestContext> predicate) {
+        implicitFlowPredicate = Constraint.isNotNull(predicate, 
+                "Predicate used to indicate whether hybrid flow is supported cannot be null");
+    }
+    
+    /**
+     * Set map of supported response types and their corresponding predicates.
+     * @param types What to set.
+     */
+    public void setSupportedResponseTypes(final Map<ResponseType, Predicate<ProfileRequestContext>> types) {
+        supportedResponseTypes = Constraint.isNotNull(types, "Supported response types cannot be null!");
     }
     
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         final Set<ResponseType> requestedTypes = getInputMetadata().getResponseTypes();
+        final Set<ResponseType> responseTypes = new HashSet<>();
         if (requestedTypes != null && !requestedTypes.isEmpty()) {
-            final Set<ResponseType> responseTypes = new HashSet<>();
             for (final ResponseType requestedType : requestedTypes) {
-                if (supportedTypes.contains(requestedType)) {
-                    responseTypes.add(requestedType);
-                    log.debug("{} Added supported response type {}", getLogPrefix(), requestedType);
+                if (supportedResponseTypes.keySet().contains(requestedType)) {
+                    addResponseTypeIfEnabled(responseTypes, requestedType, supportedResponseTypes.get(requestedType), 
+                            profileRequestContext);
                 } else {
-                    log.debug("{} Dropping unsupported requested response type {}", getLogPrefix(), requestedType);
+                    log.warn("{} Dropping unsupported requested response type {}", getLogPrefix(), requestedType);
                 }
             }
             if (responseTypes.isEmpty()) {
@@ -88,8 +145,28 @@ public class AddResponseTypesToClientMetadata extends AbstractOIDCClientMetadata
                 ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
                 return;
             }
+        } else {
+            // if no response types requested, setting it to default 'code' if code flow is enabled
+            addResponseTypeIfEnabled(responseTypes, new ResponseType(ResponseType.Value.CODE),
+                    authorizationCodeFlowPredicate, profileRequestContext);
         }
-        getOutputMetadata().setResponseTypes(supportedTypes);
+        getOutputMetadata().setResponseTypes(responseTypes);
     }
 
+    /**
+     * Adds a given response type to the given set of response types, if the given predicate is true.
+     * @param resultTypes The result set where the response type is potentially added.
+     * @param responseType The response type to check.
+     * @param predicate The predicate used for checking.
+     * @param profileRequestContext The profile context used as an input for the predicate.
+     */
+    protected void addResponseTypeIfEnabled(final Set<ResponseType> resultTypes, final ResponseType responseType, 
+            final Predicate<ProfileRequestContext> predicate, final ProfileRequestContext profileRequestContext) {
+        if (predicate.apply(profileRequestContext)) {
+            log.debug("{} Adding {} to the list of enabled types", getLogPrefix(), responseType);
+            resultTypes.add(responseType);
+        } else {
+            log.debug("{} Response type {} is not enabled", getLogPrefix(), responseType);
+        }
+    }
 }
