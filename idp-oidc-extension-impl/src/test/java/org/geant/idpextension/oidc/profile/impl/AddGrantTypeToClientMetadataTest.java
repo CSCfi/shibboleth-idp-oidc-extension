@@ -34,7 +34,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -44,6 +46,7 @@ import com.google.common.base.Predicates;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
+import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
 /**
@@ -83,7 +86,13 @@ public class AddGrantTypeToClientMetadataTest extends BaseOIDCClientMetadataPopu
 
     @Test
     public void testNotSupported() throws ComponentInitializationException {
-        testGrantTypes(Arrays.asList(new GrantType[] { GrantType.CLIENT_CREDENTIALS }), 
+        testGrantTypes(Arrays.asList(new GrantType[] { GrantType.CLIENT_CREDENTIALS }), EventIds.INVALID_MESSAGE,
+                GrantType.CLIENT_CREDENTIALS);
+    }
+
+    @Test
+    public void testOneNotSupported() throws ComponentInitializationException {
+        testGrantTypes(Arrays.asList(new GrantType[] { GrantType.CLIENT_CREDENTIALS }), null,
                 GrantType.AUTHORIZATION_CODE, GrantType.CLIENT_CREDENTIALS);
     }
     
@@ -113,16 +122,21 @@ public class AddGrantTypeToClientMetadataTest extends BaseOIDCClientMetadataPopu
     }
 
     protected void testGrantTypes(GrantType... grantTypes) throws ComponentInitializationException {
-        testGrantTypes(new ArrayList<GrantType>(), grantTypes);
+        testGrantTypes(new ArrayList<GrantType>(), null, grantTypes);
     }
 
-    protected void testGrantTypes(List<GrantType> ignoredTypes, GrantType... grantTypes) 
+    protected void testGrantTypes(List<GrantType> ignoredTypes, String expectedEventId, GrantType... grantTypes) 
             throws ComponentInitializationException {
         OIDCClientMetadata request = new OIDCClientMetadata();
         request.setGrantTypes(new HashSet<GrantType>(Arrays.asList(grantTypes)));
         OIDCClientMetadata result = new OIDCClientMetadata();
         setUpContext(request, result);
-        Assert.assertNull(action.execute(requestCtx));
+        Event event = action.execute(requestCtx);
+        if (expectedEventId != null) {
+            ActionTestingSupport.assertEvent(event, expectedEventId);
+            return;
+        }
+        Assert.assertNull(event);
         Set<GrantType> resultTypes = result.getGrantTypes();
         Assert.assertNotNull(resultTypes);
         int length = (ignoredTypes == null) ? grantTypes.length : grantTypes.length - ignoredTypes.size();

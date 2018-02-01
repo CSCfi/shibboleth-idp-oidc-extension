@@ -38,6 +38,8 @@ import javax.annotation.Nonnull;
 import org.geant.idpextension.oidc.config.logic.AuthorizationCodeFlowEnabledPredicate;
 import org.geant.idpextension.oidc.config.logic.ImplicitFlowEnabledPredicate;
 import org.geant.idpextension.oidc.config.logic.RefreshTokensEnabledPredicate;
+import org.opensaml.profile.action.ActionSupport;
+import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,6 +167,11 @@ public class AddGrantTypeToClientMetadata extends AbstractOIDCClientMetadataPopu
                 } else {
                     log.warn("{} Ignoring unsupported requested grant type {}", getLogPrefix(), grantType);
                 }
+            }
+            if (resultTypes.isEmpty()) {
+                log.error("{} No supported grant types requested", getLogPrefix());
+                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+                return;
             }
         }
         getOutputMetadata().setGrantTypes(resultTypes);
