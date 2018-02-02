@@ -52,5 +52,15 @@ public final class OidcEventIds {
      * ID of event returned if the WebFinger rel is invalid / not supported.
      */
     @Nonnull @NotEmpty public static final String INVALID_WEBFINGER_REL = "InvalidWebFingerRel";
+    
+    /**
+     * The provided authorization grant is invalid.
+     */
+    @Nonnull @NotEmpty public static final String INVALID_GRANT = "InvalidGrant";
+    
+    /**
+     * The redirect_uri in request is  is invalid.
+     */
+    @Nonnull @NotEmpty public static final String INVALID_REDIRECT_URI = "InvalidRedirectionURI";
 
 }
