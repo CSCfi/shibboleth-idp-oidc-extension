@@ -84,7 +84,7 @@ public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
         OIDCClientInformation information = new OIDCClientInformation(new ClientID("test"), null, metaData, null, null, null);
         oidcCtx.setClientInformation(information);
         final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REDIRECT_URIS);
+        ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REDIRECT_URI);
         Assert.assertNull(respCtx.getRedirectURI());
     }
 

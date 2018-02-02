@@ -105,7 +105,7 @@ public class ValidateRedirectURI extends AbstractOIDCAuthenticationResponseActio
             return;
         }
         log.error("{} redirect uri must be validated to form response", getLogPrefix());
-        ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REDIRECT_URIS);
+        ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REDIRECT_URI);
         return;
     }
 }

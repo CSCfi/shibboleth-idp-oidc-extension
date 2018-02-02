@@ -30,9 +30,10 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import java.text.ParseException;
 import javax.annotation.Nonnull;
+
+import org.geant.idpextension.oidc.profile.OidcEventIds;
 import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.opensaml.profile.action.ActionSupport;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.storage.ReplayCache;
 import org.slf4j.Logger;
@@ -110,7 +111,7 @@ public class ValidateAuthorizeCode extends AbstractOIDCTokenResponseAction {
                     if (authzCodeClaimsSet.isExpired()) {
                         log.error("{} Authorization code exp is in the past {}", getLogPrefix(),
                                 authzCodeClaimsSet.getExp().getTime());
-                        ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+                        ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_GRANT);
                         return;
                     }
                     if (!replayCache.check(getClass().getName(), authzCodeClaimsSet.getID(),
@@ -118,20 +119,20 @@ public class ValidateAuthorizeCode extends AbstractOIDCTokenResponseAction {
                         log.error("{} Replay detected of authz code {}", getLogPrefix(), authzCodeClaimsSet.getID());
                         // TODO: add authzCodeClaimsSet.getID() to RevokeCache to revoke all tokens
                         // granted by authz code.
-                        ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+                        ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_GRANT);
                         return;
                     }
                     getOidcResponseContext().setAuthorizationCodeClaimsSet(authzCodeClaimsSet);
                     return;
                 } catch (DataSealerException | ParseException e) {
                     log.error("{} Obtaining auhz code failed {}", getLogPrefix(), e.getMessage());
-                    ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+                    ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_GRANT);
                     return;
                 }
             }
         }
         log.error("{} unable to obtain authz code", getLogPrefix());
-        ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+        ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_GRANT);
 
     }
 }
