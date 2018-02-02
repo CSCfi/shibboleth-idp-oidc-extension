@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 
@@ -79,7 +80,8 @@ public class AddResponseTypesToClientMetadata extends AbstractOIDCClientMetadata
     protected void doInitialize() throws ComponentInitializationException {
         supportedResponseTypes = new HashMap<>();
         supportedResponseTypes.put(new ResponseType(ResponseType.Value.CODE), authorizationCodeFlowPredicate);
-        supportedResponseTypes.put(new ResponseType(ResponseType.Value.TOKEN), implicitFlowPredicate);
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.TOKEN), Predicates.or(implicitFlowPredicate, 
+                authorizationCodeFlowPredicate));
         supportedResponseTypes.put(new ResponseType(OIDCResponseTypeValue.ID_TOKEN), implicitFlowPredicate);        
     }
 
