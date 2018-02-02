@@ -132,8 +132,12 @@
     <bean id="BuildClientInformation" class="org.geant.idpextension.oidc.profile.impl.BuildClientInformation"
         scope="prototype" />
 
-    <bean id="BuildRegistrationResponse" class="org.geant.idpextension.oidc.profile.impl.BuildRegistrationResponse"
-        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
+    <bean id="oidc.messageEncoderFactory" class="org.geant.idpextension.oidc.encoding.impl.OIDCResponseEncoderFactory" p:messageEncoder-ref="oidc.nimbusEncoder" />
+
+    <bean id="oidc.nimbusEncoder" class="org.geant.idpextension.oidc.encoding.impl.NimbusResponseEncoder" scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" init-method="" />
+
+    <bean id="EncodeMessage" class="org.opensaml.profile.action.impl.EncodeMessage" scope="prototype"
+        p:messageEncoderFactory-ref="oidc.messageEncoderFactory" p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
 
     <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
             p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">

@@ -72,7 +72,7 @@
     <!-- end state after error display -->
     <end-state id="CommitResponse">
         <on-entry>
-            <evaluate expression="BuildRegistrationResponse" />
+            <evaluate expression="EncodeMessage" />
             <evaluate expression="RecordResponseComplete" />
         </on-entry>
     </end-state>
