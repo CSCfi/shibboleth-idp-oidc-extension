@@ -50,7 +50,7 @@ public class RefreshTokensEnabledPredicate extends AbstractRelyingPartyPredicate
         if (rpc != null) {
             final ProfileConfiguration pc = rpc.getProfileConfig();
             if (pc != null && pc instanceof AbstractOIDCProfileConfiguration) {
-                ((AbstractOIDCProfileConfiguration) pc).getRefreshTokensEnabled().apply(input);
+                return ((AbstractOIDCProfileConfiguration) pc).getRefreshTokensEnabled().apply(input);
             }
         }
         return false;
