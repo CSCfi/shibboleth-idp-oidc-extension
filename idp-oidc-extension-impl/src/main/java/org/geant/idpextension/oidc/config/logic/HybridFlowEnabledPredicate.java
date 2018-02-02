@@ -50,7 +50,7 @@ public class HybridFlowEnabledPredicate extends AbstractRelyingPartyPredicate {
         if (rpc != null) {
             final ProfileConfiguration pc = rpc.getProfileConfig();
             if (pc != null && pc instanceof AbstractOIDCProfileConfiguration) {
-                ((AbstractOIDCProfileConfiguration) pc).getHybridFlowEnabled().apply(input);
+                return ((AbstractOIDCProfileConfiguration) pc).getHybridFlowEnabled().apply(input);
             }
         }
         return false;

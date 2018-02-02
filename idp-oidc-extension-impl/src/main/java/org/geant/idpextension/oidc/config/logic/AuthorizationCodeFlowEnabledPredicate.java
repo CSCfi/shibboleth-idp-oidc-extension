@@ -51,7 +51,7 @@ public class AuthorizationCodeFlowEnabledPredicate extends AbstractRelyingPartyP
         if (rpc != null) {
             final ProfileConfiguration pc = rpc.getProfileConfig();
             if (pc != null && pc instanceof AbstractOIDCProfileConfiguration) {
-                ((AbstractOIDCProfileConfiguration) pc).getAuthorizationCodeFlowEnabled().apply(input);
+                return ((AbstractOIDCProfileConfiguration) pc).getAuthorizationCodeFlowEnabled().apply(input);
             }
         }
         return false;

@@ -50,7 +50,7 @@ public class ImplicitFlowEnabledPredicate extends AbstractRelyingPartyPredicate 
         if (rpc != null) {
             final ProfileConfiguration pc = rpc.getProfileConfig();
             if (pc != null && pc instanceof AbstractOIDCProfileConfiguration) {
-                ((AbstractOIDCProfileConfiguration) pc).getImplicitFlowEnabled().apply(input);
+                return ((AbstractOIDCProfileConfiguration) pc).getImplicitFlowEnabled().apply(input);
             }
         }
         return false;
