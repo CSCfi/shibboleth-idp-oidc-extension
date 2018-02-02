@@ -25,7 +25,7 @@
 		<evaluate expression="ValidateScope" />
 		<evaluate expression="SetRequestedClaimsToResponseContext" />
 		<evaluate expression="SetAuthenticationContextClassReferenceToResponseContext" />
-		 <evaluate expression="SetAuthenticationTimeToResponseContext" />
+		<evaluate expression="SetAuthenticationTimeToResponseContext" />
 		<evaluate expression="PopulateIDTokenSignatureSigningParameters" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="PostInitialSetup" />
@@ -46,27 +46,52 @@
 	</action-state>
 
 	<action-state id="BuildResponse">
-	    <evaluate expression="SetAccessTokenToResponseContext" />
+		<evaluate expression="SetAccessTokenToResponseContext" />
 		<evaluate expression="AddIDTokenShell" />
 		<evaluate expression="AddAttributeClaimsToIDToken" />
 		<evaluate expression="AddAuthTimeToIDToken" />
 		<evaluate expression="AddAcrToIDToken" />
 		<evaluate expression="AddNonceToIDToken" />
 		<evaluate expression="SignIDToken" />
-		<evaluate expression="'proceed'" />
-		<transition on="proceed" to="HandleOutboundMessage" />
-	</action-state>
-
-	<action-state id="HandleOutboundMessage">
 		<evaluate expression="FormOutboundMessage" />
-		<evaluate expression="EncodeMessage" />
-		<evaluate expression="RecordResponseComplete" />
 		<evaluate expression="'proceed'" />
-		<transition on="proceed" to="end" />
+		<transition on="proceed" to="CommitResponse" />
 	</action-state>
 
+	<!-- Passthrough state if an exception is thrown. -->
+	<action-state id="LogRuntimeException">
+		<on-entry>
+			<evaluate
+				expression="T(org.slf4j.LoggerFactory).getLogger('org.geant.idpextension.oidc.profile').error('Uncaught runtime exception', flowExecutionException.getCause())" />
+		</on-entry>
+		<evaluate expression="'RuntimeException'" />
+		<transition to="HandleError" />
+	</action-state>
 
-	<end-state id="end" />
+	<action-state id="HandleError">
+		<on-entry>
+			<evaluate
+				expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.SpringRequestContext), true).setRequestContext(flowRequestContext)" />
+			<evaluate expression="LogEvent" />
+		</on-entry>
+		<evaluate expression="BuildErrorResponseFromEvent" />
+		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="CommitResponse" />
+	</action-state>
+
+	<!-- end state -->
+	<end-state id="CommitResponse">
+		<on-entry>
+			<evaluate expression="EncodeMessage" />
+			<evaluate expression="RecordResponseComplete" />
+		</on-entry>
+	</end-state>
+
+	<!-- all unhandled non proceed results are turned into errors -->
+	<global-transitions>
+		<transition on-exception="java.lang.RuntimeException" to="LogRuntimeException" />
+		<transition on="#{!'proceed'.equals(currentEvent.id)}" to="HandleError" />
+	</global-transitions>
 
 
 	<bean-import resource="../../../system/flows/saml/security-beans.xml" />

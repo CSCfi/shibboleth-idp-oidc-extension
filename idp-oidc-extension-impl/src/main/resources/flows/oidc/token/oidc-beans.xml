@@ -57,7 +57,8 @@
 
 	<bean id="ValidateAuthorizeCode"
 		class="org.geant.idpextension.oidc.profile.impl.ValidateAuthorizeCode"
-		scope="prototype" c:sealer-ref="authorizeCodeSealer" p:replayCache-ref="shibboleth.ReplayCache"/>
+		scope="prototype" c:sealer-ref="authorizeCodeSealer"
+		p:replayCache-ref="shibboleth.ReplayCache" />
 
 	<bean id="ValidateRedirectURI"
 		class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
@@ -116,7 +117,7 @@
 	<bean id="shibboleth.TokenRequestScopeLookupStrategy"
 		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestScopeLookupFunction"
 		scope="prototype" />
-		
+
 	<bean id="SetAccessTokenToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetAccessTokenToResponseContext"
 		scope="prototype" c:sealer-ref="authorizeCodeSealer">
@@ -198,6 +199,34 @@
 	<bean id="shibboleth.Encoders.OIDCTokenResponseEncoder"
 		class="org.geant.idpextension.oidc.encoding.impl.OIDCTokenResponseEncoder"
 		scope="prototype" init-method="" p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
+
+	<bean id="BuildErrorResponseFromEvent"
+		class="org.geant.idpextension.oidc.profile.impl.BuildTokenErrorResponseFromEvent"
+		scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse">
+		<property name="eventContextLookupStrategy">
+			<bean
+				class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+		</property>
+		<property name="mappedErrors">
+			<map value-type="com.nimbusds.oauth2.sdk.ErrorObject">
+				<entry
+					key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_GRANT}"
+					value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_GRANT}" />
+				<entry
+					key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_REDIRECT_URI}"
+					value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_REQUEST}" />
+			</map>
+		</property>
+	</bean>
+
+	<bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent"
+		scope="prototype"
+		p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
+		<property name="eventContextLookupStrategy">
+			<bean
+				class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+		</property>
+	</bean>
 
 	<bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
 		scope="prototype" />
