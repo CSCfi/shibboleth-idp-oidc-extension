@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:c="http://www.springframework.org/schema/c" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+	default-init-method="initialize" default-destroy-method="destroy">
+
+
+	<!-- The profile and logging id used as arguments are for development phase 
+		only -->
+	<bean id="InitializeProfileRequestContext"
+		class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
+		scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/sso/browser"
+		p:loggingId="%{idp.service.logging.saml2sso:SSO}" />
+
+
+	<bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent"
+		scope="prototype"
+		p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
+		<property name="eventContextLookupStrategy">
+			<bean
+				class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+		</property>
+	</bean>
+
+	<bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
+		scope="prototype" />
+
+</beans>
