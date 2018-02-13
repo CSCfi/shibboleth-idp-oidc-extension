@@ -16,6 +16,16 @@
 		scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/sso/browser"
 		p:loggingId="%{idp.service.logging.saml2sso:SSO}" />
 
+	<bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage"
+		scope="prototype">
+		<constructor-arg>
+			<bean
+				class="org.geant.idpextension.oidc.decoding.impl.OIDCUserInfoRequestDecoder"
+				scope="prototype" p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
+		</constructor-arg>
+	</bean>
+
+
 
 	<bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent"
 		scope="prototype"
