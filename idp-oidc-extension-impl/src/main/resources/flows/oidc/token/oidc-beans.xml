@@ -197,7 +197,7 @@
 		scope="prototype" p:messageEncoder-ref="shibboleth.Encoders.OIDCTokenResponseEncoder" />
 
 	<bean id="shibboleth.Encoders.OIDCTokenResponseEncoder"
-		class="org.geant.idpextension.oidc.encoding.impl.OIDCTokenResponseEncoder"
+		class="org.geant.idpextension.oidc.encoding.impl.NimbusResponseEncoder"
 		scope="prototype" init-method="" p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
 
 	<bean id="BuildErrorResponseFromEvent"
