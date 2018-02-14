@@ -17,6 +17,7 @@
 	<action-state id="OutboundAndRelyingPartyContexts">
 		<evaluate expression="InitializeOutboundMessageContext" />
 		<evaluate expression="ValidateAccessToken" />
+		<evaluate expression="OIDCMetadataLookup" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="CommitResponse" />
 	</action-state>

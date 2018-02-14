@@ -41,6 +41,27 @@
 	<bean id="atBase64Codec" class="org.apache.commons.codec.binary.Base64"
 		c:lineLength="0" c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
 
+	<bean id="OIDCMetadataLookup"
+		class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor"
+		scope="prototype" c:executionDirection="INBOUND">
+		<constructor-arg name="messageHandler">
+			<bean
+				class="org.geant.idpextension.oidc.profile.impl.OIDCMetadataLookupHandler"
+				scope="prototype">
+				<property name="clientInformationResolver">
+					<ref bean="shibboleth.ClientInformationResolver" />
+				</property>
+				<property name="clientIDLookupStrategy">
+					<ref bean="shibboleth.UserInfoRequestClientIDLookupStrategy" />
+				</property>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<bean id="shibboleth.UserInfoRequestClientIDLookupStrategy"
+		class="org.geant.idpextension.oidc.profile.context.navigate.UserInfoRequestClientIDLookupFunction"
+		scope="prototype" />
+
 	<bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent"
 		scope="prototype"
 		p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
