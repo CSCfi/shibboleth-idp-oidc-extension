@@ -48,7 +48,6 @@ import net.shibboleth.utilities.java.support.annotation.constraint.Unmodifiable;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.InitializableComponent;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
 /**
@@ -76,9 +75,6 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCProfileCon
     /** Enabled token endpoint authentication methods. */
     @Nonnull @NonnullElements private List<String> tokenEndpointAuthMethods;
 
-    /** Supported token endpoint authentication methods. */
-    @Nonnull @NonnullElements private List<ClientAuthenticationMethod> supportedTokenEndpointAuthMethods;    
-
     /**
      * Constructor.
      */
@@ -94,27 +90,18 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCProfileCon
     public OIDCDynamicRegistrationConfiguration(@Nonnull @NotEmpty final String profileId) {
         super(profileId);
         setRegistrationValidityPeriod(0);
-        supportedTokenEndpointAuthMethods = new ArrayList<>();
-        supportedTokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
-        supportedTokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_POST);
-        supportedTokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_JWT);
-        supportedTokenEndpointAuthMethods.add(ClientAuthenticationMethod.PRIVATE_KEY_JWT);
-        supportedTokenEndpointAuthMethods.add(ClientAuthenticationMethod.NONE);
         tokenEndpointAuthMethods = new ArrayList<>();
-        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.getDefault().toString());
-        
+        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.toString());
+        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_POST.toString());
+        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.NONE.toString());
     }
 
     /** {@inheritDoc} */
     @Override
     public void initialize() throws ComponentInitializationException {
         super.initialize();
-        for (final String authMethod : tokenEndpointAuthMethods) {
-            if (!supportedTokenEndpointAuthMethods.contains(new ClientAuthenticationMethod(authMethod))) {
-                final String message = "Token endpoint authentication method " + authMethod + " is not supported!";
-                throw new ConstraintViolationException(message);
-            }
-        }
     }
 
     /** {@inheritDoc} */
@@ -175,23 +162,4 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCProfileCon
         tokenEndpointAuthMethods = new ArrayList<>(StringSupport.normalizeStringCollection(methods));
     }
 
-    /**
-     * Get the supported token endpoint authentication methods.
-     * 
-     * @return The supported token endpoint authentication methods.
-     */
-    @Nonnull @NonnullElements @NotLive @Unmodifiable
-    public List<ClientAuthenticationMethod> getSupportedTokenEndpointAuthMethods() {
-        return supportedTokenEndpointAuthMethods;
-    }
-
-    /**
-     * Set the supported token endpoint authentication methods.
-     * 
-     * @param methods What to set.
-     */
-    public void setSupportedTokenEndpointAuthMethods(
-            @Nonnull @NonnullElements final List<ClientAuthenticationMethod> methods) {
-        supportedTokenEndpointAuthMethods = Constraint.isNotNull(methods, "Collection of methods cannot be null");
-    }
 }
