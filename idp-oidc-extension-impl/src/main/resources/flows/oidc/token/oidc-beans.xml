@@ -35,9 +35,16 @@
 				<property name="clientInformationResolver">
 					<ref bean="shibboleth.ClientInformationResolver" />
 				</property>
+				<property name="clientIDLookupStrategy">
+					<ref bean="shibboleth.TokenRequestClientIDLookupStrategy" />
+				</property>
 			</bean>
 		</constructor-arg>
 	</bean>
+
+	<bean id="shibboleth.TokenRequestClientIDLookupStrategy"
+		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestClientIDLookupFunction"
+		scope="prototype" />
 
 	<bean id="InitializeRelyingPartyContext"
 		class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext"

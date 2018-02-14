@@ -36,25 +36,22 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
-
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.handler.AbstractMessageHandler;
 import org.opensaml.messaging.handler.MessageHandlerException;
 import org.geant.idpextension.oidc.criterion.ClientIDCriterion;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver;
-import org.geant.idpextension.util.RequestFieldResolver;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultClientIDLookupFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.nimbusds.oauth2.sdk.AbstractRequest;
+import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 /**
- * Handler for inbound OIDC protocol messages that attempts to locate OIDC
- * metadata for a rp, and attaches it with a {@link OIDCMetadataContext} as a
- * child of a pre-existing instance of {@link MessagesContext}.
+ * Handler for inbound OIDC protocol messages that attempts to locate OIDC metadata for a rp, and attaches it with a
+ * {@link OIDCMetadataContext} as a child of a pre-existing instance of {@link MessagesContext}.
  */
 @SuppressWarnings("rawtypes")
 public class OIDCMetadataLookupHandler extends AbstractMessageHandler {
@@ -67,11 +64,32 @@ public class OIDCMetadataLookupHandler extends AbstractMessageHandler {
     @NonnullAfterInit
     private ClientInformationResolver clientResolver;
 
+    /** Strategy used to obtain the redirect uri value for authorize/token request. */
+    @Nonnull
+    private Function<MessageContext, ClientID> clientIDLookupStrategy;
+
+    /**
+     * Constructor.
+     */
+    public OIDCMetadataLookupHandler() {
+        clientIDLookupStrategy = new DefaultClientIDLookupFunction();
+    }
+
+    /**
+     * Set the strategy used to locate the client id of the request.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setClientIDLookupStrategy(@Nonnull final Function<MessageContext, ClientID> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        clientIDLookupStrategy =
+                Constraint.isNotNull(strategy, "ClientIDLookupStrategy lookup strategy cannot be null");
+    }
+
     /**
      * Set the {@link ClientInformationResolver} to use.
      * 
-     * @param resolver
-     *            The resolver to use.
+     * @param resolver The resolver to use.
      */
     public void setClientInformationResolver(@Nonnull final ClientInformationResolver resolver) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
@@ -94,7 +112,7 @@ public class OIDCMetadataLookupHandler extends AbstractMessageHandler {
     protected void doInvoke(@Nonnull final MessageContext messageContext) throws MessageHandlerException {
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
         // Resolve client id from inbound message
-        final ClientID clientId = RequestFieldResolver.getClientID((AbstractRequest) messageContext.getMessage());
+        final ClientID clientId = clientIDLookupStrategy.apply(messageContext);
         // Resolve metadata for client id
         final ClientIDCriterion clientCriterion = new ClientIDCriterion(clientId);
         final CriteriaSet criteria = new CriteriaSet(clientCriterion);
