@@ -34,9 +34,8 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 
 /**
- * Action that adds an outbound {@link MessageContext} and related OIDC contexts
- * to the {@link ProfileRequestContext} based on the identity of a relying party
- * accessed via a lookup strategy, by default an immediate child of the profile
+ * Action that adds an outbound {@link MessageContext} and related OIDC contexts to the {@link ProfileRequestContext}
+ * based on the identity of a relying party accessed via a lookup strategy, by default an immediate child of the profile
  * request context.
  * 
  * 
@@ -44,6 +43,6 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
  * @event {@link IdPEventIds#INVALID_RELYING_PARTY_CTX}
  */
 public class InitializeOutboundAuthenticationResponseMessageContext
-        extends AbstractInitializeOutboundResponseMessageContext<AuthenticationResponse> {
+        extends AbstractInitializeOutboundResponseMessageContextForRP<AuthenticationResponse> {
 
 }
