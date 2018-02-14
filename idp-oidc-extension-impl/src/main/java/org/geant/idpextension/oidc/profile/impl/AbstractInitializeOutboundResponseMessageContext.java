@@ -32,25 +32,14 @@ import javax.annotation.Nonnull;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.profile.IdPEventIds;
-import net.shibboleth.idp.profile.context.RelyingPartyContext;
-import net.shibboleth.utilities.java.support.component.ComponentSupport;
-import net.shibboleth.utilities.java.support.logic.Constraint;
-
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.messaging.context.navigate.ChildContextLookup;
-import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-
 /**
- * Action that adds an outbound {@link MessageContext} and related OIDC contexts
- * to the {@link ProfileRequestContext} based on the identity of a relying party
- * accessed via a lookup strategy, by default an immediate child of the profile
- * request context.
+ * Action that adds an outbound {@link MessageContext} and related OIDC contexts to the {@link ProfileRequestContext}.
  * 
  * 
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
@@ -63,40 +52,10 @@ public abstract class AbstractInitializeOutboundResponseMessageContext<T> extend
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(AbstractInitializeOutboundResponseMessageContext.class);
 
-    /** Relying party context lookup strategy. */
-    @Nonnull
-    private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
-
-    /** Constructor. */
-    public AbstractInitializeOutboundResponseMessageContext() {
-        relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
-    }
-
-    /**
-     * Set the relying party context lookup strategy.
-     * 
-     * @param strategy
-     *            lookup strategy
-     */
-    public void setRelyingPartyContextLookupStrategy(
-            @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
-        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-
-        relyingPartyContextLookupStrategy = Constraint.isNotNull(strategy,
-                "RelyingPartyContext lookup strategy cannot be null");
-    }
-
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        final RelyingPartyContext relyingPartyCtx = relyingPartyContextLookupStrategy.apply(profileRequestContext);
-        if (relyingPartyCtx == null) {
-            log.error("{} No relying party context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
-            return false;
-        }
         return super.doPreExecute(profileRequestContext);
     }
 
