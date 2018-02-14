@@ -36,6 +36,7 @@ import java.util.Timer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver;
 import org.geant.idpextension.oidc.metadata.resolver.RefreshableMetadataValueResolver;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class DynamicFilesystemProviderMetadataResolver extends FilesystemProvide
     private final Logger log = LoggerFactory.getLogger(DynamicFilesystemProviderMetadataResolver.class);
     
     /** The map of dynamic metadata value resolvers, key corresponding to the name of the metadata field. */
-    private Map<String, RefreshableMetadataValueResolver> dynamicResolvers = new HashMap<>();
+    private Map<String, ? extends MetadataValueResolver> dynamicResolvers = new HashMap<>();
 
     /**
      * Constructor.
@@ -89,7 +90,7 @@ public class DynamicFilesystemProviderMetadataResolver extends FilesystemProvide
      * Set dynamic metadata value resolvers.
      * @param map What to set.
      */
-    public void setDynamicValueResolvers(final Map<String, RefreshableMetadataValueResolver> map) {
+    public void setDynamicValueResolvers(final Map<String, ? extends MetadataValueResolver> map) {
         dynamicResolvers = Constraint.isNotNull(map, "The map of dynamic metadata resolvers cannot be null");
     }
 
@@ -98,12 +99,14 @@ public class DynamicFilesystemProviderMetadataResolver extends FilesystemProvide
     protected DateTime getMetadataUpdateTime() {
         DateTime updateTime = super.getMetadataUpdateTime();
         for (final String id : dynamicResolvers.keySet()) {
-            final RefreshableMetadataValueResolver resolver = dynamicResolvers.get(id);
-            if (resolver.getLastUpdate() == null) {
-                return DateTime.now();
-            }
-            if (resolver.getLastUpdate().isAfter(updateTime)) {
-                return resolver.getLastUpdate();
+            final MetadataValueResolver resolver = dynamicResolvers.get(id);
+            if (resolver instanceof RefreshableMetadataValueResolver) {
+                if (((RefreshableMetadataValueResolver)resolver).getLastUpdate() == null) {
+                    return DateTime.now();
+                }
+                if (((RefreshableMetadataValueResolver)resolver).getLastUpdate().isAfter(updateTime)) {
+                    return ((RefreshableMetadataValueResolver)resolver).getLastUpdate();
+                }                
             }
         }
         return updateTime;
@@ -116,9 +119,11 @@ public class DynamicFilesystemProviderMetadataResolver extends FilesystemProvide
         final JSONObject jsonResult = result.toJSONObject();
         for (final String key : dynamicResolvers.keySet()) {
             log.debug("Starting to resolve value for {}", key);
-            final RefreshableMetadataValueResolver resolver = dynamicResolvers.get(key);
+            final MetadataValueResolver resolver = dynamicResolvers.get(key);
             try {
-                resolver.refresh();
+                if (resolver instanceof RefreshableMetadataValueResolver) {                    
+                    ((RefreshableMetadataValueResolver)resolver).refresh();
+                }
                 final Object value = resolver.resolveSingle(null);
                 if (value != null) {
                     jsonResult.put(key, value);
