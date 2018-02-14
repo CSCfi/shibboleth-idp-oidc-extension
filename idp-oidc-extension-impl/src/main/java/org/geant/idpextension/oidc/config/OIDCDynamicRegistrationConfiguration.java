@@ -28,18 +28,28 @@
 
 package org.geant.idpextension.oidc.config;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.opensaml.profile.context.ProfileRequestContext;
 
 import com.google.common.base.Function;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 
 import net.shibboleth.utilities.java.support.annotation.Duration;
+import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+import net.shibboleth.utilities.java.support.annotation.constraint.NotLive;
+import net.shibboleth.utilities.java.support.annotation.constraint.Unmodifiable;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.InitializableComponent;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
+import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
 /**
  * Profile configuration for the OpenID Connect dynamic client registration.
@@ -62,6 +72,12 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCProfileCon
 
     /** Validity time period of dynamically registered clients. Zero means valid forever. */
     @Duration private long registrationValidityPeriod;
+    
+    /** Enabled token endpoint authentication methods. */
+    @Nonnull @NonnullElements private List<String> tokenEndpointAuthMethods;
+
+    /** Supported token endpoint authentication methods. */
+    @Nonnull @NonnullElements private List<ClientAuthenticationMethod> supportedTokenEndpointAuthMethods;    
 
     /**
      * Constructor.
@@ -78,15 +94,27 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCProfileCon
     public OIDCDynamicRegistrationConfiguration(@Nonnull @NotEmpty final String profileId) {
         super(profileId);
         setRegistrationValidityPeriod(0);
+        supportedTokenEndpointAuthMethods = new ArrayList<>();
+        supportedTokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
+        supportedTokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_POST);
+        supportedTokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_JWT);
+        supportedTokenEndpointAuthMethods.add(ClientAuthenticationMethod.PRIVATE_KEY_JWT);
+        supportedTokenEndpointAuthMethods.add(ClientAuthenticationMethod.NONE);
+        tokenEndpointAuthMethods = new ArrayList<>();
+        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.getDefault().toString());
+        
     }
 
     /** {@inheritDoc} */
     @Override
     public void initialize() throws ComponentInitializationException {
-        Constraint.isNotNull(getSecurityConfiguration(), "Security configuration cannot be null.");
-        Constraint.isNotNull(getSecurityConfiguration().getIdGenerator(),
-                "Security configuration ID generator cannot be null.");
-        initialized = true;
+        super.initialize();
+        for (final String authMethod : tokenEndpointAuthMethods) {
+            if (!supportedTokenEndpointAuthMethods.contains(new ClientAuthenticationMethod(authMethod))) {
+                final String message = "Token endpoint authentication method " + authMethod + " is not supported!";
+                throw new ConstraintViolationException(message);
+            }
+        }
     }
 
     /** {@inheritDoc} */
@@ -126,5 +154,44 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCProfileCon
             Long> strategy) {
         registrationValidityPeriodLookupStrategy = strategy;
     }
+    
+    /**
+     * Get the enabled token endpoint authentication methods.
+     * 
+     * @return The enabled token endpoint authentication methods.
+     */
+    @Nonnull @NonnullElements @NotLive @Unmodifiable public List<String> getTokenEndpointAuthMethods() {
+        return tokenEndpointAuthMethods;
+    }
 
+    /**
+     * Set the enabled token endpoint authentication methods.
+     * 
+     * @param methods What to set.
+     */
+    public void setTokenEndpointAuthMethods(@Nonnull @NonnullElements final Collection<String> methods) {
+        Constraint.isNotNull(methods, "Collection of methods cannot be null");
+        
+        tokenEndpointAuthMethods = new ArrayList<>(StringSupport.normalizeStringCollection(methods));
+    }
+
+    /**
+     * Get the supported token endpoint authentication methods.
+     * 
+     * @return The supported token endpoint authentication methods.
+     */
+    @Nonnull @NonnullElements @NotLive @Unmodifiable
+    public List<ClientAuthenticationMethod> getSupportedTokenEndpointAuthMethods() {
+        return supportedTokenEndpointAuthMethods;
+    }
+
+    /**
+     * Set the supported token endpoint authentication methods.
+     * 
+     * @param methods What to set.
+     */
+    public void setSupportedTokenEndpointAuthMethods(
+            @Nonnull @NonnullElements final List<ClientAuthenticationMethod> methods) {
+        supportedTokenEndpointAuthMethods = Constraint.isNotNull(methods, "Collection of methods cannot be null");
+    }
 }
