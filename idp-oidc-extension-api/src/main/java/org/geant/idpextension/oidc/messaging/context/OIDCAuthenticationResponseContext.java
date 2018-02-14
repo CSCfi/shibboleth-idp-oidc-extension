@@ -31,25 +31,21 @@ package org.geant.idpextension.oidc.messaging.context;
 import java.net.URI;
 import java.util.Date;
 import javax.annotation.Nullable;
-
+import org.geant.idpextension.oidc.token.support.AccessTokenClaimsSet;
 import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.opensaml.saml.saml2.core.NameID;
-
-import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
-import com.nimbusds.oauth2.sdk.token.AccessTokenType;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
- * Subcontext carrying information to form authentication response for relying
- * party. This context appears as a subcontext of the
- * {@link org.opensaml.messaging.context.MessageContext}.
+ * Subcontext carrying information to form authentication response for relying party. This context appears as a
+ * subcontext of the {@link org.opensaml.messaging.context.MessageContext}.
  */
 public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
 
@@ -90,6 +86,10 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     @Nullable
     private AuthorizeCodeClaimsSet authorizationCodeClaims;
 
+    /** Access token claims. */
+    @Nullable
+    private AccessTokenClaimsSet accessTokenClaims;
+
     /** Access token. */
     @Nullable
     private AccessToken accessToken;
@@ -111,8 +111,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Set requested claims.
      * 
-     * @param claims
-     *            requested claims
+     * @param claims requested claims
      */
     public void setRequestedClaims(@Nullable ClaimsRequest claims) {
         requestedClaims = claims;
@@ -130,11 +129,28 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Set authorization code claims.
      * 
-     * @param claims
-     *            authorization code claims
+     * @param claims authorization code claims
      */
     public void setAuthorizationCodeClaimsSet(AuthorizeCodeClaimsSet claims) {
         authorizationCodeClaims = claims;
+    }
+
+    /**
+     * Get access token claims.
+     * 
+     * @return access token claims
+     */
+    public AccessTokenClaimsSet getAuccessTokenClaims() {
+        return accessTokenClaims;
+    }
+
+    /**
+     * Set access token claims.
+     * 
+     * @param claims access token claims
+     */
+    public void setAccessTokenClaimsSet(AccessTokenClaimsSet claims) {
+        accessTokenClaims = claims;
     }
 
     /**
@@ -150,8 +166,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Set authorization code.
      * 
-     * @param code
-     *            String to form authorization code
+     * @param code String to form authorization code
      */
     public void setAuthorizationCode(@Nullable String code) {
         authorizationCode = code == null ? null : new AuthorizationCode(code);
@@ -170,8 +185,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Set access token.
      * 
-     * @param token
-     *            String to form access token
+     * @param token String to form access token
      */
     public void setAccessToken(@Nullable String token, long lifeTime) {
         accessToken = token == null ? null : new BearerAccessToken(token, lifeTime, null);
@@ -190,8 +204,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Set requested sub value.
      * 
-     * @param sub
-     *            requested sub value.
+     * @param sub requested sub value.
      */
     public void setRequestedSubject(@Nullable String sub) {
         this.requestedSubject = sub;
@@ -209,8 +222,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Sets Name ID generated for response.
      * 
-     * @param id
-     *            Name ID generated for response
+     * @param id Name ID generated for response
      */
     public void setNameId(NameID id) {
         nameId = id;
@@ -228,8 +240,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Set validated scope values.
      * 
-     * @param scope
-     *            scope values
+     * @param scope scope values
      */
     public void setScope(Scope scope) {
         requestedScope = scope;
@@ -246,11 +257,9 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     }
 
     /**
-     * Set authentication time of the end user in millis from 1970-01-01T0:0:0Z as
-     * measured in UTC until the date/time.
+     * Set authentication time of the end user in millis from 1970-01-01T0:0:0Z as measured in UTC until the date/time.
      * 
-     * @param time
-     *            authentication time.
+     * @param time authentication time.
      */
     public void setAuthTime(long time) {
         authTime = new Date(time);
@@ -269,8 +278,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Sets a validated redirect uri for the response.
      * 
-     * @param uri
-     *            validated redirect uri for the response
+     * @param uri validated redirect uri for the response
      */
     public void setRedirectURI(@Nullable URI uri) {
         redirectURI = uri;
@@ -289,8 +297,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Set acr for response.
      * 
-     * @param acrValue
-     *            for response.
+     * @param acrValue for response.
      */
     public void setAcr(@Nullable String acrValue) {
         if (acrValue != null) {
@@ -314,8 +321,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Set the id token.
      * 
-     * @param token
-     *            The id token.
+     * @param token The id token.
      */
     public void setIDToken(@Nullable IDTokenClaimsSet token) {
         idToken = token;
@@ -334,8 +340,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /**
      * Set the signed id token.
      * 
-     * @param token
-     *            The signed id token
+     * @param token The signed id token
      */
     public void setSignedIDToken(@Nullable SignedJWT token) {
         signedIDToken = token;
