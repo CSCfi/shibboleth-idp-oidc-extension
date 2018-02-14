@@ -140,7 +140,7 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
      * 
      * @return access token claims
      */
-    public AccessTokenClaimsSet getAuccessTokenClaims() {
+    public AccessTokenClaimsSet getAccessTokenClaims() {
         return accessTokenClaims;
     }
 
