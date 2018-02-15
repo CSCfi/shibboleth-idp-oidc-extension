@@ -33,6 +33,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.geant.idpextension.oidc.config.navigate.TokenEndpointAuthMethodLookupFunction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -42,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
@@ -59,11 +59,13 @@ public class AddTokenEndpointAuthMethodsToClientMetadata extends AbstractOIDCCli
     /** Strategy to obtain enabled token endpoint authentication methods. */
     @Nullable private Function<ProfileRequestContext, List<ClientAuthenticationMethod>> 
         tokenEndpointAuthMethodsLookupStrategy;
-
-    protected void doInitialize() throws ComponentInitializationException {
-        super.doInitialize();
-        Constraint.isNotNull(tokenEndpointAuthMethodsLookupStrategy, 
-                "Strategy to obtain enabled token endpoint authentication methods cannot be null");
+    
+    /**
+     * Constructor.
+     */
+    public AddTokenEndpointAuthMethodsToClientMetadata() {
+        super();
+        tokenEndpointAuthMethodsLookupStrategy = new TokenEndpointAuthMethodLookupFunction();
     }
     
     /**
