@@ -71,7 +71,14 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCProfileCon
 
     /** Validity time period of dynamically registered clients. Zero means valid forever. */
     @Duration private long registrationValidityPeriod;
-    
+
+    /** Lookup function to supply {@link #secretExpirationPeriod} property. */
+    @SuppressWarnings("rawtypes")
+    @Nullable private Function<ProfileRequestContext, Long> secretExpirationPeriodLookupStrategy;
+
+    /** Client secret expiration period of dynamically registered clients. Zero means valid forever. */
+    @Duration private long secretExpirationPeriod;
+
     /** Enabled token endpoint authentication methods. */
     @Nonnull @NonnullElements private List<String> tokenEndpointAuthMethods;
 
@@ -90,6 +97,7 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCProfileCon
     public OIDCDynamicRegistrationConfiguration(@Nonnull @NotEmpty final String profileId) {
         super(profileId);
         setRegistrationValidityPeriod(0);
+        setSecretExpirationPeriod(0);
         tokenEndpointAuthMethods = new ArrayList<>();
         tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.toString());
         tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_POST.toString());
@@ -140,6 +148,38 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCProfileCon
     public void setRegistrationValidityPeriodLookupStrategy(@Nullable final Function<ProfileRequestContext, 
             Long> strategy) {
         registrationValidityPeriodLookupStrategy = strategy;
+    }
+
+    /**
+     * Get client secret expiration period.
+     * 
+     * @return Client secret expiration period in milliseconds.
+     */
+    @Duration public long getSecretExpirationPeriod() {
+        return Constraint.isGreaterThan(-1,
+                getIndirectProperty(secretExpirationPeriodLookupStrategy, secretExpirationPeriod),
+                "Secret expiration period must be 0 or positive.");
+    }
+
+    /**
+     * Sets the client secret expiration period.
+     * 
+     * @param millis What to set in milliseconds.
+     */
+    @Duration public void setSecretExpirationPeriod(@Duration final long millis) {
+        secretExpirationPeriod = Constraint.isGreaterThan(-1, millis, 
+                "Secret expiration period must be 0 or positive.");
+    }
+
+    /**
+     * Set a lookup strategy for the {@link #secretExpirationPeriod} property.
+     * 
+     * @param strategy lookup strategy
+     */
+    @SuppressWarnings("rawtypes")
+    public void setSecretExpirationPeriodLookupStrategy(@Nullable final Function<ProfileRequestContext, 
+            Long> strategy) {
+        secretExpirationPeriodLookupStrategy = strategy;
     }
     
     /**
