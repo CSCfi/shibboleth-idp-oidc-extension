@@ -48,7 +48,7 @@
 
 	<bean id="InitializeRelyingPartyContext"
 		class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext"
-		scope="prototype" />
+		scope="prototype" p:clientIDLookupStrategy-ref="shibboleth.TokenRequestClientIDLookupStrategy" />
 
 	<bean id="SelectRelyingPartyConfiguration"
 		class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
