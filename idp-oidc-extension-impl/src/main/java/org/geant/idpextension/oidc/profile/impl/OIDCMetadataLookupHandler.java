@@ -64,7 +64,7 @@ public class OIDCMetadataLookupHandler extends AbstractMessageHandler {
     @NonnullAfterInit
     private ClientInformationResolver clientResolver;
 
-    /** Strategy used to obtain the redirect uri value for authorize/token request. */
+    /** Strategy used to obtain the client id value for authorize/token request. */
     @Nonnull
     private Function<MessageContext, ClientID> clientIDLookupStrategy;
 
