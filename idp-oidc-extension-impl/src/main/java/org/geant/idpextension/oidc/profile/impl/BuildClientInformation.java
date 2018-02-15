@@ -41,10 +41,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformationResponse;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
@@ -106,8 +108,15 @@ public class BuildClientInformation extends AbstractProfileAction {
         final OIDCClientRegistrationResponseContext oidcContext = 
                 oidcResponseContextLookupStrategy.apply(profileRequestContext.getOutboundMessageContext());
         final ClientID clientId = new ClientID(oidcContext.getClientId());
+        final OIDCClientMetadata metadata = oidcContext.getClientMetadata();
+        final ClientAuthenticationMethod tokenAuthMethod = metadata.getTokenEndpointAuthMethod();
+        
+        final boolean secretNeeded = (tokenAuthMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC) ||
+                tokenAuthMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_JWT) ||
+                tokenAuthMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_POST));
+        
         final Secret clientSecret;
-        if (oidcContext.getClientSecret() != null) {
+        if (secretNeeded && oidcContext.getClientSecret() != null) {
             final DateTime secretExpiresAt = oidcContext.getClientSecretExpiresAt();
             if (secretExpiresAt != null) {
                 clientSecret = new Secret(oidcContext.getClientSecret(), secretExpiresAt.toDate());                
@@ -119,7 +128,7 @@ public class BuildClientInformation extends AbstractProfileAction {
         }
         
         final OIDCClientInformation clientInformation = new OIDCClientInformation(clientId, new Date(), 
-                oidcContext.getClientMetadata(), clientSecret);
+                metadata, clientSecret);
         final OIDCClientInformationResponse response = new OIDCClientInformationResponse(clientInformation);
         profileRequestContext.getOutboundMessageContext().setMessage(response);
         log.info("{} Client information successfully added to the outbound context", getLogPrefix());
