@@ -42,7 +42,8 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
-import org.geant.idpextension.util.RequestFieldResolver;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultClientIDLookupFunction;
+import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,14 +54,13 @@ import com.nimbusds.oauth2.sdk.AbstractRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 /**
- * Action that adds a {@link RelyingPartyContext} to the current
- * {@link ProfileRequestContext} tree via a creation function.
+ * Action that adds a {@link RelyingPartyContext} to the current {@link ProfileRequestContext} tree via a creation
+ * function.
  * 
  * @event {@link EventIds#INVALID_MSG_CTX}
  * @event {@link EventIds#INVALID_PROFILE_CTX}
  * @event {@link IdPEventIds#INVALID_RELYING_PARTY_CTX}
- * @post ProfileRequestContext.getSubcontext(RelyingPartyContext.class) != null
- *       with relying party id set.
+ * @post ProfileRequestContext.getSubcontext(RelyingPartyContext.class) != null with relying party id set.
  */
 @SuppressWarnings("rawtypes")
 public class InitializeRelyingPartyContext extends AbstractProfileAction {
@@ -80,39 +80,53 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
     @Nonnull
     private Function<ProfileRequestContext, OIDCMetadataContext> oidcMetadataContextLookupStrategy;
 
+    /** Strategy used to obtain the client id value for authorize/token request. */
+    @Nonnull
+    private Function<MessageContext, ClientID> clientIDLookupStrategy;
+
     /** Constructor. */
     public InitializeRelyingPartyContext() {
         relyingPartyContextCreationStrategy = new ChildContextLookup<>(RelyingPartyContext.class, true);
         oidcMetadataContextLookupStrategy = Functions.compose(new ChildContextLookup<>(OIDCMetadataContext.class),
                 new InboundMessageContextLookup());
+        clientIDLookupStrategy = new DefaultClientIDLookupFunction();
+    }
+
+    /**
+     * Set the strategy used to locate the client id of the request.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setClientIDLookupStrategy(@Nonnull final Function<MessageContext, ClientID> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        clientIDLookupStrategy =
+                Constraint.isNotNull(strategy, "ClientIDLookupStrategy lookup strategy cannot be null");
     }
 
     /**
      * Set the strategy used to return or create the {@link RelyingPartyContext} .
      * 
-     * @param strategy
-     *            creation strategy
+     * @param strategy creation strategy
      */
     public void setRelyingPartyContextCreationStrategy(
             @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
 
-        relyingPartyContextCreationStrategy = Constraint.isNotNull(strategy,
-                "RelyingPartyContext creation strategy cannot be null");
+        relyingPartyContextCreationStrategy =
+                Constraint.isNotNull(strategy, "RelyingPartyContext creation strategy cannot be null");
     }
 
     /**
      * Set the strategy used to return the {@link OIDCMetadataContext}.
      * 
-     * @param strategy
-     *            The lookup strategy.
+     * @param strategy The lookup strategy.
      */
     public void setOidcMetadataContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, OIDCMetadataContext> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
 
-        oidcMetadataContextLookupStrategy = Constraint.isNotNull(strategy,
-                "OIDCMetadataContext lookup strategy cannot be null");
+        oidcMetadataContextLookupStrategy =
+                Constraint.isNotNull(strategy, "OIDCMetadataContext lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -134,10 +148,9 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        clientId = RequestFieldResolver.getClientID((AbstractRequest)message);
+        clientId = clientIDLookupStrategy.apply(profileRequestContext.getInboundMessageContext());
         if (clientId == null) {
-            //TODO: Verify we do get client id always with token requests also
-            log.error("{} Unable to locate client id from inbound message", getLogPrefix());
+            log.error("{} Unable to locate client id", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
