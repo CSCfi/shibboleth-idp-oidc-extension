@@ -53,8 +53,16 @@
         class="org.geant.idpextension.oidc.profile.impl.GenerateClientID"
         scope="prototype" />
 
+    <bean id="GenerateClientSecret"
+        class="org.geant.idpextension.oidc.profile.impl.GenerateClientSecret"
+        scope="prototype" />
+
     <bean id="AddRedirectUrisToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddRedirectUrisToClientMetadata"
+        scope="prototype" />
+        
+    <bean id="AddTokenEndpointAuthMethodsToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddTokenEndpointAuthMethodsToClientMetadata"
         scope="prototype" />
 
     <bean id="AddApplicationTypeToClientMetadata"
