@@ -62,14 +62,9 @@
 		class="org.geant.idpextension.oidc.profile.context.navigate.UserInfoRequestClientIDLookupFunction"
 		scope="prototype" />
 
-	<bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent"
-		scope="prototype"
-		p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
-		<property name="eventContextLookupStrategy">
-			<bean
-				class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
-		</property>
-	</bean>
+	<bean id="InitializeRelyingPartyContext"
+		class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext"
+		scope="prototype" p:clientIDLookupStrategy-ref="shibboleth.UserInfoRequestClientIDLookupStrategy" />
 
 	<bean id="EncodeMessage"
 		class="org.geant.idpextension.oidc.profile.action.impl.EncodeMessage"
@@ -92,6 +87,15 @@
 					key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_GRANT}"
 					value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_GRANT}" />
 			</map>
+		</property>
+	</bean>
+
+	<bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent"
+		scope="prototype"
+		p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
+		<property name="eventContextLookupStrategy">
+			<bean
+				class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
 		</property>
 	</bean>
 
