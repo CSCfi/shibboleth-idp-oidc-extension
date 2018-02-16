@@ -31,7 +31,6 @@ package org.geant.idpextension.oidc.profile.context.navigate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
-import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
 import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -63,7 +62,7 @@ public abstract class AbstractTokenClaimsLookupFunction<T>
         if (oidcResponseContext == null) {
             return null;
         }
-        TokenClaimsSet tokenClaims = (AuthorizeCodeClaimsSet) oidcResponseContext.getTokenClaimsSet();
+        TokenClaimsSet tokenClaims = oidcResponseContext.getTokenClaimsSet();
         if (tokenClaims == null) {
             return null;
         }
