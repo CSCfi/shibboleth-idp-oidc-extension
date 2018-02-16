@@ -168,7 +168,7 @@
 		scope="prototype" p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple"></bean>
 
 	<bean id="AddAttributeClaimsToIDToken"
-		class="org.geant.idpextension.oidc.profile.impl.AddClaimsToIDToken"
+		class="org.geant.idpextension.oidc.profile.impl.AddAttributesToClaimsSet"
 		scope="prototype"></bean>
 
 	<bean id="AddAuthTimeToIDToken"
