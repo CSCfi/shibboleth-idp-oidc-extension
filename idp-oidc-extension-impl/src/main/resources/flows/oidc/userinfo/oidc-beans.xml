@@ -66,6 +66,14 @@
 		class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext"
 		scope="prototype" p:clientIDLookupStrategy-ref="shibboleth.UserInfoRequestClientIDLookupStrategy" />
 
+	<bean id="SelectRelyingPartyConfiguration"
+		class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
+		scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+
+	<bean id="SelectProfileConfiguration"
+		class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
+		scope="prototype" />
+
 	<bean id="EncodeMessage"
 		class="org.geant.idpextension.oidc.profile.action.impl.EncodeMessage"
 		scope="prototype" p:messageEncoder-ref="shibboleth.Encoders.OIDCUserInfoResponseEncoder" />

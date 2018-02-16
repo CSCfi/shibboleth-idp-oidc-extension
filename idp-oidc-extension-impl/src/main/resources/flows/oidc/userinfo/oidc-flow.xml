@@ -19,6 +19,8 @@
 		<evaluate expression="ValidateAccessToken" />
 		<evaluate expression="OIDCMetadataLookup" />
 		<evaluate expression="InitializeRelyingPartyContext" />
+		<evaluate expression="SelectRelyingPartyConfiguration" />
+		<evaluate expression="SelectProfileConfiguration" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="CommitResponse" />
 	</action-state>
