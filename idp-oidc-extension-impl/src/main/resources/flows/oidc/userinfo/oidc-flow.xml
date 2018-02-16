@@ -21,6 +21,14 @@
 		<evaluate expression="InitializeRelyingPartyContext" />
 		<evaluate expression="SelectRelyingPartyConfiguration" />
 		<evaluate expression="SelectProfileConfiguration" />
+		<evaluate expression="ValidateScope" />
+		<evaluate expression="SetRequestedClaimsToResponseContext" />
+		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="PostInitialSetup" />
+	</action-state>
+	
+	<action-state id="PostInitialSetup">
+		<evaluate expression="InitializeSubjectContext" />
 		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="CommitResponse" />
 	</action-state>
