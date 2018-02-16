@@ -73,14 +73,14 @@
 	<bean id="SelectProfileConfiguration"
 		class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
 		scope="prototype" />
-		
+
 	<bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope"
 		scope="prototype" p:scopeLookupStrategy-ref="shibboleth.TokenRequestScopeLookupStrategy" />
-		
+
 	<bean id="shibboleth.TokenRequestScopeLookupStrategy"
 		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestScopeLookupFunction"
 		scope="prototype" />
-		
+
 	<bean id="SetRequestedClaimsToResponseContext"
 		class="org.geant.idpextension.oidc.profile.impl.SetRequestedClaimsToResponseContext"
 		scope="prototype" p:requestedClaimsLookupStrategy-ref="shibboleth.TokenRequestRequestedClaimsLookupFunction" />
@@ -88,10 +88,32 @@
 	<bean id="shibboleth.TokenRequestRequestedClaimsLookupFunction"
 		class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestRequestedClaimsLookupFunction"
 		scope="prototype" />
-		
+
 	<bean id="InitializeSubjectContext"
-	class="org.geant.idpextension.oidc.profile.impl.InitializeSubjectContext"
-	scope="prototype" />
+		class="org.geant.idpextension.oidc.profile.impl.InitializeSubjectContext"
+		scope="prototype" />
+
+	<bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes"
+		scope="prototype" c:resolverService-ref="shibboleth.AttributeResolverService"
+		p:maskFailures="%{idp.service.attribute.resolver.maskFailures:true}" />
+
+	<bean id="FilterAttributes" class="net.shibboleth.idp.profile.impl.FilterAttributes"
+		scope="prototype" c:filterService-ref="shibboleth.AttributeFilterService"
+		p:maskFailures="%{idp.service.attribute.filter.maskFailures:true}" />
+
+	<bean id="SetNameIDToResponseContext"
+		class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext"
+		scope="prototype">
+		<property name="subjectTypeLookupStrategy">
+			<bean
+				class="org.geant.idpextension.oidc.profile.logic.DefaultSubjectTypeStrategy" />
+		</property>
+		<property name="nameIDGenerator">
+			<bean class="net.shibboleth.idp.saml.nameid.impl.ProxySAML2NameIDGenerator"
+				c:service-ref="shibboleth.oidc.NameIdentifierGenerationService" />
+		</property>
+	</bean>
+
 
 	<bean id="EncodeMessage"
 		class="org.geant.idpextension.oidc.profile.action.impl.EncodeMessage"
