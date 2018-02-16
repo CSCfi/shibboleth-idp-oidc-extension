@@ -50,7 +50,7 @@ import java.net.URI;
 import java.text.ParseException;
 
 /** Class wrapping claims set for authorize code. */
-public final class AuthorizeCodeClaimsSet extends AbstractTokenClaimsSet {
+public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
 
     /** Class logger. */
     @Nonnull
@@ -62,35 +62,19 @@ public final class AuthorizeCodeClaimsSet extends AbstractTokenClaimsSet {
     /**
      * Constructor for authorize code claims set.
      * 
-     * @param idGenerator
-     *            Generator for pseudo unique identifier for the code. Must not be
-     *            NULL.
-     * @param clientID
-     *            Client Id of the rp. Must not be NULL.
-     * @param issuer
-     *            OP issuer value. Must not be NULL.
-     * @param userPrincipal
-     *            User Principal of the authenticated user. Must not be NULL.
-     * @param acr
-     *            Authentication context class reference value of the
-     *            authentication. Must not be NULL.
-     * @param iat
-     *            Issue time of the authorize code. Must not be NULL.
-     * @param exp
-     *            Expiration time of the authorize code. Must not be NULL.
-     * @param nonce
-     *            Nonce of the authentication request. May be NULL.
-     * @param authTime
-     *            Authentication time of the user. Must not be NULL.
-     * @param redirect_uri
-     *            Validated redirect URI of the authentication request. Must not be
-     *            NULL.
-     * @param scope
-     *            Scope of the authentication request. Must not be NULL.
-     * @param claims
-     *            Claims request of the authentication request. May be NULL.
-     * @throws RuntimeException
-     *             if called with nonallowed null parameters
+     * @param idGenerator Generator for pseudo unique identifier for the code. Must not be NULL.
+     * @param clientID Client Id of the rp. Must not be NULL.
+     * @param issuer OP issuer value. Must not be NULL.
+     * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
+     * @param acr Authentication context class reference value of the authentication. Must not be NULL.
+     * @param iat Issue time of the authorize code. Must not be NULL.
+     * @param exp Expiration time of the authorize code. Must not be NULL.
+     * @param nonce Nonce of the authentication request. May be NULL.
+     * @param authTime Authentication time of the user. Must not be NULL.
+     * @param redirect_uri Validated redirect URI of the authentication request. Must not be NULL.
+     * @param scope Scope of the authentication request. Must not be NULL.
+     * @param claims Claims request of the authentication request. May be NULL.
+     * @throws RuntimeException if called with nonallowed null parameters
      */
     public AuthorizeCodeClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
@@ -103,8 +87,7 @@ public final class AuthorizeCodeClaimsSet extends AbstractTokenClaimsSet {
     /**
      * Private constructor for the parser.
      * 
-     * @param set
-     *            authorize code claims set
+     * @param set authorize code claims set
      */
     private AuthorizeCodeClaimsSet(JWTClaimsSet authzCodeClaimsSet) {
         tokenClaimsSet = authzCodeClaimsSet;
@@ -113,11 +96,9 @@ public final class AuthorizeCodeClaimsSet extends AbstractTokenClaimsSet {
     /**
      * Parses authz code from string (JSON)
      * 
-     * @param authorizeCodeClaimsSet
-     *            JSON String representation of the code
+     * @param authorizeCodeClaimsSet JSON String representation of the code
      * @return AuthorizeCodeClaimsSet instance if parsing is successful.
-     * @throws ParseException
-     *             if parsing fails for example due to incompatible types.
+     * @throws ParseException if parsing fails for example due to incompatible types.
      */
     public static AuthorizeCodeClaimsSet parse(String authorizeCodeClaimsSet) throws ParseException {
         JWTClaimsSet acClaimsSet = JWTClaimsSet.parse(authorizeCodeClaimsSet);
@@ -129,15 +110,11 @@ public final class AuthorizeCodeClaimsSet extends AbstractTokenClaimsSet {
     /**
      * Parses authz code from sealed authorization code
      * 
-     * @param wrappedAuthCode
-     *            wrapped code
-     * @param dataSealer
-     *            sealer to unwrap the code
+     * @param wrappedAuthCode wrapped code
+     * @param dataSealer sealer to unwrap the code
      * @return
-     * @throws ParseException
-     *             is thrown if unwrapped code is not understood
-     * @throws DataSealerException
-     *             is thrown if unwrapping fails
+     * @throws ParseException is thrown if unwrapped code is not understood
+     * @throws DataSealerException is thrown if unwrapping fails
      */
     public static AuthorizeCodeClaimsSet parse(@Nonnull String wrappedAuthCode, @Nonnull DataSealer dataSealer)
             throws ParseException, DataSealerException {

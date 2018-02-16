@@ -29,19 +29,21 @@
 package org.geant.idpextension.oidc.profile.context.navigate;
 
 import javax.annotation.Nonnull;
-import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
+import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
+
 import com.nimbusds.openid.connect.sdk.Nonce;
 
 /**
- * A function that returns copy of nonce via a lookup function. This lookup
- * locates nonce from oidc authz code for token request handling. If authz code
- * nonce are not available, null is returned.
+ * For Token and UserInfo end points.
+ * 
+ * A function that returns copy of nonce via a lookup function. This lookup locates nonce from token for token request
+ * handling. If token nonce is not available, null is returned.
  */
-public class TokenRequestNonceLookupFunction extends AbstractAuthzCodeLookupFunction<Nonce> {
+public class TokenRequestNonceLookupFunction extends AbstractTokenClaimsLookupFunction<Nonce> {
 
     @Override
-    Nonce doLookup(@Nonnull AuthorizeCodeClaimsSet authzCodeClaims) {
-        return authzCodeClaims.getNonce();
+    Nonce doLookup(@Nonnull TokenClaimsSet tokenClaims) {
+        return tokenClaims.getNonce();
     }
 
 }

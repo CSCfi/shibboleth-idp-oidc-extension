@@ -122,7 +122,7 @@ public class ValidateAuthorizeCode extends AbstractOIDCTokenResponseAction {
                         ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_GRANT);
                         return;
                     }
-                    getOidcResponseContext().setAuthorizationCodeClaimsSet(authzCodeClaimsSet);
+                    getOidcResponseContext().setTokenClaimsSet(authzCodeClaimsSet);
                     return;
                 } catch (DataSealerException | ParseException e) {
                     log.error("{} Obtaining auhz code failed {}", getLogPrefix(), e.getMessage());

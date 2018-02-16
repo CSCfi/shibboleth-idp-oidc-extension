@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 /**
+ * For UserInfo end point.
+ * 
  * A function that returns client id of the request via a lookup function. This lookup locates client id from access
  * token used for user info request if available. If information is not available, null is returned.
  */
@@ -64,10 +66,10 @@ public class UserInfoRequestClientIDLookupFunction implements ContextDataLookupF
             return null;// traveling fails
         }
         OIDCAuthenticationResponseContext ctx = msgCtx.getSubcontext(OIDCAuthenticationResponseContext.class, false);
-        if (ctx == null || ctx.getAccessTokenClaims() == null) {
+        if (ctx == null || ctx.getTokenClaimsSet() == null) {
             return null;
         }
-        return ctx.getAccessTokenClaims().getClientID();
+        return ctx.getTokenClaimsSet().getClientID();
 
     }
 }

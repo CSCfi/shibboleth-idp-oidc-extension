@@ -36,6 +36,8 @@ import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 /**
+ * For Token end point.
+ * 
  * A function that returns client id of the request via a lookup function. This lookup locates client id from oidc token
  * request if available. If information is not available, null is returned.
  */

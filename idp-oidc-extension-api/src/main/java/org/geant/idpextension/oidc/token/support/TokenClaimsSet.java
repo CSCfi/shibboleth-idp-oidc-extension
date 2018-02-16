@@ -48,12 +48,12 @@ import net.shibboleth.utilities.java.support.security.DataSealerException;
 import java.net.URI;
 import java.text.ParseException;
 
-/** Class to extend for token claims sets. */
-public abstract class AbstractTokenClaimsSet {
+/** Class to extend for token claims sets. Offers the base functionality to Authorize Code and Access Token. */
+public abstract class TokenClaimsSet {
 
     /** Class logger. */
     @Nonnull
-    private Logger log = LoggerFactory.getLogger(AbstractTokenClaimsSet.class);
+    private Logger log = LoggerFactory.getLogger(TokenClaimsSet.class);
 
     /** Claims set for the claim. */
     protected JWTClaimsSet tokenClaimsSet;
@@ -104,46 +104,29 @@ public abstract class AbstractTokenClaimsSet {
     /**
      * Constructor.
      */
-    protected AbstractTokenClaimsSet() {
+    protected TokenClaimsSet() {
 
     }
 
     /**
      * Constructor for token claims set.
      * 
-     * @param tokenType
-     *            Token type. Must not be NULL.
-     * @param tokenID
-     *            Generated pseudo unique identifier for the token. Must not be
-     *            NULL.
-     * @param clientID
-     *            Client Id of the rp. Must not be NULL.
-     * @param issuer
-     *            OP issuer value. Must not be NULL.
-     * @param userPrincipal
-     *            User Principal of the authenticated user. Must not be NULL.
-     * @param acr
-     *            Authentication context class reference value of the
-     *            authentication. Must not be NULL.
-     * @param iat
-     *            Issue time of the token. Must not be NULL.
-     * @param exp
-     *            Expiration time of the token. Must not be NULL.
-     * @param nonce
-     *            Nonce of the authentication request. May be NULL.
-     * @param authTime
-     *            Authentication time of the user. Must not be NULL.
-     * @param redirect_uri
-     *            Validated redirect URI of the authentication request. Must not be
-     *            NULL.
-     * @param scope
-     *            Scope of the authentication request. Must not be NULL.
-     * @param claims
-     *            Claims request of the authentication request. May be NULL.
-     * @throws RuntimeException
-     *             if called with nnonallowed ull parameters
+     * @param tokenType Token type. Must not be NULL.
+     * @param tokenID Generated pseudo unique identifier for the token. Must not be NULL.
+     * @param clientID Client Id of the rp. Must not be NULL.
+     * @param issuer OP issuer value. Must not be NULL.
+     * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
+     * @param acr Authentication context class reference value of the authentication. Must not be NULL.
+     * @param iat Issue time of the token. Must not be NULL.
+     * @param exp Expiration time of the token. Must not be NULL.
+     * @param nonce Nonce of the authentication request. May be NULL.
+     * @param authTime Authentication time of the user. Must not be NULL.
+     * @param redirect_uri Validated redirect URI of the authentication request. Must not be NULL.
+     * @param scope Scope of the authentication request. Must not be NULL.
+     * @param claims Claims request of the authentication request. May be NULL.
+     * @throws RuntimeException if called with nnonallowed ull parameters
      */
-    protected AbstractTokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,
+    protected TokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
             @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirect_uri,
             @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
@@ -163,12 +146,9 @@ public abstract class AbstractTokenClaimsSet {
     /**
      * Helper to verify parsed claims are what is expected.
      * 
-     * @param tokenType
-     *            The type of the expected token. Must not be NULL.
-     * @param tokenClaimsSet
-     *            token claims set Must not be NULL.
-     * @throws ParseException
-     *             if claims set is not expected one.
+     * @param tokenType The type of the expected token. Must not be NULL.
+     * @param tokenClaimsSet token claims set Must not be NULL.
+     * @throws ParseException if claims set is not expected one.
      */
     protected static void verifyParsedClaims(@Nonnull String tokenType, @Nonnull JWTClaimsSet tokenClaimsSet)
             throws ParseException {
@@ -229,11 +209,9 @@ public abstract class AbstractTokenClaimsSet {
     /**
      * Serialize the token as JSON String wrapped with sealer.
      * 
-     * @param dataSealer
-     *            data sealer to wrap the JSON serialization
+     * @param dataSealer data sealer to wrap the JSON serialization
      * @return token as JSON String wrapped with sealer
-     * @throws DataSealerException
-     *             is thrown if unwrapping fails
+     * @throws DataSealerException is thrown if unwrapping fails
      */
     public String serialize(@Nonnull DataSealer dataSealer) throws DataSealerException {
         String wrapped = dataSealer.wrap(serialize(), tokenClaimsSet.getExpirationTime().getTime());
@@ -327,8 +305,7 @@ public abstract class AbstractTokenClaimsSet {
     /**
      * Get copy of the claims request in authentication request.
      * 
-     * @return copy of the claims request in authentication request, null if not
-     *         existing.
+     * @return copy of the claims request in authentication request, null if not existing.
      */
     @Nullable
     public ClaimsRequest getClaimsRequest() {

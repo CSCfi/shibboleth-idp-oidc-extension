@@ -31,8 +31,8 @@ package org.geant.idpextension.oidc.messaging.context;
 import java.net.URI;
 import java.util.Date;
 import javax.annotation.Nullable;
-import org.geant.idpextension.oidc.token.support.AccessTokenClaimsSet;
-import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
+
+import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
 import org.opensaml.saml.saml2.core.NameID;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
@@ -44,8 +44,8 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
- * Subcontext carrying information to form authentication response for relying party. This context appears as a
- * subcontext of the {@link org.opensaml.messaging.context.MessageContext}.
+ * Subcontext carrying information to form authentication/token/userinfo response for relying party. This context
+ * appears as a subcontext of the {@link org.opensaml.messaging.context.MessageContext}.
  */
 public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
 
@@ -82,13 +82,9 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     @Nullable
     private AuthorizationCode authorizationCode;
 
-    /** Authorization code claims. */
+    /** Token (authz code, access token) claims. */
     @Nullable
-    private AuthorizeCodeClaimsSet authorizationCodeClaims;
-
-    /** Access token claims. */
-    @Nullable
-    private AccessTokenClaimsSet accessTokenClaims;
+    private TokenClaimsSet tokenClaims;
 
     /** Access token. */
     @Nullable
@@ -118,39 +114,21 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     }
 
     /**
-     * Get authorization code claims.
+     * Get token claims.
      * 
-     * @return authorization code claims
+     * @return token claims
      */
-    public AuthorizeCodeClaimsSet getAuthorizationCodeClaims() {
-        return authorizationCodeClaims;
+    public TokenClaimsSet getTokenClaimsSet() {
+        return tokenClaims;
     }
 
     /**
-     * Set authorization code claims.
+     * Set token claims.
      * 
-     * @param claims authorization code claims
+     * @param claims token claims
      */
-    public void setAuthorizationCodeClaimsSet(AuthorizeCodeClaimsSet claims) {
-        authorizationCodeClaims = claims;
-    }
-
-    /**
-     * Get access token claims.
-     * 
-     * @return access token claims
-     */
-    public AccessTokenClaimsSet getAccessTokenClaims() {
-        return accessTokenClaims;
-    }
-
-    /**
-     * Set access token claims.
-     * 
-     * @param claims access token claims
-     */
-    public void setAccessTokenClaimsSet(AccessTokenClaimsSet claims) {
-        accessTokenClaims = claims;
+    public void setTokenClaimsSet(TokenClaimsSet claims) {
+        tokenClaims = claims;
     }
 
     /**

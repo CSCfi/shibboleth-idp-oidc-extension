@@ -109,7 +109,7 @@ public class ValidateAccessToken extends AbstractOIDCUserInfoValidationResponseA
             return;
         }
         // TODO: Check revocation cache for revoked authz code
-        getOidcResponseContext().setAccessTokenClaimsSet(accessTokenClaimsSet);
+        getOidcResponseContext().setTokenClaimsSet(accessTokenClaimsSet);
         return;
 
     }

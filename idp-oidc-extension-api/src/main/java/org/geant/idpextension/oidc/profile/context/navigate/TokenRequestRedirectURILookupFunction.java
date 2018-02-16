@@ -39,9 +39,10 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 
 /**
- * A function that returns redirect uri of the request via a lookup function.
- * This default lookup locates uri from oidc token request if available. If
- * information is not available, null is returned.
+ * For Token end point.
+ * 
+ * A function that returns redirect uri of the request via a lookup function. This default lookup locates uri from oidc
+ * token request if available. If information is not available, null is returned.
  */
 public class TokenRequestRedirectURILookupFunction extends AbstractTokenRequestLookupFunction<URI> {
 

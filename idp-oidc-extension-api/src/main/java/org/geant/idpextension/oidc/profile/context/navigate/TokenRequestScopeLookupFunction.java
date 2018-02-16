@@ -29,20 +29,21 @@
 package org.geant.idpextension.oidc.profile.context.navigate;
 
 import javax.annotation.Nonnull;
+import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
 
-import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import com.nimbusds.oauth2.sdk.Scope;
 
 /**
- * A function that returns copy of requested scope via a lookup function. This
- * lookup locates scope from oidc authz code for token request handling. If
- * authz code claims are not available, null is returned.
+ * For Token and UserInfo end points.
+ * 
+ * A function that returns copy of requested scope via a lookup function. This lookup locates scope from token for token
+ * request handling. If token claims are not available, null is returned.
  */
-public class TokenRequestScopeLookupFunction extends AbstractAuthzCodeLookupFunction<Scope> {
+public class TokenRequestScopeLookupFunction extends AbstractTokenClaimsLookupFunction<Scope> {
 
     @Override
-    Scope doLookup(@Nonnull AuthorizeCodeClaimsSet authzCodeClaims) {
-        return authzCodeClaims.getScope();
+    Scope doLookup(@Nonnull TokenClaimsSet tokenClaims) {
+        return tokenClaims.getScope();
     }
 
 }

@@ -32,19 +32,20 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
+import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
 
 /**
- * A function that returns valid redirect uris via a lookup function. This
- * lookup locates uris from oidc authz code for token request handling. If authz
- * code claims are not available, null is returned.
+ * For Token and UserInfo end points.
+ * 
+ * A function that returns valid redirect uris via a lookup function. This lookup locates uris from token for token
+ * request handling. If token claims are not available, null is returned.
  */
-public class TokenRequestValidRequestURIsLookupFunction extends AbstractAuthzCodeLookupFunction<Set<URI>> {
+public class TokenRequestValidRequestURIsLookupFunction extends AbstractTokenClaimsLookupFunction<Set<URI>> {
 
     @Override
-    protected Set<URI> doLookup(@Nonnull AuthorizeCodeClaimsSet authzCodeClaims) {
+    protected Set<URI> doLookup(@Nonnull TokenClaimsSet tokenClaims) {
         Set<URI> uris = new HashSet<URI>();
-        uris.add(authzCodeClaims.getRedirectURI());
+        uris.add(tokenClaims.getRedirectURI());
         return uris;
     }
 }

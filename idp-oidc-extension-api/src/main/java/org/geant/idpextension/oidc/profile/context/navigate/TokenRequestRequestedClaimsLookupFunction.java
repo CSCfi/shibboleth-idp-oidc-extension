@@ -29,19 +29,21 @@
 package org.geant.idpextension.oidc.profile.context.navigate;
 
 import javax.annotation.Nonnull;
-import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
+import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
+
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 
 /**
- * A function that returns copy of requested claims via a lookup function. This
- * lookup locates requested claims from oidc authz code for token request
- * handling. If authz code claims are not available, null is returned.
+ * For Token and UserInfo end points.
+ * 
+ * A function that returns copy of requested claims via a lookup function. This lookup locates requested claims from
+ * token for token request handling. If token claims are not available, null is returned.
  */
-public class TokenRequestRequestedClaimsLookupFunction extends AbstractAuthzCodeLookupFunction<ClaimsRequest> {
+public class TokenRequestRequestedClaimsLookupFunction extends AbstractTokenClaimsLookupFunction<ClaimsRequest> {
 
     @Override
-    ClaimsRequest doLookup(@Nonnull AuthorizeCodeClaimsSet authzCodeClaims) {
-        return authzCodeClaims.getClaimsRequest();
+    ClaimsRequest doLookup(@Nonnull TokenClaimsSet tokenClaims) {
+        return tokenClaims.getClaimsRequest();
 
     }
 

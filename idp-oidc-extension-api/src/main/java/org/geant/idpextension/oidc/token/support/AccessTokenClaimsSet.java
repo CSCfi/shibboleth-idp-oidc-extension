@@ -41,26 +41,22 @@ import net.shibboleth.utilities.java.support.security.DataSealerException;
 import java.text.ParseException;
 
 /** Class wrapping claims set for access token. */
-public final class AccessTokenClaimsSet extends AbstractTokenClaimsSet {
+public final class AccessTokenClaimsSet extends TokenClaimsSet {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(AccessTokenClaimsSet.class);
 
-    /** Value of authorize code claims set type. */
+    /** Value of access token claims set type. */
     public static final String VALUE_TYPE_AT = "at";
 
     /**
      * Constructor for access token claims set.
      * 
-     * @param authorizeCode
-     *            Authorize Code this token is based on. Must not be NULL.
-     * @param iat
-     *            Issue time of the token. Must not be NULL.
-     * @param exp
-     *            Expiration time of the token. Must not be NULL.
-     * @throws RuntimeException
-     *             if called with non allowed null parameters
+     * @param authorizeCode Authorize Code this token is based on. Must not be NULL.
+     * @param iat Issue time of the token. Must not be NULL.
+     * @param exp Expiration time of the token. Must not be NULL.
+     * @throws RuntimeException if called with non allowed null parameters
      */
     public AccessTokenClaimsSet(@Nonnull AuthorizeCodeClaimsSet authorizeCode, @Nonnull Date iat, @Nonnull Date exp) {
         super(VALUE_TYPE_AT, authorizeCode.getID(), authorizeCode.getClientID(),
@@ -73,8 +69,7 @@ public final class AccessTokenClaimsSet extends AbstractTokenClaimsSet {
     /**
      * Private constructor for the parser.
      * 
-     * @param set
-     *            authorize code claims set
+     * @param set access token claims set
      */
     private AccessTokenClaimsSet(JWTClaimsSet accessTokenClaimsSet) {
         tokenClaimsSet = accessTokenClaimsSet;
@@ -83,11 +78,9 @@ public final class AccessTokenClaimsSet extends AbstractTokenClaimsSet {
     /**
      * Parses access token from string (JSON)
      * 
-     * @param accessTokenClaimsSet
-     *            JSON String representation of the code
+     * @param accessTokenClaimsSet JSON String representation of the code
      * @return AccessTokenClaimsSet instance if parsing is successful.
-     * @throws ParseException
-     *             if parsing fails for example due to incompatible types.
+     * @throws ParseException if parsing fails for example due to incompatible types.
      */
     public static AccessTokenClaimsSet parse(String accessTokenClaimsSet) throws ParseException {
         JWTClaimsSet atClaimsSet = JWTClaimsSet.parse(accessTokenClaimsSet);
@@ -99,15 +92,11 @@ public final class AccessTokenClaimsSet extends AbstractTokenClaimsSet {
     /**
      * Parses access token from sealed access token
      * 
-     * @param wrappedAccessToken
-     *            wrapped access token
-     * @param dataSealer
-     *            sealer to unwrap the access token
+     * @param wrappedAccessToken wrapped access token
+     * @param dataSealer sealer to unwrap the access token
      * @return
-     * @throws ParseException
-     *             is thrown if unwrapped access token is not understood
-     * @throws DataSealerException
-     *             is thrown if unwrapping fails
+     * @throws ParseException is thrown if unwrapped access token is not understood
+     * @throws DataSealerException is thrown if unwrapping fails
      */
     public static AccessTokenClaimsSet parse(@Nonnull String wrappedAccessToken, @Nonnull DataSealer dataSealer)
             throws ParseException, DataSealerException {

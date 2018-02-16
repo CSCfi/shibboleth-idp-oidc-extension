@@ -63,7 +63,7 @@ public class SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContex
             log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
-        if (getOidcResponseContext().getAuthorizationCodeClaims() == null) {
+        if (getOidcResponseContext().getTokenClaimsSet() == null) {
             log.error("{} No authz claims", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
@@ -74,7 +74,7 @@ public class SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContex
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        getOidcResponseContext().setAcr(getOidcResponseContext().getAuthorizationCodeClaims().getACR());
+        getOidcResponseContext().setAcr(getOidcResponseContext().getTokenClaimsSet().getACR());
     }
 
 }

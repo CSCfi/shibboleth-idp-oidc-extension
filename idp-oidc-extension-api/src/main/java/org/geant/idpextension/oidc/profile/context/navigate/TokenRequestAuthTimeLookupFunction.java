@@ -29,18 +29,19 @@
 package org.geant.idpextension.oidc.profile.context.navigate;
 
 import javax.annotation.Nonnull;
-import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
+import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
 
 /**
- * A function that returns auth time via a lookup function. This lookup locates
- * auth time from oidc authz code for token request handling. If authz code
- * claims are not available, null is returned.
+ * For Token and UserInfo end points.
+ * 
+ * A function that returns auth time via a lookup function. This lookup locates auth time from token for token request
+ * handling. If token claims are not available, null is returned.
  */
-public class TokenRequestAuthTimeLookupFunction extends AbstractAuthzCodeLookupFunction<Long> {
+public class TokenRequestAuthTimeLookupFunction extends AbstractTokenClaimsLookupFunction<Long> {
 
     @Override
-    Long doLookup(@Nonnull AuthorizeCodeClaimsSet authzCodeClaims) {
-        return authzCodeClaims.getAuthenticationTime().getTime();
+    Long doLookup(@Nonnull TokenClaimsSet tokenClaims) {
+        return tokenClaims.getAuthenticationTime().getTime();
     }
 
 }

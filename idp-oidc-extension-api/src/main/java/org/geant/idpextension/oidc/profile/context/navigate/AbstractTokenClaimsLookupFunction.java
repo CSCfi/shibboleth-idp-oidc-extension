@@ -32,24 +32,25 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
+import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
 import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A Abstract function extended by lookups searching fields from authz code.
+ * A Abstract function extended by lookups searching fields from tokens (Authorization Code, Access Token).
  */
 @SuppressWarnings("rawtypes")
-public abstract class AbstractAuthzCodeLookupFunction<T>
+public abstract class AbstractTokenClaimsLookupFunction<T>
         implements ContextDataLookupFunction<ProfileRequestContext, T> {
 
     /** Class logger. */
     @Nonnull
-    private final Logger log = LoggerFactory.getLogger(AbstractAuthzCodeLookupFunction.class);
+    private final Logger log = LoggerFactory.getLogger(AbstractTokenClaimsLookupFunction.class);
 
     /** Implemented to perform the actual lookup. */
-    abstract T doLookup(@Nonnull AuthorizeCodeClaimsSet authzCodeClaims);
+    abstract T doLookup(@Nonnull TokenClaimsSet authzCodeClaims);
 
     @Override
     @Nullable
@@ -57,16 +58,16 @@ public abstract class AbstractAuthzCodeLookupFunction<T>
         if (input == null || input.getOutboundMessageContext() == null) {
             return null;
         }
-        OIDCAuthenticationResponseContext oidcResponseContext = input.getOutboundMessageContext()
-                .getSubcontext(OIDCAuthenticationResponseContext.class, false);
+        OIDCAuthenticationResponseContext oidcResponseContext =
+                input.getOutboundMessageContext().getSubcontext(OIDCAuthenticationResponseContext.class, false);
         if (oidcResponseContext == null) {
             return null;
         }
-        AuthorizeCodeClaimsSet authzCodeClaims = oidcResponseContext.getAuthorizationCodeClaims();
-        if (authzCodeClaims == null) {
+        TokenClaimsSet tokenClaims = (AuthorizeCodeClaimsSet) oidcResponseContext.getTokenClaimsSet();
+        if (tokenClaims == null) {
             return null;
         }
-        return doLookup(authzCodeClaims);
+        return doLookup(tokenClaims);
 
     }
 
