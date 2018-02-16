@@ -171,7 +171,7 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
                 }
             }
         }
-        log.debug("{} id token after mapping attributes to claims {}", getLogPrefix(),
-                getOidcResponseContext().getIDToken().toJSONObject().toJSONString());
+        log.debug("{} claims set after mapping attributes to claims {}", getLogPrefix(),
+                claimsSet.toJSONObject().toJSONString());
     }
 }
