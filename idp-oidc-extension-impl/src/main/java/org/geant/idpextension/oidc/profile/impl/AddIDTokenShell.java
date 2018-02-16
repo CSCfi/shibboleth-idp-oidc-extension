@@ -29,7 +29,6 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -57,9 +56,8 @@ import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
- * Action that creates a {@link IDTokenClaimsSet} object shell , and sets it to
- * work context {@link OIDCAuthenticationResponseContext} located under
- * {@link ProfileRequestContext#getOutboundMessageContext()}.
+ * Action that creates a {@link IDTokenClaimsSet} object shell , and sets it to work context
+ * {@link OIDCAuthenticationResponseContext} located under {@link ProfileRequestContext#getOutboundMessageContext()}.
  *
  */
 @SuppressWarnings("rawtypes")
@@ -81,8 +79,7 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
     private SubjectContext subjectCtx;
 
     /**
-     * Strategy used to locate the {@link RelyingPartyContext} associated with a
-     * given {@link ProfileRequestContext}.
+     * Strategy used to locate the {@link RelyingPartyContext} associated with a given {@link ProfileRequestContext}.
      */
     @Nonnull
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
@@ -97,26 +94,24 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
     }
 
     /**
-     * Set the strategy used to locate the {@link RelyingPartyContext} associated
-     * with a given {@link ProfileRequestContext}.
+     * Set the strategy used to locate the {@link RelyingPartyContext} associated with a given
+     * {@link ProfileRequestContext}.
      * 
-     * @param strategy
-     *            strategy used to locate the {@link RelyingPartyContext} associated
-     *            with a given {@link ProfileRequestContext}
+     * @param strategy strategy used to locate the {@link RelyingPartyContext} associated with a given
+     *            {@link ProfileRequestContext}
      */
     public void setRelyingPartyContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
 
-        relyingPartyContextLookupStrategy = Constraint.isNotNull(strategy,
-                "RelyingPartyContext lookup strategy cannot be null");
+        relyingPartyContextLookupStrategy =
+                Constraint.isNotNull(strategy, "RelyingPartyContext lookup strategy cannot be null");
     }
 
     /**
      * Set the strategy used to locate the issuer value to use.
      * 
-     * @param strategy
-     *            lookup strategy
+     * @param strategy lookup strategy
      */
     public void setIssuerLookupStrategy(@Nonnull final Function<ProfileRequestContext, String> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
@@ -148,25 +143,22 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         /**
-         * aud REQUIRED. Audience(s) that this ID Token is intended for. It MUST contain
-         * the OAuth 2.0 client_id of the Relying Party as an audience value. It MAY
-         * also contain identifiers for other audiences. In the general case, the aud
-         * value is an array of case sensitive strings. In the common special case when
-         * there is one audience, the aud value MAY be a single case sensitive string.
+         * aud REQUIRED. Audience(s) that this ID Token is intended for. It MUST contain the OAuth 2.0 client_id of the
+         * Relying Party as an audience value. It MAY also contain identifiers for other audiences. In the general case,
+         * the aud value is an array of case sensitive strings. In the common special case when there is one audience,
+         * the aud value MAY be a single case sensitive string.
          * 
          * NOTE. TODO. We allow only single value in this first version.
          */
         List<Audience> aud = new ArrayList<Audience>();
         aud.add(new Audience(rpCtx.getRelyingPartyId()));
         /**
-         * exp REQUIRED. Expiration time on or after which the ID Token MUST NOT be
-         * accepted for processing. The processing of this parameter requires that the
-         * current date/time MUST be before the expiration date/time listed in the
-         * value. Implementers MAY provide for some small leeway, usually no more than a
-         * few minutes, to account for clock skew. Its value is a JSON number
-         * representing the number of seconds from 1970-01-01T0:0:0Z as measured in UTC
-         * until the date/time. See RFC 3339 [RFC3339] for details regarding date/times
-         * in general and UTC in particular.
+         * exp REQUIRED. Expiration time on or after which the ID Token MUST NOT be accepted for processing. The
+         * processing of this parameter requires that the current date/time MUST be before the expiration date/time
+         * listed in the value. Implementers MAY provide for some small leeway, usually no more than a few minutes, to
+         * account for clock skew. Its value is a JSON number representing the number of seconds from 1970-01-01T0:0:0Z
+         * as measured in UTC until the date/time. See RFC 3339 [RFC3339] for details regarding date/times in general
+         * and UTC in particular.
          * 
          * NOTE. We set here exp to +180s unless set in response context.
          */
@@ -182,19 +174,17 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
         }
 
         /**
-         * iss REQUIRED. Issuer Identifier for the Issuer of the response. The iss value
-         * is a case sensitive URL using the https scheme that contains scheme, host,
-         * and optionally, port number and path components and no query or fragment
-         * components.
+         * iss REQUIRED. Issuer Identifier for the Issuer of the response. The iss value is a case sensitive URL using
+         * the https scheme that contains scheme, host, and optionally, port number and path components and no query or
+         * fragment components.
          * 
          */
 
         /**
-         * sub REQUIRED. Subject Identifier. A locally unique and never reassigned
-         * identifier within the Issuer for the End-User, which is intended to be
-         * consumed by the Client, e.g., 24400320 or
-         * AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4. It MUST NOT exceed 255 ASCII
-         * characters in length. The sub value is a case sensitive string.
+         * sub REQUIRED. Subject Identifier. A locally unique and never reassigned identifier within the Issuer for the
+         * End-User, which is intended to be consumed by the Client, e.g., 24400320 or
+         * AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4. It MUST NOT exceed 255 ASCII characters in length. The sub value is
+         * a case sensitive string.
          * 
          * 
          * Note. We use Name ID based value as the sub.
@@ -202,9 +192,8 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
          */
 
         /**
-         * iat REQUIRED. Time at which the JWT was issued. Its value is a JSON number
-         * representing the number of seconds from 1970-01-01T0:0:0Z as measured in UTC
-         * until the date/time.
+         * iat REQUIRED. Time at which the JWT was issued. Its value is a JSON number representing the number of seconds
+         * from 1970-01-01T0:0:0Z as measured in UTC until the date/time.
          * 
          * Note. We consider time of idtoken shell generation as iat.
          */
