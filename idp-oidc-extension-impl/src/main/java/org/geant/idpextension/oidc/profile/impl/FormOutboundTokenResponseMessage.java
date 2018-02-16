@@ -46,21 +46,15 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.PlainJWT;
-import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 
 /**
- * Action that forms outbound message based on token request and response
- * context. Formed message is set to
+ * Action that forms outbound message based on token request and response context. Formed message is set to
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
- *
- *
- * NOTE! Very preliminary copy-paste implementation. WILL CHANGE!
  *
  */
 @SuppressWarnings("rawtypes")
@@ -89,14 +83,13 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
     /**
      * Set the lookup strategy to use to locate the {@link RelyingPartyContext}.
      * 
-     * @param strategy
-     *            lookup function to use
+     * @param strategy lookup function to use
      */
     public void setRelyingPartyContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
 
-        relyingPartyContextLookupStrategy = Constraint.isNotNull(strategy,
-                "RelyingPartyContext lookup strategy cannot be null");
+        relyingPartyContextLookupStrategy =
+                Constraint.isNotNull(strategy, "RelyingPartyContext lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -117,7 +110,6 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
         accessToken = getOidcResponseContext().getAccessToken();
         if (accessToken == null) {
             log.error("{} unable to provide access token (required)", getLogPrefix());
-            // TODO: set error parameters to produce oidc error response
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
         }
@@ -125,8 +117,7 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
     }
 
     /**
-     * Returns signed (preferred) or non signed id token. Returns null if signed
-     * token is expected but not available.
+     * Returns signed (preferred) or non signed id token. Returns null if signed token is expected but not available.
      * 
      * @return id token.
      */
@@ -148,23 +139,17 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        TokenResponse resp;
-        if (getOidcResponseContext().getErrorCode() != null) {
-            resp = new TokenErrorResponse(new ErrorObject(getOidcResponseContext().getErrorCode(),
-                    getOidcResponseContext().getErrorDescription()));
-        } else {
-            JWT idToken = getIdToken();
-            if (idToken == null) {
-                log.error("{} unable to provide id token (required)", getLogPrefix());
-                // TODO: set error parameters to produce oidc error response
-                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-                return;
-            }
-            // TODO: refresh token handling is missing totally
-            // TODO: refactoring..has duplicate functionality to
-            // FormOutboundAuthenticationResponseMessage..
-            resp = new OIDCTokenResponse(new OIDCTokens(idToken, accessToken, null/* RefreshToken refreshToken */));
+        JWT idToken = getIdToken();
+        if (idToken == null) {
+            log.error("{} unable to provide id token (required)", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+            return;
         }
+        // TODO: refresh token handling is missing totally
+        // TODO: refactoring..has duplicate functionality to
+        // FormOutboundAuthenticationResponseMessage..
+        TokenResponse resp =
+                new OIDCTokenResponse(new OIDCTokens(idToken, accessToken, null/* RefreshToken refreshToken */));
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
 }
