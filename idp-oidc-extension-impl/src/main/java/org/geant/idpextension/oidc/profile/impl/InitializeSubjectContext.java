@@ -40,40 +40,40 @@ import org.slf4j.LoggerFactory;
 /**
  * An action that creates an {@link SubjectContext} and attaches it to the
  * current {@link ProfileRequestContext}. The principal is set by the
- * information provided by Authorization Code.
+ * information provided by Authorization Code / Access Token.
  * 
  */
 @SuppressWarnings("rawtypes")
 public class InitializeSubjectContext extends AbstractOIDCTokenResponseAction {
 
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(InitializeSubjectContext.class);
+	/** Class logger. */
+	@Nonnull
+	private final Logger log = LoggerFactory.getLogger(InitializeSubjectContext.class);
 
-    /** {@inheritDoc} */
-    @Override
-    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        if (!super.doPreExecute(profileRequestContext)) {
-            log.error("{} pre-execute failed", getLogPrefix());
-            return false;
-        }
-        if (getOidcResponseContext().getTokenClaimsSet() == null) {
-            log.error("{} user principal not resolved from authz code", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
-            return false;
-        }
-        return true;
-    }
+	/** {@inheritDoc} */
+	@Override
+	protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+		if (!super.doPreExecute(profileRequestContext)) {
+			log.error("{} pre-execute failed", getLogPrefix());
+			return false;
+		}
+		if (getOidcResponseContext().getTokenClaimsSet() == null) {
+			log.error("{} user principal not resolved from token", getLogPrefix());
+			ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+			return false;
+		}
+		return true;
+	}
 
-    /** {@inheritDoc} */
-    @Override
-    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+	/** {@inheritDoc} */
+	@Override
+	protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        log.debug("{} Initializing authentication context", getLogPrefix());
-        SubjectContext subCtx = profileRequestContext.getSubcontext(SubjectContext.class, true);
-        subCtx.setPrincipalName(getOidcResponseContext().getTokenClaimsSet().getClaimsSet().getSubject());
-        log.debug("{} Created subject context {} for user {}", getLogPrefix(), subCtx,
-                getOidcResponseContext().getTokenClaimsSet().getClaimsSet().getSubject());
-    }
+		log.debug("{} Initializing authentication context", getLogPrefix());
+		SubjectContext subCtx = profileRequestContext.getSubcontext(SubjectContext.class, true);
+		subCtx.setPrincipalName(getOidcResponseContext().getTokenClaimsSet().getClaimsSet().getSubject());
+		log.debug("{} Created subject context {} for user {}", getLogPrefix(), subCtx,
+				getOidcResponseContext().getTokenClaimsSet().getClaimsSet().getSubject());
+	}
 
 }
