@@ -118,6 +118,14 @@
 		class="org.geant.idpextension.oidc.profile.impl.AddUserInfoShell"
 		scope="prototype" p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple"></bean>
 
+	<bean id="AddAttributeClaimsToUserInfo"
+		class="org.geant.idpextension.oidc.profile.impl.AddAttributesToClaimsSet"
+		scope="prototype" p:responseClaimsSetLookupStrategy-ref="shibboleth.UserInfoResponseClaimsSetLookupStrategy" />
+
+	<bean id="shibboleth.UserInfoResponseClaimsSetLookupStrategy"
+		class="org.geant.idpextension.oidc.profile.context.navigate.UserInfoResponseClaimsSetLookupFunction"
+		scope="prototype" />
+
 	<bean id="FormOutboundMessage"
 		class="org.geant.idpextension.oidc.profile.impl.FormOutboundUserInfoResponseMessage"
 		scope="prototype" />
