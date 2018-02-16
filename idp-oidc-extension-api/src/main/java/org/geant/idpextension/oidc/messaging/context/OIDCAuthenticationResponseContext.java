@@ -42,6 +42,7 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 /**
  * Subcontext carrying information to form authentication/token/userinfo response for relying party. This context
@@ -52,6 +53,10 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
     /** The id token formed. */
     @Nullable
     private IDTokenClaimsSet idToken;
+
+    /** The user info formed. */
+    @Nullable
+    private UserInfo userInfo;
 
     /** The id token formed. */
     @Nullable
@@ -303,6 +308,25 @@ public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
      */
     public void setIDToken(@Nullable IDTokenClaimsSet token) {
         idToken = token;
+    }
+
+    /**
+     * Get the user info.
+     * 
+     * @return The user info.
+     */
+    @Nullable
+    public UserInfo getUserInfo() {
+        return userInfo;
+    }
+
+    /**
+     * Set the user info.
+     * 
+     * @param token The user info.
+     */
+    public void setUserInfo(@Nullable UserInfo info) {
+        userInfo = info;
     }
 
     /**
