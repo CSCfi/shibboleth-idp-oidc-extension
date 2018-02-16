@@ -38,6 +38,14 @@
 		<evaluate expression="FilterAttributes" />
 		<evaluate expression="SetNameIDToResponseContext" />
 		<evaluate expression="'proceed'" />
+		<transition on="proceed" to="BuildResponse" />
+	</action-state>
+
+	<action-state id="BuildResponse">
+		<!-- Missing signing/encryption, filtered attributes -->
+		<evaluate expression="AddUserInfoShell" />
+		<evaluate expression="FormOutboundMessage" />
+		<evaluate expression="'proceed'" />
 		<transition on="proceed" to="CommitResponse" />
 	</action-state>
 

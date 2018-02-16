@@ -114,6 +114,13 @@
 		</property>
 	</bean>
 
+	<bean id="AddUserInfoShell"
+		class="org.geant.idpextension.oidc.profile.impl.AddUserInfoShell"
+		scope="prototype" p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple"></bean>
+
+	<bean id="FormOutboundMessage"
+		class="org.geant.idpextension.oidc.profile.impl.FormOutboundUserInfoResponseMessage"
+		scope="prototype" />
 
 	<bean id="EncodeMessage"
 		class="org.geant.idpextension.oidc.profile.action.impl.EncodeMessage"
