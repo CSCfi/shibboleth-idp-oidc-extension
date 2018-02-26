@@ -111,6 +111,17 @@
          idp.oidc.dynreg.defaultScope = openid
          idp.oidc.dynreg.defaultSubjectType = public
 
+- name: Set default lifetime of oidc tokens to idp.properties
+  blockinfile:
+    dest: "{{ idp_home }}/conf/idp.properties"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for token lifetimes"
+    insertafter: "idp.policy.clockSkew"
+    content: |
+         # Default lifetime of oidc tokens
+         #idp.oidc.authorizeCode.defaultLifetime = PT5M
+         #idp.oidc.accessToken.defaultLifetime = PT1H
+         #idp.oidc.idToken.defaultLifetime = PT1H
+         
 - name: Add one trusted test SP
   blockinfile:
     dest: "{{ idp_home }}/conf/metadata-providers.xml"

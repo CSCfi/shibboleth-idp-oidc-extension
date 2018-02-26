@@ -18,7 +18,7 @@
     <bean id="profileResponderIdLookupFunction" class="org.geant.idpextension.oidc.profile.context.navigate.ProfileResponderIdLookupFunction" p:defaultResponder="#{getObject('entityID')}" p:profileResponders-ref="profileResponders" />
 
     <!--  OIDC Profile Configurations. -->
-    <bean id="OIDC.SSO" class="org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration" p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}" p:servletRequest-ref="shibboleth.HttpServletRequest" />
+    <bean id="OIDC.SSO" class="org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration" p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}" p:iDTokenLifetime="%{idp.oidc.idToken.defaultLifetime:PT1H}" p:accessTokenLifetime="%{idp.oidc.accessToken.defaultLifetime:PT1H}" p:authorizeCodeLifetime="%{idp.oidc.authorizeCode.defaultLifetime:PT5M}" p:servletRequest-ref="shibboleth.HttpServletRequest" />
     <bean id="OIDC.Registration" class="org.geant.idpextension.oidc.config.OIDCDynamicRegistrationConfiguration" p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}" p:servletRequest-ref="shibboleth.HttpServletRequest" />
 
     <!--
