@@ -184,6 +184,7 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
         } else {
             log.debug("{} No oidc profile configuration associated with this profile request", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
+            return false;
         }
         return super.doPreExecute(profileRequestContext);
     }

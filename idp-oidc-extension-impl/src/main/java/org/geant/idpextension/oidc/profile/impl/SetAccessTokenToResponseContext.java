@@ -125,6 +125,7 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
         } else {
             log.debug("{} No oidc profile configuration associated with this profile request", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
+            return false;
         }
         authzCodeClaimsSet = (AuthorizeCodeClaimsSet) getOidcResponseContext().getTokenClaimsSet();
         if (authzCodeClaimsSet == null) {
