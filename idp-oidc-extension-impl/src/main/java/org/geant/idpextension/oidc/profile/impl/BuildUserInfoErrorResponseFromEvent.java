@@ -29,6 +29,8 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import org.opensaml.profile.context.EventContext;
+import org.opensaml.profile.context.ProfileRequestContext;
+
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 
@@ -39,7 +41,7 @@ import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 public class BuildUserInfoErrorResponseFromEvent extends AbstractBuildErrorResponseFromEvent<UserInfoErrorResponse> {
 
     @Override
-    protected UserInfoErrorResponse buildErrorResponse(ErrorObject error) {
+    protected UserInfoErrorResponse buildErrorResponse(ErrorObject error, ProfileRequestContext profileRequestContext) {
         return new UserInfoErrorResponse(error);
     }
 
