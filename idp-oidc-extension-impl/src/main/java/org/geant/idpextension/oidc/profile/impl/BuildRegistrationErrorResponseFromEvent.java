@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import org.opensaml.profile.context.EventContext;
+import org.opensaml.profile.context.ProfileRequestContext;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationErrorResponse;
@@ -42,7 +43,7 @@ public class BuildRegistrationErrorResponseFromEvent
         extends AbstractBuildErrorResponseFromEvent<ClientRegistrationErrorResponse> {
 
     @Override
-    protected ClientRegistrationErrorResponse buildErrorResponse(ErrorObject error) {
+    protected ClientRegistrationErrorResponse buildErrorResponse(ErrorObject error, ProfileRequestContext profileRequestContext) {
         return new ClientRegistrationErrorResponse(error);
     }
 
