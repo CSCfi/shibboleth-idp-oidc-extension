@@ -29,6 +29,8 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import org.opensaml.profile.context.EventContext;
+import org.opensaml.profile.context.ProfileRequestContext;
+
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 
@@ -40,7 +42,7 @@ import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 public class BuildTokenErrorResponseFromEvent extends AbstractBuildErrorResponseFromEvent<TokenErrorResponse> {
 
     @Override
-    protected TokenErrorResponse buildErrorResponse(ErrorObject error) {
+    protected TokenErrorResponse buildErrorResponse(ErrorObject error, ProfileRequestContext profileRequestContext) {
         return new TokenErrorResponse(error);
     }
 
