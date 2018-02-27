@@ -140,7 +140,7 @@
     <bean id="BuildClientInformation" class="org.geant.idpextension.oidc.profile.impl.BuildClientInformation"
         scope="prototype" />
 
-    <bean id="oidc.messageEncoderFactory" class="org.geant.idpextension.oidc.encoding.impl.OIDCResponseEncoderFactory" p:messageEncoder-ref="oidc.nimbusEncoder" />
+    <bean id="oidc.messageEncoderFactory" class="org.geant.idpextension.oidc.encoding.impl.OIDCResponseEncoderFactory" p:messageEncoder-ref="oidc.nimbusEncoder" scope="prototype" />
 
     <bean id="oidc.nimbusEncoder" class="org.geant.idpextension.oidc.encoding.impl.NimbusResponseEncoder" scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" init-method="" />
 
