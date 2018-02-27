@@ -78,24 +78,7 @@ public class FormOutboundAuthenticationResponseMessageTest extends BaseOIDCRespo
 
     }
 
-    /**
-     * Test that action is able to form error message.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     */
-    @Test
-    public void testErrorMessage() throws ComponentInitializationException, URISyntaxException {
-        init();
-        respCtx.setErrorCode("error");
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertProceedEvent(event);
-        AuthenticationResponse resp = (AuthenticationResponse) ((MessageContext<?>) respCtx.getParent()).getMessage();
-        Assert.assertTrue(resp instanceof AuthenticationErrorResponse);
-    }
-
     
-
     /**
      * Test that action is able to form success message.
      * 
