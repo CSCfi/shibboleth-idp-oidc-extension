@@ -83,20 +83,10 @@
 		<evaluate expression="AddAcrToIDToken" />
 		<evaluate expression="AddNonceToIDToken" />
 		<evaluate expression="SignIDToken" />
-		<evaluate expression="'proceed'" />
-		<transition on="proceed" to="HandleOutboundMessage" />
-	</action-state>
-
-	<action-state id="HandleOutboundMessage">
 		<evaluate expression="FormOutboundMessage" />
-		<evaluate expression="EncodeMessage" />
-		<evaluate expression="RecordResponseComplete" />
 		<evaluate expression="'proceed'" />
-		<transition on="proceed" to="end" />
-		<transition to="DisplayError" />
-		<exception-handler bean="RethrowingFlowExecutionExceptionHandler" />
+		<transition on="proceed" to="CommitResponse" />
 	</action-state>
-
 
 	<!-- Error views, handling and end states -->
 	<view-state id="DisplayError" view="#{flowRequestContext.activeFlow.id}-error">
@@ -113,7 +103,6 @@
 				expression="flowRequestContext.getExternalContext().getNativeResponse()"
 				result="viewScope.response" />
 		</on-render>
-		<transition to="HandleErrorLocally" />
 		<exception-handler bean="RethrowingFlowExecutionExceptionHandler" />
 	</view-state>
 
@@ -129,17 +118,19 @@
 
 	<!-- Select to show local error or oidc error response -->
 	<decision-state id="SelectErrorMedia">
+		<on-entry>
+			<evaluate expression="BuildErrorResponseFromEvent" />
+		</on-entry>
 		<if
-			test="opensamlProfileRequestContext.getOutboundMessageContext() != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false) != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false).getRedirectURI() != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getSubcontext(T(org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext), false).getErrorCode() != null"
-			then="HandleOutboundMessage" else="DisplayError" />
+			test="opensamlProfileRequestContext.getOutboundMessageContext() != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getMessage() != null"
+			then="CommitResponse" else="DisplayError" />
+		<exception-handler bean="RethrowingFlowExecutionExceptionHandler" />
 	</decision-state>
 
-
-	<end-state id="end" />
-
-	<!-- end state after error display -->
-	<end-state id="HandleErrorLocally">
+	<!-- end state -->
+	<end-state id="CommitResponse">
 		<on-entry>
+			<evaluate expression="EncodeMessage" />
 			<evaluate expression="RecordResponseComplete" />
 		</on-entry>
 	</end-state>
