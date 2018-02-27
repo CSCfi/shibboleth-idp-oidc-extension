@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.messaging.context;
 
 import org.joda.time.DateTime;
+import org.opensaml.messaging.context.BaseContext;
 
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
@@ -36,7 +37,7 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
  * Subcontext carrying information on OIDC client registration response. This
  * context appears as a subcontext of the {@link org.opensaml.messaging.context.MessageContext}.
  */
-public class OIDCClientRegistrationResponseContext extends BaseOIDCResponseContext {
+public class OIDCClientRegistrationResponseContext extends BaseContext  {
 
     /** Mandatory Unique Client Identifier. */
     private String clientId;
