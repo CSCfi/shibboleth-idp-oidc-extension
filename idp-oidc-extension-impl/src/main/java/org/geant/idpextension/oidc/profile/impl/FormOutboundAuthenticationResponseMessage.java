@@ -33,7 +33,6 @@ import javax.annotation.Nonnull;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
@@ -42,27 +41,17 @@ import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Function;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.PlainJWT;
-import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 
 /**
- * Action that forms outbound message based on request and response context.
- * Formed message is set to
+ * Action that forms outbound message based on request and response context. Formed message is set to
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
- * 
- * 
- *
  */
 @SuppressWarnings("rawtypes")
 public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthenticationResponseAction {
@@ -87,14 +76,13 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
     /**
      * Set the lookup strategy to use to locate the {@link RelyingPartyContext}.
      * 
-     * @param strategy
-     *            lookup function to use
+     * @param strategy lookup function to use
      */
     public void setRelyingPartyContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
 
-        relyingPartyContextLookupStrategy = Constraint.isNotNull(strategy,
-                "RelyingPartyContext lookup strategy cannot be null");
+        relyingPartyContextLookupStrategy =
+                Constraint.isNotNull(strategy, "RelyingPartyContext lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -116,8 +104,7 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
     }
 
     /**
-     * Returns signed (preferred) or non signed id token. Returns null if signed
-     * token is expected but not available.
+     * Returns signed (preferred) or non signed id token. Returns null if signed token is expected but not available.
      * 
      * @return id token.
      */
@@ -132,52 +119,31 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
         }
         return jwt;
     }
-    
-    /**
-     * TODO
-     * To create a mock access token. We do not use it for anything yet. 
-     * 
-     * @return mock access token.
-     */
-    private AccessToken getMockAccessToken() {
-        if (getAuthenticationRequest().getResponseType().contains(ResponseType.Value.TOKEN)){
-            return new BearerAccessToken();
-        }
-        return null;
-    }
 
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        //Should not ever happen
+        // Should not ever happen
         if (getOidcResponseContext().getRedirectURI() == null) {
             log.error("{} redirect uri must be validated to form response", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
             return;
         }
         AuthenticationResponse resp = null;
-        if (getOidcResponseContext().getErrorCode() != null) {
-            resp = new AuthenticationErrorResponse(getOidcResponseContext().getRedirectURI(),
-                    new ErrorObject(getOidcResponseContext().getErrorCode(),
-                            getOidcResponseContext().getErrorDescription()),
-                    getAuthenticationRequest().getState(), getAuthenticationRequest().getResponseMode());
-            log.debug("constructed response:" + ((AuthenticationErrorResponse) resp).toURI());
-        } else {
-            JWT idToken = null;
-            if (getAuthenticationRequest().getResponseType().contains(OIDCResponseTypeValue.ID_TOKEN)) {
-                idToken = getIdToken();
-                if (idToken == null) {
-                    log.error("{} unable to provide id token (required)", getLogPrefix());
-                    ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-                    return;
-                }
+        JWT idToken = null;
+        if (getAuthenticationRequest().getResponseType().contains(OIDCResponseTypeValue.ID_TOKEN)) {
+            idToken = getIdToken();
+            if (idToken == null) {
+                log.error("{} unable to provide id token (required)", getLogPrefix());
+                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+                return;
             }
-            resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
-                    getOidcResponseContext().getAuthorizationCode(), idToken, getMockAccessToken(),
-                    getAuthenticationRequest().getState(), null, getAuthenticationRequest().getResponseMode());
-            log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
         }
+        resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
+                getOidcResponseContext().getAuthorizationCode(), idToken, null, getAuthenticationRequest().getState(),
+                null, getAuthenticationRequest().getResponseMode());
+        log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
 }
