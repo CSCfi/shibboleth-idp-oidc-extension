@@ -33,6 +33,7 @@ import java.util.Date;
 import javax.annotation.Nullable;
 
 import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
+import org.opensaml.messaging.context.BaseContext;
 import org.opensaml.saml.saml2.core.NameID;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
@@ -48,7 +49,7 @@ import com.nimbusds.openid.connect.sdk.claims.UserInfo;
  * Subcontext carrying information to form authentication/token/userinfo response for relying party. This context
  * appears as a subcontext of the {@link org.opensaml.messaging.context.MessageContext}.
  */
-public class OIDCAuthenticationResponseContext extends BaseOIDCResponseContext {
+public class OIDCAuthenticationResponseContext extends BaseContext {
 
     /** The id token formed. */
     @Nullable
