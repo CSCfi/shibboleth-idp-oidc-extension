@@ -106,6 +106,9 @@
                   c:method="urn:oasis:names:tc:SAML:1.0:am:password" />
               <bean parent="shibboleth.OIDCAuthnContextClassReference"
                   c:classRef="password" />
+              <!-- for oidc certification tests -->    
+              <bean parent="shibboleth.OIDCAuthnContextClassReference"
+                  c:classRef="1" /> 
             </list>
           </property>
         </bean>

@@ -103,16 +103,6 @@
 		</AttributeRule>
 	</AttributeFilterPolicy>
 
-	<!-- This demonstrates a rule that releases a claim in response to all oidc 
-		authentication requests -->
-
-	<AttributeFilterPolicy id="ALL_OPENID_CLIENTS">
-		<PolicyRequirementRule xsi:type="oidcext:OIDCScope"
-			value="openid" />
-		<AttributeRule attributeID="eduPersonPrincipalName">
-			<PermitValueRule xsi:type="ANY" />
-		</AttributeRule>
-	</AttributeFilterPolicy>
 
 	<!-- This demonstrates a rule that releases claim in response to oidc authentication 
 		request of demo_rp if the claim is specifically requested -->
@@ -120,10 +110,13 @@
 	<AttributeFilterPolicy id="DEMO_RP_REQUEST_CLAIM">
 		<PolicyRequirementRule xsi:type="Requester"
 			value="demo_rp" />
-		<AttributeRule attributeID="age">
+		<AttributeRule attributeID="email">
 			<PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" />
 		</AttributeRule>
-		<AttributeRule attributeID="eduPersonAffiliation">
+		<AttributeRule attributeID="name">
+			<PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" />
+		</AttributeRule>
+		<AttributeRule attributeID="picture">
 			<PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" />
 		</AttributeRule>
 	</AttributeFilterPolicy>
