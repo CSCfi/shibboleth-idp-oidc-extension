@@ -36,32 +36,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Action verifies that produced subject equals to requested subject if such
- * exists.
+ * Action verifies that produced subject equals to requested subject if such exists.
  */
 @SuppressWarnings("rawtypes")
 public class VerifyRequestedSubjectIdentifier extends AbstractOIDCAuthenticationResponseAction {
 
-	/** Class logger. */
-	@Nonnull
-	private Logger log = LoggerFactory.getLogger(VerifyRequestedSubjectIdentifier.class);
+    /** Class logger. */
+    @Nonnull
+    private Logger log = LoggerFactory.getLogger(VerifyRequestedSubjectIdentifier.class);
 
-	/** {@inheritDoc} */
-	@Override
-	protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+    /** {@inheritDoc} */
+    @Override
+    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-		final String requestedSubject = getOidcResponseContext().getRequestedSubject();
-		final String generatedSubject = getOidcResponseContext().getNameId().getValue();
-		if (requestedSubject == null) {
-			log.debug("{} No requested subject, nothing to do", getLogPrefix());
-			return;
-		}
-		if (!requestedSubject.equals(generatedSubject)) {
-			log.error("{} client requested for subject {}, the produced subject is {}, mismatch", getLogPrefix(),
-					requestedSubject, generatedSubject);
-			ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_SUBJECT);
-		}
-		log.debug("{} Requested subject matched the generated subject {}", getLogPrefix(), generatedSubject);
-	}
+        final String requestedSubject = getOidcResponseContext().getRequestedSubject();
+        final String generatedSubject = getOidcResponseContext().getNameId().getValue();
+        if (requestedSubject == null) {
+            log.debug("{} No requested subject, nothing to do", getLogPrefix());
+            return;
+        }
+        if (!requestedSubject.equals(generatedSubject)) {
+            log.error("{} client requested for subject {}, the produced subject is {}, mismatch", getLogPrefix(),
+                    requestedSubject, generatedSubject);
+            ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_SUBJECT);
+        }
+        log.debug("{} Requested subject matched the generated subject {}", getLogPrefix(), generatedSubject);
+    }
 
 }

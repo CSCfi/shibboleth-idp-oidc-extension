@@ -38,25 +38,24 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.oauth2.sdk.ResponseType;
 
 /**
- * An action that validates the requested response_type is registered to the
- * requesting RP.
+ * An action that validates the requested response_type is registered to the requesting RP.
  */
 public class ValidateResponseType extends AbstractOIDCAuthenticationResponseAction {
 
-	/** Class logger. */
-	@Nonnull
-	private Logger log = LoggerFactory.getLogger(ValidateResponseType.class);
+    /** Class logger. */
+    @Nonnull
+    private Logger log = LoggerFactory.getLogger(ValidateResponseType.class);
 
-	/** {@inheritDoc} */
-	@SuppressWarnings("rawtypes")
-	@Override
-	protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-		final Set<ResponseType> registeredTypes = getMetadataContext().getClientInformation().getMetadata()
-				.getResponseTypes();
-		final ResponseType requestedType = getAuthenticationRequest().getResponseType();
-		if (registeredTypes == null || registeredTypes.isEmpty() || !registeredTypes.contains(requestedType)) {
-			log.warn("{} The response type {} is not registered for this RP", getLogPrefix(), requestedType);
-			ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_RESPONSE_TYPE);
-		}
-	}
+    /** {@inheritDoc} */
+    @SuppressWarnings("rawtypes")
+    @Override
+    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+        final Set<ResponseType> registeredTypes =
+                getMetadataContext().getClientInformation().getMetadata().getResponseTypes();
+        final ResponseType requestedType = getAuthenticationRequest().getResponseType();
+        if (registeredTypes == null || registeredTypes.isEmpty() || !registeredTypes.contains(requestedType)) {
+            log.warn("{} The response type {} is not registered for this RP", getLogPrefix(), requestedType);
+            ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_RESPONSE_TYPE);
+        }
+    }
 }
