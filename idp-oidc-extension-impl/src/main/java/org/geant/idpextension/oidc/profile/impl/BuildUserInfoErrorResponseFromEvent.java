@@ -40,6 +40,7 @@ import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
  */
 public class BuildUserInfoErrorResponseFromEvent extends AbstractBuildErrorResponseFromEvent<UserInfoErrorResponse> {
 
+    @SuppressWarnings("rawtypes")
     @Override
     protected UserInfoErrorResponse buildErrorResponse(ErrorObject error, ProfileRequestContext profileRequestContext) {
         return new UserInfoErrorResponse(error);

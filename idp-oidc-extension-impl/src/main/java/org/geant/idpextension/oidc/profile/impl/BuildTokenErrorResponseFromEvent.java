@@ -41,6 +41,7 @@ import com.nimbusds.oauth2.sdk.TokenErrorResponse;
  */
 public class BuildTokenErrorResponseFromEvent extends AbstractBuildErrorResponseFromEvent<TokenErrorResponse> {
 
+    @SuppressWarnings("rawtypes")
     @Override
     protected TokenErrorResponse buildErrorResponse(ErrorObject error, ProfileRequestContext profileRequestContext) {
         return new TokenErrorResponse(error);

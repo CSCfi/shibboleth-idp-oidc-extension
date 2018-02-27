@@ -35,15 +35,16 @@ import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationErrorResponse;
 
 /**
- * This action reads an event from the configured {@link EventContext} lookup
- * strategy, constructs an OIDC client registration error response message and
- * attaches it as the outbound message.
+ * This action reads an event from the configured {@link EventContext} lookup strategy, constructs an OIDC client
+ * registration error response message and attaches it as the outbound message.
  */
 public class BuildRegistrationErrorResponseFromEvent
         extends AbstractBuildErrorResponseFromEvent<ClientRegistrationErrorResponse> {
 
+    @SuppressWarnings("rawtypes")
     @Override
-    protected ClientRegistrationErrorResponse buildErrorResponse(ErrorObject error, ProfileRequestContext profileRequestContext) {
+    protected ClientRegistrationErrorResponse buildErrorResponse(ErrorObject error,
+            ProfileRequestContext profileRequestContext) {
         return new ClientRegistrationErrorResponse(error);
     }
 
