@@ -49,8 +49,8 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * This action is extended by error response actions. Action reads an event from the configured {@link EventContext} lookup strategy, constructs an OIDC 
- * error response message and attaches it as the outbound message.
+ * This action is extended by error response actions. Action reads an event from the configured {@link EventContext}
+ * lookup strategy, constructs an OIDC error response message and attaches it as the outbound message.
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorResponse> extends AbstractProfileAction {
@@ -58,13 +58,14 @@ public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorRespons
     /** Class logger. */
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(AbstractBuildErrorResponseFromEvent.class);
-    
+
     /** Strategy function for access to {@link EventContext} to check. */
-    @Nonnull private Function<ProfileRequestContext,EventContext> eventContextLookupStrategy;
-    
+    @Nonnull
+    private Function<ProfileRequestContext, EventContext> eventContextLookupStrategy;
+
     /** Map of eventIds to pre-configured error objects. */
     private Map<String, ErrorObject> mappedErrors;
-    
+
     /** Constructor. */
     public AbstractBuildErrorResponseFromEvent() {
         eventContextLookupStrategy = new CurrentOrPreviousEventLookup();
@@ -74,16 +75,17 @@ public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorRespons
     /**
      * Set lookup strategy for {@link EventContext} to check.
      * 
-     * @param strategy  lookup strategy
+     * @param strategy lookup strategy
      */
-    public void setEventContextLookupStrategy(@Nonnull final Function<ProfileRequestContext,EventContext> strategy) {
+    public void setEventContextLookupStrategy(@Nonnull final Function<ProfileRequestContext, EventContext> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        
+
         eventContextLookupStrategy = Constraint.isNotNull(strategy, "EventContext lookup strategy cannot be null");
     }
-    
+
     /**
      * Set map of eventIds to pre-configured error objects.
+     * 
      * @param errors map of eventIds to pre-configured error objects.
      */
     public void setMappedErrors(@Nonnull final Map<String, ErrorObject> errors) {
@@ -91,9 +93,9 @@ public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorRespons
 
         mappedErrors = Constraint.isNotNull(errors, "Mapped errors cannot be null");
     }
-    
-    protected abstract T buildErrorResponse(ErrorObject error);
-    
+
+    protected abstract T buildErrorResponse(ErrorObject error, ProfileRequestContext profileRequestContext);
+
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override
@@ -110,10 +112,16 @@ public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorRespons
             error = mappedErrors.get(event);
         } else {
             log.debug("{} No mapped event found for {}, creating general invalid_request", getLogPrefix(), event);
-            error = new ErrorObject("invalid_request", "Invalid request: " 
-                    + eventCtx.getEvent().toString(), HTTPResponse.SC_BAD_REQUEST);   
+            error = new ErrorObject("invalid_request", "Invalid request: " + eventCtx.getEvent().toString(),
+                    HTTPResponse.SC_BAD_REQUEST);
         }
-        profileRequestContext.getOutboundMessageContext().setMessage(buildErrorResponse(error));
-        log.debug("{} ClientRegistrationErrorResponse successfully set as the outbound message", getLogPrefix());
+        ErrorResponse errorResponse = buildErrorResponse(error, profileRequestContext);
+        if (errorResponse != null) {
+            profileRequestContext.getOutboundMessageContext()
+                    .setMessage(buildErrorResponse(error, profileRequestContext));
+            log.debug("{} ClientRegistrationErrorResponse successfully set as the outbound message", getLogPrefix());
+        } else {
+            log.debug("{} Error response not formed", getLogPrefix());
+        }
     }
 }
