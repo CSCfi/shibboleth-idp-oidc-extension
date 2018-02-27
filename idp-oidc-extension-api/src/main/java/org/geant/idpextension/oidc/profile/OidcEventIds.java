@@ -59,8 +59,18 @@ public final class OidcEventIds {
     @Nonnull @NotEmpty public static final String INVALID_GRANT = "InvalidGrant";
     
     /**
-     * The redirect_uri in request is  is invalid.
+     * The redirect_uri in request is invalid.
      */
     @Nonnull @NotEmpty public static final String INVALID_REDIRECT_URI = "InvalidRedirectionURI";
+    
+    /**
+     * The response type in request is not supported for RP.
+     */
+    @Nonnull @NotEmpty public static final String INVALID_RESPONSE_TYPE = "InvalidResponseType";
+    
+    /**
+     * The subject resolved is not the expected one.
+     */
+    @Nonnull @NotEmpty public static final String INVALID_SUBJECT = "InvalidSubject";
 
 }
