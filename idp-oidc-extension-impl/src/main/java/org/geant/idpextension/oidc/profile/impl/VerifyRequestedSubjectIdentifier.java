@@ -29,8 +29,7 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
-
-import net.shibboleth.idp.authn.AuthnEventIds;
+import org.geant.idpextension.oidc.profile.OidcEventIds;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
@@ -38,33 +37,31 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Action verifies that produced subject equals to requested subject if such
- * exists. 
+ * exists.
  */
 @SuppressWarnings("rawtypes")
 public class VerifyRequestedSubjectIdentifier extends AbstractOIDCAuthenticationResponseAction {
 
-    /** Class logger. */
-    @Nonnull
-    private Logger log = LoggerFactory.getLogger(VerifyRequestedSubjectIdentifier.class);
+	/** Class logger. */
+	@Nonnull
+	private Logger log = LoggerFactory.getLogger(VerifyRequestedSubjectIdentifier.class);
 
-    /** {@inheritDoc} */
-    @Override
-    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        
-        final String requestedSubject = getOidcResponseContext().getRequestedSubject();
-        final String generatedSubject = getOidcResponseContext().getNameId().getValue();
-        if (requestedSubject == null) {
-            log.debug("{} No requested subject, nothing to do", getLogPrefix());
-            return;
-        }
-        if (!requestedSubject.equals(generatedSubject)) {
-            log.error("{} client requested for subject {}, the produced subject is {}, mismatch", getLogPrefix(),
-                    requestedSubject, generatedSubject);
-            getOidcResponseContext().setErrorCode("login_required");
-            getOidcResponseContext().setErrorDescription("unable to produce requested subject " + requestedSubject);
-            ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.INVALID_SUBJECT);
-        }
-        log.debug("{} Requested subject matched the generated subject {}", getLogPrefix(), generatedSubject);
-    }
+	/** {@inheritDoc} */
+	@Override
+	protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+
+		final String requestedSubject = getOidcResponseContext().getRequestedSubject();
+		final String generatedSubject = getOidcResponseContext().getNameId().getValue();
+		if (requestedSubject == null) {
+			log.debug("{} No requested subject, nothing to do", getLogPrefix());
+			return;
+		}
+		if (!requestedSubject.equals(generatedSubject)) {
+			log.error("{} client requested for subject {}, the produced subject is {}, mismatch", getLogPrefix(),
+					requestedSubject, generatedSubject);
+			ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_SUBJECT);
+		}
+		log.debug("{} Requested subject matched the generated subject {}", getLogPrefix(), generatedSubject);
+	}
 
 }

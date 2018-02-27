@@ -29,38 +29,34 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import java.util.Set;
-
 import javax.annotation.Nonnull;
-
+import org.geant.idpextension.oidc.profile.OidcEventIds;
 import org.opensaml.profile.action.ActionSupport;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.nimbusds.oauth2.sdk.ResponseType;
 
 /**
- * An action that validates the requested response_type is registered to the requesting RP.
+ * An action that validates the requested response_type is registered to the
+ * requesting RP.
  */
 public class ValidateResponseType extends AbstractOIDCAuthenticationResponseAction {
-    
-    /** Class logger. */
-    @Nonnull
-    private Logger log = LoggerFactory.getLogger(ValidateResponseType.class);
 
-    /** {@inheritDoc} */
-    @Override
-    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        final Set<ResponseType> registeredTypes = 
-                getMetadataContext().getClientInformation().getMetadata().getResponseTypes();
-        final ResponseType requestedType = getAuthenticationRequest().getResponseType();
-        if (registeredTypes == null || registeredTypes.isEmpty() || !registeredTypes.contains(requestedType)) {
-            log.warn("{} The response type {} is not registered for this RP", getLogPrefix(), requestedType);
-            //TODO: check from constants
-            getOidcResponseContext().setErrorCode("invalid_request");
-            getOidcResponseContext().setErrorDescription("Unsupported response_type value for this RP");
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
-        }
-    }
+	/** Class logger. */
+	@Nonnull
+	private Logger log = LoggerFactory.getLogger(ValidateResponseType.class);
+
+	/** {@inheritDoc} */
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+		final Set<ResponseType> registeredTypes = getMetadataContext().getClientInformation().getMetadata()
+				.getResponseTypes();
+		final ResponseType requestedType = getAuthenticationRequest().getResponseType();
+		if (registeredTypes == null || registeredTypes.isEmpty() || !registeredTypes.contains(requestedType)) {
+			log.warn("{} The response type {} is not registered for this RP", getLogPrefix(), requestedType);
+			ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_RESPONSE_TYPE);
+		}
+	}
 }
