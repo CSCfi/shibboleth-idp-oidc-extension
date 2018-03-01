@@ -31,7 +31,8 @@
 
 	<bean id="ValidateAccessToken"
 		class="org.geant.idpextension.oidc.profile.impl.ValidateAccessToken"
-		scope="prototype" c:sealer-ref="accessTokenSealer" p:replayCache-ref="shibboleth.ReplayCache" />
+		scope="prototype" c:sealer-ref="accessTokenSealer"
+		p:revocationCache-ref="shibboleth.RevocationCache" />
 
 	<bean id="accessTokenSealer" lazy-init="true"
 		class="net.shibboleth.utilities.java.support.security.DataSealer"
@@ -165,5 +166,10 @@
 
 	<bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
 		scope="prototype" />
+
+	<bean id="shibboleth.RevocationCache" class="org.geant.idpextension.oidc.storage.RevocationCache"
+		depends-on="shibboleth.LoggingService"
+		p:storage-ref="#{'%{idp.oidc.revocationCache.StorageService:shibboleth.StorageService}'.trim()}"
+		p:strict="true" />
 
 </beans>

@@ -65,7 +65,7 @@
 	<bean id="ValidateAuthorizeCode"
 		class="org.geant.idpextension.oidc.profile.impl.ValidateAuthorizeCode"
 		scope="prototype" c:sealer-ref="authorizeCodeSealer"
-		p:replayCache-ref="shibboleth.ReplayCache" />
+		p:replayCache-ref="shibboleth.ReplayCache" p:revocationCache-ref="shibboleth.RevocationCache" />
 
 	<bean id="ValidateRedirectURI"
 		class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
@@ -237,5 +237,10 @@
 
 	<bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
 		scope="prototype" />
+
+	<bean id="shibboleth.RevocationCache" class="org.geant.idpextension.oidc.storage.RevocationCache"
+		depends-on="shibboleth.LoggingService"
+		p:storage-ref="#{'%{idp.oidc.revocationCache.StorageService:shibboleth.StorageService}'.trim()}"
+		p:strict="true" />
 
 </beans>
