@@ -31,10 +31,11 @@ package org.geant.idpextension.oidc.profile.impl;
 import java.text.ParseException;
 import javax.annotation.Nonnull;
 import org.geant.idpextension.oidc.profile.OidcEventIds;
+import org.geant.idpextension.oidc.storage.RevocationCache;
+import org.geant.idpextension.oidc.storage.RevocationCacheContexts;
 import org.geant.idpextension.oidc.token.support.AccessTokenClaimsSet;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.context.ProfileRequestContext;
-import org.opensaml.storage.ReplayCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.shibboleth.utilities.java.support.annotation.ParameterName;
@@ -47,8 +48,8 @@ import net.shibboleth.utilities.java.support.security.DataSealerException;
 
 /**
  * Action that validates access token is a valid one. Token is valid if it is successfully unwrapped, parsed as access
- * token, is not expired and has not been used before. Validated token is stored to response context retrievable as
- * claims {@link OIDCAuthenticationResponseContext#getAccessTokenClaimsSet()}.
+ * token, is not expired and authorize code it has been derived from has not been revoked. Validated token is stored to
+ * response context retrievable as claims {@link OIDCAuthenticationResponseContext#getAccessTokenClaimsSet()}.
  * 
  */
 @SuppressWarnings("rawtypes")
@@ -62,9 +63,9 @@ public class ValidateAccessToken extends AbstractOIDCUserInfoValidationResponseA
     @Nonnull
     private final DataSealer dataSealer;
 
-    /** Message replay cache instance to use. */
+    /** Message revocation cache instance to use. */
     @NonnullAfterInit
-    private ReplayCache replayCache;
+    private RevocationCache revocationCache;
 
     /**
      * Constructor.
@@ -74,20 +75,20 @@ public class ValidateAccessToken extends AbstractOIDCUserInfoValidationResponseA
     }
 
     /**
-     * Set the replay cache instance to use.
+     * Set the revocation cache instance to use.
      * 
-     * @param cache The replayCache to set.
+     * @param cache The revocationCache to set.
      */
-    public void setReplayCache(@Nonnull final ReplayCache cache) {
+    public void setRevocationCache(@Nonnull final RevocationCache cache) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        replayCache = Constraint.isNotNull(cache, "ReplayCache cannot be null");
+        revocationCache = Constraint.isNotNull(cache, "ReplayCache cannot be null");
     }
 
     /** {@inheritDoc} */
     @Override
     protected void doInitialize() throws ComponentInitializationException {
         super.doInitialize();
-        Constraint.isNotNull(replayCache, "ReplayCache cannot be null");
+        Constraint.isNotNull(revocationCache, "RevocationCache cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -108,7 +109,13 @@ public class ValidateAccessToken extends AbstractOIDCUserInfoValidationResponseA
             ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_GRANT);
             return;
         }
-        // TODO: Check revocation cache for revoked authz code
+        if (revocationCache.isRevoked(RevocationCacheContexts.AUTHORIZATION_CODE, accessTokenClaimsSet.getID())) {
+            log.error("{} authorize code {} and all derived tokens have been revoked", getLogPrefix(),
+                    accessTokenClaimsSet.getID());
+            ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_GRANT);
+            return;
+        }
+        log.error("{} access token {} validated", getLogPrefix(), accessTokenClaimsSet.getID());
         getOidcResponseContext().setTokenClaimsSet(accessTokenClaimsSet);
         return;
 

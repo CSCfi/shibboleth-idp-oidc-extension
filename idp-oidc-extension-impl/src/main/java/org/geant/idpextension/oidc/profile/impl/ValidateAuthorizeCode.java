@@ -32,6 +32,8 @@ import java.text.ParseException;
 import javax.annotation.Nonnull;
 
 import org.geant.idpextension.oidc.profile.OidcEventIds;
+import org.geant.idpextension.oidc.storage.RevocationCache;
+import org.geant.idpextension.oidc.storage.RevocationCacheContexts;
 import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -50,11 +52,9 @@ import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
 
 /**
- * Action that validates authorization code is a valid one. Code is valid if it
- * is successfully unwrapped, parsed as authz code, is not expired and has not
- * been used before. Validated code is stored to response context retrievable as
- * claims
- * {@link OIDCAuthenticationResponseContext#getAuthorizationCodeClaimsSet()}.
+ * Action that validates authorization code is a valid one. Code is valid if it is successfully unwrapped, parsed as
+ * authz code, is not expired and has not been used before. Validated code is stored to response context retrievable as
+ * claims {@link OIDCAuthenticationResponseContext#getAuthorizationCodeClaimsSet()}.
  * 
  */
 @SuppressWarnings("rawtypes")
@@ -72,6 +72,10 @@ public class ValidateAuthorizeCode extends AbstractOIDCTokenResponseAction {
     @NonnullAfterInit
     private ReplayCache replayCache;
 
+    /** Message revocation cache instance to use. */
+    @NonnullAfterInit
+    private RevocationCache revocationCache;
+
     /**
      * Constructor.
      */
@@ -82,12 +86,21 @@ public class ValidateAuthorizeCode extends AbstractOIDCTokenResponseAction {
     /**
      * Set the replay cache instance to use.
      * 
-     * @param cache
-     *            The replayCache to set.
+     * @param cache The replayCache to set.
      */
     public void setReplayCache(@Nonnull final ReplayCache cache) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
         replayCache = Constraint.isNotNull(cache, "ReplayCache cannot be null");
+    }
+
+    /**
+     * Set the revocation cache instance to use.
+     * 
+     * @param cache The revocationCache to set.
+     */
+    public void setRevocationCache(@Nonnull final RevocationCache cache) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        revocationCache = Constraint.isNotNull(cache, "ReplayCache cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -95,6 +108,7 @@ public class ValidateAuthorizeCode extends AbstractOIDCTokenResponseAction {
     protected void doInitialize() throws ComponentInitializationException {
         super.doInitialize();
         Constraint.isNotNull(replayCache, "ReplayCache cannot be null");
+        Constraint.isNotNull(revocationCache, "RevocationCache cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -105,8 +119,8 @@ public class ValidateAuthorizeCode extends AbstractOIDCTokenResponseAction {
             AuthorizationCodeGrant codeGrant = (AuthorizationCodeGrant) grant;
             if (codeGrant.getAuthorizationCode() != null && codeGrant.getAuthorizationCode().getValue() != null) {
                 try {
-                    AuthorizeCodeClaimsSet authzCodeClaimsSet = AuthorizeCodeClaimsSet
-                            .parse(codeGrant.getAuthorizationCode().getValue(), dataSealer);
+                    AuthorizeCodeClaimsSet authzCodeClaimsSet =
+                            AuthorizeCodeClaimsSet.parse(codeGrant.getAuthorizationCode().getValue(), dataSealer);
                     log.debug("{} authz code unwrapped {}", getLogPrefix(), authzCodeClaimsSet.serialize());
                     if (authzCodeClaimsSet.isExpired()) {
                         log.error("{} Authorization code exp is in the past {}", getLogPrefix(),
@@ -117,8 +131,10 @@ public class ValidateAuthorizeCode extends AbstractOIDCTokenResponseAction {
                     if (!replayCache.check(getClass().getName(), authzCodeClaimsSet.getID(),
                             authzCodeClaimsSet.getExp().getTime())) {
                         log.error("{} Replay detected of authz code {}", getLogPrefix(), authzCodeClaimsSet.getID());
-                        // TODO: add authzCodeClaimsSet.getID() to RevokeCache to revoke all tokens
-                        // granted by authz code.
+                        if (!revocationCache.revoke(RevocationCacheContexts.AUTHORIZATION_CODE,
+                                authzCodeClaimsSet.getID())) {
+                            log.error("{} Fatal error! Unable to set entry to revocation cache", getLogPrefix());
+                        }
                         ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_GRANT);
                         return;
                     }
