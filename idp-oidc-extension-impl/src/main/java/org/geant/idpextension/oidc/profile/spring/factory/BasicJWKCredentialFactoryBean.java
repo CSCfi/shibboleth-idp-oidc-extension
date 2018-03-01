@@ -49,7 +49,7 @@ import org.geant.security.jwk.BasicJWKCredential;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.AssymetricJWK;
+import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.KeyType;
 import com.google.common.io.ByteStreams;
@@ -66,8 +66,7 @@ public class BasicJWKCredentialFactoryBean extends AbstractCredentialFactoryBean
     /**
      * Set the resource containing the private key.
      * 
-     * @param res
-     *            private key resource, never <code>null</code>
+     * @param res private key resource, never <code>null</code>
      */
     public void setJWKResource(@Nonnull final Resource res) {
         jwkResource = res;
@@ -76,18 +75,17 @@ public class BasicJWKCredentialFactoryBean extends AbstractCredentialFactoryBean
     /**
      * Convert jwk key usage type to shibboleth usage type.
      * 
-     * @param jwk
-     *            containing usage type.
+     * @param jwk containing usage type.
      * @return usage type.
      */
     private UsageType getUsageType(JWK jwk) {
         switch (jwk.getKeyUse()) {
-        case ENCRYPTION:
-            return UsageType.ENCRYPTION;
-        case SIGNATURE:
-            return UsageType.SIGNING;
-        default:
-            return UsageType.UNSPECIFIED;
+            case ENCRYPTION:
+                return UsageType.ENCRYPTION;
+            case SIGNATURE:
+                return UsageType.SIGNING;
+            default:
+                return UsageType.UNSPECIFIED;
         }
     }
 
@@ -106,17 +104,17 @@ public class BasicJWKCredentialFactoryBean extends AbstractCredentialFactoryBean
             jwkCredential = new BasicJWKCredential();
             if (jwk.getKeyType() == KeyType.EC || jwk.getKeyType() == KeyType.RSA) {
                 if (jwk.isPrivate()) {
-                    jwkCredential.setPrivateKey(((AssymetricJWK) jwk).toPrivateKey());
+                    jwkCredential.setPrivateKey(((AsymmetricJWK) jwk).toPrivateKey());
                 }
-                jwkCredential.setPublicKey(((AssymetricJWK) jwk).toPublicKey());
+                jwkCredential.setPublicKey(((AsymmetricJWK) jwk).toPublicKey());
             } else if (jwk.getKeyType() == KeyType.OCT) {
                 jwkCredential.setSecretKey(((OctetSequenceKey) jwk).toSecretKey());
             } else {
                 throw new FatalBeanException("Unsupported KeyFile at " + jwkResource.getDescription());
             }
-        } catch (IOException | ParseException | JOSEException e) {
-            log.error("{}: Could not decode KeyFile at {}: {}", 
-                    getConfigDescription(), jwkResource.getDescription(), e);
+        } catch (IOException | ParseException /* | JOSEException */ e) {
+            log.error("{}: Could not decode KeyFile at {}: {}", getConfigDescription(), jwkResource.getDescription(),
+                    e);
             throw new FatalBeanException("Could not decode provided KeyFile " + jwkResource.getDescription(), e);
         }
         jwkCredential.setUsageType(getUsageType(jwk));
