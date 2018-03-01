@@ -30,7 +30,6 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
-import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -55,7 +54,6 @@ abstract class AbstractOIDCUserInfoValidationResponseAction extends AbstractOIDC
     @Nonnull
     private OIDCAuthenticationResponseContext oidcResponseContext;
 
- 
     /**
      * Returns oidc response context.
      * 
@@ -66,7 +64,6 @@ abstract class AbstractOIDCUserInfoValidationResponseAction extends AbstractOIDC
         return oidcResponseContext;
     }
 
- 
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
