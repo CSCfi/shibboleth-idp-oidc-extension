@@ -4,7 +4,9 @@
 
 The goal of the project is to provide a [OpenID Connect](http://openid.net/connect/) OP extension to [Shibboleth IdP V3](https://wiki.shibboleth.net/confluence/display/IDP30/Home). The work is done as part of task T3.1A OpenID Connect Federation in GN4-2 JRA3 project.
 
-First alpha release is planned to the end of the year 2017 and a pilot early 2018. 
+First alpha release 0.5 has been released that supports imlicit flow. 
+
+Now we are working with code flow and hope to release 0.6a by the end of march.
 
 The Shibboleth IdP 3.3 installed by this project is extended to act as a [OpenID Connect](http://openid.net/connect/) provider for implicit flow.  
 
