@@ -95,15 +95,16 @@
 - name: Set oidc issuer to idp.properties
   blockinfile:
     dest: "{{ idp_home }}/conf/idp.properties"
-    marker: "# {mark} ANSIBLE MANAGER BLOCK"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for oidc issuer"
     insertafter: "idp.entityID"
     content: |
+         # Open ID Connect Issuer value 
          idp.oidc.issuer= https://{{ service_name }}
 
 - name: Set oidc registration properties to idp.properties
   blockinfile:
     dest: "{{ idp_home }}/conf/idp.properties"
-    marker: "# {mark} ANSIBLE MANAGER BLOCK 2"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for oidc dyn. registration"
     insertafter: "idp.oidc.issuer"
     content: |
          idp.oidc.dynreg.StorageService = shibboleth.JPAStorageService
@@ -115,12 +116,23 @@
   blockinfile:
     dest: "{{ idp_home }}/conf/idp.properties"
     marker: "# {mark} ANSIBLE MANAGED BLOCK for token lifetimes"
-    insertafter: "idp.policy.clockSkew"
+    insertafter: "idp.oidc.dynreg.defaultSubjectType"
     content: |
          # Default lifetime of oidc tokens
          #idp.oidc.authorizeCode.defaultLifetime = PT5M
          #idp.oidc.accessToken.defaultLifetime = PT1H
          #idp.oidc.idToken.defaultLifetime = PT1H
+
+- name: Set properties for revocation cache to idp.properties
+  blockinfile:
+    dest: "{{ idp_home }}/conf/idp.properties"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for revocation cache"
+    insertafter: "idp.oidc.idToken.defaultLifetime"
+    content: |
+         # Lifetime of entries in revocation cache for authorize code
+         #idp.oidc.revocationCache.authorizeCode.lifetime = PT6H
+         # Storage for revocation cache. Requires server-side storage
+         #idp.oidc.revocationCache.StorageService = shibboleth.StorageService
          
 - name: Add one trusted test SP
   blockinfile:
@@ -153,6 +165,7 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
     insertafter: "idp.signing.key"
     content: |
+         # Signing key for oidc id tokens
          idp.signing.oidc.key= %{idp.home}/credentials/idp-signing-rs256.jwk
 
 - name: Add metadata filter for trusted test SP
