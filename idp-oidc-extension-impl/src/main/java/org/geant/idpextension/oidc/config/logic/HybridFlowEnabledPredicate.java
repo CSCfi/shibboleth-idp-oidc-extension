@@ -30,7 +30,7 @@ package org.geant.idpextension.oidc.config.logic;
 
 import javax.annotation.Nullable;
 
-import org.geant.idpextension.oidc.config.AbstractOIDCProfileConfiguration;
+import org.geant.idpextension.oidc.config.AbstractOIDCFlowAwareProfileConfiguration;
 import org.opensaml.profile.context.ProfileRequestContext;
 
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
@@ -49,8 +49,8 @@ public class HybridFlowEnabledPredicate extends AbstractRelyingPartyPredicate {
         final RelyingPartyContext rpc = getRelyingPartyContextLookupStrategy().apply(input);
         if (rpc != null) {
             final ProfileConfiguration pc = rpc.getProfileConfig();
-            if (pc != null && pc instanceof AbstractOIDCProfileConfiguration) {
-                return ((AbstractOIDCProfileConfiguration) pc).getHybridFlowEnabled().apply(input);
+            if (pc != null && pc instanceof AbstractOIDCFlowAwareProfileConfiguration) {
+                return ((AbstractOIDCFlowAwareProfileConfiguration) pc).getHybridFlowEnabled().apply(input);
             }
         }
         return false;
