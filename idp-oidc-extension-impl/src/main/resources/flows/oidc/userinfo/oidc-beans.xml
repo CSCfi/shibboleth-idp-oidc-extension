@@ -13,7 +13,7 @@
 		only -->
 	<bean id="InitializeProfileRequestContext"
 		class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
-		scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/sso/browser"
+		scope="prototype" p:profileId=""http://csc.fi/ns/profiles/oidc/userinfo"
 		p:loggingId="%{idp.service.logging.saml2sso:SSO}" />
 
 	<bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage"
