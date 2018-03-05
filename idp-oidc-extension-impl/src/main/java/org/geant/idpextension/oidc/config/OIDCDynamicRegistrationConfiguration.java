@@ -53,7 +53,7 @@ import net.shibboleth.utilities.java.support.primitive.StringSupport;
 /**
  * Profile configuration for the OpenID Connect dynamic client registration.
  */
-public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCProfileConfiguration
+public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCFlowAwareProfileConfiguration
         implements InitializableComponent {
 
     /** OIDC base protocol URI. */

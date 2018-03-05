@@ -63,7 +63,7 @@ import com.google.common.base.Predicate;
 /**
  * Profile configuration for the OpenID Connect core protocol.
  */
-public class OIDCCoreProtocolConfiguration extends AbstractOIDCProfileConfiguration
+public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileConfiguration
     implements InitializableComponent, AuthenticationProfileConfiguration {
 
     /** OIDC base protocol URI. */
