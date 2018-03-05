@@ -169,7 +169,7 @@
 
 	<bean id="shibboleth.RevocationCache" class="org.geant.idpextension.oidc.storage.RevocationCache"
 		depends-on="shibboleth.LoggingService"
-		p:entryExpiration="#{%{idp.oidc.revocationCache.authorizeCode.lifetime:PT6H}"
+		p:entryExpiration="#{'%{idp.oidc.revocationCache.authorizeCode.lifetime:PT6H}'}"
 		p:storage-ref="#{'%{idp.oidc.revocationCache.StorageService:shibboleth.StorageService}'.trim()}"
 		p:strict="true" />
 
