@@ -28,6 +28,8 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
+import java.net.MalformedURLException;
+
 import javax.annotation.Nonnull;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
@@ -43,9 +45,18 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.proc.BadJOSEException;
+import com.nimbusds.jose.proc.JWSKeySelector;
+import com.nimbusds.jose.proc.JWSVerificationKeySelector;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
+import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
@@ -53,6 +64,7 @@ import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretJWT;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
 import com.nimbusds.oauth2.sdk.auth.PlainClientSecret;
+import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
@@ -62,6 +74,9 @@ import net.shibboleth.utilities.java.support.component.ComponentInitializationEx
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
+/**
+ * Validates the endpoint authentication with the token_endpoint_auth_method stored to the client's metadata.
+ */
 public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestAction {
 
     /** Class logger. */
@@ -143,6 +158,9 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
         final ClientAuthenticationMethod clientAuthMethod = clientMetadata.getTokenEndpointAuthMethod() != null ? 
                 clientMetadata.getTokenEndpointAuthMethod() : ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
         final ClientAuthentication clientAuth = request.getClientAuthentication();
+
+        //TODO: should the set of authentication methods be configurable?
+        
         if (clientAuthMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)) {
             if ((clientAuth instanceof ClientSecretBasic)) {
                 if (validateSecret((ClientSecretBasic)clientAuth, clientInformation)) {
@@ -166,26 +184,55 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
                 final ClientSecretJWT secretJwt = (ClientSecretJWT) clientAuth;
                 //TODO: make sure that Nimbus checks client_assertion_type
                 final SignedJWT jwt = secretJwt.getClientAssertion();
-                try {
-                    final JWSVerifier verifier = new MACVerifier(clientInformation.getSecret().getValue());
-                    if (jwt.verify(verifier)) {
-                        log.debug("{} The incoming JWT successfully verified", getLogPrefix());
-                        return;
-                    } else {
-                        log.warn("{} The incoming JWT could not be verified", getLogPrefix());
-                    }
-                } catch (JOSEException e) {
-                    log.error("{} Exception caught during the JWT validation", getLogPrefix(), e);
+                final JWKSource keySource = new ImmutableSecret(clientInformation.getSecret().getValueBytes());
+                if (validateJwt(jwt, keySource, clientMetadata.getTokenEndpointAuthJWSAlg())) {
+                    return;
                 }
             }
-            //TODO: check tid
+        } else if (clientAuthMethod.equals(ClientAuthenticationMethod.PRIVATE_KEY_JWT)) {
+            if (clientAuth instanceof PrivateKeyJWT) {
+                final PrivateKeyJWT keyJwt = (PrivateKeyJWT) clientAuth;
+                //TODO: make sure that Nimbus checks client_assertion_type
+                final SignedJWT jwt = keyJwt.getClientAssertion();
+                final JWKSource keySource = initializeKeySource(clientMetadata);
+                if (keySource != null) {
+                    if (validateJwt(jwt, keySource, clientMetadata.getTokenEndpointAuthJWSAlg())) {
+                        return;                        
+                    }
+                }                
+            }
         } else {
-            //TODO: support the rest of the standard methods
-            log.warn("{} Unsupported client authentication method {}", getLogPrefix(), clientAuth.getMethod());
+            log.warn("{} Unsupported client authentication method {}", getLogPrefix(), clientAuth.getMethod());            
         }
         ActionSupport.buildEvent(profileRequestContext, EventIds.ACCESS_DENIED);
     }
 
+    /**
+     * Initializes the JWK source from the given client's metadata.
+     * @param clientMetadata The client metadata.
+     * @return The JWK source corresponding to the metadata.
+     */
+    protected JWKSource initializeKeySource(final OIDCClientMetadata clientMetadata) {
+        if (clientMetadata.getJWKSet() != null) {
+            return new ImmutableJWKSet(clientMetadata.getJWKSet());
+        } else if (clientMetadata.getJWKSetURI() != null) {
+            try {
+                return new RemoteJWKSet(clientMetadata.getJWKSetURI().toURL());
+            } catch (MalformedURLException e) {
+                log.warn("{} Could not convert the URI {} to URL", getLogPrefix(), clientMetadata.getJWKSetURI());
+            }
+        } else {
+            log.error("{} No jwks or jwks_uri registered for this client", getLogPrefix());
+        }
+        return null;
+    }
+    
+    /**
+     * Validates the given client secret against the one stored in the client's metadata.
+     * @param secret The secret to be validated.
+     * @param clientInformation The client metadata.
+     * @return True if the secret was valid, false otherwise.
+     */
     protected boolean validateSecret(final PlainClientSecret secret, final OIDCClientInformation clientInformation) {
         final Secret clientSecret = secret.getClientSecret();
         if (clientSecret == null) {
@@ -199,5 +246,34 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
         }
         log.warn("{} Password validation failed", getLogPrefix());
         return false;
+    }
+    
+    /**
+     * Validates the given JWT using the given key source and algorithm.
+     * @param jwt The JWT to be validated.
+     * @param keySource The key source used for validation.
+     * @param expectedAlg The expected algorithm. If null, then the algorithm defined in the JWT's header is used.
+     * @return True if the JWT is valid, false otherwise.
+     */
+    protected boolean validateJwt(final SignedJWT jwt, final JWKSource keySource, final JWSAlgorithm expectedAlg) {
+        //TODO verify that the algorithm is accepted
+        final JWSAlgorithm algorithm = (expectedAlg == null) ? jwt.getHeader().getAlgorithm() : expectedAlg;
+        final ConfigurableJWTProcessor jwtProcessor = new DefaultJWTProcessor();
+        final JWSKeySelector keySelector = new JWSVerificationKeySelector(algorithm, keySource);
+        jwtProcessor.setJWSKeySelector(keySelector);
+        try {
+            final JWTClaimsSet claimsSet = jwtProcessor.process(jwt, null);
+            claimsSet.getJWTID();
+            if (!replayCache.check(getClass().getName(), claimsSet.getJWTID(),
+                    claimsSet.getExpirationTime().getTime())) {
+                log.warn("{} Replay detected for JWT id {}", getLogPrefix(), claimsSet.getJWTID());
+                return false;
+            }
+        } catch (BadJOSEException | JOSEException e) {
+            log.warn("{} Could not validate the signature", getLogPrefix());
+            return false;
+        }
+        log.debug("{} The incoming JWT successfully verified", getLogPrefix());
+        return true;
     }
 }
