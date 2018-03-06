@@ -34,11 +34,12 @@ import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.logic.AbstractRelyingPartyPredicate;
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
+import org.geant.idpextension.oidc.config.OIDCUserInfoConfiguration;
 import org.opensaml.profile.context.ProfileRequestContext;
 
 /** A predicate implementation that forwards to {@link OIDCCoreProtocolConfiguration#getPairwiseSubject()}. */
 public class PairwiseSubjectPredicate extends AbstractRelyingPartyPredicate {
-    
+
     /** {@inheritDoc} */
     @SuppressWarnings("rawtypes")
     @Override
@@ -49,8 +50,12 @@ public class PairwiseSubjectPredicate extends AbstractRelyingPartyPredicate {
             if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
                 return ((OIDCCoreProtocolConfiguration) pc).getPairwiseSubject().apply(input);
             }
+            // TODO: fix this inheritance awkwardness
+            if (pc != null && pc instanceof OIDCUserInfoConfiguration) {
+                return ((OIDCUserInfoConfiguration) pc).getPairwiseSubject().apply(input);
+            }
         }
-        
+
         return false;
     }
 
