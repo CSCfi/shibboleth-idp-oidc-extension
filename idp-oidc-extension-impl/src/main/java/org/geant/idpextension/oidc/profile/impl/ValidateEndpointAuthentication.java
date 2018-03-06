@@ -140,7 +140,8 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
         final TokenRequest request = getTokenRequest();
         final OIDCClientInformation clientInformation = oidcMetadataContext.getClientInformation();
         final OIDCClientMetadata clientMetadata = clientInformation.getOIDCMetadata();
-        final ClientAuthenticationMethod clientAuthMethod = clientMetadata.getTokenEndpointAuthMethod();
+        final ClientAuthenticationMethod clientAuthMethod = clientMetadata.getTokenEndpointAuthMethod() != null ? 
+                clientMetadata.getTokenEndpointAuthMethod() : ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
         final ClientAuthentication clientAuth = request.getClientAuthentication();
         if (clientAuthMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)) {
             if ((clientAuth instanceof ClientSecretBasic)) {
@@ -163,22 +164,18 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
         } else if (clientAuthMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_JWT)) {
             if (clientAuth instanceof ClientSecretJWT) {
                 final ClientSecretJWT secretJwt = (ClientSecretJWT) clientAuth;
-                final String clientAssertionType = request.getCustomParameter("client_assertion_type");
-                if (!"urn:ietf:params:oauth:client-assertion-type:jwt-bearer".equals(clientAssertionType)) {
-                    log.warn("{} Unrecognized client assertion type {}", getLogPrefix(), clientAssertionType);
-                } else {
-                    final SignedJWT jwt = secretJwt.getClientAssertion();
-                    try {
-                        final JWSVerifier verifier = new MACVerifier(clientInformation.getSecret().getValue());
-                        if (jwt.verify(verifier)) {
-                            log.debug("{} The incoming JWT successfully verified", getLogPrefix());
-                            return;
-                        } else {
-                            log.warn("{} The incoming JWT could not be verified", getLogPrefix());
-                        }
-                    } catch (JOSEException e) {
-                        log.error("{} Exception caught during the JWT validation", getLogPrefix(), e);
+                //TODO: make sure that Nimbus checks client_assertion_type
+                final SignedJWT jwt = secretJwt.getClientAssertion();
+                try {
+                    final JWSVerifier verifier = new MACVerifier(clientInformation.getSecret().getValue());
+                    if (jwt.verify(verifier)) {
+                        log.debug("{} The incoming JWT successfully verified", getLogPrefix());
+                        return;
+                    } else {
+                        log.warn("{} The incoming JWT could not be verified", getLogPrefix());
                     }
+                } catch (JOSEException e) {
+                    log.error("{} Exception caught during the JWT validation", getLogPrefix(), e);
                 }
             }
             //TODO: check tid
