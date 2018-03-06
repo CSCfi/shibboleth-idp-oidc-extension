@@ -276,6 +276,14 @@
             p:beanPostProcessors-ref="shibboleth.IdentifiableBeanPostProcessor"
             p:beanFactoryPostProcessors-ref="shibboleth.PropertySourcesPlaceholderConfigurer" />
 
+- name: Add claims splitting predicates for attribute resolver to services.xml
+  blockinfile:
+    dest: "{{ idp_home }}/conf/services.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK  for OIDC Claim Splitting -->"
+    insertafter: "AttributeResolverResources"
+    content: |
+        <value>%{idp.home}/conf/oidc-resolver-predicates.xml</value>
+        
 - name: Add OIDC name identifier generation to services.xml
   blockinfile:
     dest: "{{ idp_home }}/conf/services.xml"
@@ -287,14 +295,14 @@
             <value>%{idp.home}/system/conf/oidc-subject-system.xml</value>
         </util:list>
      
-
-- name: Copy relying-party.xml, oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
+- name: Copy oidc-resolver-predicates.xml, relying-party.xml, oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "oidc-subject.xml"
     - "oidc-subject.properties"
     - "oidc-relying-party.xml"
     - "relying-party.xml"
+    - "oidc-resolver-predicates.xml"
 
 - name: Add oidc-subject.properties to included confs in idp.properties
   lineinfile:
