@@ -25,6 +25,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.geant.idpextension.oidc.profile.logic;
 
 import javax.annotation.Nonnull;
@@ -33,9 +34,7 @@ import javax.annotation.Nullable;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
-import org.geant.idpextension.oidc.config.logic.PairwiseSubjectPredicate;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultOIDCMetadataContextLookupFunction;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
@@ -47,8 +46,8 @@ import com.google.common.base.Function;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 
 /**
- * Function to select subject type derived from an entity's oidc metadata or
- * configuration preferences if not in metadata.
+ * Function to select subject type derived from an entity's oidc metadata or configuration preferences if not in
+ * metadata.
  * 
  */
 @SuppressWarnings("rawtypes")
@@ -61,7 +60,7 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
     /** Strategy function to lookup OIDC metadata context . */
     @Nonnull
     private Function<ProfileRequestContext, OIDCMetadataContext> oidcMetadataContextLookupStrategy;
-    
+
     /** Strategy function to lookup RelyingPartyContext. */
     @Nonnull
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
@@ -73,33 +72,29 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
         oidcMetadataContextLookupStrategy = new DefaultOIDCMetadataContextLookupFunction();
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
     }
-    
+
     /**
      * Set the lookup strategy to use to locate the {@link RelyingPartyContext}.
      * 
-     * @param strategy
-     *            lookup function to use
+     * @param strategy lookup function to use
      */
     public void setRelyingPartyContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
 
-        relyingPartyContextLookupStrategy = Constraint.isNotNull(strategy,
-                "RelyingPartyContext lookup strategy cannot be null");
+        relyingPartyContextLookupStrategy =
+                Constraint.isNotNull(strategy, "RelyingPartyContext lookup strategy cannot be null");
     }
 
     /**
      * Set the lookup strategy to use to locate the {@link OIDCMetadataContext}.
      * 
-     * @param strategy
-     *            lookup function to use
+     * @param strategy lookup function to use
      */
     public void setOIDCMetadataContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, OIDCMetadataContext> strategy) {
-        oidcMetadataContextLookupStrategy = Constraint.isNotNull(strategy,
-                "OIDCMetadata lookup strategy cannot be null");
+        oidcMetadataContextLookupStrategy =
+                Constraint.isNotNull(strategy, "OIDCMetadata lookup strategy cannot be null");
     }
-    
-    
 
     /** {@inheritDoc} */
     @Override
