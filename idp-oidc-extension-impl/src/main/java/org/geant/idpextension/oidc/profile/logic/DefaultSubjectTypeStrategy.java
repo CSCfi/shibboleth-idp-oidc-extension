@@ -35,6 +35,7 @@ import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
+import org.geant.idpextension.oidc.config.OIDCUserInfoConfiguration;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultOIDCMetadataContextLookupFunction;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
@@ -113,6 +114,10 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
                 final ProfileConfiguration pc = rpc.getProfileConfig();
                 if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
                     pairwise = ((OIDCCoreProtocolConfiguration) pc).getPairwiseSubject().apply(input);
+                }
+                // TODO: fix this inheritance awkwardness
+                if (pc != null && pc instanceof OIDCUserInfoConfiguration) {
+                    pairwise = ((OIDCUserInfoConfiguration) pc).getPairwiseSubject().apply(input);
                 }
             }
             type = pairwise ? SubjectType.PAIRWISE : SubjectType.PUBLIC;
