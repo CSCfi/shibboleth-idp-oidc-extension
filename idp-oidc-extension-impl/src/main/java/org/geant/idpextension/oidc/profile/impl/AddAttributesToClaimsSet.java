@@ -155,10 +155,12 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
             for (final AttributeEncoder<?> encoder : encoders) {
                 try {
                     if (encoder instanceof AbstractOIDCAttributeEncoder) {
-                        // TODO: missing a activation condition check for
-                        // encoder!
+                        if (encoder.getActivationCondition() != null
+                                && !encoder.getActivationCondition().apply(profileRequestContext)) {
+                            log.debug("{} Encoder not active", getLogPrefix());
+                            continue;
+                        }
                         JSONObject obj = (JSONObject) encoder.encode(attribute);
-                        // There should be exactly one key
                         for (String name : obj.keySet()) {
                             log.debug("Adding claim {} with value {}", name, obj.get(name));
                             claimsSet.setClaim(name, obj.get(name));
