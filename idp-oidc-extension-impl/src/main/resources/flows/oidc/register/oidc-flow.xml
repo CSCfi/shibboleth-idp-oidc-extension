@@ -38,6 +38,7 @@
         <evaluate expression="AddResponseTypesToClientMetadata" />
         <evaluate expression="AddSubjectTypeToClientMetadata" />
         <evaluate expression="AddContactsToClientMetadata" />
+        <evaluate expression="AddJwksToClientMetadata" />
         <evaluate expression="AddTokenEndpointAuthMethodsToClientMetadata" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="HandleOutboundMessage" />

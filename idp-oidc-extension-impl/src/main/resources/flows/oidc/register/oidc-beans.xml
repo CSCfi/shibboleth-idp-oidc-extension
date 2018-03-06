@@ -99,6 +99,10 @@
         class="org.geant.idpextension.oidc.profile.impl.AddResponseTypesToClientMetadata"
         scope="prototype" />
 
+    <bean id="AddJwksToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddJwksToClientMetadata"
+        scope="prototype" />
+
     <bean id="shibboleth.oidc.ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
         scope="prototype" p:id="OIDCClientInformationManager"
