@@ -55,7 +55,6 @@ import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 /**
  * Action that forms outbound message based on token request and response context. Formed message is set to
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
- *
  */
 @SuppressWarnings("rawtypes")
 public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseAction {
@@ -145,11 +144,9 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return;
         }
-        // TODO: refresh token handling is missing totally
         // TODO: refactoring..has duplicate functionality to
         // FormOutboundAuthenticationResponseMessage..
-        TokenResponse resp =
-                new OIDCTokenResponse(new OIDCTokens(idToken, accessToken, null/* RefreshToken refreshToken */));
+        TokenResponse resp = new OIDCTokenResponse(new OIDCTokens(idToken, accessToken, null));
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
 }
