@@ -4,6 +4,7 @@
 
     <action-state id="InitializeMandatoryContexts">
         <evaluate expression="InitializeProfileRequestContext" />
+        <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="DecodeMessage" />
     </action-state>
@@ -20,7 +21,6 @@
     </action-state>
 
     <action-state id="OutboundContextsAndSecurityParameters">
-        <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="ValidateEndpointAuthentication" />
         <evaluate expression="ValidateAuthorizeCode" />
         <evaluate expression="ValidateRedirectURI" />
