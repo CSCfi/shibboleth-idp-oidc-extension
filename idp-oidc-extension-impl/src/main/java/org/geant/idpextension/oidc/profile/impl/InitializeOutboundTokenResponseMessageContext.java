@@ -43,6 +43,6 @@ import com.nimbusds.oauth2.sdk.TokenResponse;
  * @event {@link IdPEventIds#INVALID_RELYING_PARTY_CTX}
  */
 public class InitializeOutboundTokenResponseMessageContext
-        extends AbstractInitializeOutboundResponseMessageContextForRP<TokenResponse> {
+        extends AbstractInitializeOutboundResponseMessageContext<TokenResponse> {
 
 }
