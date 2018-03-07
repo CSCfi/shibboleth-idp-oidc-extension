@@ -61,13 +61,13 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
     private Logger log = LoggerFactory.getLogger(FormOutboundAuthenticationResponseMessage.class);
 
     /**
-     * Returns signed (preferred) or non signed id token.
+     * Returns signed (preferred) or non signed id token if such exists.
      * 
      * @return id token.
      */
     private JWT getIdToken() {
         JWT jwt = getOidcResponseContext().getSignedIDToken();
-        if (jwt == null) {
+        if (jwt == null && getOidcResponseContext().getIDToken() != null) {
             try {
                 jwt = new PlainJWT(getOidcResponseContext().getIDToken().toJWTClaimsSet());
             } catch (ParseException e) {
