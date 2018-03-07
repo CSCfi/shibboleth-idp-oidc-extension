@@ -60,61 +60,18 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
     @Nonnull
     private Logger log = LoggerFactory.getLogger(FormOutboundAuthenticationResponseMessage.class);
 
-    /** if id token should be signed or not. */
-    private boolean signedToken = true;
-
-    /** Strategy function to lookup RelyingPartyContext. */
-    @Nonnull
-    private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
-
-    /** Default constructor. */
-    public FormOutboundAuthenticationResponseMessage() {
-        relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
-
-    }
-
     /**
-     * Set the lookup strategy to use to locate the {@link RelyingPartyContext}.
-     * 
-     * @param strategy lookup function to use
-     */
-    public void setRelyingPartyContextLookupStrategy(
-            @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
-
-        relyingPartyContextLookupStrategy =
-                Constraint.isNotNull(strategy, "RelyingPartyContext lookup strategy cannot be null");
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        if (!super.doPreExecute(profileRequestContext)) {
-            log.error("{} pre-execute failed", getLogPrefix());
-            return false;
-        }
-        final RelyingPartyContext rpc = relyingPartyContextLookupStrategy.apply(profileRequestContext);
-        if (rpc != null) {
-            final ProfileConfiguration pc = rpc.getProfileConfig();
-            if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
-                signedToken = ((OIDCCoreProtocolConfiguration) pc).getSignIDTokens().apply(profileRequestContext);
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Returns signed (preferred) or non signed id token. Returns null if signed token is expected but not available.
+     * Returns signed (preferred) or non signed id token.
      * 
      * @return id token.
      */
     private JWT getIdToken() {
         JWT jwt = getOidcResponseContext().getSignedIDToken();
-        if (!signedToken) {
+        if (jwt == null) {
             try {
                 jwt = new PlainJWT(getOidcResponseContext().getIDToken().toJWTClaimsSet());
             } catch (ParseException e) {
-                log.error("{} error parsing claimset", getLogPrefix());
+                log.error("{} error parsing claimset for id token", getLogPrefix());
             }
         }
         return jwt;
@@ -130,19 +87,10 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
             return;
         }
-        AuthenticationResponse resp = null;
-        JWT idToken = null;
-        if (getAuthenticationRequest().getResponseType().contains(OIDCResponseTypeValue.ID_TOKEN)) {
-            idToken = getIdToken();
-            if (idToken == null) {
-                log.error("{} unable to provide id token (required)", getLogPrefix());
-                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-                return;
-            }
-        }
-        resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
-                getOidcResponseContext().getAuthorizationCode(), idToken, null, getAuthenticationRequest().getState(),
-                null, getAuthenticationRequest().getResponseMode());
+        AuthenticationResponse resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
+                getOidcResponseContext().getAuthorizationCode(), getIdToken(),
+                getOidcResponseContext().getAccessToken(), getAuthenticationRequest().getState(), null,
+                getAuthenticationRequest().getResponseMode());
         log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
