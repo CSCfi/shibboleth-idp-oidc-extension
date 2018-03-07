@@ -1,235 +1,243 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:c="http://www.springframework.org/schema/c" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
-	default-init-method="initialize" default-destroy-method="destroy">
+    default-init-method="initialize" default-destroy-method="destroy">
 
-	<bean id="InitializeProfileRequestContext"
-		class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
-		scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/sso/browser"
-		p:loggingId="%{idp.service.logging.saml2sso:SSO}" p:browserProfile="true" />
+    <bean id="InitializeProfileRequestContext" class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
+        scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/sso/browser" p:loggingId="%{idp.service.logging.saml2sso:SSO}"
+        p:browserProfile="true" />
 
-	<bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage"
-		scope="prototype">
-		<constructor-arg>
-			<bean
-				class="org.geant.idpextension.oidc.decoding.impl.OIDCAuthenticationRequestDecoder"
-				scope="prototype" p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
-		</constructor-arg>
-	</bean>
+    <bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage" scope="prototype">
+        <constructor-arg>
+            <bean class="org.geant.idpextension.oidc.decoding.impl.OIDCAuthenticationRequestDecoder" scope="prototype"
+                p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
+        </constructor-arg>
+    </bean>
 
-	<bean id="InitializeAuthenticationContext"
-		class="org.geant.idpextension.oidc.profile.impl.InitializeAuthenticationContext"
-		scope="prototype" />
+    <bean id="InitializeAuthenticationContext" class="org.geant.idpextension.oidc.profile.impl.InitializeAuthenticationContext"
+        scope="prototype" />
 
-	<bean id="ProcessRequestedAuthnContext"
-		class="org.geant.idpextension.oidc.profile.impl.ProcessRequestedAuthnContext"
-		scope="prototype" />
+    <bean id="ProcessRequestedAuthnContext" class="org.geant.idpextension.oidc.profile.impl.ProcessRequestedAuthnContext"
+        scope="prototype" />
 
-	<bean id="InitializeRelyingPartyContext"
-		class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext"
-		scope="prototype" />
+    <bean id="InitializeRelyingPartyContext" class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext"
+        scope="prototype" />
 
-	<bean id="SelectRelyingPartyConfiguration"
-		class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
-		scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+    <bean id="SelectRelyingPartyConfiguration" class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
+        scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
 
-	<bean id="SelectProfileConfiguration"
-		class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
-		scope="prototype" />
+    <bean id="SelectProfileConfiguration" class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration" scope="prototype" />
 
-	<bean id="PopulateUserAgentContext"
-		class="net.shibboleth.idp.profile.impl.PopulateUserAgentContext"
-		scope="prototype" p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
+    <bean id="PopulateUserAgentContext" class="net.shibboleth.idp.profile.impl.PopulateUserAgentContext" scope="prototype"
+        p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
 
-	<bean id="OIDCMetadataLookup"
-		class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor"
-		scope="prototype" c:executionDirection="INBOUND">
-		<constructor-arg name="messageHandler">
-			<bean
-				class="org.geant.idpextension.oidc.profile.impl.OIDCMetadataLookupHandler"
-				scope="prototype">
-				<property name="clientInformationResolver">
-					<ref bean="shibboleth.ClientInformationResolver" />
-				</property>
-			</bean>
-		</constructor-arg>
-	</bean>
+    <bean id="OIDCMetadataLookup" class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor" scope="prototype"
+        c:executionDirection="INBOUND">
+        <constructor-arg name="messageHandler">
+            <bean class="org.geant.idpextension.oidc.profile.impl.OIDCMetadataLookupHandler" scope="prototype">
+                <property name="clientInformationResolver">
+                    <ref bean="shibboleth.ClientInformationResolver" />
+                </property>
+            </bean>
+        </constructor-arg>
+    </bean>
 
-	<bean id="SetRequestedSubjectToResponseContext"
-		class="org.geant.idpextension.oidc.profile.impl.SetRequestedSubjectToResponseContext"
-		scope="prototype" />
+    <bean id="SetRequestedSubjectToResponseContext" class="org.geant.idpextension.oidc.profile.impl.SetRequestedSubjectToResponseContext"
+        scope="prototype" />
 
-	<bean id="SetRequestedClaimsToResponseContext"
-		class="org.geant.idpextension.oidc.profile.impl.SetRequestedClaimsToResponseContext"
-		scope="prototype" />
+    <bean id="SetRequestedClaimsToResponseContext" class="org.geant.idpextension.oidc.profile.impl.SetRequestedClaimsToResponseContext"
+        scope="prototype" />
 
-	<bean id="VerifyRequestedSubjectIdentifier"
-		class="org.geant.idpextension.oidc.profile.impl.VerifyRequestedSubjectIdentifier"
-		scope="prototype" />
+    <bean id="VerifyRequestedSubjectIdentifier" class="org.geant.idpextension.oidc.profile.impl.VerifyRequestedSubjectIdentifier"
+        scope="prototype" />
 
-	<bean id="PopulatePostAuthnInterceptContext"
-		class="net.shibboleth.idp.profile.interceptor.impl.PopulateProfileInterceptorContext"
-		scope="prototype" p:availableFlows-ref="shibboleth.AvailableInterceptFlows">
-		<property name="activeFlowsLookupStrategy">
-			<bean
-				class="net.shibboleth.idp.authn.config.navigate.PostAuthenticationFlowsLookupFunction" />
-		</property>
-	</bean>
+    <bean id="PopulatePostAuthnInterceptContext" class="net.shibboleth.idp.profile.interceptor.impl.PopulateProfileInterceptorContext"
+        scope="prototype" p:availableFlows-ref="shibboleth.AvailableInterceptFlows">
+        <property name="activeFlowsLookupStrategy">
+            <bean class="net.shibboleth.idp.authn.config.navigate.PostAuthenticationFlowsLookupFunction" />
+        </property>
+    </bean>
 
-	<bean id="InitializeOutboundMessageContext"
-		class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundAuthenticationResponseMessageContext"
-		scope="prototype" />
+    <bean id="InitializeOutboundMessageContext" class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundAuthenticationResponseMessageContext"
+        scope="prototype" />
 
-	<bean id="ValidateRedirectURI"
-		class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
-		scope="prototype" />
+    <bean id="ValidateRedirectURI" class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI" scope="prototype" />
 
-	<bean id="ValidateResponseType"
-		class="org.geant.idpextension.oidc.profile.impl.ValidateResponseType"
-		scope="prototype" />
+    <bean id="ValidateResponseType" class="org.geant.idpextension.oidc.profile.impl.ValidateResponseType" scope="prototype" />
 
-	<bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope"
-		scope="prototype" />
+    <bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope" scope="prototype" />
 
-	<bean id="PopulateIDTokenSignatureSigningParameters"
-		class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters"
-		scope="prototype" p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
-		p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
-		<property name="activationCondition">
-			<bean
-				class="org.geant.idpextension.oidc.config.logic.SignIDTokensPredicate" />
-		</property>
-		<property name="securityParametersContextLookupStrategy">
-			<bean class="com.google.common.base.Functions" factory-method="compose"
-				c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
-		</property>
-		<property name="existingParametersContextLookupStrategy">
-			<bean class="com.google.common.base.Functions" factory-method="compose"
-				c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
-		</property>
-	</bean>
+    <bean id="PopulateIDTokenSignatureSigningParameters" class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters"
+        scope="prototype" p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
+        p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
+        <property name="activationCondition">
+            <bean parent="shibboleth.Conditions.AND">
+                <constructor-arg>
+                    <bean class="org.geant.idpextension.oidc.config.logic.SignIDTokensPredicate" />
+                </constructor-arg>
+                <constructor-arg>
+                    <ref bean="IDTokenRequested" />
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="securityParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+        <property name="existingParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
+        </property>
+    </bean>
 
-	<bean id="SetAuthorizationCodeToResponseContext"
-		class="org.geant.idpextension.oidc.profile.impl.SetAuthorizationCodeToResponseContext"
-		scope="prototype" c:sealer-ref="authorizeCodeSealer">
-		<property name="identifierGeneratorLookupStrategy">
-			<bean
-				class="net.shibboleth.idp.profile.config.navigate.IdentifierGenerationStrategyLookupFunction"
-				p:defaultIdentifierGenerationStrategy-ref="shibboleth.DefaultIdentifierGenerationStrategy" />
-		</property>
-	</bean>
+    <bean id="SetAuthorizationCodeToResponseContext" class="org.geant.idpextension.oidc.profile.impl.SetAuthorizationCodeToResponseContext"
+        scope="prototype" c:sealer-ref="authorizeCodeSealer">
+        <property name="identifierGeneratorLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.config.navigate.IdentifierGenerationStrategyLookupFunction"
+                p:defaultIdentifierGenerationStrategy-ref="shibboleth.DefaultIdentifierGenerationStrategy" />
+        </property>
+        <property name="activationCondition">
+            <ref bean="AuthorizeCodeRequested" />
+        </property>
+    </bean>
 
-	<bean id="authorizeCodeSealer" lazy-init="true"
-		class="net.shibboleth.utilities.java.support.security.DataSealer"
-		p:keyStrategy-ref="shibboleth.DataSealerKeyStrategy" p:encoder-ref="acBase64Codec"
-		p:decoder-ref="acBase64Codec" />
+    <bean id="SetAccessTokenToResponseContext" class="org.geant.idpextension.oidc.profile.impl.SetAccessTokenToResponseContext"
+        scope="prototype" c:sealer-ref="authorizeCodeSealer">
+        <property name="activationCondition">
+            <ref bean="AccessTokenRequested" />
+        </property>
+    </bean>
 
-	<bean id="acBase64Codec" class="org.apache.commons.codec.binary.Base64"
-		c:lineLength="0" c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
+    <bean id="authorizeCodeSealer" lazy-init="true" class="net.shibboleth.utilities.java.support.security.DataSealer"
+        p:keyStrategy-ref="shibboleth.DataSealerKeyStrategy" p:encoder-ref="acBase64Codec" p:decoder-ref="acBase64Codec" />
 
-	<bean id="SetNameIDToResponseContext"
-		class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext"
-		scope="prototype">
-		<property name="subjectTypeLookupStrategy">
-			<bean
-				class="org.geant.idpextension.oidc.profile.logic.DefaultSubjectTypeStrategy" />
-		</property>
-		<property name="nameIDGenerator">
-			<bean class="net.shibboleth.idp.saml.nameid.impl.ProxySAML2NameIDGenerator"
-				c:service-ref="shibboleth.oidc.NameIdentifierGenerationService" />
-		</property>
-	</bean>
+    <bean id="acBase64Codec" class="org.apache.commons.codec.binary.Base64" c:lineLength="0" c:lineSeparator="#{new byte[] {10} }"
+        c:urlSafe="true" />
 
-	<bean id="SetAuthenticationTimeToResponseContext"
-		class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationTimeToResponseContext"
-		scope="prototype"></bean>
+    <bean id="SetNameIDToResponseContext" class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext"
+        scope="prototype">
+        <property name="subjectTypeLookupStrategy">
+            <bean class="org.geant.idpextension.oidc.profile.logic.DefaultSubjectTypeStrategy" />
+        </property>
+        <property name="nameIDGenerator">
+            <bean class="net.shibboleth.idp.saml.nameid.impl.ProxySAML2NameIDGenerator" c:service-ref="shibboleth.oidc.NameIdentifierGenerationService" />
+        </property>
+    </bean>
 
-	<bean id="SetAuthenticationContextClassReferenceToResponseContext"
-		class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationContextClassReferenceToResponseContext"
-		scope="prototype">
-		<property name="classRefLookupStrategy">
-			<bean
-				class="net.shibboleth.idp.authn.principal.DefaultPrincipalDeterminationStrategy"
-				c:type="org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal"
-				p:weightMap="#{getObject('shibboleth.AuthenticationPrincipalWeightMap')}">
-				<constructor-arg name="principal">
-					<bean
-						class="org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal"
-						c:classRef="#{T(org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal).UNSPECIFIED}" />
-				</constructor-arg>
-			</bean>
-		</property>
-	</bean>
+    <bean id="SetAuthenticationTimeToResponseContext" class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationTimeToResponseContext"
+        scope="prototype"></bean>
 
-	<bean id="AddIDTokenShell"
-		class="org.geant.idpextension.oidc.profile.impl.AddIDTokenShell"
-		scope="prototype" p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple"></bean>
+    <bean id="SetAuthenticationContextClassReferenceToResponseContext" class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationContextClassReferenceToResponseContext"
+        scope="prototype">
+        <property name="classRefLookupStrategy">
+            <bean class="net.shibboleth.idp.authn.principal.DefaultPrincipalDeterminationStrategy" c:type="org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal"
+                p:weightMap="#{getObject('shibboleth.AuthenticationPrincipalWeightMap')}">
+                <constructor-arg name="principal">
+                    <bean class="org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal"
+                        c:classRef="#{T(org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal).UNSPECIFIED}" />
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
 
-	<bean id="AddAttributeClaimsToIDToken"
-		class="org.geant.idpextension.oidc.profile.impl.AddAttributesToClaimsSet"
-		scope="prototype"></bean>
+    <bean id="AddIDTokenShell" class="org.geant.idpextension.oidc.profile.impl.AddIDTokenShell" scope="prototype"
+        p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple">
+        <property name="activationCondition">
+            <ref bean="IDTokenRequested" />
+        </property>
+    </bean>
 
-	<bean id="AddAuthTimeToIDToken"
-		class="org.geant.idpextension.oidc.profile.impl.AddAuthTimeToIDToken"
-		scope="prototype"></bean>
+    <bean id="AddAttributeClaimsToIDToken" class="org.geant.idpextension.oidc.profile.impl.AddAttributesToClaimsSet"
+        scope="prototype">
+        <property name="activationCondition">
+            <ref bean="IDTokenRequested" />
+        </property>
+    </bean>
 
-	<bean id="AddAcrToIDToken"
-		class="org.geant.idpextension.oidc.profile.impl.AddAcrToIDToken"
-		scope="prototype"></bean>
+    <bean id="AddAuthTimeToIDToken" class="org.geant.idpextension.oidc.profile.impl.AddAuthTimeToIDToken" scope="prototype">
+        <property name="activationCondition">
+            <ref bean="IDTokenRequested" />
+        </property>
+    </bean>
 
-	<bean id="AddNonceToIDToken"
-		class="org.geant.idpextension.oidc.profile.impl.AddNonceToIDToken"
-		scope="prototype"></bean>
+    <bean id="AddAcrToIDToken" class="org.geant.idpextension.oidc.profile.impl.AddAcrToIDToken" scope="prototype">
+        <property name="activationCondition">
+            <ref bean="IDTokenRequested" />
+        </property>
+    </bean>
 
-	<bean id="SignIDToken" class="org.geant.idpextension.oidc.profile.impl.SignIDToken"
-		scope="prototype">
-		<property name="securityParametersLookupStrategy">
-			<bean class="com.google.common.base.Functions" factory-method="compose"
-				c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
-		</property>
-	</bean>
+    <bean id="AddNonceToIDToken" class="org.geant.idpextension.oidc.profile.impl.AddNonceToIDToken" scope="prototype">
+        <property name="activationCondition">
+            <ref bean="IDTokenRequested" />
+        </property>
+    </bean>
 
-	<bean id="FormOutboundMessage"
-		class="org.geant.idpextension.oidc.profile.impl.FormOutboundAuthenticationResponseMessage"
-		scope="prototype" />
+    <bean id="SignIDToken" class="org.geant.idpextension.oidc.profile.impl.SignIDToken" scope="prototype">
+        <property name="securityParametersLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+        <property name="activationCondition">
+            <ref bean="IDTokenRequested" />
+        </property>
+    </bean>
 
-	<bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes"
-		scope="prototype" c:resolverService-ref="shibboleth.AttributeResolverService"
-		p:maskFailures="%{idp.service.attribute.resolver.maskFailures:true}" />
+    <bean id="FormOutboundMessage" class="org.geant.idpextension.oidc.profile.impl.FormOutboundAuthenticationResponseMessage"
+        scope="prototype" />
 
-	<bean id="FilterAttributes" class="net.shibboleth.idp.profile.impl.FilterAttributes"
-		scope="prototype" c:filterService-ref="shibboleth.AttributeFilterService"
-		p:maskFailures="%{idp.service.attribute.filter.maskFailures:true}" />
+    <bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes" scope="prototype"
+        c:resolverService-ref="shibboleth.AttributeResolverService" p:maskFailures="%{idp.service.attribute.resolver.maskFailures:true}" />
 
-	<bean id="shibboleth.Encoders.OIDCResponseEncoder"
-		class="org.geant.idpextension.oidc.encoding.impl.OIDCAuthenticationResponseEncoder"
-		scope="prototype" init-method="" p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
+    <bean id="FilterAttributes" class="net.shibboleth.idp.profile.impl.FilterAttributes" scope="prototype"
+        c:filterService-ref="shibboleth.AttributeFilterService" p:maskFailures="%{idp.service.attribute.filter.maskFailures:true}" />
 
-	<bean id="EncodeMessage"
-		class="org.geant.idpextension.oidc.profile.action.impl.EncodeMessage"
-		scope="prototype" p:messageEncoder-ref="shibboleth.Encoders.OIDCResponseEncoder" />
+    <bean id="shibboleth.Encoders.OIDCResponseEncoder" class="org.geant.idpextension.oidc.encoding.impl.OIDCAuthenticationResponseEncoder"
+        scope="prototype" init-method="" p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
 
-	<bean id="BuildErrorResponseFromEvent"
-		class="org.geant.idpextension.oidc.profile.impl.BuildAuthenticationErrorResponseFromEvent"
-		scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse">
-		<property name="eventContextLookupStrategy">
-			<bean
-				class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
-		</property>
-		<property name="mappedErrors">
-			<map value-type="com.nimbusds.oauth2.sdk.ErrorObject">
-				<entry
-					key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_RESPONSE_TYPE}"
-					value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).UNSUPPORTED_RESPONSE_TYPE}" />
-			</map>
-		</property>
-	</bean>
+    <bean id="EncodeMessage" class="org.geant.idpextension.oidc.profile.action.impl.EncodeMessage" scope="prototype"
+        p:messageEncoder-ref="shibboleth.Encoders.OIDCResponseEncoder" />
 
-	<bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
-		scope="prototype" />
+    <bean id="BuildErrorResponseFromEvent" class="org.geant.idpextension.oidc.profile.impl.BuildAuthenticationErrorResponseFromEvent"
+        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>
+        <property name="mappedErrors">
+            <map value-type="com.nimbusds.oauth2.sdk.ErrorObject">
+                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_RESPONSE_TYPE}" value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).UNSUPPORTED_RESPONSE_TYPE}" />
+            </map>
+        </property>
+    </bean>
+
+    <bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete" scope="prototype" />
+
+    <bean id="IDTokenRequested" parent="shibboleth.Conditions.Expression">
+        <constructor-arg>
+            <value>
+                #profileContext.getInboundMessageContext().getMessage().getResponseType().contains(T(com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue).ID_TOKEN)
+            </value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="AccessTokenRequested" parent="shibboleth.Conditions.Expression">
+        <constructor-arg>
+            <value>
+                #profileContext.getInboundMessageContext().getMessage().getResponseType().contains(T(com.nimbusds.oauth2.sdk.ResponseType.Value).TOKEN)
+            </value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="AuthorizeCodeRequested" parent="shibboleth.Conditions.Expression">
+        <constructor-arg>
+            <value>
+                #profileContext.getInboundMessageContext().getMessage().getResponseType().contains(T(com.nimbusds.oauth2.sdk.ResponseType.Value).CODE)
+            </value>
+        </constructor-arg>
+    </bean>
+
+
 </beans>
