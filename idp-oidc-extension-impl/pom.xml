@@ -46,6 +46,10 @@
             <artifactId>idp-attribute-filter-impl</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-ui</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.geant.fedoidc</groupId>
             <artifactId>oidcfederatedmetadatastatement</artifactId>
         </dependency>
