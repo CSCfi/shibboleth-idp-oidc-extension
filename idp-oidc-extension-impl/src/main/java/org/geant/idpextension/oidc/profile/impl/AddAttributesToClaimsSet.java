@@ -126,7 +126,9 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
+        if (!super.doPreExecute(profileRequestContext)) {
+            return false;
+        }
         attributeCtx = attributeContextLookupStrategy.apply(profileRequestContext);
         if (attributeCtx == null) {
             log.debug("{} No AttributeSubcontext available, nothing to do", getLogPrefix());
@@ -138,7 +140,7 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        return super.doPreExecute(profileRequestContext);
+        return true;
     }
 
     /** {@inheritDoc} */
