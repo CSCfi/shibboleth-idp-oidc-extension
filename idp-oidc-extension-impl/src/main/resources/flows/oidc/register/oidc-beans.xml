@@ -103,6 +103,18 @@
         class="org.geant.idpextension.oidc.profile.impl.AddJwksToClientMetadata"
         scope="prototype" />
 
+    <bean id="AddLogoUrisToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddLogoUrisToClientMetadata"
+        scope="prototype" />
+
+    <bean id="AddPolicyUrisToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddPolicyUrisToClientMetadata"
+        scope="prototype" />
+
+    <bean id="AddTosUrisToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddTosUrisToClientMetadata"
+        scope="prototype" />
+
     <bean id="shibboleth.oidc.ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
         scope="prototype" p:id="OIDCClientInformationManager"

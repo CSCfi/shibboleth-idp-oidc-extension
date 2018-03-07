@@ -40,6 +40,9 @@
         <evaluate expression="AddContactsToClientMetadata" />
         <evaluate expression="AddJwksToClientMetadata" />
         <evaluate expression="AddTokenEndpointAuthMethodsToClientMetadata" />
+        <evaluate expression="AddLogoUrisToClientMetadata" />
+        <evaluate expression="AddPolicyUrisToClientMetadata" />
+        <evaluate expression="AddTosUrisToClientMetadata" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="HandleOutboundMessage" />
     </action-state>
