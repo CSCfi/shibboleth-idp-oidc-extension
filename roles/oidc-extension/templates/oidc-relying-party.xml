@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd" default-init-method="initialize" default-destroy-method="destroy">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+    default-init-method="initialize" default-destroy-method="destroy">
 
     <!-- This is one of the few properties we rely on that has no default. -->
     <!-- needed to share common credentials.xml file with saml -->
@@ -15,86 +19,109 @@
     </util:map>
 
     <!-- Lookup method to select responder id -->
-    <bean id="profileResponderIdLookupFunction" class="org.geant.idpextension.oidc.profile.context.navigate.ProfileResponderIdLookupFunction" p:defaultResponder="#{getObject('entityID')}" p:profileResponders-ref="profileResponders" />
+    <bean id="profileResponderIdLookupFunction" class="org.geant.idpextension.oidc.profile.context.navigate.ProfileResponderIdLookupFunction"
+        p:defaultResponder="#{getObject('entityID')}" p:profileResponders-ref="profileResponders" />
 
-    <!--  OIDC Profile Configurations. -->
-    <bean id="OIDC.SSO" class="org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration" p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}" p:iDTokenLifetime="%{idp.oidc.idToken.defaultLifetime:PT1H}" p:accessTokenLifetime="%{idp.oidc.accessToken.defaultLifetime:PT1H}" p:authorizeCodeLifetime="%{idp.oidc.authorizeCode.defaultLifetime:PT5M}" p:servletRequest-ref="shibboleth.HttpServletRequest" />
-    <bean id="OIDC.UserInfo" class="org.geant.idpextension.oidc.config.OIDCUserInfoConfiguration" p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}" p:servletRequest-ref="shibboleth.HttpServletRequest" />
-    <bean id="OIDC.Registration" class="org.geant.idpextension.oidc.config.OIDCDynamicRegistrationConfiguration" p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}" p:servletRequest-ref="shibboleth.HttpServletRequest" />
+    <!-- OIDC Profile Configurations. -->
+    <bean id="OIDC.SSO" class="org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration"
+        p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
+        p:iDTokenLifetime="%{idp.oidc.idToken.defaultLifetime:PT1H}" p:accessTokenLifetime="%{idp.oidc.accessToken.defaultLifetime:PT1H}"
+        p:authorizeCodeLifetime="%{idp.oidc.authorizeCode.defaultLifetime:PT5M}" p:servletRequest-ref="shibboleth.HttpServletRequest" />
+    <bean id="OIDC.UserInfo" class="org.geant.idpextension.oidc.config.OIDCUserInfoConfiguration"
+        p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
+        p:servletRequest-ref="shibboleth.HttpServletRequest" />
+    <!-- Refresh tokens are not supported. Do not turn it on in OIDC.Registration -->
+    <bean id="OIDC.Registration" class="org.geant.idpextension.oidc.config.OIDCDynamicRegistrationConfiguration"
+        p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
+        p:refreshTokensEnabled="false" p:servletRequest-ref="shibboleth.HttpServletRequest" />
 
-    <!--
-    Security Configuration Defaults
+    <!-- Security Configuration Defaults These settings establish the default security configurations for signatures and 
+        loads the default credentials used. -->
 
-    These settings establish the default security configurations for signatures
-    and loads the default credentials used.
-    -->
-    
     <bean id="shibboleth.oidc.DefaultSecurityConfiguration" class="net.shibboleth.idp.profile.config.SecurityConfiguration">
         <property name="signatureSigningConfiguration">
             <ref bean="#{'%{idp.oidc.signing.config:shibboleth.SigningConfiguration.RS256}'.trim()}" />
         </property>
     </bean>
-    
-    <bean id="shibboleth.SigningConfiguration.RS256" parent="shibboleth.BasicSignatureSigningConfiguration" p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+
+    <bean id="shibboleth.SigningConfiguration.RS256" parent="shibboleth.BasicSignatureSigningConfiguration"
+        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
         <property name="signatureAlgorithms">
             <list>
-                <util:constant static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_256" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_256" />
             </list>
         </property>
     </bean>
-    <bean id="shibboleth.SigningConfiguration.RS384" parent="shibboleth.BasicSignatureSigningConfiguration" p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.SigningConfiguration.RS384" parent="shibboleth.BasicSignatureSigningConfiguration"
+        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
         <property name="signatureAlgorithms">
             <list>
-                <util:constant static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_384" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_384" />
             </list>
         </property>
     </bean>
-    <bean id="shibboleth.SigningConfiguration.RS512" parent="shibboleth.BasicSignatureSigningConfiguration" p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.SigningConfiguration.RS512" parent="shibboleth.BasicSignatureSigningConfiguration"
+        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
         <property name="signatureAlgorithms">
             <list>
-                <util:constant static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_512" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_512" />
             </list>
         </property>
     </bean>
-    <bean id="shibboleth.SigningConfiguration.ES256" parent="shibboleth.BasicSignatureSigningConfiguration" p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.SigningConfiguration.ES256" parent="shibboleth.BasicSignatureSigningConfiguration"
+        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
         <property name="signatureAlgorithms">
             <list>
-                <util:constant static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_256" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_256" />
             </list>
         </property>
     </bean>
-    <bean id="shibboleth.SigningConfiguration.ES384" parent="shibboleth.BasicSignatureSigningConfiguration" p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.SigningConfiguration.ES384" parent="shibboleth.BasicSignatureSigningConfiguration"
+        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
         <property name="signatureAlgorithms">
             <list>
-                <util:constant static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_384" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_384" />
             </list>
         </property>
     </bean>
-    <bean id="shibboleth.SigningConfiguration.ES512" parent="shibboleth.BasicSignatureSigningConfiguration" p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.SigningConfiguration.ES512" parent="shibboleth.BasicSignatureSigningConfiguration"
+        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
         <property name="signatureAlgorithms">
             <list>
-                <util:constant static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_512" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_512" />
             </list>
         </property>
     </bean>
-    <bean id="shibboleth.SigningConfiguration.HS256" parent="shibboleth.BasicSignatureSigningConfiguration" p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.SigningConfiguration.HS256" parent="shibboleth.BasicSignatureSigningConfiguration"
+        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
         <property name="signatureAlgorithms">
             <list>
-                <util:constant static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_256" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_256" />
             </list>
         </property>
     </bean>
-    <bean id="shibboleth.SigningConfiguration.HS384" parent="shibboleth.BasicSignatureSigningConfiguration" p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.SigningConfiguration.HS384" parent="shibboleth.BasicSignatureSigningConfiguration"
+        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
         <property name="signatureAlgorithms">
             <list>
-                <util:constant static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_384" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_384" />
             </list>
         </property>
     </bean>
-    <bean id="shibboleth.SigningConfiguration.HS512" parent="shibboleth.BasicSignatureSigningConfiguration" p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.SigningConfiguration.HS512" parent="shibboleth.BasicSignatureSigningConfiguration"
+        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
         <property name="signatureAlgorithms">
             <list>
-                <util:constant static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_512" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_512" />
             </list>
         </property>
     </bean>
