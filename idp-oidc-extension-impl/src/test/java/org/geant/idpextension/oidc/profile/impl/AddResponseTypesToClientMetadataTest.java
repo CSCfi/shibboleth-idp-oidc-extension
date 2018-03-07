@@ -30,8 +30,10 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.opensaml.profile.action.EventIds;
@@ -61,6 +63,18 @@ public class AddResponseTypesToClientMetadataTest extends BaseOIDCClientMetadata
         Predicate<ProfileRequestContext> predicate = Predicates.alwaysTrue();
         newAction.setAuthorizationCodeFlowEnabled(predicate);
         newAction.setImplicitFlowEnabled(predicate);
+        Map<ResponseType, Predicate<ProfileRequestContext>>supportedResponseTypes = new HashMap<>();
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.CODE), predicate);
+        supportedResponseTypes.put(new ResponseType(OIDCResponseTypeValue.ID_TOKEN), predicate);
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.TOKEN, OIDCResponseTypeValue.ID_TOKEN), 
+                predicate);
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN), 
+                predicate);
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.CODE, ResponseType.Value.TOKEN), 
+                predicate);
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.CODE, ResponseType.Value.TOKEN, 
+                OIDCResponseTypeValue.ID_TOKEN), predicate);
+        newAction.setSupportedResponseTypes(supportedResponseTypes);
         return newAction;
     }
     
@@ -84,7 +98,8 @@ public class AddResponseTypesToClientMetadataTest extends BaseOIDCClientMetadata
 
     @Test
     public void testNotSupported() throws ComponentInitializationException {
-        testResponseTypes(Arrays.asList(new ResponseType[] { new ResponseType(OIDCResponseTypeValue.NONE) }), EventIds.INVALID_MESSAGE,
+        testResponseTypes(Arrays.asList(new ResponseType[] { new ResponseType(OIDCResponseTypeValue.NONE) }), 
+                EventIds.INVALID_MESSAGE,
                 new ResponseType(OIDCResponseTypeValue.NONE));
     }
 
@@ -96,7 +111,8 @@ public class AddResponseTypesToClientMetadataTest extends BaseOIDCClientMetadata
     
     @Test
     public void testToken() throws ComponentInitializationException {
-        testResponseTypes(new ResponseType(ResponseType.Value.TOKEN));
+        testResponseTypes(new ArrayList<ResponseType>(), EventIds.INVALID_MESSAGE, 
+                new ResponseType(ResponseType.Value.TOKEN));
     }
 
     @Test
@@ -111,20 +127,21 @@ public class AddResponseTypesToClientMetadataTest extends BaseOIDCClientMetadata
     
     @Test
     public void testTwo() throws ComponentInitializationException {
-        testResponseTypes(new ResponseType(OIDCResponseTypeValue.ID_TOKEN), new ResponseType(ResponseType.Value.CODE));
+        testResponseTypes(new ResponseType(OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.CODE));
     }
 
     @Test
     public void testAll() throws ComponentInitializationException {
-        testResponseTypes(new ResponseType(OIDCResponseTypeValue.ID_TOKEN), 
-                new ResponseType(ResponseType.Value.CODE), new ResponseType(ResponseType.Value.TOKEN));
+        testResponseTypes(new ResponseType(OIDCResponseTypeValue.ID_TOKEN, ResponseType.Value.CODE, 
+                ResponseType.Value.TOKEN)); 
     }
 
     protected void testResponseTypes(ResponseType... responseTypes) throws ComponentInitializationException {
         testResponseTypes(new ArrayList<ResponseType>(), null, responseTypes);
     }
 
-    protected void testResponseTypes(List<ResponseType> ignoredTypes, String expectedEventId, ResponseType... responseTypes) 
+    protected void testResponseTypes(List<ResponseType> ignoredTypes, String expectedEventId, 
+            ResponseType... responseTypes) 
             throws ComponentInitializationException {
         OIDCClientMetadata request = new OIDCClientMetadata();
         request.setResponseTypes(new HashSet<ResponseType>(Arrays.asList(responseTypes)));

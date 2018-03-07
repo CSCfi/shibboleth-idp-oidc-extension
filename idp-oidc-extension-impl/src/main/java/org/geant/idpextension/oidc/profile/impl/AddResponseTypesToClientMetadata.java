@@ -53,13 +53,21 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
  * An action that adds response_types to the OIDC client metadata.
+ * 
+ * The default set of supported response_types as defined in the OIDC registration specification:
+ * code: if authorization_code enabled
+ * id_token: if implicit enabled
+ * token id_token: if implicit enabled
+ * code id_token: if both authorization_code, implicit enabled
+ * code token: if both authorization_code, implicit enabled
+ * code token id_token: if both authorization_code, implicit enabled
  */
 @SuppressWarnings("rawtypes")
 public class AddResponseTypesToClientMetadata extends AbstractOIDCClientMetadataPopulationAction {
 
     /** Class logger. */
     @Nonnull
-    private final Logger log = LoggerFactory.getLogger(AddRedirectUrisToClientMetadata.class);
+    private final Logger log = LoggerFactory.getLogger(AddResponseTypesToClientMetadata.class);
     
     /** Predicate used to indicate whether authorization code flow is enabled. */
     @Nonnull private Predicate<ProfileRequestContext> authorizationCodeFlowPredicate;
@@ -74,17 +82,25 @@ public class AddResponseTypesToClientMetadata extends AbstractOIDCClientMetadata
     public AddResponseTypesToClientMetadata() {
         authorizationCodeFlowPredicate = new AuthorizationCodeFlowEnabledPredicate();
         implicitFlowPredicate = new ImplicitFlowEnabledPredicate();
+
+        supportedResponseTypes = new HashMap<>();
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.CODE), authorizationCodeFlowPredicate);
+        supportedResponseTypes.put(new ResponseType(OIDCResponseTypeValue.ID_TOKEN), implicitFlowPredicate);
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.TOKEN, OIDCResponseTypeValue.ID_TOKEN), 
+                implicitFlowPredicate);
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.CODE, OIDCResponseTypeValue.ID_TOKEN), 
+                Predicates.and(implicitFlowPredicate, authorizationCodeFlowPredicate));
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.CODE, ResponseType.Value.TOKEN), 
+                Predicates.and(implicitFlowPredicate, authorizationCodeFlowPredicate));
+        supportedResponseTypes.put(new ResponseType(ResponseType.Value.CODE, ResponseType.Value.TOKEN, 
+                OIDCResponseTypeValue.ID_TOKEN), 
+                Predicates.and(implicitFlowPredicate, authorizationCodeFlowPredicate));
     }
     
     /** {@inheritDoc} */
     protected void doInitialize() throws ComponentInitializationException {
-        supportedResponseTypes = new HashMap<>();
-        supportedResponseTypes.put(new ResponseType(ResponseType.Value.CODE), authorizationCodeFlowPredicate);
-        supportedResponseTypes.put(new ResponseType(ResponseType.Value.TOKEN), Predicates.or(implicitFlowPredicate, 
-                authorizationCodeFlowPredicate));
-        supportedResponseTypes.put(new ResponseType(OIDCResponseTypeValue.ID_TOKEN), implicitFlowPredicate);        
+        super.doInitialize();
     }
-
     
     /**
      * Get predicate used to indicate whether authorization code flow is enabled.
@@ -126,6 +142,14 @@ public class AddResponseTypesToClientMetadata extends AbstractOIDCClientMetadata
      */
     public void setSupportedResponseTypes(final Map<ResponseType, Predicate<ProfileRequestContext>> types) {
         supportedResponseTypes = Constraint.isNotNull(types, "Supported response types cannot be null!");
+    }
+    
+    /**
+     * Get map of supported response types and their corresponding predicates.
+     * @return Map of supported response types and their corresponding predicates.
+     */
+    public Map<ResponseType, Predicate<ProfileRequestContext>> getSupportedResponseTypes() {
+        return supportedResponseTypes;
     }
     
     /** {@inheritDoc} */
