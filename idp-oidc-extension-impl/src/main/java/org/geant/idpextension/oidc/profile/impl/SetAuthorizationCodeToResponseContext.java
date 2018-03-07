@@ -59,9 +59,9 @@ import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGene
 
 /**
  * Action that creates a Authorization Code, and sets it to work context
- * {@link OIDCAuthenticationResponseContext#getAuthorizationCode()} located
- * under {@link ProfileRequestContext#getOutboundMessageContext()}. The code is
- * not created if the requested response type equals to "id_token".
+ * {@link OIDCAuthenticationResponseContext#getAuthorizationCode()} located under
+ * {@link ProfileRequestContext#getOutboundMessageContext()}. The code is not created if the requested response type
+ * equals to "id_token".
  *
  */
 @SuppressWarnings("rawtypes")
@@ -92,14 +92,13 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     /** Strategy used to locate the {@link IdentifierGenerationStrategy} to use. */
     @Nonnull
     private Function<ProfileRequestContext, IdentifierGenerationStrategy> idGeneratorLookupStrategy;
-    
+
     /**
-     * Strategy used to locate the {@link RelyingPartyContext} associated with a
-     * given {@link ProfileRequestContext}.
+     * Strategy used to locate the {@link RelyingPartyContext} associated with a given {@link ProfileRequestContext}.
      */
     @Nonnull
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
-    
+
     /**
      * Constructor.
      */
@@ -115,42 +114,37 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     }
 
     /**
-     * Set the strategy used to locate the {@link RelyingPartyContext} associated
-     * with a given {@link ProfileRequestContext}.
+     * Set the strategy used to locate the {@link RelyingPartyContext} associated with a given
+     * {@link ProfileRequestContext}.
      * 
-     * @param strategy
-     *            strategy used to locate the {@link RelyingPartyContext} associated
-     *            with a given {@link ProfileRequestContext}
+     * @param strategy strategy used to locate the {@link RelyingPartyContext} associated with a given
+     *            {@link ProfileRequestContext}
      */
     public void setRelyingPartyContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
 
-        relyingPartyContextLookupStrategy = Constraint.isNotNull(strategy,
-                "RelyingPartyContext lookup strategy cannot be null");
+        relyingPartyContextLookupStrategy =
+                Constraint.isNotNull(strategy, "RelyingPartyContext lookup strategy cannot be null");
     }
-    
+
     /**
-     * Set the strategy used to locate the {@link IdentifierGenerationStrategy} to
-     * use.
+     * Set the strategy used to locate the {@link IdentifierGenerationStrategy} to use.
      * 
-     * @param strategy
-     *            lookup strategy
+     * @param strategy lookup strategy
      */
     public void setIdentifierGeneratorLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, IdentifierGenerationStrategy> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
 
-        idGeneratorLookupStrategy = Constraint.isNotNull(strategy,
-                "IdentifierGenerationStrategy lookup strategy cannot be null");
+        idGeneratorLookupStrategy =
+                Constraint.isNotNull(strategy, "IdentifierGenerationStrategy lookup strategy cannot be null");
     }
 
-    
     /**
      * Set the strategy used to locate the issuer value to use.
      * 
-     * @param strategy
-     *            lookup strategy
+     * @param strategy lookup strategy
      */
     public void setIssuerLookupStrategy(@Nonnull final Function<ProfileRequestContext, String> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
@@ -192,22 +186,23 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        if (!getAuthenticationRequest().getResponseType().impliesImplicitFlow()) {
-            Date dateExp = new Date(System.currentTimeMillis() + authCodeLifetime);
-            AuthorizeCodeClaimsSet claimsSet = new AuthorizeCodeClaimsSet(idGenerator,
-                    getAuthenticationRequest().getClientID(), issuerLookupStrategy.apply(profileRequestContext),
-                    subjectCtx.getPrincipalName(), getOidcResponseContext().getAcr(), new Date(), dateExp,
-                    getAuthenticationRequest().getNonce(), getOidcResponseContext().getAuthTime(),
-                    getOidcResponseContext().getRedirectURI(), getAuthenticationRequest().getScope(),
-                    getAuthenticationRequest().getClaims());
-            try {
-                getOidcResponseContext().setAuthorizationCode(claimsSet.serialize(dataSealer));
-                log.debug("{} Setting authz code {} as {} to response context ", getLogPrefix(), claimsSet.serialize(),
-                        getOidcResponseContext().getAuthorizationCode());
-            } catch (DataSealerException e) {
-                log.error("{} Authorization Code generation failed {}", getLogPrefix(), e.getMessage());
-                ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_ENCRYPT);
-            }
+        Date dateExp = new Date(System.currentTimeMillis() + authCodeLifetime);
+        AuthorizeCodeClaimsSet claimsSet =
+                new AuthorizeCodeClaimsSet(idGenerator, getAuthenticationRequest().getClientID(),
+                        issuerLookupStrategy.apply(profileRequestContext), subjectCtx.getPrincipalName(),
+                        getOidcResponseContext().getAcr(), new Date(), dateExp, getAuthenticationRequest().getNonce(),
+                        getOidcResponseContext().getAuthTime(), getOidcResponseContext().getRedirectURI(),
+                        getAuthenticationRequest().getScope(), getAuthenticationRequest().getClaims());
+        // We set token claims set to response context for possible access token generation.
+        // TODO: consider renaming setTokenClaimsSet method, confusing.
+        getOidcResponseContext().setTokenClaimsSet(claimsSet);
+        try {
+            getOidcResponseContext().setAuthorizationCode(claimsSet.serialize(dataSealer));
+            log.debug("{} Setting authz code {} as {} to response context ", getLogPrefix(), claimsSet.serialize(),
+                    getOidcResponseContext().getAuthorizationCode());
+        } catch (DataSealerException e) {
+            log.error("{} Authorization Code generation failed {}", getLogPrefix(), e.getMessage());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_ENCRYPT);
         }
 
     }
