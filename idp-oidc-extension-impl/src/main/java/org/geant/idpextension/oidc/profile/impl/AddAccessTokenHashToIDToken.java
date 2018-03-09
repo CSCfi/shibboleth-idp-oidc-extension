@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.openid.connect.sdk.claims.AccessTokenHash;
+import com.nimbusds.openid.connect.sdk.claims.CodeHash;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
@@ -59,13 +60,16 @@ public class AddAccessTokenHashToIDToken extends AbstractOIDCSigningResponseActi
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return;
         }
+        AccessTokenHash atHash = AccessTokenHash.compute(getOidcResponseContext().getAccessToken(),
+                new JWSAlgorithm(signatureSigningParameters.getSignatureAlgorithm()));
+        if (atHash == null || atHash.getValue() == null) {
+            log.error("{} Not able to generate at_hash using algorithm {}", getLogPrefix(),
+                    signatureSigningParameters.getSignatureAlgorithm());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_SEC_CFG);
+            return;
+        }
         log.debug("{} Setting access token hash to id token", getLogPrefix());
-        getOidcResponseContext().getIDToken()
-                .setClaim(IDTokenClaimsSet.AT_HASH_CLAIM_NAME,
-                        AccessTokenHash
-                                .compute(getOidcResponseContext().getAccessToken(),
-                                        new JWSAlgorithm(signatureSigningParameters.getSignatureAlgorithm()))
-                                .getValue());
+        getOidcResponseContext().getIDToken().setClaim(IDTokenClaimsSet.AT_HASH_CLAIM_NAME, atHash.getValue());
         log.debug("{} Updated token {}", getLogPrefix(),
                 getOidcResponseContext().getIDToken().toJSONObject().toJSONString());
 

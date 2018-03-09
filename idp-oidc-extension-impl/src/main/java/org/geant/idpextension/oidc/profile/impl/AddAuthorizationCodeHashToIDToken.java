@@ -34,7 +34,12 @@ import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.openid.connect.sdk.claims.CodeHash;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
@@ -58,13 +63,16 @@ public class AddAuthorizationCodeHashToIDToken extends AbstractOIDCSigningRespon
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return;
         }
+        CodeHash cHash = CodeHash.compute(getOidcResponseContext().getAuthorizationCode(),
+                new JWSAlgorithm(signatureSigningParameters.getSignatureAlgorithm()));
+        if (cHash == null || cHash.getValue() == null) {
+            log.error("{} Not able to generate c_hash using algorithm {}", getLogPrefix(),
+                    signatureSigningParameters.getSignatureAlgorithm());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_SEC_CFG);
+            return;
+        }
         log.debug("{} Setting authz code hash to id token", getLogPrefix());
-        getOidcResponseContext().getIDToken()
-                .setClaim(
-                        IDTokenClaimsSet.C_HASH_CLAIM_NAME, CodeHash
-                                .compute(getOidcResponseContext().getAuthorizationCode(),
-                                        new JWSAlgorithm(signatureSigningParameters.getSignatureAlgorithm()))
-                                .getValue());
+        getOidcResponseContext().getIDToken().setClaim(IDTokenClaimsSet.C_HASH_CLAIM_NAME, cHash.getValue());
         log.debug("{} Updated token {}", getLogPrefix(),
                 getOidcResponseContext().getIDToken().toJSONObject().toJSONString());
 
