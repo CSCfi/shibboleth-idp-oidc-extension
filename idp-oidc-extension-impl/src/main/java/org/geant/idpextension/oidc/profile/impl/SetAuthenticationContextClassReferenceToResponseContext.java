@@ -46,9 +46,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 
 /**
- * Action that sets authentication context class reference to work context
- * {@link OIDCAuthenticationResponseContext} located under
- * {@link ProfileRequestContext#getOutboundMessageContext()}.
+ * Action that sets authentication context class reference to work context {@link OIDCAuthenticationResponseContext}
+ * located under {@link ProfileRequestContext#getOutboundMessageContext()}.
  *
  */
 @SuppressWarnings("rawtypes")
@@ -67,18 +66,16 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
     private Function<ProfileRequestContext, AuthenticationContextClassReferencePrincipal> classRefLookupStrategy;
 
     /**
-     * Set the strategy function to use to obtain the authentication context
-     * class reference to use.
+     * Set the strategy function to use to obtain the authentication context class reference to use.
      * 
-     * @param strategy
-     *            authentication context class reference lookup strategy
+     * @param strategy authentication context class reference lookup strategy
      */
     public void setClassRefLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, AuthenticationContextClassReferencePrincipal> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
 
-        classRefLookupStrategy = Constraint.isNotNull(strategy,
-                "Authentication context class reference strategy cannot be null");
+        classRefLookupStrategy =
+                Constraint.isNotNull(strategy, "Authentication context class reference strategy cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -87,10 +84,10 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
         super.doInitialize();
 
         if (classRefLookupStrategy == null) {
-            classRefLookupStrategy = new DefaultPrincipalDeterminationStrategy<>(
-                    AuthenticationContextClassReferencePrincipal.class,
-                    new AuthenticationContextClassReferencePrincipal(
-                            AuthenticationContextClassReferencePrincipal.UNSPECIFIED));
+            classRefLookupStrategy =
+                    new DefaultPrincipalDeterminationStrategy<>(AuthenticationContextClassReferencePrincipal.class,
+                            new AuthenticationContextClassReferencePrincipal(
+                                    AuthenticationContextClassReferencePrincipal.UNSPECIFIED));
         }
     }
 
@@ -113,10 +110,9 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         String name = null;
-        if (requestedPrincipalContext != null
-                && requestedPrincipalContext.getMatchingPrincipal() != null
-                && requestedPrincipalContext.getMatchingPrincipal() instanceof 
-                AuthenticationContextClassReferencePrincipal) {
+        if (requestedPrincipalContext != null && requestedPrincipalContext.getMatchingPrincipal() != null
+                && requestedPrincipalContext
+                        .getMatchingPrincipal() instanceof AuthenticationContextClassReferencePrincipal) {
             name = requestedPrincipalContext.getMatchingPrincipal().getName();
             log.debug("{} Setting acr based on requested ctx", getLogPrefix());
         } else {
