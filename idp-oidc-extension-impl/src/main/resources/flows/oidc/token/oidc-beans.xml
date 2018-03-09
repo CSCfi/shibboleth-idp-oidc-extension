@@ -115,10 +115,6 @@
         class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters"
         scope="prototype" p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
         p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
-        <property name="activationCondition">
-            <bean
-                class="org.geant.idpextension.oidc.config.logic.SignIDTokensPredicate" />
-        </property>
         <property name="securityParametersContextLookupStrategy">
             <bean class="com.google.common.base.Functions"
                 factory-method="compose"

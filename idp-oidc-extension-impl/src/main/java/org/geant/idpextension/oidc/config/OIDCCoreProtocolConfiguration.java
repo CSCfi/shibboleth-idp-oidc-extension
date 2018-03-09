@@ -87,11 +87,7 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
     /** Enables post-authentication interceptor flows. */
     @Nonnull @NonnullElements private List<String> postAuthenticationFlows;
     
-    /** Predicate used to determine if the generated id token should be signed. Default returns true. */
-    @SuppressWarnings("rawtypes")
-    @Nonnull private Predicate<ProfileRequestContext> signIDTokensPredicate;
-    
-    /** Predicate used to determine if the generated subject is pairwise. Default returns false. */
+    /** Predicate used to determine if the default subject is pairwise. Default returns false. */
     @SuppressWarnings("rawtypes")
     @Nonnull private Predicate<ProfileRequestContext> pairwiseSubject;
     
@@ -141,45 +137,15 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
         postAuthenticationFlows = Collections.emptyList();
         defaultAuthenticationContexts = Collections.emptyList();
         nameIDFormatPrecedence = Collections.emptyList();
-        signIDTokensPredicate = Predicates.alwaysTrue();
         pairwiseSubject = Predicates.alwaysFalse();
         idTokenLifetime = 5 * 60 * 1000;
         authorizeCodeLifetime = 5 * 60 * 1000;
         accessTokenLifetime = 5 * 60 * 1000;
         refreshTokenLifetime = 5 * 60 * 1000;
     }
-
-
-    
     
     /**
-     * Get the predicate used to determine if generated id tokens should be
-     * signed.
-     * 
-     * @return predicate to determine signing of id token.
-     */
-    @SuppressWarnings("rawtypes")
-    @Nonnull
-    public Predicate<ProfileRequestContext> getSignIDTokens() {
-        return signIDTokensPredicate;
-    }
-
-    /**
-     * Set the predicate used to determine if generated id tokens should be
-     * signed.
-     * 
-     * @param predicate
-     *            predicate used to determine if generated responses should be
-     *            signed
-     */
-    @SuppressWarnings("rawtypes")
-    public void setSignIDTokens(@Nonnull final Predicate<ProfileRequestContext> predicate) {
-        signIDTokensPredicate = Constraint.isNotNull(predicate,
-                "Predicate to determine if id tokens should be signed cannot be null");
-    }
-    
-    /**
-     * Get the predicate used to determine if subject should be pairwise.
+     * Get the predicate used to determine if default subject should be pairwise.
      * 
      * @return predicate to determine if subject should be pairwise.
      */
@@ -190,7 +156,7 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
     }
 
     /**
-     * Set the predicate used to determine if subject should be pairwise.
+     * Set the predicate used to determine if default subject should be pairwise.
      * 
      * @param predicate
      *            predicate used to determine if subject should be pairwise

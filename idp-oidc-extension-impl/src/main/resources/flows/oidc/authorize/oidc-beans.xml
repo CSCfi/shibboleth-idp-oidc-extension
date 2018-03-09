@@ -75,14 +75,7 @@
         scope="prototype" p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
         p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
         <property name="activationCondition">
-            <bean parent="shibboleth.Conditions.AND">
-                <constructor-arg>
-                    <bean class="org.geant.idpextension.oidc.config.logic.SignIDTokensPredicate" />
-                </constructor-arg>
-                <constructor-arg>
-                    <ref bean="IDTokenRequested" />
-                </constructor-arg>
-            </bean>
+            <ref bean="IDTokenRequested" />
         </property>
         <property name="securityParametersContextLookupStrategy">
             <bean class="com.google.common.base.Functions" factory-method="compose"
