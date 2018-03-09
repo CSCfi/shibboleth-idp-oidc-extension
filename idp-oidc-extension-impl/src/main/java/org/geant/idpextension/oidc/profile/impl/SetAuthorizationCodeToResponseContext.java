@@ -60,8 +60,7 @@ import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGene
 /**
  * Action that creates a Authorization Code, and sets it to work context
  * {@link OIDCAuthenticationResponseContext#getAuthorizationCode()} located under
- * {@link ProfileRequestContext#getOutboundMessageContext()}. The code is not created if the requested response type
- * equals to "id_token".
+ * {@link ProfileRequestContext#getOutboundMessageContext()}.
  *
  */
 @SuppressWarnings("rawtypes")
