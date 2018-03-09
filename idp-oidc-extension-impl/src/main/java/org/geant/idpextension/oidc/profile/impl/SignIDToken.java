@@ -39,8 +39,8 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 
 /**
- * Action that signs {@link IDTokenClaimsSet} and sets it to
- * {@link OidcResponseContext#getSignedIDToken}
+ * Action that signs {@link IDTokenClaimsSet} and sets it to {@link OidcResponseContext#getSignedIDToken}. Actions fails
+ * silently if there are no signing parameters available.
  *
  */
 public class SignIDToken extends AbstractSignJWTAction {
@@ -53,7 +53,8 @@ public class SignIDToken extends AbstractSignJWTAction {
 
     /** {@inheritDoc} */
     @Override
-    protected boolean doPreExecute(@SuppressWarnings("rawtypes") @Nonnull final ProfileRequestContext profileRequestContext) {
+    protected boolean
+            doPreExecute(@SuppressWarnings("rawtypes") @Nonnull final ProfileRequestContext profileRequestContext) {
 
         if (!super.doPreExecute(profileRequestContext)) {
             return false;
@@ -73,7 +74,6 @@ public class SignIDToken extends AbstractSignJWTAction {
         return true;
     }
 
-    
     /**
      * Sets id token claims as input for signing.
      * 
@@ -83,12 +83,11 @@ public class SignIDToken extends AbstractSignJWTAction {
     protected JWTClaimsSet getClaimsSetToSign() {
         return idTokenClaims;
     }
-    
+
     /**
      * Set signed id token to response context.
      * 
-     * @param jwt
-     *            signed id token.
+     * @param jwt signed id token.
      */
     @Override
     protected void setSignedJWT(SignedJWT jwt) {
