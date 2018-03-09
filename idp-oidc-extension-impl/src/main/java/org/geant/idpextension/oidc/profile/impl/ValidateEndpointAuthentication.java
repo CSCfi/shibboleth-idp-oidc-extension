@@ -240,6 +240,10 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
     protected boolean enabledAndEquals(final List<ClientAuthenticationMethod> enabledMethods, 
             final ClientAuthenticationMethod requestedMethod, final ClientAuthenticationMethod desiredMethod) {
         if (requestedMethod.equals(desiredMethod)) {
+            if (enabledMethods == null || enabledMethods.isEmpty()) {
+                log.warn("{} List of enabled methods is empty, all methods are disabled", getLogPrefix());
+                return false;
+            }
             if (!enabledMethods.contains(requestedMethod)) {
                 log.warn("{} The requested method {} is not enabled", getLogPrefix(), requestedMethod);
                 return false;
