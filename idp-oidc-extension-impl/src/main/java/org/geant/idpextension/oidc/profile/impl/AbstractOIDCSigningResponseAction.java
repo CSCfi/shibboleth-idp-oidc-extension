@@ -84,7 +84,6 @@ public abstract class AbstractOIDCSigningResponseAction extends AbstractOIDCResp
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         if (!super.doPreExecute(profileRequestContext)) {
-            log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
 
