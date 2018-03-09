@@ -81,6 +81,8 @@
         <evaluate expression="AddAuthTimeToIDToken" />
         <evaluate expression="AddAcrToIDToken" />
         <evaluate expression="AddNonceToIDToken" />
+        <evaluate expression="AddAccessTokenHashToIDToken" />
+        <evaluate expression="AddAuthorizationCodeHashToIDToken" />
         <evaluate expression="SignIDToken" />
         <evaluate expression="FormOutboundMessage" />
         <evaluate expression="'proceed'" />

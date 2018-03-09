@@ -176,6 +176,42 @@
         </property>
     </bean>
 
+    <bean id="AddAccessTokenHashToIDToken" class="org.geant.idpextension.oidc.profile.impl.AddAccessTokenHashToIDToken"
+        scope="prototype">
+        <property name="securityParametersLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+        <property name="activationCondition">
+            <bean parent="shibboleth.Conditions.AND">
+                <constructor-arg>
+                    <ref bean="AccessTokenRequested" />
+                </constructor-arg>
+                <constructor-arg>
+                    <ref bean="IDTokenRequested" />
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="AddAuthorizationCodeHashToIDToken" class="org.geant.idpextension.oidc.profile.impl.AddAuthorizationCodeHashToIDToken"
+        scope="prototype">
+        <property name="securityParametersLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+        <property name="activationCondition">
+            <bean parent="shibboleth.Conditions.AND">
+                <constructor-arg>
+                    <ref bean="AuthorizeCodeRequested" />
+                </constructor-arg>
+                <constructor-arg>
+                    <ref bean="IDTokenRequested" />
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
     <bean id="SignIDToken" class="org.geant.idpextension.oidc.profile.impl.SignIDToken" scope="prototype">
         <property name="securityParametersLookupStrategy">
             <bean class="com.google.common.base.Functions" factory-method="compose"
