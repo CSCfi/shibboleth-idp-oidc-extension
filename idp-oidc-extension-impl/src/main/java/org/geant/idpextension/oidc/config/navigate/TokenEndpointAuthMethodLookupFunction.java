@@ -31,7 +31,7 @@ package org.geant.idpextension.oidc.config.navigate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.geant.idpextension.oidc.config.OIDCDynamicRegistrationConfiguration;
+import org.geant.idpextension.oidc.config.AbstractOIDCFlowAwareProfileConfiguration;
 import org.opensaml.profile.context.ProfileRequestContext;
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
@@ -41,7 +41,7 @@ import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.AbstractRelyingPartyLookupFunction;
 
 /**
- * A function that obtains {@link OIDCDynamicRegistrationConfiguration#getTokenEndpointAuthMethods()}
+ * A function that obtains {@link AbstractOIDCFlowAwareProfileConfiguration#getTokenEndpointAuthMethods()}
  * if such a profile is available from a {@link RelyingPartyContext} obtained via a lookup function,
  * by default a child of the {@link ProfileRequestContext}. That result is then transformed into a list
  * of {@link ClientAuthenticationMethod}s.
@@ -57,10 +57,10 @@ public class TokenEndpointAuthMethodLookupFunction
         final RelyingPartyContext rpc = getRelyingPartyContextLookupStrategy().apply(input);
         if (rpc != null) {
             final ProfileConfiguration pc = rpc.getProfileConfig();
-            if (pc != null && pc instanceof OIDCDynamicRegistrationConfiguration) {
+            if (pc != null && pc instanceof AbstractOIDCFlowAwareProfileConfiguration) {
                 final List<ClientAuthenticationMethod> result = new ArrayList<>();
                 for (final String tokenAuthMethod : 
-                    ((OIDCDynamicRegistrationConfiguration)pc).getTokenEndpointAuthMethods()) {
+                    ((AbstractOIDCFlowAwareProfileConfiguration)pc).getTokenEndpointAuthMethods()) {
                     result.add(new ClientAuthenticationMethod(tokenAuthMethod));
                 }
                 return result;

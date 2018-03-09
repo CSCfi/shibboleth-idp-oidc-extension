@@ -28,27 +28,18 @@
 
 package org.geant.idpextension.oidc.config;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.opensaml.profile.context.ProfileRequestContext;
 
 import com.google.common.base.Function;
-import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 
 import net.shibboleth.utilities.java.support.annotation.Duration;
-import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
-import net.shibboleth.utilities.java.support.annotation.constraint.NotLive;
-import net.shibboleth.utilities.java.support.annotation.constraint.Unmodifiable;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.InitializableComponent;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
 /**
  * Profile configuration for the OpenID Connect dynamic client registration.
@@ -79,9 +70,6 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCFlowAwareP
     /** Client secret expiration period of dynamically registered clients. Zero means valid forever. */
     @Duration private long secretExpirationPeriod;
 
-    /** Enabled token endpoint authentication methods. */
-    @Nonnull @NonnullElements private List<String> tokenEndpointAuthMethods;
-
     /**
      * Constructor.
      */
@@ -98,12 +86,6 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCFlowAwareP
         super(profileId);
         setRegistrationValidityPeriod(0);
         setSecretExpirationPeriod(0);
-        tokenEndpointAuthMethods = new ArrayList<>();
-        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.toString());
-        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_POST.toString());
-        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.NONE.toString());
     }
 
     /** {@inheritDoc} */
@@ -181,25 +163,4 @@ public class OIDCDynamicRegistrationConfiguration extends AbstractOIDCFlowAwareP
             Long> strategy) {
         secretExpirationPeriodLookupStrategy = strategy;
     }
-    
-    /**
-     * Get the enabled token endpoint authentication methods.
-     * 
-     * @return The enabled token endpoint authentication methods.
-     */
-    @Nonnull @NonnullElements @NotLive @Unmodifiable public List<String> getTokenEndpointAuthMethods() {
-        return tokenEndpointAuthMethods;
-    }
-
-    /**
-     * Set the enabled token endpoint authentication methods.
-     * 
-     * @param methods What to set.
-     */
-    public void setTokenEndpointAuthMethods(@Nonnull @NonnullElements final Collection<String> methods) {
-        Constraint.isNotNull(methods, "Collection of methods cannot be null");
-        
-        tokenEndpointAuthMethods = new ArrayList<>(StringSupport.normalizeStringCollection(methods));
-    }
-
 }
