@@ -35,9 +35,6 @@ import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.PlainJWT;
-import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 
@@ -52,23 +49,6 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
     @Nonnull
     private Logger log = LoggerFactory.getLogger(FormOutboundAuthenticationResponseMessage.class);
 
-    /**
-     * Returns signed (preferred) or non signed id token if such exists.
-     * 
-     * @return id token.
-     */
-    private JWT getIdToken() {
-        JWT jwt = getOidcResponseContext().getSignedIDToken();
-        if (jwt == null && getOidcResponseContext().getIDToken() != null) {
-            try {
-                jwt = new PlainJWT(getOidcResponseContext().getIDToken().toJWTClaimsSet());
-            } catch (ParseException e) {
-                log.error("{} error parsing claimset for id token", getLogPrefix());
-            }
-        }
-        return jwt;
-    }
-
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override
@@ -80,7 +60,7 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
             return;
         }
         AuthenticationResponse resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
-                getOidcResponseContext().getAuthorizationCode(), getIdToken(),
+                getOidcResponseContext().getAuthorizationCode(), getOidcResponseContext().getSignedIDToken(),
                 getOidcResponseContext().getAccessToken(), getAuthenticationRequest().getState(), null,
                 getAuthenticationRequest().getResponseMode());
         log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());

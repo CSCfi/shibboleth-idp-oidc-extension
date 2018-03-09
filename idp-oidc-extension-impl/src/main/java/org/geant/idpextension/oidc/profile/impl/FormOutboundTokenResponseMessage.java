@@ -30,23 +30,13 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 
-import net.shibboleth.idp.profile.config.ProfileConfiguration;
-import net.shibboleth.idp.profile.context.RelyingPartyContext;
-import net.shibboleth.utilities.java.support.logic.Constraint;
-
-import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Function;
 import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.PlainJWT;
-import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
@@ -63,33 +53,11 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
     @Nonnull
     private Logger log = LoggerFactory.getLogger(FormOutboundTokenResponseMessage.class);
 
-    /** if id token should be signed or not. */
-    private boolean signedToken = true;
-
     /** access token for response. */
     private AccessToken accessToken;
 
-    /** Strategy function to lookup RelyingPartyContext. */
-    @Nonnull
-    private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
-
-    /** Default constructor. */
-    public FormOutboundTokenResponseMessage() {
-        relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
-
-    }
-
-    /**
-     * Set the lookup strategy to use to locate the {@link RelyingPartyContext}.
-     * 
-     * @param strategy lookup function to use
-     */
-    public void setRelyingPartyContextLookupStrategy(
-            @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
-
-        relyingPartyContextLookupStrategy =
-                Constraint.isNotNull(strategy, "RelyingPartyContext lookup strategy cannot be null");
-    }
+    /** id token for response. */
+    JWT idToken;
 
     /** {@inheritDoc} */
     @Override
@@ -99,53 +67,25 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
             log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
-        final RelyingPartyContext rpc = relyingPartyContextLookupStrategy.apply(profileRequestContext);
-        if (rpc != null) {
-            final ProfileConfiguration pc = rpc.getProfileConfig();
-            if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
-                signedToken = ((OIDCCoreProtocolConfiguration) pc).getSignIDTokens().apply(profileRequestContext);
-            }
-        }
         accessToken = getOidcResponseContext().getAccessToken();
         if (accessToken == null) {
             log.error("{} unable to provide access token (required)", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
         }
-        return true;
-    }
-
-    /**
-     * Returns signed (preferred) or non signed id token. Returns null if signed token is expected but not available.
-     * 
-     * @return id token.
-     */
-    private JWT getIdToken() {
-        JWT jwt = getOidcResponseContext().getSignedIDToken();
-        if (!signedToken) {
-            try {
-                jwt = new PlainJWT(getOidcResponseContext().getIDToken().toJWTClaimsSet());
-            } catch (ParseException e) {
-                log.error("{} error parsing claimset", getLogPrefix());
-            }
+        idToken = getOidcResponseContext().getSignedIDToken();
+        if (idToken == null) {
+            log.error("{} unable to provide id token (required)", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+            return false;
         }
-
-        return jwt;
+        return true;
     }
 
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        JWT idToken = getIdToken();
-        if (idToken == null) {
-            log.error("{} unable to provide id token (required)", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-            return;
-        }
-        // TODO: refactoring..has duplicate functionality to
-        // FormOutboundAuthenticationResponseMessage..
         TokenResponse resp = new OIDCTokenResponse(new OIDCTokens(idToken, accessToken, null));
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
