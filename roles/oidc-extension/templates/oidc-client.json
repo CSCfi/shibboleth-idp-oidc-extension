@@ -1,1 +1,1 @@
-{"scope":"openid info profile email address phone","redirect_uris":["https://192.168.0.150/static"],"client_id":"demo_rp","response_types":["code","id_token"]}
+{"scope":"openid info profile email address phone","redirect_uris":["https://192.168.0.150/static"],"client_id":"demo_rp","response_types":["code","id_token","token id_token","code id_token","code token","code token id_token"]}
