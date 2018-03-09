@@ -88,7 +88,6 @@ public abstract class AbstractOIDCFlowAwareProfileConfiguration extends Abstract
         tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_POST.toString());
         tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_JWT.toString());
         tokenEndpointAuthMethods.add(ClientAuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.NONE.toString());
     }
 
     /**
