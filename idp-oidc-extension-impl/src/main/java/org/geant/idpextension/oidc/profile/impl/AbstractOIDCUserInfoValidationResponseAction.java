@@ -69,7 +69,6 @@ abstract class AbstractOIDCUserInfoValidationResponseAction extends AbstractOIDC
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         if (!super.doPreExecute(profileRequestContext)) {
-            log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
         final MessageContext outboundMessageCtx = profileRequestContext.getOutboundMessageContext();
