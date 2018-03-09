@@ -31,18 +31,13 @@ package org.geant.idpextension.oidc.profile.impl;
 import java.security.interfaces.ECPrivateKey;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.shibboleth.utilities.java.support.component.ComponentSupport;
-import net.shibboleth.utilities.java.support.logic.Constraint;
 import org.geant.security.jwk.JWKCredential;
-import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.security.credential.Credential;
-import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.base.Function;
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -53,16 +48,14 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.opensaml.xmlsec.context.SecurityParametersContext;
 
 /**
- * Abstract action for signing JWT. The extending class is expected to set
- * claims set by implementing {@link getClaimsSetToSign}. The signed jwt is
- * received by extending class by implementing method {@link setSignedJWT}.
- *
+ * Abstract action for signing JWT. The extending class is expected to set claims set by implementing
+ * {@link getClaimsSetToSign}. The signed jwt is received by extending class by implementing method
+ * {@link setSignedJWT}.
  */
 @SuppressWarnings("rawtypes")
-public abstract class AbstractSignJWTAction extends AbstractOIDCAuthenticationResponseAction {
+public abstract class AbstractSignJWTAction extends AbstractOIDCSigningResponseAction {
 
     /** Class logger. */
     @Nonnull
@@ -71,53 +64,12 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCAuthenticationRe
     /** resolved credential. */
     private Credential credential;
 
-    /**
-     * Strategy used to locate the {@link SecurityParametersContext} to use for
-     * signing.
-     */
-    @Nonnull
-    private Function<ProfileRequestContext, SecurityParametersContext> securityParametersLookupStrategy;
-
-    /** The signature signing parameters. */
-    @Nullable
-    private SignatureSigningParameters signatureSigningParameters;
-
-    /** Constructor. */
-    public AbstractSignJWTAction() {
-        securityParametersLookupStrategy = new ChildContextLookup<>(SecurityParametersContext.class);
-    }
-
-    /**
-     * Set the strategy used to locate the {@link SecurityParametersContext} to use.
-     * 
-     * @param strategy
-     *            lookup strategy
-     */
-    public void setSecurityParametersLookupStrategy(
-            @Nonnull final Function<ProfileRequestContext, SecurityParametersContext> strategy) {
-        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-
-        securityParametersLookupStrategy = Constraint.isNotNull(strategy,
-                "SecurityParameterContext lookup strategy cannot be null");
-    }
-
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         if (!super.doPreExecute(profileRequestContext)) {
-            return false;
-        }
-
-        final SecurityParametersContext secParamCtx = securityParametersLookupStrategy.apply(profileRequestContext);
-        if (secParamCtx == null) {
-            log.debug("{} Will not sign jwt because no security parameters context is available", getLogPrefix());
-            return false;
-        }
-
-        signatureSigningParameters = secParamCtx.getSignatureSigningParameters();
-        if (signatureSigningParameters == null || signatureSigningParameters.getSigningCredential() == null) {
-            log.debug("{} Will not sign jwt because no signature signing credentials available", getLogPrefix());
+            log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
         credential = signatureSigningParameters.getSigningCredential();
@@ -127,11 +79,9 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCAuthenticationRe
     /**
      * Returns correct implementation of signer based on algorithm type.
      * 
-     * @param jwsAlgorithm
-     *            JWS algorithm
+     * @param jwsAlgorithm JWS algorithm
      * @return signer for algorithm and private key
-     * @throws JOSEException
-     *             if algorithm cannot be supported
+     * @throws JOSEException if algorithm cannot be supported
      */
     private JWSSigner getSigner(Algorithm jwsAlgorithm) throws JOSEException {
         if (JWSAlgorithm.Family.EC.contains(jwsAlgorithm)) {
@@ -147,8 +97,7 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCAuthenticationRe
     }
 
     /**
-     * Resolves kid from key name. If there is no key name and the credential is
-     * JWK, the kid is read from JWK.
+     * Resolves kid from key name. If there is no key name and the credential is JWK, the kid is read from JWK.
      * 
      * @return key names or null if not found.
      */
@@ -185,8 +134,7 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCAuthenticationRe
     /**
      * Called with signed JWT as parameter.
      * 
-     * @param jwt
-     *            signed JWT.
+     * @param jwt signed JWT.
      */
     protected abstract void setSignedJWT(@Nullable SignedJWT jwt);
 
