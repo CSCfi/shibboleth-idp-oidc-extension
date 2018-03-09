@@ -29,9 +29,12 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import java.net.MalformedURLException;
+import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import org.geant.idpextension.oidc.config.navigate.TokenEndpointAuthMethodLookupFunction;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
@@ -87,6 +90,10 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
     @Nonnull
     private Function<ProfileRequestContext, OIDCMetadataContext> oidcMetadataContextLookupStrategy;
     
+    /** Strategy to obtain enabled token endpoint authentication methods. */
+    @Nullable private Function<ProfileRequestContext, List<ClientAuthenticationMethod>> 
+        tokenEndpointAuthMethodsLookupStrategy;
+    
     /** Message replay cache instance to use. */
     @NonnullAfterInit
     private ReplayCache replayCache;
@@ -100,6 +107,7 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
     public ValidateEndpointAuthentication() {
         oidcMetadataContextLookupStrategy = Functions.compose(new ChildContextLookup<>(OIDCMetadataContext.class),
                 new InboundMessageContextLookup());
+        tokenEndpointAuthMethodsLookupStrategy = new TokenEndpointAuthMethodLookupFunction();
     }
         
     /**
@@ -113,6 +121,17 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
 
         oidcMetadataContextLookupStrategy =
                 Constraint.isNotNull(strategy, "OIDCMetadataContext lookup strategy cannot be null");
+    }
+    
+    /**
+     * Set strategy to obtain enabled token endpoint authentication methods.
+     * @param strategy What to set.
+     */
+    public void setTokenEndpointAuthMethodsLookupStrategy(@Nonnull final Function<ProfileRequestContext, 
+            List<ClientAuthenticationMethod>> strategy) {
+        tokenEndpointAuthMethodsLookupStrategy = Constraint.isNotNull(strategy, 
+                "Strategy to obtain enabled token endpoint authentication methods cannot be null");
+        
     }
     
     /**
@@ -158,10 +177,14 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
         final ClientAuthenticationMethod clientAuthMethod = clientMetadata.getTokenEndpointAuthMethod() != null ? 
                 clientMetadata.getTokenEndpointAuthMethod() : ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
         final ClientAuthentication clientAuth = request.getClientAuthentication();
-
-        //TODO: should the set of authentication methods be configurable?
-        
-        if (clientAuthMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)) {
+        final List<ClientAuthenticationMethod> enabledMethods = 
+                tokenEndpointAuthMethodsLookupStrategy.apply(profileRequestContext);
+                
+        if (enabledAndEquals(enabledMethods, clientAuthMethod, ClientAuthenticationMethod.NONE)) {
+           log.debug("{} None authentication is requested and enabled, nothing to do", getLogPrefix());
+           return;
+        } else if (enabledAndEquals(enabledMethods, clientAuthMethod, 
+                ClientAuthenticationMethod.CLIENT_SECRET_BASIC)) {
             if ((clientAuth instanceof ClientSecretBasic)) {
                 if (validateSecret((ClientSecretBasic)clientAuth, clientInformation)) {
                     return;
@@ -170,7 +193,7 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
                 log.warn("{} Unrecognized client authentication {} for client_secret_basic", getLogPrefix(), 
                         request.getClientAuthentication());
             }
-        } else if (clientAuthMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_POST)) {
+        } else if (enabledAndEquals(enabledMethods, clientAuthMethod, ClientAuthenticationMethod.CLIENT_SECRET_POST)) {
             if (clientAuth instanceof ClientSecretPost) {
                 if (validateSecret((ClientSecretPost)clientAuth, clientInformation)) {
                     return;
@@ -179,7 +202,7 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
                 log.warn("{} Unrecognized client authentication {} for client_secret_post", getLogPrefix(), 
                         request.getClientAuthentication());
             }
-        } else if (clientAuthMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_JWT)) {
+        } else if (enabledAndEquals(enabledMethods, clientAuthMethod, ClientAuthenticationMethod.CLIENT_SECRET_JWT)) {
             if (clientAuth instanceof ClientSecretJWT) {
                 final ClientSecretJWT secretJwt = (ClientSecretJWT) clientAuth;
                 //TODO: make sure that Nimbus checks client_assertion_type
@@ -189,7 +212,7 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
                     return;
                 }
             }
-        } else if (clientAuthMethod.equals(ClientAuthenticationMethod.PRIVATE_KEY_JWT)) {
+        } else if (enabledAndEquals(enabledMethods, clientAuthMethod, ClientAuthenticationMethod.PRIVATE_KEY_JWT)) {
             if (clientAuth instanceof PrivateKeyJWT) {
                 final PrivateKeyJWT keyJwt = (PrivateKeyJWT) clientAuth;
                 //TODO: make sure that Nimbus checks client_assertion_type
@@ -205,6 +228,25 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
             log.warn("{} Unsupported client authentication method {}", getLogPrefix(), clientAuth.getMethod());            
         }
         ActionSupport.buildEvent(profileRequestContext, EventIds.ACCESS_DENIED);
+    }
+    
+    /**
+     * Checks whether the requested authentication method is enabled and matching to the desired method.
+     * @param enabledMethods The list of enabled authentication method.
+     * @param requestedMethod The requested authentication method to be checked.
+     * @param desiredMethod The desired authentication method.
+     * @return True if enabled and matching, false otherwise.
+     */
+    protected boolean enabledAndEquals(final List<ClientAuthenticationMethod> enabledMethods, 
+            final ClientAuthenticationMethod requestedMethod, final ClientAuthenticationMethod desiredMethod) {
+        if (requestedMethod.equals(desiredMethod)) {
+            if (!enabledMethods.contains(requestedMethod)) {
+                log.warn("{} The requested method {} is not enabled", getLogPrefix(), requestedMethod);
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
