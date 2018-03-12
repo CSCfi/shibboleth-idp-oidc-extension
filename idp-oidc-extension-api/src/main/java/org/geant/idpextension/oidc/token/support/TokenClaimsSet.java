@@ -49,7 +49,7 @@ import java.net.URI;
 import java.text.ParseException;
 
 /** Class to extend for token claims sets. Offers the base functionality to Authorize Code and Access Token. */
-public abstract class TokenClaimsSet {
+public class TokenClaimsSet {
 
     /** Class logger. */
     @Nonnull
@@ -136,9 +136,9 @@ public abstract class TokenClaimsSet {
             throw new RuntimeException("Invalid parameters, programming error");
         }
         tokenClaimsSet = new JWTClaimsSet.Builder().claim(KEY_TYPE, tokenType).jwtID(tokenID)
-                .audience(clientID.getValue()).issuer(issuer).subject(userPrincipal).claim("acr", acr.getValue())
+                .audience(clientID.getValue()).issuer(issuer).subject(userPrincipal).claim(KEY_ACR, acr.getValue())
                 .issueTime(iat).expirationTime(exp).claim(KEY_NONCE, nonce == null ? null : nonce.getValue())
-                .claim("auth_time", authTime).claim(KEY_REDIRECT_URI, redirect_uri.toString())
+                .claim(KEY_AUTH_TIME, authTime).claim(KEY_REDIRECT_URI, redirect_uri.toString())
                 .claim(KEY_SCOPE, scope.toString()).claim(KEY_CLAIMS, claims == null ? null : claims.toJSONObject())
                 .build();
     }
