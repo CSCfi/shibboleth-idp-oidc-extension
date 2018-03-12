@@ -35,14 +35,20 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
- * A Abstract function extended by lookups searching fields from authentication
- * request.
+ * A Abstract function extended by lookups searching fields from authentication request.
+ * 
+ * @param <T> type of lookup result to return.
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractAuthenticationRequestLookupFunction<T>
         implements ContextDataLookupFunction<ProfileRequestContext, T> {
 
-    /** Implemented to perform the actual lookup. */
+    /**
+     * Implemented to perform the actual lookup.
+     * 
+     * @param req authentication request to perform the lookup from.
+     * @return lookup value.
+     */
     abstract T doLookup(@Nonnull AuthenticationRequest req);
 
     /** {@inheritDoc} */
