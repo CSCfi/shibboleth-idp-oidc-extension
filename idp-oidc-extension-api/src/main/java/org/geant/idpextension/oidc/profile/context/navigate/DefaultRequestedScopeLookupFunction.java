@@ -33,12 +33,12 @@ import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
- * A function that returns copy of requested scopes via a lookup function. This
- * default lookup locates scope from oidc authentication request if available.
- * If information is not available, null is returned.
+ * A function that returns copy of requested scopes via a lookup function. This default lookup locates scope from oidc
+ * authentication request if available. If information is not available, null is returned.
  */
 public class DefaultRequestedScopeLookupFunction extends AbstractAuthenticationRequestLookupFunction<Scope> {
 
+    /** {@inheritDoc} */
     @Override
     Scope doLookup(@Nonnull AuthenticationRequest req) {
         Scope scope = new Scope();
