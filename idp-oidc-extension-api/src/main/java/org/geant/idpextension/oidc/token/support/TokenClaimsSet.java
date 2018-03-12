@@ -51,13 +51,6 @@ import java.text.ParseException;
 /** Class to extend for token claims sets. Offers the base functionality to Authorize Code and Access Token. */
 public class TokenClaimsSet {
 
-    /** Class logger. */
-    @Nonnull
-    private Logger log = LoggerFactory.getLogger(TokenClaimsSet.class);
-
-    /** Claims set for the claim. */
-    protected JWTClaimsSet tokenClaimsSet;
-
     /** OP issuer. */
     public static final String KEY_ISSUER = "iss";
 
@@ -101,6 +94,13 @@ public class TokenClaimsSet {
     /** Claims request of the original authentication request. */
     public static final String KEY_CLAIMS = "claims";
 
+    /** Claims set for the claim. */
+    protected JWTClaimsSet tokenClaimsSet;
+
+    /** Class logger. */
+    @Nonnull
+    private Logger log = LoggerFactory.getLogger(TokenClaimsSet.class);
+
     /**
      * Constructor.
      */
@@ -121,27 +121,30 @@ public class TokenClaimsSet {
      * @param exp Expiration time of the token. Must not be NULL.
      * @param nonce Nonce of the authentication request. May be NULL.
      * @param authTime Authentication time of the user. Must not be NULL.
-     * @param redirect_uri Validated redirect URI of the authentication request. Must not be NULL.
+     * @param redirectURI Validated redirect URI of the authentication request. Must not be NULL.
      * @param scope Scope of the authentication request. Must not be NULL.
      * @param claims Claims request of the authentication request. May be NULL.
      * @throws RuntimeException if called with nnonallowed ull parameters
      */
+    // Checkstyle: CyclomaticComplexity OFF
     protected TokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
-            @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirect_uri,
+            @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
             @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
         if (tokenType == null || tokenID == null || clientID == null || issuer == null || userPrincipal == null
-                || acr == null || iat == null || exp == null || authTime == null || redirect_uri == null
+                || acr == null || iat == null || exp == null || authTime == null || redirectURI == null
                 || scope == null) {
             throw new RuntimeException("Invalid parameters, programming error");
         }
         tokenClaimsSet = new JWTClaimsSet.Builder().claim(KEY_TYPE, tokenType).jwtID(tokenID)
                 .audience(clientID.getValue()).issuer(issuer).subject(userPrincipal).claim(KEY_ACR, acr.getValue())
                 .issueTime(iat).expirationTime(exp).claim(KEY_NONCE, nonce == null ? null : nonce.getValue())
-                .claim(KEY_AUTH_TIME, authTime).claim(KEY_REDIRECT_URI, redirect_uri.toString())
+                .claim(KEY_AUTH_TIME, authTime).claim(KEY_REDIRECT_URI, redirectURI.toString())
                 .claim(KEY_SCOPE, scope.toString()).claim(KEY_CLAIMS, claims == null ? null : claims.toJSONObject())
                 .build();
     }
+
+    // Checkstyle: CyclomaticComplexity ON
 
     /**
      * Helper to verify parsed claims are what is expected.
@@ -150,6 +153,7 @@ public class TokenClaimsSet {
      * @param tokenClaimsSet token claims set Must not be NULL.
      * @throws ParseException if claims set is not expected one.
      */
+    // Checkstyle: CyclomaticComplexity OFF
     protected static void verifyParsedClaims(@Nonnull String tokenType, @Nonnull JWTClaimsSet tokenClaimsSet)
             throws ParseException {
         // Check existence and type of mandatory fields and values
@@ -196,6 +200,7 @@ public class TokenClaimsSet {
         }
 
     }
+    // Checkstyle: CyclomaticComplexity ON
 
     /**
      * Serialize the token as JSON String.
@@ -313,7 +318,7 @@ public class TokenClaimsSet {
             return null;
         }
         try {
-            return ClaimsRequest.parse((tokenClaimsSet.getJSONObjectClaim(KEY_CLAIMS)));
+            return ClaimsRequest.parse(tokenClaimsSet.getJSONObjectClaim(KEY_CLAIMS));
         } catch (ParseException e) {
             log.error("Error parsing claims request {}", tokenClaimsSet.getClaim(KEY_CLAIMS));
             return null;
@@ -328,7 +333,7 @@ public class TokenClaimsSet {
     @Nonnull
     public Scope getScope() {
         try {
-            return Scope.parse((tokenClaimsSet.getStringClaim(KEY_SCOPE)));
+            return Scope.parse(tokenClaimsSet.getStringClaim(KEY_SCOPE));
         } catch (ParseException e) {
             log.error("Error parsing scope in request {}", tokenClaimsSet.getClaim(KEY_SCOPE));
             // should never happen, programming error.
