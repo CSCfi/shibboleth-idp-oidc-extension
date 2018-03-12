@@ -119,7 +119,7 @@ public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorRespons
         if (errorResponse != null) {
             profileRequestContext.getOutboundMessageContext()
                     .setMessage(buildErrorResponse(error, profileRequestContext));
-            log.debug("{} ClientRegistrationErrorResponse successfully set as the outbound message", getLogPrefix());
+            log.debug("{} ErrorResponse successfully set as the outbound message", getLogPrefix());
         } else {
             log.debug("{} Error response not formed", getLogPrefix());
         }
