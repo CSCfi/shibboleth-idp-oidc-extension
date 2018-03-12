@@ -69,7 +69,6 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCSigningResponseA
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         if (!super.doPreExecute(profileRequestContext)) {
-            log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
         credential = signatureSigningParameters.getSigningCredential();
