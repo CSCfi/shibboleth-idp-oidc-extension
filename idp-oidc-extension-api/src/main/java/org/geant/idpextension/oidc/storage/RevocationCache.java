@@ -175,9 +175,8 @@ public class RevocationCache extends AbstractIdentifiableInitializableComponent 
         try {
             StorageRecord entry = storage.read(context, key);
             if (entry == null) {
-                log.debug(
-                        "Entry '{}' of context '{}' is not yet on list of revoked entries, adding to cache with expiration time {}",
-                        key, context, expires);
+                log.debug("Entry '{}' of context '{}' is not yet on list of revoked entries,"
+                        + " adding to cache with expiration time {}", key, context, expires);
                 storage.create(context, key, "y", System.currentTimeMillis() + expires);
                 return true;
             } else {
