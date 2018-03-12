@@ -109,7 +109,7 @@
     content: |
          idp.oidc.dynreg.StorageService = shibboleth.JPAStorageService
          idp.oidc.dynreg.defaultValidity = PT24H
-         idp.oidc.dynreg.defaultScope = openid
+         idp.oidc.dynreg.defaultScope = openid phone email address profile
          idp.oidc.dynreg.defaultSubjectType = public
 
 - name: Set default lifetime of oidc tokens to idp.properties
