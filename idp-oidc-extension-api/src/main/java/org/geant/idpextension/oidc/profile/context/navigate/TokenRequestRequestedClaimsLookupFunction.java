@@ -41,6 +41,7 @@ import com.nimbusds.openid.connect.sdk.ClaimsRequest;
  */
 public class TokenRequestRequestedClaimsLookupFunction extends AbstractTokenClaimsLookupFunction<ClaimsRequest> {
 
+    /** {@inheritDoc} */
     @Override
     ClaimsRequest doLookup(@Nonnull TokenClaimsSet tokenClaims) {
         return tokenClaims.getClaimsRequest();
