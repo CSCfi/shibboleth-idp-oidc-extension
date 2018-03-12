@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 
 /**
- * For Token end point.
+ * For Token endpoint.
  * 
  * A function that returns redirect uri of the request via a lookup function. This default lookup locates uri from oidc
  * token request if available. If information is not available, null is returned.
@@ -50,19 +50,20 @@ public class TokenRequestRedirectURILookupFunction extends AbstractTokenRequestL
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(TokenRequestRedirectURILookupFunction.class);
 
+    /** {@inheritDoc} */
     @Override
     URI doLookup(TokenRequest req) {
         // TODO: constant to replace redirect_uri key
-        String redirect_uri = req.getAuthorizationGrant().toParameters().get("redirect_uri");
-        if (redirect_uri == null) {
+        String redirectURI = req.getAuthorizationGrant().toParameters().get("redirect_uri");
+        if (redirectURI == null) {
             log.warn("No redirect_uri parameter");
             return null;
         }
         URI uri = null;
         try {
-            uri = new URI(redirect_uri);
+            uri = new URI(redirectURI);
         } catch (URISyntaxException e) {
-            log.error("Unable to parse uri from token request redirect_uri {}", redirect_uri);
+            log.error("Unable to parse uri from token request redirect_uri {}", redirectURI);
         }
         return uri;
 
