@@ -52,12 +52,12 @@ import java.text.ParseException;
 /** Class wrapping claims set for authorize code. */
 public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
 
+    /** Value of authorize code claims set type. */
+    private static final String VALUE_TYPE_AC = "ac";
+    
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(AuthorizeCodeClaimsSet.class);
-
-    /** Value of authorize code claims set type. */
-    public static final String VALUE_TYPE_AC = "ac";
 
     /**
      * Constructor for authorize code claims set.
@@ -71,30 +71,30 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
      * @param exp Expiration time of the authorize code. Must not be NULL.
      * @param nonce Nonce of the authentication request. May be NULL.
      * @param authTime Authentication time of the user. Must not be NULL.
-     * @param redirect_uri Validated redirect URI of the authentication request. Must not be NULL.
+     * @param redirectURI Validated redirect URI of the authentication request. Must not be NULL.
      * @param scope Scope of the authentication request. Must not be NULL.
      * @param claims Claims request of the authentication request. May be NULL.
      * @throws RuntimeException if called with nonallowed null parameters
      */
     public AuthorizeCodeClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
-            @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirect_uri,
+            @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
             @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
         super(VALUE_TYPE_AC, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, acr, iat, exp, nonce,
-                authTime, redirect_uri, scope, claims);
+                authTime, redirectURI, scope, claims);
     }
 
     /**
      * Private constructor for the parser.
      * 
-     * @param set authorize code claims set
+     * @param authzCodeClaimsSet authorize code claims set
      */
     private AuthorizeCodeClaimsSet(JWTClaimsSet authzCodeClaimsSet) {
         tokenClaimsSet = authzCodeClaimsSet;
     }
 
     /**
-     * Parses authz code from string (JSON)
+     * Parses authz code from string (JSON).
      * 
      * @param authorizeCodeClaimsSet JSON String representation of the code
      * @return AuthorizeCodeClaimsSet instance if parsing is successful.
@@ -108,11 +108,11 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
     }
 
     /**
-     * Parses authz code from sealed authorization code
+     * Parses authz code from sealed authorization code.
      * 
      * @param wrappedAuthCode wrapped code
      * @param dataSealer sealer to unwrap the code
-     * @return
+     * @return authorize code
      * @throws ParseException is thrown if unwrapped code is not understood
      * @throws DataSealerException is thrown if unwrapping fails
      */
