@@ -35,14 +35,20 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 
 /**
- * A Abstract function extended by lookups searching fields from authentication
- * request.
+ * A Abstract function extended by lookups searching fields from token request.
+ * 
+ * @param <T> type of lookup result to return.
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractTokenRequestLookupFunction<T>
         implements ContextDataLookupFunction<ProfileRequestContext, T> {
 
-    /** Implemented to perform the actual lookup. */
+    /**
+     * Implemented to perform the actual lookup.
+     * 
+     * @param req token request to perform the lookup from.
+     * @return lookup value.
+     */
     abstract T doLookup(@Nonnull TokenRequest req);
 
     /** {@inheritDoc} */
