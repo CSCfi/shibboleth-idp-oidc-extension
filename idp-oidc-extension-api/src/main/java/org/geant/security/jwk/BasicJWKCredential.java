@@ -38,6 +38,7 @@ public class BasicJWKCredential extends BasicCredential implements JWKCredential
 
     /** jwk algorithm. */
     private Algorithm jwkAlgorithm;
+
     /** jwk kid. */
     private String jwkKid;
 
