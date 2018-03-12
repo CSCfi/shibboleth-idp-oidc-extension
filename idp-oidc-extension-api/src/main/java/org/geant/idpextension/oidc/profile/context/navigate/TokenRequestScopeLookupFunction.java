@@ -41,6 +41,7 @@ import com.nimbusds.oauth2.sdk.Scope;
  */
 public class TokenRequestScopeLookupFunction extends AbstractTokenClaimsLookupFunction<Scope> {
 
+    /** {@inheritDoc} */
     @Override
     Scope doLookup(@Nonnull TokenClaimsSet tokenClaims) {
         return tokenClaims.getScope();
