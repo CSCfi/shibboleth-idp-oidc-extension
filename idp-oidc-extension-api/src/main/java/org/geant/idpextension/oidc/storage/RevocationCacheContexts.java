@@ -32,7 +32,7 @@ import javax.annotation.Nonnull;
 
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 
-/* Revocation cache contexts shared across actions.*/
+/** Revocation cache contexts shared across actions. */
 public class RevocationCacheContexts {
 
     /**
