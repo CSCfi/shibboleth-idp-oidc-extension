@@ -33,11 +33,12 @@ import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
- * A function that returns copy of the repsonse mode of the request via a lookup function. This default lookup locates
+ * A function that returns copy of the response mode of the request via a lookup function. This default lookup locates
  * response mode from oidc authentication request if available. If information is not available, null is returned.
  */
 public class DefaultResponseModeLookupFunction extends AbstractAuthenticationRequestLookupFunction<ResponseMode> {
 
+    /** {@inheritDoc} */
     @Override
     ResponseMode doLookup(@Nonnull AuthenticationRequest req) {
         if (req.getResponseMode() == null) {
