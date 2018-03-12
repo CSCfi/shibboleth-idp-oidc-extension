@@ -33,12 +33,12 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
 
 /**
- * A function that returns copy of Nonce via a lookup function. This default
- * lookup locates nonce from oidc authentication request if available. If
- * information is not available, null is returned.
+ * A function that returns copy of Nonce via a lookup function. This default lookup locates nonce from oidc
+ * authentication request if available. If information is not available, null is returned.
  */
 public class DefaultRequestNonceLookupFunction extends AbstractAuthenticationRequestLookupFunction<Nonce> {
 
+    /** {@inheritDoc} */
     @Override
     Nonce doLookup(@Nonnull AuthenticationRequest req) {
         if (req.getNonce() != null) {
