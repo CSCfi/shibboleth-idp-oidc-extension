@@ -170,6 +170,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * Set access token.
      * 
      * @param token String to form access token
+     * @param lifeTime lifetime of the access token is seconds.
      */
     public void setAccessToken(@Nullable String token, long lifeTime) {
         accessToken = token == null ? null : new BearerAccessToken(token, lifeTime, null);
@@ -324,7 +325,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     /**
      * Set the user info.
      * 
-     * @param token The user info.
+     * @param info The user info.
      */
     public void setUserInfo(@Nullable UserInfo info) {
         userInfo = info;
