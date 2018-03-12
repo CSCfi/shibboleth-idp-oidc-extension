@@ -51,12 +51,12 @@ import java.text.ParseException;
 /** Class wrapping claims set for access token. */
 public final class AccessTokenClaimsSet extends TokenClaimsSet {
 
+    /** Value of access token claims set type. */
+    private static final String VALUE_TYPE_AT = "at";
+
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(AccessTokenClaimsSet.class);
-
-    /** Value of access token claims set type. */
-    public static final String VALUE_TYPE_AT = "at";
 
     /**
      * Constructor for access token claims set when derived from authz code.
@@ -86,30 +86,30 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
      * @param exp Expiration time of the authorize code. Must not be NULL.
      * @param nonce Nonce of the authentication request. May be NULL.
      * @param authTime Authentication time of the user. Must not be NULL.
-     * @param redirect_uri Validated redirect URI of the authentication request. Must not be NULL.
+     * @param redirectURI Validated redirect URI of the authentication request. Must not be NULL.
      * @param scope Scope of the authentication request. Must not be NULL.
      * @param claims Claims request of the authentication request. May be NULL.
      * @throws RuntimeException if called with nonallowed null parameters
      */
     public AccessTokenClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
-            @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirect_uri,
+            @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
             @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
         super(VALUE_TYPE_AT, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, acr, iat, exp, nonce,
-                authTime, redirect_uri, scope, claims);
+                authTime, redirectURI, scope, claims);
     }
 
     /**
      * Private constructor for the parser.
      * 
-     * @param set access token claims set
+     * @param accessTokenClaimsSet access token claims set
      */
     private AccessTokenClaimsSet(JWTClaimsSet accessTokenClaimsSet) {
         tokenClaimsSet = accessTokenClaimsSet;
     }
 
     /**
-     * Parses access token from string (JSON)
+     * Parses access token from string (JSON).
      * 
      * @param accessTokenClaimsSet JSON String representation of the code
      * @return AccessTokenClaimsSet instance if parsing is successful.
@@ -123,11 +123,11 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
     }
 
     /**
-     * Parses access token from sealed access token
+     * Parses access token from sealed access token.
      * 
      * @param wrappedAccessToken wrapped access token
      * @param dataSealer sealer to unwrap the access token
-     * @return
+     * @return access token claims set.
      * @throws ParseException is thrown if unwrapped access token is not understood
      * @throws DataSealerException is thrown if unwrapping fails
      */
