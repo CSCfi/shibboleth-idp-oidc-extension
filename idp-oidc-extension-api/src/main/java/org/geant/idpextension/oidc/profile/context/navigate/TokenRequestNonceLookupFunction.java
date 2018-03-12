@@ -41,6 +41,7 @@ import com.nimbusds.openid.connect.sdk.Nonce;
  */
 public class TokenRequestNonceLookupFunction extends AbstractTokenClaimsLookupFunction<Nonce> {
 
+    /** {@inheritDoc} */
     @Override
     Nonce doLookup(@Nonnull TokenClaimsSet tokenClaims) {
         return tokenClaims.getNonce();

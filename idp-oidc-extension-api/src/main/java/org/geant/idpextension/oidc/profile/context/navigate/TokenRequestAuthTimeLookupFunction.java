@@ -39,6 +39,7 @@ import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
  */
 public class TokenRequestAuthTimeLookupFunction extends AbstractTokenClaimsLookupFunction<Long> {
 
+    /** {@inheritDoc} */
     @Override
     Long doLookup(@Nonnull TokenClaimsSet tokenClaims) {
         return tokenClaims.getAuthenticationTime().getTime();
