@@ -39,9 +39,8 @@ import net.shibboleth.idp.authn.AuthenticationResult;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 
 /**
- * A function that returns auth time via a lookup function. This lookup locates
- * auth time from authentication context. If auth time is not available, null is
- * returned.
+ * A function that returns auth time via a lookup function. This lookup locates auth time from authentication context.
+ * If auth time is not available, null is returned.
  */
 @SuppressWarnings("rawtypes")
 public class DefaultAuthTimeLookupFunction implements ContextDataLookupFunction<ProfileRequestContext, Long> {
