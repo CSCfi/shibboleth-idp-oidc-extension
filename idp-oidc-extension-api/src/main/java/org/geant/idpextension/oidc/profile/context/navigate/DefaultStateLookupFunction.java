@@ -38,6 +38,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
  */
 public class DefaultStateLookupFunction extends AbstractAuthenticationRequestLookupFunction<State> {
 
+    /** {@inheritDoc} */
     @Override
     State doLookup(@Nonnull AuthenticationRequest req) {
         if (req.getState() == null) {
