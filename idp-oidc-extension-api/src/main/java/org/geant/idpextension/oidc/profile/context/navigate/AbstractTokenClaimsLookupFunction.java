@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A Abstract function extended by lookups searching fields from tokens (Authorization Code, Access Token).
+ * 
+ * @param <T> type of lookup result to return.
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractTokenClaimsLookupFunction<T>
@@ -48,8 +50,13 @@ public abstract class AbstractTokenClaimsLookupFunction<T>
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(AbstractTokenClaimsLookupFunction.class);
 
-    /** Implemented to perform the actual lookup. */
-    abstract T doLookup(@Nonnull TokenClaimsSet authzCodeClaims);
+    /**
+     * Implemented to perform the actual lookup.
+     * 
+     * @param tokenClaims token claims set to perform the lookup from.
+     * @return lookup value.
+     */
+    abstract T doLookup(@Nonnull TokenClaimsSet tokenClaims);
 
     @Override
     @Nullable
