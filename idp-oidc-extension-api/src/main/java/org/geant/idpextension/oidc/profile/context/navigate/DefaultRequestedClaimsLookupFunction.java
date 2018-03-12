@@ -33,12 +33,12 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 
 /**
- * A function that returns copy of requested claims via a lookup function. This
- * default lookup locates requested claims from oidc authentication request if
- * available. If information is not available, null is returned.
+ * A function that returns copy of requested claims via a lookup function. This default lookup locates requested claims
+ * from oidc authentication request if available. If information is not available, null is returned.
  */
 public class DefaultRequestedClaimsLookupFunction extends AbstractAuthenticationRequestLookupFunction<ClaimsRequest> {
 
+    /** {@inheritDoc} */
     @Override
     ClaimsRequest doLookup(@Nonnull AuthenticationRequest req) {
         if (req.getClaims() == null) {
