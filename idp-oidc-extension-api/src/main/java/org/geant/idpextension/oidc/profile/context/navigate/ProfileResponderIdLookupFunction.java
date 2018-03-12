@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
 
 /** A function that returns responder id based on profile. */
 @SuppressWarnings("rawtypes")
-public class ProfileResponderIdLookupFunction extends AbstractIdentifiableInitializableComponent implements
-        ContextDataLookupFunction<ProfileRequestContext, String> {
+public class ProfileResponderIdLookupFunction extends AbstractIdentifiableInitializableComponent
+        implements ContextDataLookupFunction<ProfileRequestContext, String> {
 
     /** Class logger. */
     @Nonnull
@@ -64,8 +64,7 @@ public class ProfileResponderIdLookupFunction extends AbstractIdentifiableInitia
     /**
      * Set default responder value, usually entity id.
      * 
-     * @param resp
-     *            default responder value, usually entity id
+     * @param resp default responder value, usually entity id
      */
     public void setDefaultResponder(@Nonnull String resp) {
         defaultResponder = Constraint.isNotNull(resp, "Default responder cannot be null");
@@ -74,8 +73,7 @@ public class ProfileResponderIdLookupFunction extends AbstractIdentifiableInitia
     /**
      * Set mapping from profile to responder value.
      * 
-     * @param resp
-     *            mapping from profile to responder value
+     * @param resp mapping from profile to responder value
      */
     public void setProfileResponders(@Nullable Map<ProfileConfiguration, String> resp) {
         profileResponders.clear();
