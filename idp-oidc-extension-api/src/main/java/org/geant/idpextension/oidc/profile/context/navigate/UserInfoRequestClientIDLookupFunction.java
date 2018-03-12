@@ -53,17 +53,18 @@ public class UserInfoRequestClientIDLookupFunction implements ContextDataLookupF
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(UserInfoRequestClientIDLookupFunction.class);
 
+    /** {@inheritDoc} */
     @Override
     public ClientID apply(@Nullable MessageContext input) {
         if (input == null) {
             return null;
         }
         if (!(input.getParent() instanceof ProfileRequestContext)) {
-            return null;// traveling fails
+            return null;
         }
         MessageContext msgCtx = ((ProfileRequestContext) input.getParent()).getOutboundMessageContext();
         if (msgCtx == null) {
-            return null;// traveling fails
+            return null;
         }
         OIDCAuthenticationResponseContext ctx = msgCtx.getSubcontext(OIDCAuthenticationResponseContext.class, false);
         if (ctx == null || ctx.getTokenClaimsSet() == null) {
