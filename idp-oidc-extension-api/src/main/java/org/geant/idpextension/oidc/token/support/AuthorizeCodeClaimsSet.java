@@ -54,7 +54,7 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
 
     /** Value of authorize code claims set type. */
     private static final String VALUE_TYPE_AC = "ac";
-    
+
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(AuthorizeCodeClaimsSet.class);
