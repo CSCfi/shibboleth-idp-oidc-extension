@@ -47,18 +47,17 @@ import com.google.common.base.Function;
 /**
  * A function that returns sector identifier obtained via a lookup function.
  * 
- * The value is host component of registered sector_identifier_uri or host
- * component of the registered redirect_uri in case there is no
- * sector_identifier_uri. In the latter case there must be only on registered
- * redirect_uri or null is returned.
+ * The value is host component of registered sector_identifier_uri or host component of the registered redirect_uri in
+ * case there is no sector_identifier_uri. In the latter case there must be only on registered redirect_uri or null is
+ * returned.
  * 
  * <p>
  * If a specific setting is unavailable, a null value is returned.
  * </p>
  */
 @SuppressWarnings("rawtypes")
-public class SectorIdentifierLookupFunction extends AbstractIdentifiableInitializableComponent implements
-        ContextDataLookupFunction<ProfileRequestContext, String> {
+public class SectorIdentifierLookupFunction extends AbstractIdentifiableInitializableComponent
+        implements ContextDataLookupFunction<ProfileRequestContext, String> {
 
     /** Class logger. */
     @Nonnull
@@ -78,19 +77,21 @@ public class SectorIdentifierLookupFunction extends AbstractIdentifiableInitiali
     /**
      * Set the lookup strategy to use to locate the {@link OIDCMetadataContext}.
      * 
-     * @param strategy
-     *            lookup function to use
+     * @param strategy lookup function to use
      */
     public void setOIDCMetadataContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, OIDCMetadataContext> strategy) {
-        oidcMetadataContextLookupStrategy = Constraint.isNotNull(strategy,
-                "OIDCMetadata lookup strategy cannot be null");
+        oidcMetadataContextLookupStrategy =
+                Constraint.isNotNull(strategy, "OIDCMetadata lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
     @Override
     @Nullable
     public String apply(@Nullable final ProfileRequestContext input) {
+        if (input == null) {
+            return null;
+        }
         String sectorIdentifier = null;
         OIDCMetadataContext ctx = oidcMetadataContextLookupStrategy.apply(input);
         if (ctx == null || ctx.getClientInformation() == null || ctx.getClientInformation().getOIDCMetadata() == null) {
