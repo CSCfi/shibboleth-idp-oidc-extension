@@ -44,6 +44,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 @SuppressWarnings("rawtypes")
 public class TokenRequestClientIDLookupFunction implements ContextDataLookupFunction<MessageContext, ClientID> {
 
+    /** {@inheritDoc} */
     @Override
     public ClientID apply(@Nullable MessageContext input) {
         if (input == null) {
