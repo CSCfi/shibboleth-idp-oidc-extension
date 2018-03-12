@@ -42,6 +42,7 @@ import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
  */
 public class TokenRequestValidRequestURIsLookupFunction extends AbstractTokenClaimsLookupFunction<Set<URI>> {
 
+    /** {@inheritDoc} */
     @Override
     protected Set<URI> doLookup(@Nonnull TokenClaimsSet tokenClaims) {
         Set<URI> uris = new HashSet<URI>();
