@@ -34,12 +34,12 @@ import javax.annotation.Nonnull;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
- * A function that returns redirect uri of the request via a lookup function.
- * This default lookup locates redirect uri from oidc authentication request if
- * available. If information is not available, null is returned.
+ * A function that returns redirect uri of the authentication request via a lookup function. This default lookup locates
+ * redirect uri from oidc authentication request if available. If information is not available, null is returned.
  */
 public class DefaultRedirectURILookupFunction extends AbstractAuthenticationRequestLookupFunction<URI> {
 
+    /** {@inheritDoc} */
     @Override
     URI doLookup(@Nonnull AuthenticationRequest req) {
         return req.getRedirectionURI();
