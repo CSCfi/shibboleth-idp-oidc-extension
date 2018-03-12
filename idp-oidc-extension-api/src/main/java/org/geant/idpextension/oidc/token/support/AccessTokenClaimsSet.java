@@ -31,13 +31,21 @@ package org.geant.idpextension.oidc.token.support;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.ClaimsRequest;
+import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
+import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
+
+import java.net.URI;
 import java.text.ParseException;
 
 /** Class wrapping claims set for access token. */
@@ -51,7 +59,7 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
     public static final String VALUE_TYPE_AT = "at";
 
     /**
-     * Constructor for access token claims set.
+     * Constructor for access token claims set when derived from authz code.
      * 
      * @param authorizeCode Authorize Code this token is based on. Must not be NULL.
      * @param iat Issue time of the token. Must not be NULL.
@@ -64,6 +72,31 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
                 new ACR(authorizeCode.getACR()), iat, exp, authorizeCode.getNonce(),
                 authorizeCode.getAuthenticationTime(), authorizeCode.getRedirectURI(), authorizeCode.getScope(),
                 authorizeCode.getClaimsRequest());
+    }
+
+    /**
+     * Constructor for access token claims set.
+     * 
+     * @param idGenerator Generator for pseudo unique identifier for the code. Must not be NULL.
+     * @param clientID Client Id of the rp. Must not be NULL.
+     * @param issuer OP issuer value. Must not be NULL.
+     * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
+     * @param acr Authentication context class reference value of the authentication. Must not be NULL.
+     * @param iat Issue time of the authorize code. Must not be NULL.
+     * @param exp Expiration time of the authorize code. Must not be NULL.
+     * @param nonce Nonce of the authentication request. May be NULL.
+     * @param authTime Authentication time of the user. Must not be NULL.
+     * @param redirect_uri Validated redirect URI of the authentication request. Must not be NULL.
+     * @param scope Scope of the authentication request. Must not be NULL.
+     * @param claims Claims request of the authentication request. May be NULL.
+     * @throws RuntimeException if called with nonallowed null parameters
+     */
+    public AccessTokenClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
+            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
+            @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirect_uri,
+            @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
+        super(VALUE_TYPE_AT, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, acr, iat, exp, nonce,
+                authTime, redirect_uri, scope, claims);
     }
 
     /**
