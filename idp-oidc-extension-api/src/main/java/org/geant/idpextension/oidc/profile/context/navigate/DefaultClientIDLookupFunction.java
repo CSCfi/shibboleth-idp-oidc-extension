@@ -36,12 +36,13 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
- * A function that returns client id of the request via a lookup function. This default lookup locates client if from
- * oidc authentication request if available. If information is not available, null is returned.
+ * A function that returns client id of the authentication request via a lookup function. This default lookup locates
+ * client id from oidc authentication request if available. If information is not available, null is returned.
  */
 @SuppressWarnings("rawtypes")
 public class DefaultClientIDLookupFunction implements ContextDataLookupFunction<MessageContext, ClientID> {
 
+    /** {@inheritDoc} */
     @Override
     public ClientID apply(@Nullable MessageContext input) {
         if (input == null) {
