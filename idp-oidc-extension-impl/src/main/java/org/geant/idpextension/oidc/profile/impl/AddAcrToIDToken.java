@@ -37,24 +37,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Action that adds acr claim to a {@link IDTokenClaimsSet}.
- * 
- * OPTIONAL. Authentication Context Class Reference. String specifying an
- * Authentication Context Class Reference value that identifies the
- * Authentication Context Class that the authentication performed satisfied. The
- * value "0" indicates the End-User authentication did not meet the requirements
- * of ISO/IEC 29115 [ISO29115] level 1. Authentication using a long-lived
- * browser cookie, for instance, is one example where the use of "level 0" is
- * appropriate. Authentications with level 0 SHOULD NOT be used to authorize
- * access to any resource of any monetary value. (This corresponds to the OpenID
- * 2.0 PAPE [OpenID.PAPE] nist_auth_level 0.) An absolute URI or an RFC 6711
- * [RFC6711] registered name SHOULD be used as the acr value; registered names
- * MUST NOT be used with a different meaning than that which is registered.
- * Parties using this claim will need to agree upon the meanings of the values
- * used, which may be context-specific. The acr value is a case sensitive
- * string.
- * 
- *
- *
  */
 @SuppressWarnings("rawtypes")
 public class AddAcrToIDToken extends AbstractOIDCAuthenticationResponseAction {
@@ -75,8 +57,8 @@ public class AddAcrToIDToken extends AbstractOIDCAuthenticationResponseAction {
         if (getOidcResponseContext().getAcr() != null) {
             log.debug("{} Setting acr to id token", getLogPrefix());
             getOidcResponseContext().getIDToken().setACR(getOidcResponseContext().getAcr());
-            log.debug("{} Updated token {}", getLogPrefix(), getOidcResponseContext().getIDToken().toJSONObject()
-                    .toJSONString());
+            log.debug("{} Updated token {}", getLogPrefix(),
+                    getOidcResponseContext().getIDToken().toJSONObject().toJSONString());
         }
     }
 }
