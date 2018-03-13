@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Action that adds an outbound {@link MessageContext} and related OIDC contexts to the {@link ProfileRequestContext}.
  * 
+ * @param <T> response message implementation class.
  * 
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
  * @event {@link IdPEventIds#INVALID_RELYING_PARTY_CTX}

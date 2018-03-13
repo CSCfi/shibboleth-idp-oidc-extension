@@ -48,6 +48,7 @@ import com.google.common.base.Function;
  * based on the identity of a relying party accessed via a lookup strategy, by default an immediate child of the profile
  * request context.
  * 
+ * @param <T> response message implementation class.
  * 
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
  * @event {@link IdPEventIds#INVALID_RELYING_PARTY_CTX}
