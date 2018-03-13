@@ -39,12 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
- * Abstract class for actions performing actions on
- * {@link OIDCAuthenticationResponseContext} located under
- * {@link ProfileRequestContext#getOutboundMessageContext()}. Extends baseclass
- * that offers actions on {@link TokenRequest} found via
- * {@link ProfileRequestContext#getInboundMessageContext()#getMessage()}.
+ * Abstract class for actions performing actions on {@link OIDCAuthenticationResponseContext} located under
+ * {@link ProfileRequestContext#getOutboundMessageContext()}. Extends baseclass that offers actions on
+ * {@link TokenRequest} found via {@link ProfileRequestContext#getInboundMessageContext()#getMessage()}.
  */
 @SuppressWarnings("rawtypes")
 abstract class AbstractOIDCTokenResponseAction extends AbstractOIDCTokenRequestAction {
@@ -99,8 +96,8 @@ abstract class AbstractOIDCTokenResponseAction extends AbstractOIDCTokenRequestA
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        oidcMetadataContext = profileRequestContext.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class,
-                false);
+        oidcMetadataContext =
+                profileRequestContext.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, false);
         if (oidcMetadataContext == null) {
             log.error("{} No metadata found for relying party", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
