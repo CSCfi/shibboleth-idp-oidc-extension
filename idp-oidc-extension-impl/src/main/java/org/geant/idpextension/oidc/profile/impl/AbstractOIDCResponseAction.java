@@ -41,9 +41,7 @@ import org.slf4j.LoggerFactory;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 
 /**
- * 
- * Abstract class for actions performing actions on
- * {@link OIDCAuthenticationResponseContext} located under
+ * Abstract class for actions performing actions on {@link OIDCAuthenticationResponseContext} located under
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
  */
 @SuppressWarnings("rawtypes")
@@ -100,8 +98,8 @@ abstract class AbstractOIDCResponseAction extends AbstractProfileAction {
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
-        oidcMetadataContext = profileRequestContext.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class,
-                false);
+        oidcMetadataContext =
+                profileRequestContext.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, false);
         if (oidcMetadataContext == null) {
             log.error("{} No metadata found for relying party", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
