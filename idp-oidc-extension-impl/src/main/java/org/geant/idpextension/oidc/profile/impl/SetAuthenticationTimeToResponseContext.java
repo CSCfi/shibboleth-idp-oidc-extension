@@ -40,10 +40,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 
 /**
- * Action that sets authentication instant to work context
- * {@link OIDCAuthenticationResponseContext} located under
+ * Action that sets authentication instant to work context {@link OIDCAuthenticationResponseContext} located under
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
- *
  */
 @SuppressWarnings("rawtypes")
 public class SetAuthenticationTimeToResponseContext extends AbstractOIDCResponseAction {
@@ -66,13 +64,12 @@ public class SetAuthenticationTimeToResponseContext extends AbstractOIDCResponse
     /**
      * Set the strategy used to locate the authentication time.
      * 
-     * @param strategy
-     *            lookup strategy
+     * @param strategy lookup strategy
      */
     public void setAuthTimeLookupStrategy(@Nonnull final Function<ProfileRequestContext, Long> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        authTimeLookupStrategy = Constraint.isNotNull(strategy,
-                "AuthTimeLookupStrategy lookup strategy cannot be null");
+        authTimeLookupStrategy =
+                Constraint.isNotNull(strategy, "AuthTimeLookupStrategy lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
