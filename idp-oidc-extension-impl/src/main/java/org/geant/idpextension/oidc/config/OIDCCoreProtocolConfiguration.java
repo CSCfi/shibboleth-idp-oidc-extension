@@ -256,7 +256,8 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
      *
      * @param strategy  lookup strategy
      */
-    public void setIDTokenLifetimeLookupStrategy(@SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext,Long> strategy) {
+    public void setIDTokenLifetimeLookupStrategy(
+            @SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext, Long> strategy) {
         idTokenLifetimeLookupStrategy = strategy;
     }
     
@@ -265,7 +266,8 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
      *
      * @param strategy  lookup strategy
      */
-    public void setAuthorizeCodeLifetimeLookupStrategy(@SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext,Long> strategy) {
+    public void setAuthorizeCodeLifetimeLookupStrategy(
+            @SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext, Long> strategy) {
         authorizeCodeLifetimeLookupStrategy = strategy;
     }
     
@@ -274,7 +276,8 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
      *
      * @param strategy  lookup strategy
      */
-    public void setAccessTokenLifetimeLookupStrategy(@SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext,Long> strategy) {
+    public void setAccessTokenLifetimeLookupStrategy(
+            @SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext, Long> strategy) {
         accessTokenLifetimeLookupStrategy = strategy;
     }
     
@@ -283,7 +286,8 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
      *
      * @param strategy  lookup strategy
      */
-    public void setRefreshTokenLifetimeLookupStrategy(@SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext,Long> strategy) {
+    public void setRefreshTokenLifetimeLookupStrategy(
+            @SuppressWarnings("rawtypes") @Nullable final Function<ProfileRequestContext, Long> strategy) {
         refreshTokenLifetimeLookupStrategy = strategy;
     }
     
@@ -338,7 +342,8 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
      * @return authz code lifetime in ms.
      */
     @Positive @Duration public long getAuthorizeCodeLifetime() {
-        return Constraint.isGreaterThan(0, getIndirectProperty(authorizeCodeLifetimeLookupStrategy, authorizeCodeLifetime),
+        return Constraint.isGreaterThan(0,
+                getIndirectProperty(authorizeCodeLifetimeLookupStrategy, authorizeCodeLifetime),
                 "authorize code lifetime must be greater than 0");
     }
     
