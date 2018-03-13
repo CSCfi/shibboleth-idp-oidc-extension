@@ -43,9 +43,7 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Action that validates redirect uri is a expected one. Validated redirect uri
- * is stored to response context.
- *
+ * Action that validates redirect uri is a expected one. Validated redirect uri is stored to response context.
  */
 @SuppressWarnings("rawtypes")
 public class ValidateRedirectURI extends AbstractOIDCAuthenticationResponseAction {
@@ -73,25 +71,23 @@ public class ValidateRedirectURI extends AbstractOIDCAuthenticationResponseActio
     /**
      * Set the strategy used to locate the redirect uri of the request.
      * 
-     * @param strategy
-     *            lookup strategy
+     * @param strategy lookup strategy
      */
     public void setRedirectURILookupStrategy(@Nonnull final Function<ProfileRequestContext, URI> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        redirectURILookupStrategy = Constraint.isNotNull(strategy,
-                "RedirectURILookupStrategy lookup strategy cannot be null");
+        redirectURILookupStrategy =
+                Constraint.isNotNull(strategy, "RedirectURILookupStrategy lookup strategy cannot be null");
     }
 
     /**
      * Set the strategy used to locate the redirect uris to compare against.
      * 
-     * @param strategy
-     *            lookup strategy
+     * @param strategy lookup strategy
      */
     public void setValidRedirectURIsLookupStrategy(@Nonnull final Function<ProfileRequestContext, Set<URI>> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        validRedirectURIsLookupStrategy = Constraint.isNotNull(strategy,
-                "ValidRedirectURIsLookupStrategy lookup strategy cannot be null");
+        validRedirectURIsLookupStrategy =
+                Constraint.isNotNull(strategy, "ValidRedirectURIsLookupStrategy lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
