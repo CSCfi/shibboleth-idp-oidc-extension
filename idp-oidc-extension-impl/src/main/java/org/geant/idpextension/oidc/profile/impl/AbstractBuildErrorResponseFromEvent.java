@@ -51,6 +51,8 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 /**
  * This action is extended by error response actions. Action reads an event from the configured {@link EventContext}
  * lookup strategy, constructs an OIDC error response message and attaches it as the outbound message.
+ * 
+ * @param <T> ErrorResponse implementation.
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorResponse> extends AbstractProfileAction {
@@ -94,6 +96,13 @@ public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorRespons
         mappedErrors = Constraint.isNotNull(errors, "Mapped errors cannot be null");
     }
 
+    /**
+     * Method implemented by the extending class to create ErrorResponse.
+     * 
+     * @param error error object to build the response from.
+     * @param profileRequestContext profile request context.
+     * @return ErrorResponse
+     */
     protected abstract T buildErrorResponse(ErrorObject error, ProfileRequestContext profileRequestContext);
 
     /** {@inheritDoc} */
