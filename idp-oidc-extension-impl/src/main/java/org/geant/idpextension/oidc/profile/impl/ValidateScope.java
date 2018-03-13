@@ -43,9 +43,7 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Action that validates requested scopes are registered ones. Validated scopes
- * are stored to response context.
- *
+ * Action that validates requested scopes are registered ones. Validated scopes are stored to response context.
  */
 @SuppressWarnings("rawtypes")
 public class ValidateScope extends AbstractOIDCAuthenticationResponseAction {
@@ -68,8 +66,7 @@ public class ValidateScope extends AbstractOIDCAuthenticationResponseAction {
     /**
      * Set the strategy used to locate the requested scope to use.
      * 
-     * @param strategy
-     *            lookup strategy
+     * @param strategy lookup strategy
      */
     public void setScopeLookupStrategy(@Nonnull final Function<ProfileRequestContext, Scope> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
