@@ -44,8 +44,8 @@ import org.w3c.dom.Element;
 public class AttributeInOIDCRequestedClaimsRuleParser extends BaseAttributeValueMatcherParser {
 
     /** Schema type - afp. */
-    public static final QName SCHEMA_TYPE_AFP = new QName(AttributeFilterNamespaceHandler.NAMESPACE,
-            "AttributeInOIDCRequestedClaims");
+    public static final QName SCHEMA_TYPE_AFP =
+            new QName(AttributeFilterNamespaceHandler.NAMESPACE, "AttributeInOIDCRequestedClaims");
 
     /** {@inheritDoc} */
     @Override
@@ -66,7 +66,6 @@ public class AttributeInOIDCRequestedClaimsRuleParser extends BaseAttributeValue
             @Nonnull final BeanDefinitionBuilder builder) {
         super.doParse(config, builder);
 
-        
         if (config.hasAttributeNS(null, "onlyIfEssential")) {
             builder.addPropertyValue("onlyIfEssential",
                     StringSupport.trimOrNull(config.getAttributeNS(null, "onlyIfEssential")));
