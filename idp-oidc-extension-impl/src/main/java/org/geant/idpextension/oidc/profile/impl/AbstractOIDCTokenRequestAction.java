@@ -34,11 +34,8 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 
 /**
- * 
- * Abstract class for actions performing actions on {@link TokenRequest} found
- * via {@link ProfileRequestContext#getInboundMessageContext()#getMessage()}.
- *
- *
+ * Abstract class for actions performing actions on {@link TokenRequest} found via
+ * {@link ProfileRequestContext#getInboundMessageContext()#getMessage()}.
  */
 public abstract class AbstractOIDCTokenRequestAction extends AbstractOIDCRequestAction<TokenRequest> {
 
