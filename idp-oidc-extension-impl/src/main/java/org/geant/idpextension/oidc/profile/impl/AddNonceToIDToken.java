@@ -43,18 +43,6 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
  * Action that adds nonce claim to a {@link IDTokenClaimsSet}.
- * 
- * String value used to associate a Client session with an ID Token, and to
- * mitigate replay attacks. The value is passed through unmodified from the
- * Authentication Request to the ID Token. If present in the ID Token, Clients
- * MUST verify that the nonce Claim Value is equal to the value of the nonce
- * parameter sent in the Authentication Request. If present in the
- * Authentication Request, Authorization Servers MUST include a nonce Claim in
- * the ID Token with the Claim Value being the nonce value sent in the
- * Authentication Request. Authorization Servers SHOULD perform no other
- * processing on nonce values used. The nonce value is a case sensitive string.
- *
- *
  */
 @SuppressWarnings("rawtypes")
 public class AddNonceToIDToken extends AbstractOIDCResponseAction {
@@ -77,13 +65,12 @@ public class AddNonceToIDToken extends AbstractOIDCResponseAction {
     /**
      * Set the strategy used to locate the nonce of authentication request.
      * 
-     * @param strategy
-     *            lookup strategy
+     * @param strategy lookup strategy
      */
     public void setRequestNonceLookupStrategy(@Nonnull final Function<ProfileRequestContext, Nonce> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        requestNonceLookupStrategy = Constraint.isNotNull(strategy,
-                "RequestNonceLookupStrategy lookup strategy cannot be null");
+        requestNonceLookupStrategy =
+                Constraint.isNotNull(strategy, "RequestNonceLookupStrategy lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
