@@ -57,8 +57,6 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
 /**
  * Action that adds claims to a {@link ClaimsSet}. Claims are formed of resolved attributes having OIDC encoder.
- *
- *
  */
 @SuppressWarnings("rawtypes")
 public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
