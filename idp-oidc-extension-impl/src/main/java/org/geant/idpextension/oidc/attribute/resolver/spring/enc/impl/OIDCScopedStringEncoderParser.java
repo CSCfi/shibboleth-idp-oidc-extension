@@ -50,8 +50,10 @@ public class OIDCScopedStringEncoderParser extends AbstractOIDCEncoderParser {
     public static final QName TYPE_NAME = new QName(AttributeEncoderNamespaceHandler.NAMESPACE, "OIDCScopedString");
 
     /** Local name of scope delimeter attribute. */
-    @Nonnull @NotEmpty public static final String SCOPE_DELIMETER_ATTRIBUTE_NAME = "scopeDelimiter";
-   
+    @Nonnull
+    @NotEmpty
+    public static final String SCOPE_DELIMETER_ATTRIBUTE_NAME = "scopeDelimiter";
+
     /** Constructor. */
     public OIDCScopedStringEncoderParser() {
         setNameRequired(true);
@@ -62,14 +64,14 @@ public class OIDCScopedStringEncoderParser extends AbstractOIDCEncoderParser {
     protected Class<OIDCScopedStringAttributeEncoder> getBeanClass(@Nullable final Element element) {
         return OIDCScopedStringAttributeEncoder.class;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     protected void doParse(@Nonnull final Element config, @Nonnull final ParserContext parserContext,
             @Nonnull final BeanDefinitionBuilder builder) {
-        
+
         super.doParse(config, parserContext, builder);
-        
+
         if (config.hasAttributeNS(null, SCOPE_DELIMETER_ATTRIBUTE_NAME)) {
             builder.addPropertyValue("scopeDelimiter",
                     StringSupport.trimOrNull(config.getAttributeNS(null, SCOPE_DELIMETER_ATTRIBUTE_NAME)));
