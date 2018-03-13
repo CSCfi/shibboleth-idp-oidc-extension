@@ -54,7 +54,7 @@ public class OIDCResponseEncoderFactory extends AbstractInitializableComponent i
     @Nonnull private final Logger log = LoggerFactory.getLogger(OIDCResponseEncoderFactory.class);
     
     /** The message encoder to be returned by this factory. */
-    @Nonnull MessageEncoder messageEncoder;
+    @Nonnull private MessageEncoder messageEncoder;
     
     /**
      * Set the message encoder to be returned by this factory.

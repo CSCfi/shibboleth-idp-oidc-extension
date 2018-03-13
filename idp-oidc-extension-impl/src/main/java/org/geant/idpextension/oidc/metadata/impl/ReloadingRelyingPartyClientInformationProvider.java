@@ -92,7 +92,7 @@ public class ReloadingRelyingPartyClientInformationProvider extends AbstractIden
                 component.unpinComponent();
             }
         }
-        return Collections.EMPTY_SET;
+        return Collections.emptySet();
     }
 
     /** {@inheritDoc} */

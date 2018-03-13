@@ -361,8 +361,8 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
      * @return refresh token lifetime in ms.
      */
     @Positive @Duration public long getRefreshTokenLifetime() {
-        return Constraint.isGreaterThan(0, getIndirectProperty(refreshTokenLifetimeLookupStrategy, refreshTokenLifetime),
-                "refresh token lifetime must be greater than 0");
+        return Constraint.isGreaterThan(0, getIndirectProperty(refreshTokenLifetimeLookupStrategy, 
+                refreshTokenLifetime), "refresh token lifetime must be greater than 0");
     }
 
 }

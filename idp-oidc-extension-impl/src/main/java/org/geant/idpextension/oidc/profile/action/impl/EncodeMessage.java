@@ -81,7 +81,7 @@ public class EncodeMessage extends AbstractProfileAction {
     /** The factory to use to obtain an encoder. */
     private MessageEncoderFactory encoderFactory;
 
-    /** Message encoder */
+    /** Message encoder. */
     private MessageEncoder encoder;
 
     /**

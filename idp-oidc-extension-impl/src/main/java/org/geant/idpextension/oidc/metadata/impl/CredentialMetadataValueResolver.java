@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,8 @@ import org.opensaml.security.credential.Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -81,8 +84,15 @@ public class CredentialMetadataValueResolver extends AbstractIdentifiableInitial
                 use = null;
         }
         final JWK jwk;
-        if ((publicKey instanceof RSAPublicKey)) {
+        if (publicKey instanceof RSAPublicKey) {
             final RSAKey.Builder builder = new RSAKey.Builder((RSAPublicKey) publicKey).keyID(kid).keyUse(use);
+            if (credential instanceof JWKCredential) {
+                builder.algorithm(((JWKCredential) credential).getAlgorithm());
+            }
+            jwk = builder.build();
+        } else if (publicKey instanceof ECPublicKey) {
+            final Curve curve = Curve.forECParameterSpec(((ECPublicKey)publicKey).getParams());
+            final ECKey.Builder builder = new ECKey.Builder(curve, (ECPublicKey)publicKey);
             if (credential instanceof JWKCredential) {
                 builder.algorithm(((JWKCredential) credential).getAlgorithm());
             }

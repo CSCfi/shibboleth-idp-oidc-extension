@@ -42,7 +42,14 @@ import net.shibboleth.utilities.java.support.resolver.ResolverException;
  * 
  * Based on {@link org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver} and its parent classes.
  */
-public class ResolverHelper {
+public final class ResolverHelper {
+    
+    /**
+     * Constructor.
+     */
+    private ResolverHelper() {
+        // no op
+    }
     
     /**
      * Converts an InputStream into a byte array.
