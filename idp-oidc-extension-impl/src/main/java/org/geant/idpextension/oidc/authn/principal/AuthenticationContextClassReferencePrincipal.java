@@ -40,19 +40,18 @@ import com.google.common.base.MoreObjects;
 /** Principal based on a OIDC Authentication Context Class Reference. */
 public final class AuthenticationContextClassReferencePrincipal implements CloneablePrincipal {
 
-    /** unspecified auth ctx class.*/
+    /** unspecified auth ctx class. */
     public static final String UNSPECIFIED = "org.geant.idpextension.oidc.authn.principal.string.unspecified";
 
     /** The class ref. */
     @Nonnull
     @NotEmpty
     private String authnContextClassReference;
-    
+
     /**
      * Constructor.
      * 
-     * @param classRef
-     *            the class reference URI
+     * @param classRef the class reference URI
      */
     public AuthenticationContextClassReferencePrincipal(
             @Nonnull @NotEmpty @ParameterName(name = "classRef") final String classRef) {
@@ -102,8 +101,8 @@ public final class AuthenticationContextClassReferencePrincipal implements Clone
     /** {@inheritDoc} */
     @Override
     public AuthenticationContextClassReferencePrincipal clone() throws CloneNotSupportedException {
-        final AuthenticationContextClassReferencePrincipal copy = (AuthenticationContextClassReferencePrincipal) super
-                .clone();
+        final AuthenticationContextClassReferencePrincipal copy =
+                (AuthenticationContextClassReferencePrincipal) super.clone();
         copy.authnContextClassReference = authnContextClassReference;
         return copy;
     }
