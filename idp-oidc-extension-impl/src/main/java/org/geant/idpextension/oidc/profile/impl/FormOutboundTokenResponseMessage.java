@@ -57,7 +57,7 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
     private AccessToken accessToken;
 
     /** id token for response. */
-    JWT idToken;
+    private JWT idToken;
 
     /** {@inheritDoc} */
     @Override
