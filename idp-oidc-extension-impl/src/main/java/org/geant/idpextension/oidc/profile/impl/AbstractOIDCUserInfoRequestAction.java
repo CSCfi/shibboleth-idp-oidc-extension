@@ -34,11 +34,8 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 
 /**
- * 
  * Abstract class for actions performing actions on {@link UserInfoRequest} found via
  * {@link ProfileRequestContext#getInboundMessageContext()#getMessage()}.
- *
- *
  */
 public abstract class AbstractOIDCUserInfoRequestAction extends AbstractOIDCRequestAction<UserInfoRequest> {
 
