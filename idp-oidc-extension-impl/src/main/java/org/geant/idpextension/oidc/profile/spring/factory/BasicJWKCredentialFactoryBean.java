@@ -30,24 +30,17 @@ package org.geant.idpextension.oidc.profile.spring.factory;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.annotation.Nonnull;
-
 import org.opensaml.security.credential.UsageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.core.io.Resource;
-
 import java.text.ParseException;
 import java.util.List;
-
 import net.shibboleth.idp.profile.spring.factory.AbstractCredentialFactoryBean;
-
 import org.geant.security.jwk.BasicJWKCredential;
-
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
@@ -112,7 +105,7 @@ public class BasicJWKCredentialFactoryBean extends AbstractCredentialFactoryBean
             } else {
                 throw new FatalBeanException("Unsupported KeyFile at " + jwkResource.getDescription());
             }
-        } catch (IOException | ParseException /* | JOSEException */ e) {
+        } catch (IOException | ParseException e) {
             log.error("{}: Could not decode KeyFile at {}: {}", getConfigDescription(), jwkResource.getDescription(),
                     e);
             throw new FatalBeanException("Could not decode provided KeyFile " + jwkResource.getDescription(), e);
