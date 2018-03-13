@@ -55,7 +55,6 @@ import net.shibboleth.utilities.java.support.security.DataSealerException;
  * Action that validates authorization code is a valid one. Code is valid if it is successfully unwrapped, parsed as
  * authz code, is not expired and has not been used before. Validated code is stored to response context retrievable as
  * claims {@link OIDCAuthenticationResponseContext#getAuthorizationCodeClaimsSet()}.
- * 
  */
 @SuppressWarnings("rawtypes")
 public class ValidateAuthorizeCode extends AbstractOIDCTokenResponseAction {
@@ -78,6 +77,8 @@ public class ValidateAuthorizeCode extends AbstractOIDCTokenResponseAction {
 
     /**
      * Constructor.
+     * 
+     * @param sealer sealer to decrypt/hmac authorize code.
      */
     public ValidateAuthorizeCode(@Nonnull @ParameterName(name = "sealer") final DataSealer sealer) {
         dataSealer = Constraint.isNotNull(sealer, "DataSealer cannot be null");
