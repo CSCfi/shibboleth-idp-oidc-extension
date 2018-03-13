@@ -48,7 +48,6 @@ import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 /**
  * Action that creates a {@link UserInfo} object shell, and sets it to work context
  * {@link OIDCAuthenticationResponseContext} located under {@link ProfileRequestContext#getOutboundMessageContext()}.
- *
  */
 @SuppressWarnings("rawtypes")
 public class AddUserInfoShell extends AbstractOIDCResponseAction {
@@ -132,13 +131,7 @@ public class AddUserInfoShell extends AbstractOIDCResponseAction {
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        /**
-         * sub is required.
-         * 
-         * aud and iss should exist if response is signed.
-         * 
-         * TODO: add control to add/not add aud and iss. They are resolved already by the action.
-         */
+        // TODO: add control to add/not add aud and iss depending on signing. They are resolved already by the action.
         UserInfo userInfo = new UserInfo(new Subject(getOidcResponseContext().getNameId().getValue()));
         log.debug("{} Setting id token shell to response context {}", getLogPrefix(),
                 userInfo.toJSONObject().toJSONString());
