@@ -44,9 +44,8 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
 /**
- * Class encoding scoped string attributes to string json object. Name of the
- * attribute will be set as the key. The string contains attribute value,
- * delimiter and scope catenated. If there are several attribute values they are
+ * Class encoding scoped string attributes to string json object. Name of the attribute will be set as the key. The
+ * string contains attribute value, delimiter and scope catenated. If there are several attribute values they are
  * delimited with delimiter(space is default) or placed to array.
  */
 public class OIDCScopedStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
@@ -70,8 +69,7 @@ public class OIDCScopedStringAttributeEncoder extends AbstractOIDCAttributeEncod
     /**
      * Set the scope delimiter.
      * 
-     * @param newScopeDelimiter
-     *            delimiter to set
+     * @param newScopeDelimiter delimiter to set
      */
     public void setScopeDelimiter(@Nullable final String newScopeDelimiter) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
@@ -87,7 +85,7 @@ public class OIDCScopedStringAttributeEncoder extends AbstractOIDCAttributeEncod
         List<String> values = new ArrayList<String>();
         for (IdPAttributeValue value : idpAttribute.getValues()) {
             if (value instanceof ScopedStringAttributeValue && value.getValue() != null) {
-                values.add(value.getValue()+scopeDelimiter+((ScopedStringAttributeValue) value).getScope());
+                values.add(value.getValue() + scopeDelimiter + ((ScopedStringAttributeValue) value).getScope());
             }
         }
         obj.put(getName(), values.isEmpty() ? null : encodeValues(values));

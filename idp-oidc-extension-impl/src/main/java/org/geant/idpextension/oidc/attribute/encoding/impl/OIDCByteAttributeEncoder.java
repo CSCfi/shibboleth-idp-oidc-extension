@@ -43,12 +43,10 @@ import net.shibboleth.utilities.java.support.codec.Base64Support;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Class encoding byte attributes to base64 encoded string json object. Name of
- * the attribute will be set as the key. The string contains base64 coded
- * attribute value. If there are several attribute values they are delimited
- * with space. The output may be set also to array. The output may also be set
- * to be int instead of b64. In that case each value (byte[]) is converted to
- * int array and placed into array.
+ * Class encoding byte attributes to base64 encoded string json object. Name of the attribute will be set as the key.
+ * The string contains base64 coded attribute value. If there are several attribute values they are delimited with
+ * space. The output may be set also to array. The output may also be set to be int instead of b64. In that case each
+ * value (byte[]) is converted to int array and placed into array.
  */
 public class OIDCByteAttributeEncoder extends AbstractOIDCAttributeEncoder {
 
@@ -56,7 +54,7 @@ public class OIDCByteAttributeEncoder extends AbstractOIDCAttributeEncoder {
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(OIDCByteAttributeEncoder.class);
 
-// Checkstyle: CyclomaticComplexity OFF
+    // Checkstyle: CyclomaticComplexity OFF
     @SuppressWarnings("rawtypes")
     @Override
     public JSONObject encode(IdPAttribute idpAttribute) throws AttributeEncodingException {
@@ -70,7 +68,7 @@ public class OIDCByteAttributeEncoder extends AbstractOIDCAttributeEncoder {
                     // int
                     JSONArray innerArray = new JSONArray();
                     for (byte byteValue : ((ByteAttributeValue) value).getValue()) {
-                        innerArray.add((int)byteValue);
+                        innerArray.add((int) byteValue);
                     }
                     // each byte array is converted to json int array and placed
                     // to json array.
@@ -80,8 +78,8 @@ public class OIDCByteAttributeEncoder extends AbstractOIDCAttributeEncoder {
                     if (attributeString.length() > 0 && getStringDelimiter() != null) {
                         attributeString += getStringDelimiter();
                     }
-                    attributeString += Base64Support.encode(((ByteAttributeValue) value).getValue(),
-                            Base64Support.UNCHUNKED);
+                    attributeString +=
+                            Base64Support.encode(((ByteAttributeValue) value).getValue(), Base64Support.UNCHUNKED);
                     if (getAsArray()) {
                         array.add(attributeString.toString());
                         attributeString = "";
@@ -96,6 +94,6 @@ public class OIDCByteAttributeEncoder extends AbstractOIDCAttributeEncoder {
         }
         return obj;
     }
- // Checkstyle: CyclomaticComplexity ON
+    // Checkstyle: CyclomaticComplexity ON
 
 }

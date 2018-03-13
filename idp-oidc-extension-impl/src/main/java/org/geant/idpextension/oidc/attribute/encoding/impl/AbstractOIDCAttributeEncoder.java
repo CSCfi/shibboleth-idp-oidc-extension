@@ -56,11 +56,10 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
 /**
- * abstract class for OIDC attribute encoders. Needs some work still, activation
- * condition needs to be verified to work.
+ * abstract class for OIDC attribute encoders.
  */
-public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializableComponent implements
-        AttributeEncoder<JSONObject> {
+public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializableComponent
+        implements AttributeEncoder<JSONObject> {
 
     /** Class logger. */
     @Nonnull
@@ -72,22 +71,28 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
 
     /** Whether to set value to array. */
     private boolean asArray;
+
     /** Whether to interpret value as integer. */
     private boolean asInt;
+
     /** Delimiter used for when catenating string values. */
     @Nullable
     private String stringDelimiter;
+
     /** Whether to wrap the value to JSON Object. */
     private boolean asObject;
+
     /** Name of the key field if the value is wrapped into JSON Object. */
     private String fieldName;
+
     /** Whether to to interpret value as boolean. */
     private boolean asBoolean;
+
     /** Condition for use of this encoder. */
     @SuppressWarnings("rawtypes")
     @Nonnull
     private Predicate<ProfileRequestContext> activationCondition;
-    
+
     /** Default constructor. */
     public AbstractOIDCAttributeEncoder() {
         stringDelimiter = " ";
@@ -105,8 +110,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Sets whether to wrap the value to JSON Object.
      * 
-     * @param flag
-     *            whether to wrap the value to JSON Object
+     * @param flag whether to wrap the value to JSON Object
      */
     public void setAsObject(boolean flag) {
         asObject = flag;
@@ -124,8 +128,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Sets name of the key field if the value is wrapped into JSON Object.
      * 
-     * @param field
-     *            of the key field if the value is wrapped into JSON Object
+     * @param field of the key field if the value is wrapped into JSON Object
      */
     public void setFieldName(String field) {
         fieldName = field;
@@ -143,14 +146,12 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Sets whether to to interpret value as boolean.
      * 
-     * @param flag
-     *            whether to to interpret value as boolean
+     * @param flag whether to to interpret value as boolean
      */
     public void setAsBoolean(boolean flag) {
         asBoolean = flag;
     }
 
-   
     /**
      * Gets whether to set value to array.
      * 
@@ -163,8 +164,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Sets whether to set value to array.
      * 
-     * @param flag
-     *            whether to set value to array
+     * @param flag whether to set value to array
      */
     public void setAsArray(boolean flag) {
         asArray = flag;
@@ -182,8 +182,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Sets whether to interpret value as integer.
      * 
-     * @param flag
-     *            whether to interpret value as integer
+     * @param flag whether to interpret value as integer
      */
     public void setAsInt(boolean flag) {
         asInt = flag;
@@ -201,8 +200,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Sets delimiter used when catenating string values.
      * 
-     * @param delimeter
-     *            delimiter used when catenating string values
+     * @param delimeter delimiter used when catenating string values
      */
     public void setStringDelimiter(@Nullable String delimeter) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
@@ -210,11 +208,9 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     }
 
     /**
-     * Set whether to encode type information. Not Supported. Encoder parser
-     * sets this if defined.
+     * Set whether to encode type information. Not Supported. Encoder parser sets this if defined.
      * 
-     * @param flag
-     *            flag to set
+     * @param flag flag to set
      */
     public void setEncodeType(final boolean flag) {
         log.warn("Encode type parameter is not supported");
@@ -231,12 +227,10 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Set the activation condition for this encoder.
      * 
-     * @param condition
-     *            condition to set
+     * @param condition condition to set
      */
     @SuppressWarnings("rawtypes")
     public void setActivationCondition(@Nonnull final Predicate<ProfileRequestContext> condition) {
-        // TODO: activation condition must be tested and be verified to work
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
         activationCondition = Constraint.isNotNull(condition, "Activation condition cannot be null");
     }
@@ -254,8 +248,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Set the name of the attribute.
      * 
-     * @param attributeName
-     *            name of the attribute
+     * @param attributeName name of the attribute
      */
     public void setName(@Nonnull @NotEmpty final String attributeName) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
@@ -277,8 +270,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Wraps object to JSON object if flag is set.
      * 
-     * @param obj
-     *            to be wrapped
+     * @param obj to be wrapped
      * @return original object or object wrapped to JSON object
      */
     private Object wrapToJSONObject(Object obj) {
@@ -291,16 +283,13 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
         return obj;
     }
 
-// Checkstyle: CyclomaticComplexity OFF
+    // Checkstyle: CyclomaticComplexity OFF
     /**
-     * Either catenates a list of string or places them to array depending on
-     * configuration. The result may still be wrapped to JSON object depending
-     * on configuration.
+     * Either catenates a list of string or places them to array depending on configuration. The result may still be
+     * wrapped to JSON object depending on configuration.
      * 
-     * @param <T> 
-     *            Integer, Boolean or String
-     * @param values
-     *            list of strings
+     * @param <T> Integer, Boolean or String
+     * @param values list of strings
      * @return String, JSON Array or JSON Object
      */
     protected <T extends Object> Object encodeValues(List<T> values) {
@@ -335,14 +324,12 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
             return attributeString.length() != 0 ? wrapToJSONObject(attributeString) : null;
         }
     }
- // Checkstyle: CyclomaticComplexity ON
+    // Checkstyle: CyclomaticComplexity ON
 
     /**
-     * Converts string idp attribute values to List of Integer, String or
-     * Boolean depending on configuration.
+     * Converts string idp attribute values to List of Integer, String or Boolean depending on configuration.
      * 
-     * @param attributevalues
-     *            string idp attribute values
+     * @param attributevalues string idp attribute values
      * @return list of strings, boolean or integer
      */
     protected List<?> getValues(List<IdPAttributeValue<?>> attributevalues) {
@@ -362,8 +349,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Converts string idp attribute values to List of Strings.
      * 
-     * @param attributevalues
-     *            string idp attribute values
+     * @param attributevalues string idp attribute values
      * @return list of strings
      */
     private List<String> getStringValues(List<IdPAttributeValue<?>> attributevalues) {
@@ -383,8 +369,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Converts string idp attribute values to List of Integers.
      * 
-     * @param attributevalues
-     *            string idp attribute values
+     * @param attributevalues string idp attribute values
      * @return list of integers
      */
     private List<Integer> getIntValues(List<IdPAttributeValue<?>> attributevalues) {
@@ -409,8 +394,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /**
      * Converts string idp attribute values to List of Booleans.
      * 
-     * @param attributevalues
-     *            string idp attribute values
+     * @param attributevalues string idp attribute values
      * @return list of booleans
      */
     private List<Boolean> getBooleanValues(List<IdPAttributeValue<?>> attributevalues) {
@@ -420,8 +404,8 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
         List<Boolean> values = new ArrayList<Boolean>();
         for (IdPAttributeValue<?> value : attributevalues) {
             if (value instanceof StringAttributeValue) {
-                log.debug("value {} added as {}", (String) value.getValue(), ((StringAttributeValue) value).getValue()
-                        .equalsIgnoreCase(Boolean.TRUE.toString()));
+                log.debug("value {} added as {}", (String) value.getValue(),
+                        ((StringAttributeValue) value).getValue().equalsIgnoreCase(Boolean.TRUE.toString()));
                 values.add(((StringAttributeValue) value).getValue() != null
                         && ((StringAttributeValue) value).getValue().equalsIgnoreCase(Boolean.TRUE.toString()));
             }

@@ -39,16 +39,13 @@ import net.shibboleth.idp.attribute.IdPAttribute;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Class encoding string attributes to string json object. Name of the attribute
- * will be set as the key. The string contains attribute value. If there are
- * several attribute values they are delimited with delimiter(space is default)
- * or placed to array. If the value is set to be interpreted as int, only values
- * that may be parsed to int are used. In case output is interpreted as int but
- * not set to array, only the first parsable value is used. If the value is
- * interpreted as boolean the value is true if string value equals to "true"
- * ignoring the case. If boolean values are not set to array the first string
- * value is considered to be the result. Finally, the result may be placed to
- * json Object.
+ * Class encoding string attributes to string json object. Name of the attribute will be set as the key. The string
+ * contains attribute value. If there are several attribute values they are delimited with delimiter(space is default)
+ * or placed to array. If the value is set to be interpreted as int, only values that may be parsed to int are used. In
+ * case output is interpreted as int but not set to array, only the first parsable value is used. If the value is
+ * interpreted as boolean the value is true if string value equals to "true" ignoring the case. If boolean values are
+ * not set to array the first string value is considered to be the result. Finally, the result may be placed to json
+ * Object.
  */
 public class OIDCStringAttributeEncoder extends AbstractOIDCAttributeEncoder {
 
