@@ -69,6 +69,8 @@ public class ValidateAccessToken extends AbstractOIDCUserInfoValidationResponseA
 
     /**
      * Constructor.
+     * 
+     * @param sealer sealer to decrypt/hmac access token.
      */
     public ValidateAccessToken(@Nonnull @ParameterName(name = "sealer") final DataSealer sealer) {
         dataSealer = Constraint.isNotNull(sealer, "DataSealer cannot be null");
