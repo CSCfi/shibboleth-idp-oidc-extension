@@ -35,12 +35,8 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
- * 
- * Abstract class for actions performing actions on
- * {@link AuthenticationRequest} found via
+ * Abstract class for actions performing actions on {@link AuthenticationRequest} found via
  * {@link ProfileRequestContext#getInboundMessageContext()#getMessage()}.
- *
- *
  */
 public abstract class AbstractOIDCAuthenticationRequestAction extends AbstractOIDCRequestAction<AuthenticationRequest> {
 
