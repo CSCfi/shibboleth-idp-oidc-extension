@@ -37,14 +37,12 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.openid.connect.sdk.Prompt;
 
 /**
- * An action that creates an {@link AuthenticationContext} and attaches it to
- * the current {@link ProfileRequestContext}.
+ * An action that creates an {@link AuthenticationContext} and attaches it to the current {@link ProfileRequestContext}.
  * 
  * <p>
- * As the incoming message is a OIDC {@link AuthnRequest}, the basic
- * authentication policy (IsPassive, ForceAuthn) is interpreted from the request
- * prompt parameter. If the incoming message has login_hint parameter the value
- * of it is placed to hinted name.
+ * As the incoming message is a OIDC {@link AuthnRequest}, the basic authentication policy (IsPassive, ForceAuthn) is
+ * interpreted from the request prompt parameter. If the incoming message has login_hint parameter the value of it is
+ * placed to hinted name.
  * </p>
  * 
  * 
@@ -74,7 +72,6 @@ public class InitializeAuthenticationContext extends AbstractOIDCAuthenticationR
         if (initialAuthnContext != null) {
             authnCtx.setInitialAuthenticationResult(initialAuthnContext.getAuthenticationResult());
         }
-        
         profileRequestContext.addSubcontext(authnCtx, true);
         log.debug("{} Created authentication context: {}", getLogPrefix(), authnCtx);
     }
