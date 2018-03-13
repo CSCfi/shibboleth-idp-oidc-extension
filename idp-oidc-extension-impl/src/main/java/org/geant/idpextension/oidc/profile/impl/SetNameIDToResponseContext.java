@@ -70,7 +70,7 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
     @Nonnull
     private Function<ProfileRequestContext, SubjectType> subjectTypeStrategy;
 
-    /** Subject type */
+    /** Subject type. */
     @Nonnull
     @NonnullElements
     private SubjectType subjectType;
@@ -78,8 +78,7 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
     /**
      * Set the generator to use.
      * 
-     * @param theGenerator
-     *            the generator to use
+     * @param theGenerator the generator to use
      */
     public void setNameIDGenerator(@Nullable final SAML2NameIDGenerator theGenerator) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
@@ -90,8 +89,7 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
     /**
      * Set the strategy function to use to obtain the subject type.
      * 
-     * @param strategy
-     *            subject type lookup strategy
+     * @param strategy subject type lookup strategy
      */
     public void setSubjectTypeLookupStrategy(@Nonnull final Function<ProfileRequestContext, SubjectType> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
@@ -124,11 +122,9 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
     }
 
     /**
-     * Attempt to generate a {@link NameID} using each of the candidate and
-     * plugins.
+     * Attempt to generate a {@link NameID} using each of the candidate and plugins.
      * 
-     * @param profileRequestContext
-     *            current profile request context
+     * @param profileRequestContext current profile request context
      * 
      * @return a generated {@link NameID} or null
      */
