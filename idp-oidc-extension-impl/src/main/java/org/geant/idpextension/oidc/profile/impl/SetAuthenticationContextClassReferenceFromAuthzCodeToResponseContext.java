@@ -28,10 +28,7 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.text.ParseException;
-
 import javax.annotation.Nonnull;
-
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -39,12 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Action that sets authentication context class reference to work context
- * {@link OIDCAuthenticationResponseContext} located under
- * {@link ProfileRequestContext#getOutboundMessageContext()}.
+ * Action that sets authentication context class reference to work context {@link OIDCAuthenticationResponseContext}
+ * located under {@link ProfileRequestContext#getOutboundMessageContext()}.
  * 
- * The acr is located from authz code. This implementation applies only to token
- * endpoint.
+ * The acr is located from authz code. This implementation applies only to token endpoint.
  *
  */
 @SuppressWarnings("rawtypes")
@@ -53,8 +48,8 @@ public class SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContex
 
     /** Class logger. */
     @Nonnull
-    private Logger log = LoggerFactory
-            .getLogger(SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContext.class);
+    private Logger log =
+            LoggerFactory.getLogger(SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContext.class);
 
     /** {@inheritDoc} */
     @Override
