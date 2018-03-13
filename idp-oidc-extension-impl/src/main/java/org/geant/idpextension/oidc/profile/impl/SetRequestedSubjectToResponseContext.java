@@ -41,10 +41,8 @@ import com.nimbusds.openid.connect.sdk.ClaimsRequest.Entry;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
- * Action that sets requested sub value to response context. Value may be in id
- * token hint or in claims parameter. If value is in both, claims value will be
- * used. Multiple values for subject in claims parameter will be ignored.
- *
+ * Action that sets requested sub value to response context. Value may be in id token hint or in claims parameter. If
+ * value is in both, claims value will be used. Multiple values for subject in claims parameter will be ignored.
  */
 @SuppressWarnings("rawtypes")
 public class SetRequestedSubjectToResponseContext extends AbstractOIDCAuthenticationResponseAction {
