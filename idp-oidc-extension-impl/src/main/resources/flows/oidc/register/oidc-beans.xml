@@ -55,7 +55,8 @@
 
     <bean id="GenerateClientSecret"
         class="org.geant.idpextension.oidc.profile.impl.GenerateClientSecret"
-        scope="prototype" />
+        scope="prototype" 
+        p:defaultRegistrationValidityPeriod="#{'%{idp.oidc.dynreg.defaultSecretExpiration:P12M}'.trim()}" />
 
     <bean id="AddRedirectUrisToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddRedirectUrisToClientMetadata"
@@ -123,7 +124,7 @@
     <bean id="StoreClientInformation"
         class="org.geant.idpextension.oidc.profile.impl.StoreClientInformation"
         scope="prototype" p:clientInformationManager-ref="shibboleth.oidc.ClientInformationManager"
-        p:defaultRegistrationValidityPeriod="#{'%{idp.oidc.dynreg.defaultValidity:PT24H}'.trim()}">
+        p:defaultRegistrationValidityPeriod="#{'%{idp.oidc.dynreg.defaultRegistrationValidity:PT24H}'.trim()}">
         <property name="registrationValidityPeriodStrategy">
             <bean class="org.geant.idpextension.oidc.config.navigate.RegistrationValidityPeriodLookupFunction" />
         </property>

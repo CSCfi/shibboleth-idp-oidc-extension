@@ -108,7 +108,8 @@
     insertafter: "idp.oidc.issuer"
     content: |
          idp.oidc.dynreg.StorageService = shibboleth.JPAStorageService
-         idp.oidc.dynreg.defaultValidity = PT24H
+         idp.oidc.dynreg.defaultRegistrationValidity = PT24H
+         idp.oidc.dynreg.defaultSecretExpiration = P12M
          idp.oidc.dynreg.defaultScope = openid phone email address profile
          idp.oidc.dynreg.defaultSubjectType = public
 
