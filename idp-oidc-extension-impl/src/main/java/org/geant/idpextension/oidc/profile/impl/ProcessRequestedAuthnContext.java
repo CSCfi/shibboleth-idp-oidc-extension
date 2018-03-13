@@ -52,21 +52,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An action that creates an {@link RequestedPrincipalContext} and attaches it
- * to the current {@link AuthenticationContext}.
+ * An action that creates an {@link RequestedPrincipalContext} and attaches it to the current
+ * {@link AuthenticationContext}.
  * 
  * <p>
- * If the incoming message contains acr values we create requested principal
- * context populated with matching
- * {@AuthenticationContextClassReferencePrincipal
+ * If the incoming message contains acr values we create requested principal context populated with matching
+ * {@link AuthenticationContextClassReferencePrincipal}.
  * 
+ * Acr values may be be given as authentication request parameter (acr_values) or as requested id token claim (acr) in
+ * requested claims parameter. If they are given in both, the outcome is unspecified.
  * 
- * }.
- * 
- * Acr values may be be given as authentication request parameter (acr_values)
- * or as requested id token claim (acr) in requested claims parameter. If they
- * are given in both, the outcome is unspecified.
- * 
+ * The information of essentiality of requested acr is stored to {@link OIDCRequestedPrincipalContext}.
  * </p>
  */
 @SuppressWarnings("rawtypes")
@@ -81,9 +77,11 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
 
     /** acr values parameter. */
     private List<ACR> acrValues;
+
     /** requested acr claim. */
     private Entry acrClaim;
 
+    // Checkstyle: CyclomaticComplexity OFF
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -114,7 +112,9 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
         }
         return true;
     }
+    // Checkstyle: CyclomaticComplexity ON
 
+    // Checkstyle: CyclomaticComplexity OFF
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -147,11 +147,12 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
         rpCtx.setOperator(AuthnContextComparisonTypeEnumeration.EXACT.toString());
         rpCtx.setRequestedPrincipals(principals);
         // we need oidc context for storing essential flag
-        final OIDCRequestedPrincipalContext oidcRPCtx = authenticationContext
-                .getSubcontext(OIDCRequestedPrincipalContext.class, true);
+        final OIDCRequestedPrincipalContext oidcRPCtx =
+                authenticationContext.getSubcontext(OIDCRequestedPrincipalContext.class, true);
         oidcRPCtx.setEssential(isEssential);
         authenticationContext.addSubcontext(rpCtx, true);
         log.debug("{} Created requested principal context", getLogPrefix());
     }
+    // Checkstyle: CyclomaticComplexity ON
 
 }
