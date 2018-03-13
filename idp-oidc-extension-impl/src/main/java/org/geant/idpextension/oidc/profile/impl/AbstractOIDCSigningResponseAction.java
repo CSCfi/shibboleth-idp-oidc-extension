@@ -47,6 +47,10 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractOIDCSigningResponseAction extends AbstractOIDCResponseAction {
 
+    /** The signature signing parameters. */
+    @Nullable
+    protected SignatureSigningParameters signatureSigningParameters;
+
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(AbstractOIDCSigningResponseAction.class);
@@ -56,10 +60,6 @@ public abstract class AbstractOIDCSigningResponseAction extends AbstractOIDCResp
      */
     @Nonnull
     private Function<ProfileRequestContext, SecurityParametersContext> securityParametersLookupStrategy;
-
-    /** The signature signing parameters. */
-    @Nullable
-    protected SignatureSigningParameters signatureSigningParameters;
 
     /** Constructor. */
     public AbstractOIDCSigningResponseAction() {
