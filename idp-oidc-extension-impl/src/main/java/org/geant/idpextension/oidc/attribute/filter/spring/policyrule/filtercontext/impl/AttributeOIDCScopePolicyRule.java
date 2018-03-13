@@ -51,13 +51,12 @@ public class AttributeOIDCScopePolicyRule extends AbstractStringPolicyRule {
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(AttributeOIDCScopePolicyRule.class);
 
-    // TODO: consider moving hhelper methods elsewhere!
+    // TODO: consider moving helper methods elsewhere!
 
     /**
      * Helper method to locate authentication response context.
      * 
-     * @param ctx
-     *            any context child of profile request context,
+     * @param ctx any context child of profile request context,
      * @return Inbound message context or null if not found.
      */
     @SuppressWarnings("rawtypes")
@@ -70,8 +69,8 @@ public class AttributeOIDCScopePolicyRule extends AbstractStringPolicyRule {
             ctxRunner = ctxRunner.getParent();
         }
         if (ctxRunner instanceof ProfileRequestContext) {
-            return ((ProfileRequestContext) ctxRunner).getOutboundMessageContext().getSubcontext(
-                    OIDCAuthenticationResponseContext.class, false);
+            return ((ProfileRequestContext) ctxRunner).getOutboundMessageContext()
+                    .getSubcontext(OIDCAuthenticationResponseContext.class, false);
         }
         return null;
     }
@@ -79,11 +78,8 @@ public class AttributeOIDCScopePolicyRule extends AbstractStringPolicyRule {
     /**
      * Compare the authentication request scopes with the provided string.
      * 
-     * @param filterContext
-     *            the context
+     * @param filterContext the context
      * @return whether it matches
-     * 
-     *         {@inheritDoc}
      */
     @Override
     public Tristate matches(@Nonnull final AttributeFilterContext filterContext) {
