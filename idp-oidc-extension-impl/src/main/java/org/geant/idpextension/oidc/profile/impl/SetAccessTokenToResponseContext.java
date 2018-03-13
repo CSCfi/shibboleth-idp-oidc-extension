@@ -86,7 +86,7 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
 
     /** Authorize Code the access token is based on. */
-    AuthorizeCodeClaimsSet authzCodeClaimsSet;
+    private AuthorizeCodeClaimsSet authzCodeClaimsSet;
 
     /** Strategy used to obtain the response issuer value. */
     @Nonnull
@@ -103,10 +103,13 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     @Nonnull
     private Function<ProfileRequestContext, IdentifierGenerationStrategy> idGeneratorLookupStrategy;
 
-    AuthenticationRequest authenticationRequest;
+    /** Authentication request the token is based on. */
+    private AuthenticationRequest authenticationRequest;
 
     /**
      * Constructor.
+     * 
+     * @param sealer sealer to encrypt/hmac access token.
      */
     public SetAccessTokenToResponseContext(@Nonnull @ParameterName(name = "sealer") final DataSealer sealer) {
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
@@ -157,6 +160,7 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
         issuerLookupStrategy = Constraint.isNotNull(strategy, "IssuerLookupStrategy lookup strategy cannot be null");
     }
 
+    // Checkstyle: CyclomaticComplexity OFF
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -210,6 +214,7 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
         }
         return true;
     }
+    // Checkstyle: CyclomaticComplexity ON
 
     /** {@inheritDoc} */
     @Override
