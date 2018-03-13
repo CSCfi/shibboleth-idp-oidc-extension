@@ -56,7 +56,7 @@
     <bean id="GenerateClientSecret"
         class="org.geant.idpextension.oidc.profile.impl.GenerateClientSecret"
         scope="prototype" 
-        p:defaultRegistrationValidityPeriod="#{'%{idp.oidc.dynreg.defaultSecretExpiration:P12M}'.trim()}" />
+        p:defaultSecretExpirationPeriod="#{'%{idp.oidc.dynreg.defaultSecretExpiration:P12M}'.trim()}" />
 
     <bean id="AddRedirectUrisToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddRedirectUrisToClientMetadata"
