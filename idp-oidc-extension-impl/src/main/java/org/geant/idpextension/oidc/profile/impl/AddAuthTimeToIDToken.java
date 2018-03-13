@@ -39,15 +39,6 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
  * Action that adds auth_time claim to a {@link IDTokenClaimsSet}.
- * 
- * auth_time Time when the End-User authentication occurred. Its value is a JSON
- * number representing the number of seconds from 1970-01-01T0:0:0Z as measured
- * in UTC until the date/time. When a max_age request is made or when auth_time
- * is requested as an Essential Claim, then this Claim is REQUIRED; otherwise,
- * its inclusion is OPTIONAL. (The auth_time Claim semantically corresponds to
- * the OpenID 2.0 PAPE [OpenID.PAPE] auth_time response parameter.)
- *
- *
  */
 @SuppressWarnings("rawtypes")
 public class AddAuthTimeToIDToken extends AbstractOIDCResponseAction {
@@ -69,8 +60,8 @@ public class AddAuthTimeToIDToken extends AbstractOIDCResponseAction {
             log.debug("{} Setting auth_time to id token", getLogPrefix());
             getOidcResponseContext().getIDToken().setClaim(IDTokenClaimsSet.AUTH_TIME_CLAIM_NAME,
                     getOidcResponseContext().getAuthTime().getTime() / 1000);
-            log.debug("{} Updated token {}", getLogPrefix(), getOidcResponseContext().getIDToken().toJSONObject()
-                    .toJSONString());
+            log.debug("{} Updated token {}", getLogPrefix(),
+                    getOidcResponseContext().getIDToken().toJSONObject().toJSONString());
         }
 
     }
