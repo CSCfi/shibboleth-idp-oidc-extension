@@ -100,6 +100,7 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
     /** {@inheritDoc} */
     @Override
     @Nullable
+    // Checkstyle: CyclomaticComplexity OFF
     public SubjectType apply(@Nullable final ProfileRequestContext input) {
 
         SubjectType type = null;
@@ -124,5 +125,6 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
         }
         return type;
     }
+    // Checkstyle: CyclomaticComplexity ON
 
 }
