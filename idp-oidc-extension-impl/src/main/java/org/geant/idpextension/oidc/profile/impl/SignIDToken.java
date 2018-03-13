@@ -41,7 +41,6 @@ import com.nimbusds.oauth2.sdk.ParseException;
 /**
  * Action that signs {@link IDTokenClaimsSet} and sets it to {@link OidcResponseContext#getSignedIDToken}. Actions fails
  * silently if there are no signing parameters available.
- *
  */
 public class SignIDToken extends AbstractSignJWTAction {
 
@@ -49,6 +48,7 @@ public class SignIDToken extends AbstractSignJWTAction {
     @Nonnull
     private Logger log = LoggerFactory.getLogger(SignIDToken.class);
 
+    /** token claims set to sign. */
     private JWTClaimsSet idTokenClaims;
 
     /** {@inheritDoc} */
