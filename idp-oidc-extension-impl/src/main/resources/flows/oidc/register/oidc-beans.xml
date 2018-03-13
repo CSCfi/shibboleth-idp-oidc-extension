@@ -124,7 +124,7 @@
     <bean id="StoreClientInformation"
         class="org.geant.idpextension.oidc.profile.impl.StoreClientInformation"
         scope="prototype" p:clientInformationManager-ref="shibboleth.oidc.ClientInformationManager"
-        p:defaultRegistrationValidityPeriod="#{'%{idp.oidc.dynreg.defaultValidity:PT24H}'.trim()}">
+        p:defaultRegistrationValidityPeriod="#{'%{idp.oidc.dynreg.defaultRegistrationValidity:PT24H}'.trim()}">
         <property name="registrationValidityPeriodStrategy">
             <bean class="org.geant.idpextension.oidc.config.navigate.RegistrationValidityPeriodLookupFunction" />
         </property>
