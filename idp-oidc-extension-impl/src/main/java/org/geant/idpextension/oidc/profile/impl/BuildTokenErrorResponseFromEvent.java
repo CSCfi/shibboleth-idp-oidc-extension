@@ -35,9 +35,8 @@ import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 
 /**
- * This action reads an event from the configured {@link EventContext} lookup
- * strategy, constructs an OIDC token error response message and attaches it as
- * the outbound message.
+ * This action reads an event from the configured {@link EventContext} lookup strategy, constructs an OIDC token error
+ * response message and attaches it as the outbound message.
  */
 public class BuildTokenErrorResponseFromEvent extends AbstractBuildErrorResponseFromEvent<TokenErrorResponse> {
 
