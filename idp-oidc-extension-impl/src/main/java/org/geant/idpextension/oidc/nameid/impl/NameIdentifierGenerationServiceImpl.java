@@ -25,6 +25,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.geant.idpextension.oidc.nameid.impl;
 
 import javax.annotation.Nonnull;
@@ -43,14 +44,11 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 /**
  * Implementation of {@link NameIdentifierGenerationService}.
  * 
- * OIDC Subject generation takes advantage of saml2 persistent id generators.
- * This class enables a more convenient naming for user to configure the
- * list.
+ * OIDC Subject generation takes advantage of saml2 persistent id generators. This class enables a more convenient
+ * naming for user to configure the list.
  * 
- * Based on
- * {@link net.shibboleth.idp.saml.nameid.impl.NameIdentifierGenerationServiceImpl}
- * .
- * */
+ * Based on {@link net.shibboleth.idp.saml.nameid.impl.NameIdentifierGenerationServiceImpl} .
+ */
 public class NameIdentifierGenerationServiceImpl extends AbstractServiceableComponent<NameIdentifierGenerationService>
         implements NameIdentifierGenerationService, IdentifiableComponent {
 
@@ -67,8 +65,7 @@ public class NameIdentifierGenerationServiceImpl extends AbstractServiceableComp
     /**
      * Set the {@link SAML2NameIDGenerator} to use.
      * 
-     * @param generator
-     *            generator to use
+     * @param generator generator to use
      */
     public void setSubjectGenerator(@Nonnull final SAML2NameIDGenerator generator) {
         saml2Generator = Constraint.isNotNull(generator, "SAML2NameIDGenerator cannot be null");
