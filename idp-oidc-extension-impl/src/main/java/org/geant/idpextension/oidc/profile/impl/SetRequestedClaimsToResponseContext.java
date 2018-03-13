@@ -40,8 +40,7 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Action that sets requested claims to response context. For instance attribute
- * filtering may use this information.
+ * Action that sets requested claims to response context. For instance attribute filtering may use this information.
  */
 @SuppressWarnings("rawtypes")
 public class SetRequestedClaimsToResponseContext extends AbstractOIDCResponseAction {
@@ -64,13 +63,13 @@ public class SetRequestedClaimsToResponseContext extends AbstractOIDCResponseAct
     /**
      * Set the strategy used to locate the requested claims of request.
      * 
-     * @param strategy
-     *            lookup strategy
+     * @param strategy lookup strategy
      */
-    public void setRequestedClaimsLookupStrategy(@Nonnull final Function<ProfileRequestContext, ClaimsRequest> strategy) {
+    public void
+            setRequestedClaimsLookupStrategy(@Nonnull final Function<ProfileRequestContext, ClaimsRequest> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        requestedClaimsLookupStrategy = Constraint.isNotNull(strategy,
-                "RequestedClaimsLookupStrategy lookup strategy cannot be null");
+        requestedClaimsLookupStrategy =
+                Constraint.isNotNull(strategy, "RequestedClaimsLookupStrategy lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
