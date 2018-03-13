@@ -100,6 +100,8 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
 
     /**
      * Constructor.
+     * 
+     * @param sealer sealer to encrypt/hmac authz code.
      */
     public SetAuthorizationCodeToResponseContext(@Nonnull @ParameterName(name = "sealer") final DataSealer sealer) {
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
