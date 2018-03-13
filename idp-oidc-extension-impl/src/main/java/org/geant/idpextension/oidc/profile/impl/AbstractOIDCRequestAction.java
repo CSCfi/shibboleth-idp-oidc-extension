@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
  * Abstract class for actions performing actions on a oidc request found via
  * {@link ProfileRequestContext#getInboundMessageContext()#getMessage()}.
  *
+ * @param <T> request message implementation class.
  *
  */
 @SuppressWarnings("rawtypes")
@@ -65,7 +66,7 @@ public abstract class AbstractOIDCRequestAction<T> extends AbstractProfileAction
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
