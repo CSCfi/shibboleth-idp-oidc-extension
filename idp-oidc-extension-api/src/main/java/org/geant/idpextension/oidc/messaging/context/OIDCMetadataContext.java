@@ -47,8 +47,7 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 public class OIDCMetadataContext extends BaseContext {
 
     /** The client information. */
-    @Nullable
-    OIDCClientInformation clientInformation;
+    @Nullable private OIDCClientInformation clientInformation;
     
     /**
      * Set the client information.

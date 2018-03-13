@@ -70,4 +70,10 @@ public final class SignatureConstants {
     /** No Signature. */
     public static final String ALGO_ID_SIGNATURE_NONE = "none";
 
+    /**
+     * Constructor.
+     */
+    private SignatureConstants() {
+        // no op
+    }
 }

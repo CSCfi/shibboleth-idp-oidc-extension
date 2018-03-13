@@ -37,7 +37,7 @@ import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
  * {@link org.opensaml.profile.context.EventContext}s.
  */
 public final class OidcEventIds {
-
+    
     /**
      * ID of event returned if the mandatory redirect_uris is missing.
      */
@@ -72,5 +72,12 @@ public final class OidcEventIds {
      * The subject resolved is not the expected one.
      */
     @Nonnull @NotEmpty public static final String INVALID_SUBJECT = "InvalidSubject";
+
+    /**
+     * Constructor.
+     */
+    private OidcEventIds() {
+        // no op
+    }
 
 }
