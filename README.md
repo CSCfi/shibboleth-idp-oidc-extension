@@ -44,6 +44,11 @@ By following log entries it should be possible to get an idea of the execution.
 tail -f /opt/shibboleth-idp/logs/idp-process.log
 ``` 
 
+### Self Test Page
+Fastest way to test installation is to use preconfigured mod_auth_openidc client for authentication sequence that may be triggered on self test page [https://192.168.0.150](https://192.168.0.150)
+
+By modifying both the authentication request - /etc/httpd/conf.d/auth_openidc.conf - and the Shib OIDC OP extension configuration as described in Wiki you should be able to try different response types, claim sets and closing of userinfo endpoint just to name few.   
+
 ### LDAP User to authenticate with
 The LDAP user is Ted Tester, in Finnish:
 
@@ -51,11 +56,6 @@ The LDAP user is Ted Tester, in Finnish:
 user:teppo
 password:testaaja
 ```
-
-### Self Test Page
-Fastest way to test installation is to use preconfigured mod_auth_openidc client for authentication sequence that may be triggered on self test page [https://192.168.0.150](https://192.168.0.150)
-
-By modifying both the authentication request - /etc/httpd/conf.d/auth_openidc.conf - and the Shib OIDC OP extension configuration as described in Wiki you should be able to try different response types, claim sets and closing of userinfo endpoint just to name few.   
 
 ### Configuration
 See Wiki
