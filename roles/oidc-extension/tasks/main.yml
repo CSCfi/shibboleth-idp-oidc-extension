@@ -371,6 +371,11 @@
     src: authn-comparison.xml
     dest: "{{ idp_home }}/conf/authn/authn-comparison.xml"
 
+- name: Setting modified login.vm
+  template:
+    src: login.vm
+    dest: "{{ idp_home }}/views/login.vm"
+
 - name: Setting index.html containing authentication links
   template:
     src: index.html
