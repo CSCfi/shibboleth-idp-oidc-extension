@@ -115,6 +115,10 @@
     <bean id="AddTosUrisToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddTosUrisToClientMetadata"
         scope="prototype" />
+        
+    <bean id="AddClientNameToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddClientNameToClientMetadata"
+        scope="prototype" />
 
     <bean id="shibboleth.oidc.ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
