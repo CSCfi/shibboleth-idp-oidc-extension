@@ -36,7 +36,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
