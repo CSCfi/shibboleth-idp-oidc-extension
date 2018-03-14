@@ -35,6 +35,8 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
@@ -49,17 +51,24 @@ import org.opensaml.profile.context.navigate.InboundMessageContextLookup;
 import org.opensaml.profile.context.navigate.OutboundMessageContextLookup;
 import org.opensaml.saml.common.messaging.context.SAMLMetadataContext;
 import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
+import org.opensaml.saml.ext.saml2mdui.DisplayName;
 import org.opensaml.saml.ext.saml2mdui.InformationURL;
 import org.opensaml.saml.ext.saml2mdui.Logo;
 import org.opensaml.saml.ext.saml2mdui.PrivacyStatementURL;
 import org.opensaml.saml.ext.saml2mdui.UIInfo;
+import org.opensaml.saml.ext.saml2mdui.impl.DisplayNameBuilder;
 import org.opensaml.saml.ext.saml2mdui.impl.InformationURLBuilder;
 import org.opensaml.saml.ext.saml2mdui.impl.LogoBuilder;
 import org.opensaml.saml.ext.saml2mdui.impl.PrivacyStatementURLBuilder;
 import org.opensaml.saml.ext.saml2mdui.impl.UIInfoBuilder;
+import org.opensaml.saml.saml2.metadata.ContactPerson;
+import org.opensaml.saml.saml2.metadata.ContactPersonTypeEnumeration;
+import org.opensaml.saml.saml2.metadata.EmailAddress;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.Extensions;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.impl.ContactPersonBuilder;
+import org.opensaml.saml.saml2.metadata.impl.EmailAddressBuilder;
 import org.opensaml.saml.saml2.metadata.impl.EntityDescriptorBuilder;
 import org.opensaml.saml.saml2.metadata.impl.ExtensionsBuilder;
 import org.opensaml.saml.saml2.metadata.impl.SPSSODescriptorBuilder;
@@ -100,6 +109,9 @@ public class InitializeOutboundAuthenticationResponseMessageContext
     /** The OIDC metadata context used as a source for the SAML metadata context. */
     private OIDCMetadataContext oidcMetadataCtx;
     
+    /** The default language when it has not been defined in the metadata. */
+    private String defaultLanguage;
+    
     /**
      * Constructor.
      */
@@ -110,6 +122,7 @@ public class InitializeOutboundAuthenticationResponseMessageContext
                         new OutboundMessageContextLookup()));
         oidcMetadataCtxLookupStrategy = Functions.compose(new ChildContextLookup<>(OIDCMetadataContext.class, false),
                 new InboundMessageContextLookup());
+        defaultLanguage = "en";
     }
     
     /**
@@ -153,6 +166,17 @@ public class InitializeOutboundAuthenticationResponseMessageContext
         
         oidcMetadataCtxLookupStrategy = Constraint.isNotNull(strgy, "Injected Metadata Strategy cannot be null");
     }
+    
+    /**
+     * Set the default language when it has not been defined in the metadata.
+     * 
+     * @param language What to set.
+     */
+    public void setDefaultLanguage(@Nonnull final String language) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        defaultLanguage = Constraint.isNotEmpty(language, "The default language cannot be empty");
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -178,7 +202,7 @@ public class InitializeOutboundAuthenticationResponseMessageContext
         final UIInfo uiInfo = new UIInfoBuilder().buildObject();
         for (final LangTag tag : oidcMetadata.getLogoURIEntries().keySet()) {
             final Logo logo = new LogoBuilder().buildObject();
-            logo.setXMLLang(tag == null ? null : tag.getLanguage());
+            logo.setXMLLang(tag == null ? defaultLanguage : tag.getLanguage());
             final URI logoUri = oidcMetadata.getLogoURI(tag);
             try {
                 final BufferedImage image = ImageIO.read(oidcMetadata.getLogoURI(tag).toURL());
@@ -192,15 +216,33 @@ public class InitializeOutboundAuthenticationResponseMessageContext
         }
         for (final LangTag tag : oidcMetadata.getPolicyURIEntries().keySet()) {
             final PrivacyStatementURL url = new PrivacyStatementURLBuilder().buildObject();
-            url.setXMLLang(tag == null ? null : tag.getLanguage());
+            url.setXMLLang(tag == null ? defaultLanguage : tag.getLanguage());
             url.setValue(oidcMetadata.getPolicyURI(tag).toString());
             uiInfo.getPrivacyStatementURLs().add(url);
         }
         for (final LangTag tag: oidcMetadata.getTermsOfServiceURIEntries().keySet()) {
             final InformationURL url = new InformationURLBuilder().buildObject();
-            url.setXMLLang(tag == null ? null : tag.getLanguage());
+            url.setXMLLang(tag == null ? defaultLanguage : tag.getLanguage());
             url.setValue(oidcMetadata.getTermsOfServiceURI(tag).toString());
             uiInfo.getInformationURLs().add(url); 
+        }
+        final List<String> emails = oidcMetadata.getEmailContacts();
+        if (emails != null) {
+            final ContactPerson contactPerson = new ContactPersonBuilder().buildObject();
+            //TODO: should it be configurable?
+            contactPerson.setType(ContactPersonTypeEnumeration.SUPPORT);
+            for (final String email : emails) {
+                final EmailAddress address = new EmailAddressBuilder().buildObject();
+                address.setAddress(email.startsWith("mailto:") ? email : "mailto:" + email);
+                contactPerson.getEmailAddresses().add(address);
+            }
+            entityDescriptor.getContactPersons().add(contactPerson);
+        }
+        for (final LangTag tag : oidcMetadata.getNameEntries().keySet()) {
+            final DisplayName displayName = new DisplayNameBuilder().buildObject();
+            displayName.setXMLLang(tag == null ? defaultLanguage : tag.getLanguage());
+            displayName.setValue(oidcMetadata.getNameEntries().get(tag));
+            uiInfo.getDisplayNames().add(displayName);
         }
         final Extensions extensions = new ExtensionsBuilder().buildObject();
         extensions.getUnknownXMLObjects().add(uiInfo);
