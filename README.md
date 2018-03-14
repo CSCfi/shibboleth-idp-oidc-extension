@@ -44,13 +44,20 @@ By following log entries it should be possible to get an idea of the execution.
 tail -f /opt/shibboleth-idp/logs/idp-process.log
 ``` 
 
-#### LDAP User to authenticate with
+### LDAP User to authenticate with
 The LDAP user is Ted Tester, in Finnish:
 
 ```
 user:teppo
 password:testaaja
 ```
+
+### Self Test Page
+Fastest way to test installation is to use preconfigured mod_auth_openidc client. The self test page location is 
+```
+https://192.168.0.150/static.
+```
+ 
 
 ### Configuration
 See wiki
