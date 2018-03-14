@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <html>
-<body>
-<br/>
-<a href="https://192.168.0.150/idp/profile/oidc/register">Dynamic registration request with GET (should produce JSON error)</a><br>
-<br/>
-<a href="https://192.168.0.150:8443/protected/">mod_auth_openidc with dynamic registration (use	e.g. teppo@192.168.0.150 as username)</a><br>
-</body>
+    <body>
+        <h1>Self Test for RPless People</h1>
+        <p>
+            Test link performs all possible phase: webfinger, dynamic registration and code flow using scope openid+email.     
+        </p>
+        <p>
+        <ul>
+        <li>Webfinger user:<b>teppo@192.168.0.150</b> </li>
+        <li>Username for Shibboleth Login page:<b>teppo</b></li>
+        <li>Password for Shibboleth Login page:<b>testaaja</b></li>
+        <ul>
+        </p>
+        <a href="https://192.168.0.150:8443/protected/">Authenticate</a><br>
+    </body>
 </html>
