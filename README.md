@@ -53,11 +53,8 @@ password:testaaja
 ```
 
 ### Self Test Page
-Fastest way to test installation is to use preconfigured mod_auth_openidc client. The self test page location is 
-```
-https://192.168.0.150/static.
-```
- 
+Fastest way to test installation is to use preconfigured mod_auth_openidc client for authentication sequence that may be triggered on self test page (https://192.168.0.150)[https://192.168.0.150]
+By modifying the produced authentication request (/etc/httpd/conf.d/auth_openidc.conf) and by changing the Shib OP as described in Wiki you should be able to try different response types, claim sets and closing of userinfo endpoint just to name few.   
 
 ### Configuration
 See wiki
