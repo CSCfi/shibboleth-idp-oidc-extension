@@ -133,7 +133,7 @@ public class AddUserInfoShell extends AbstractOIDCResponseAction {
 
         // TODO: add control to add/not add aud and iss depending on signing. They are resolved already by the action.
         UserInfo userInfo = new UserInfo(new Subject(getOidcResponseContext().getNameId().getValue()));
-        log.debug("{} Setting id token shell to response context {}", getLogPrefix(),
+        log.debug("{} Setting userinfo response shell to response context {}", getLogPrefix(),
                 userInfo.toJSONObject().toJSONString());
         getOidcResponseContext().setUserInfo(userInfo);
     }
