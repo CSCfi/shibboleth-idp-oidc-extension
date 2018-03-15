@@ -185,7 +185,7 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
            return;
         } else if (enabledAndEquals(enabledMethods, clientAuthMethod, 
                 ClientAuthenticationMethod.CLIENT_SECRET_BASIC)) {
-            if ((clientAuth instanceof ClientSecretBasic)) {
+            if (clientAuth instanceof ClientSecretBasic) {
                 if (validateSecret((ClientSecretBasic)clientAuth, clientInformation)) {
                     return;
                 }
@@ -225,7 +225,7 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
                 }                
             }
         } else {
-            log.warn("{} Unsupported client authentication method {}", getLogPrefix(), clientAuth.getMethod());            
+            log.warn("{} Unsupported client authentication method {}", getLogPrefix(), clientAuth.getMethod());
         }
         ActionSupport.buildEvent(profileRequestContext, EventIds.ACCESS_DENIED);
     }
