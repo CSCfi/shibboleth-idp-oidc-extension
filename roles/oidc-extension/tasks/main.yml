@@ -119,7 +119,7 @@
   blockinfile:
     dest: "{{ idp_home }}/conf/idp.properties"
     marker: "# {mark} ANSIBLE MANAGED BLOCK for token lifetimes"
-    insertafter: "idp.oidc.dynreg.defaultSubjectType"
+    insertafter: "idp.oidc.tokenEndpointAuthMethods"
     content: |
          # Default lifetime of oidc tokens
          #idp.oidc.authorizeCode.defaultLifetime = PT5M
