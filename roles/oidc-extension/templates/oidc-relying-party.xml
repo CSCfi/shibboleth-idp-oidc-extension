@@ -26,14 +26,16 @@
     <bean id="OIDC.SSO" class="org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration"
         p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
         p:iDTokenLifetime="%{idp.oidc.idToken.defaultLifetime:PT1H}" p:accessTokenLifetime="%{idp.oidc.accessToken.defaultLifetime:PT1H}"
-        p:authorizeCodeLifetime="%{idp.oidc.authorizeCode.defaultLifetime:PT5M}" p:servletRequest-ref="shibboleth.HttpServletRequest" />
+        p:authorizeCodeLifetime="%{idp.oidc.authorizeCode.defaultLifetime:PT5M}" p:servletRequest-ref="shibboleth.HttpServletRequest"
+        p:tokenEndpointAuthMethods="%{idp.oidc.tokenEndpointAuthMethods:client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt}" />
     <bean id="OIDC.UserInfo" class="org.geant.idpextension.oidc.config.OIDCUserInfoConfiguration"
         p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
         p:servletRequest-ref="shibboleth.HttpServletRequest" />
     <!-- Refresh tokens are not supported. Do not turn it on in OIDC.Registration -->
     <bean id="OIDC.Registration" class="org.geant.idpextension.oidc.config.OIDCDynamicRegistrationConfiguration"
         p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
-        p:refreshTokensEnabled="false" p:servletRequest-ref="shibboleth.HttpServletRequest" />
+        p:refreshTokensEnabled="false" p:servletRequest-ref="shibboleth.HttpServletRequest"
+        p:tokenEndpointAuthMethods="%{idp.oidc.dynreg.tokenEndpointAuthMethods:client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt}" />
 
     <!-- Security Configuration Defaults These settings establish the default security configurations for signatures and 
         loads the default credentials used. -->

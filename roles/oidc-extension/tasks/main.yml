@@ -112,6 +112,8 @@
          idp.oidc.dynreg.defaultSecretExpiration = P12M
          idp.oidc.dynreg.defaultScope = openid phone email address profile
          idp.oidc.dynreg.defaultSubjectType = public
+         idp.oidc.dynreg.tokenEndpointAuthMethods = client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt
+         idp.oidc.tokenEndpointAuthMethods = client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt
 
 - name: Set default lifetime of oidc tokens to idp.properties
   blockinfile:
