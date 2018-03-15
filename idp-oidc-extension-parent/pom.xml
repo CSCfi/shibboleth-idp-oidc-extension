@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.geant</groupId>
     <artifactId>idp-oidc-extension-parent</artifactId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.6.0</version>
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -111,7 +111,7 @@
             </dependency>
             <dependency>
                 <groupId>org.geant</groupId>
-                <version>0.5.1-SNAPSHOT</version>
+                <version>0.6.0</version>
                 <artifactId>idp-oidc-extension-api</artifactId>
             </dependency>
             <dependency>
