@@ -438,7 +438,9 @@
   with_items:
     - "index.php"
 
-- name: Restart httpd
+- name: Set httpd enabled and restart
   service:
     name: httpd
     state: restarted
+    enabled: yes
+
