@@ -56,8 +56,6 @@
     <action-state id="AttributeResolution">
         <evaluate expression="ResolveAttributes" />
         <evaluate expression="FilterAttributes" />
-        <evaluate expression="SetNameIDToResponseContext" />
-        <evaluate expression="VerifyRequestedSubjectIdentifier" />
         <evaluate expression="PopulatePostAuthnInterceptContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="CheckPostAuthnInterceptContext" />
@@ -66,14 +64,21 @@
     <decision-state id="CheckPostAuthnInterceptContext">
         <if
             test="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.ProfileInterceptorContext)).getAvailableFlows().isEmpty()"
-            then="BuildResponse" else="DoPostAuthnInterceptSubflow" />
+            then="SubjectResolution" else="DoPostAuthnInterceptSubflow" />
     </decision-state>
 
     <subflow-state id="DoPostAuthnInterceptSubflow" subflow="intercept">
         <input name="calledAsSubflow" value="true" />
-        <transition on="proceed" to="BuildResponse" />
+        <transition on="proceed" to="SubjectResolution" />
         <transition on="RestartAuthentication" to="PostInitialSetup" />
     </subflow-state>
+
+    <action-state id="SubjectResolution">
+        <evaluate expression="SetNameIDToResponseContext" />
+        <evaluate expression="VerifyRequestedSubjectIdentifier" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="BuildResponse" />
+    </action-state>
 
     <action-state id="BuildResponse">
         <evaluate expression="AddIDTokenShell" />
@@ -94,9 +99,12 @@
         <on-render>
             <evaluate expression="environment" result="viewScope.environment" />
             <evaluate expression="opensamlProfileRequestContext" result="viewScope.profileRequestContext" />
-            <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="viewScope.encoder" />
-            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="viewScope.request" />
-            <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="viewScope.response" />
+            <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)"
+                result="viewScope.encoder" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()"
+                result="viewScope.request" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()"
+                result="viewScope.response" />
         </on-render>
         <exception-handler bean="RethrowingFlowExecutionExceptionHandler" />
     </view-state>
