@@ -287,10 +287,10 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
         }
         //TODO: should support other than plaintext storage
         if (clientSecret.equals(clientInformation.getSecret())) {
-            log.debug("{} Password successfully verified", getLogPrefix());
+            log.debug("{} The client secret successfully verified", getLogPrefix());
             return true;
         }
-        log.warn("{} Password validation failed", getLogPrefix());
+        log.warn("{} The client secret validation failed", getLogPrefix());
         return false;
     }
     
