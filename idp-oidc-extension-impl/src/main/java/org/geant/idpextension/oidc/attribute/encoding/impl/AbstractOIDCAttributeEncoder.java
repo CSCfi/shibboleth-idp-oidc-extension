@@ -79,6 +79,12 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     @Nullable
     private String stringDelimiter;
 
+    /**
+     * Whether the attribute should encoded to authorization code / access token.
+     */
+    @Nullable
+    private boolean setToToken;
+
     /** Whether to wrap the value to JSON Object. */
     private boolean asObject;
 
@@ -177,6 +183,24 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
      */
     public boolean getAsInt() {
         return asInt;
+    }
+
+    /**
+     * Sets whether the attribute should encoded to authorization code / access token.
+     * 
+     * @param flag whether the attribute should encoded to authorization code / access token
+     */
+    public void setSetToToken(boolean flag) {
+        setToToken = flag;
+    }
+
+    /**
+     * Gets whether the attribute should encoded to authorization code / access token.
+     * 
+     * @return whhether the attribute should encoded to authorization code / access token.
+     */
+    public boolean getSetToToken() {
+        return setToToken;
     }
 
     /**

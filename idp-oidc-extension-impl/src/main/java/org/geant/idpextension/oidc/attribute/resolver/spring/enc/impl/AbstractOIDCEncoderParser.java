@@ -56,6 +56,11 @@ public abstract class AbstractOIDCEncoderParser extends BaseAttributeEncoderPars
     @NotEmpty
     public static final String STRING_DELIMETER_ATTRIBUTE_NAME = "stringDelimiter";
 
+    /** Local name of set to token attribute. */
+    @Nonnull
+    @NotEmpty
+    public static final String SET_TO_TOKEN_ATTRIBUTE_NAME = "setToToken";
+
     /** Local name of as object attribute. */
     @Nonnull
     @NotEmpty
@@ -84,6 +89,10 @@ public abstract class AbstractOIDCEncoderParser extends BaseAttributeEncoderPars
         if (config.hasAttributeNS(null, AS_INT_ATTRIBUTE_NAME)) {
             builder.addPropertyValue("asInt",
                     StringSupport.trimOrNull(config.getAttributeNS(null, AS_INT_ATTRIBUTE_NAME)));
+        }
+        if (config.hasAttributeNS(null, SET_TO_TOKEN_ATTRIBUTE_NAME)) {
+            builder.addPropertyValue("setToToken",
+                    StringSupport.trimOrNull(config.getAttributeNS(null, SET_TO_TOKEN_ATTRIBUTE_NAME)));
         }
         if (config.hasAttributeNS(null, STRING_DELIMETER_ATTRIBUTE_NAME)) {
             builder.addPropertyValue("stringDelimiter",
