@@ -108,7 +108,7 @@
                     <annotation>
                         <documentation>
                             Instructs to encode the attribute to code/token. This is needed for attributes
-                            formed of session based information.
+                            formed of session/context based information.
                         </documentation>
                     </annotation>
                 </attribute>
