@@ -1,112 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:encoder="urn:mace:shibboleth:2.0:attribute:encoder"
-	xmlns:resolver="urn:mace:shibboleth:2.0:resolver" xmlns:oidcresolver="org.geant.idpextension.oidc.attribute.encoder"
-	targetNamespace="org.geant.idpextension.oidc.attribute.encoder"
-	elementFormDefault="qualified">
+    xmlns:resolver="urn:mace:shibboleth:2.0:resolver" xmlns:oidcresolver="org.geant.idpextension.oidc.attribute.encoder"
+    targetNamespace="org.geant.idpextension.oidc.attribute.encoder" elementFormDefault="qualified">
 
-	<import namespace="urn:mace:shibboleth:2.0:resolver"
-		schemaLocation="http://shibboleth.net/schema/idp/shibboleth-attribute-resolver.xsd" />
+    <import namespace="urn:mace:shibboleth:2.0:resolver"
+        schemaLocation="http://shibboleth.net/schema/idp/shibboleth-attribute-resolver.xsd" />
 
-	<!-- Encoders that produce OIDC Attributes -->
+    <!-- Encoders that produce OIDC Attributes -->
 
-	<complexType name="OIDCString">
-		<annotation>
-			<documentation>Defines a encoder for a string attribute.
-			</documentation>
-		</annotation>
-		<complexContent>
-			<extension base="oidcresolver:BaseAttributeEncoderType">
-			</extension>
-		</complexContent>
-	</complexType>
+    <complexType name="OIDCString">
+        <annotation>
+            <documentation>Defines a encoder for a string attribute.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="oidcresolver:BaseAttributeEncoderType">
+            </extension>
+        </complexContent>
+    </complexType>
 
-	<complexType name="OIDCByte">
-		<annotation>
-			<documentation>Defines a base64 encoder for a byte attribute.
-			</documentation>
-		</annotation>
-		<complexContent>
-			<extension base="oidcresolver:BaseAttributeEncoderType">
-			</extension>
-		</complexContent>
-	</complexType>
+    <complexType name="OIDCByte">
+        <annotation>
+            <documentation>Defines a base64 encoder for a byte attribute.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="oidcresolver:BaseAttributeEncoderType">
+            </extension>
+        </complexContent>
+    </complexType>
 
-	<complexType name="OIDCScopedString">
-		<annotation>
-			<documentation>Defines a OIDC string encoder for a scoped string
-				attribute.
-			</documentation>
-		</annotation>
-		<complexContent>
-			<extension base="oidcresolver:BaseAttributeEncoderType">
-				<attribute name="scopeDelimiter" type="string" use="optional">
-					<annotation>
-						<documentation>
-							This is the delimeter used between the attribute
-							value and
-							scope.
-						</documentation>
-					</annotation>
-				</attribute>
-			</extension>
-		</complexContent>
-	</complexType>
+    <complexType name="OIDCScopedString">
+        <annotation>
+            <documentation>Defines a OIDC string encoder for a scoped string
+                attribute.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="oidcresolver:BaseAttributeEncoderType">
+                <attribute name="scopeDelimiter" type="string" use="optional">
+                    <annotation>
+                        <documentation>
+                            This is the delimeter used between the attribute
+                            value and
+                            scope.
+                        </documentation>
+                    </annotation>
+                </attribute>
+            </extension>
+        </complexContent>
+    </complexType>
 
-	
-	<element name="OIDCAttributeEncoder" type="oidcresolver:BaseAttributeEncoderType">
-		<annotation>
-			<documentation>Defines a encoder (to JSON Object) for an attribute.
-			</documentation>
-		</annotation>
-	</element>
-	<complexType name="BaseAttributeEncoderType">
-		<complexContent>
-			<extension base="resolver:BaseAttributeEncoderType">
-			    <attribute name="asObject" type="string" use="optional">
-					<annotation>
-						<documentation>
-							Wrap encoded values into JSON Object.
-						</documentation>
-					</annotation>
-				</attribute>
-				<attribute name="fieldName" type="string" use="optional">
-					<annotation>
-						<documentation>
-							If values are wrapped into JSON Object, the name of the value.
-						</documentation>
-					</annotation>
-				</attribute>
-				<attribute name="asBoolean" type="string" use="optional">
-					<annotation>
-						<documentation>
-							Encode values as boolean.
-						</documentation>
-					</annotation>
-				</attribute>
-				<attribute name="asArray" type="string" use="optional">
-					<annotation>
-						<documentation>
-							Encode values into array.
-						</documentation>
-					</annotation>
-				</attribute>
-				<attribute name="asInt" type="string" use="optional">
-					<annotation>
-						<documentation>
-							Convert value to integer if possible.
-						</documentation>
-					</annotation>
-				</attribute>
-				<attribute name="stringDelimiter" type="string" use="optional">
-					<annotation>
-						<documentation>
-							Delimeter used when catenating multiple attribute
-							values to one.
-						</documentation>
-					</annotation>
-				</attribute>
-			</extension>
-		</complexContent>
-	</complexType>
+
+    <element name="OIDCAttributeEncoder" type="oidcresolver:BaseAttributeEncoderType">
+        <annotation>
+            <documentation>Defines a encoder (to JSON Object) for an attribute.
+            </documentation>
+        </annotation>
+    </element>
+    <complexType name="BaseAttributeEncoderType">
+        <complexContent>
+            <extension base="resolver:BaseAttributeEncoderType">
+                <attribute name="asObject" type="string" use="optional">
+                    <annotation>
+                        <documentation>
+                            Wrap encoded values into JSON Object.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="fieldName" type="string" use="optional">
+                    <annotation>
+                        <documentation>
+                            If values are wrapped into JSON Object, the name of the value.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="asBoolean" type="string" use="optional">
+                    <annotation>
+                        <documentation>
+                            Encode values as boolean.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="asArray" type="string" use="optional">
+                    <annotation>
+                        <documentation>
+                            Encode values into array.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="asInt" type="string" use="optional">
+                    <annotation>
+                        <documentation>
+                            Convert value to integer if possible.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="stringDelimiter" type="string" use="optional">
+                    <annotation>
+                        <documentation>
+                            Delimeter used when catenating multiple attribute
+                            values to one.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="setToToken" type="string" use="optional">
+                    <annotation>
+                        <documentation>
+                            Instructs to encode the attribute to code/token. This is needed for attributes
+                            formed of session based information.
+                        </documentation>
+                    </annotation>
+                </attribute>
+            </extension>
+        </complexContent>
+    </complexType>
 
 </schema>
