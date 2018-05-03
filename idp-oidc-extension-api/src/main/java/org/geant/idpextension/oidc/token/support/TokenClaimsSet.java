@@ -42,6 +42,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
 import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
@@ -93,6 +94,15 @@ public class TokenClaimsSet {
 
     /** Claims request of the original authentication request. */
     public static final String KEY_CLAIMS = "claims";
+    
+    /** Claims set for token delivery. */
+    public static final String KEY_DELIVERY_CLAIMS = "dl_claims";
+    
+    /** Claims set for token delivery, id token only. */
+    public static final String KEY_DELIVERY_CLAIMS_IDTOKEN = "dl_claims_id";
+    
+    /** Claims set for token delivery, user info only. */
+    public static final String KEY_DELIVERY_CLAIMS_USERINFO = "dl_claims_ui";
 
     /** Claims set for the claim. */
     protected JWTClaimsSet tokenClaimsSet;
@@ -130,7 +140,7 @@ public class TokenClaimsSet {
     protected TokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
             @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
-            @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
+            @Nonnull Scope scope, @Nullable ClaimsRequest claims, @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI) {
         if (tokenType == null || tokenID == null || clientID == null || issuer == null || userPrincipal == null
                 || acr == null || iat == null || exp == null || authTime == null || redirectURI == null
                 || scope == null) {
@@ -141,6 +151,9 @@ public class TokenClaimsSet {
                 .issueTime(iat).expirationTime(exp).claim(KEY_NONCE, nonce == null ? null : nonce.getValue())
                 .claim(KEY_AUTH_TIME, authTime).claim(KEY_REDIRECT_URI, redirectURI.toString())
                 .claim(KEY_SCOPE, scope.toString()).claim(KEY_CLAIMS, claims == null ? null : claims.toJSONObject())
+                .claim(KEY_DELIVERY_CLAIMS, dlClaims == null ? null : dlClaims.toJSONObject())
+                .claim(KEY_DELIVERY_CLAIMS_IDTOKEN, dlClaimsID == null ? null : dlClaimsID.toJSONObject())
+                .claim(KEY_DELIVERY_CLAIMS_USERINFO, dlClaimsUI == null ? null : dlClaimsUI.toJSONObject())
                 .build();
     }
 
@@ -194,6 +207,15 @@ public class TokenClaimsSet {
         // Voluntary fields
         if (tokenClaimsSet.getClaims().containsKey(KEY_CLAIMS)) {
             tokenClaimsSet.getJSONObjectClaim(KEY_CLAIMS);
+        }
+        if (tokenClaimsSet.getClaims().containsKey(KEY_DELIVERY_CLAIMS)) {
+            tokenClaimsSet.getJSONObjectClaim(KEY_DELIVERY_CLAIMS);
+        }
+        if (tokenClaimsSet.getClaims().containsKey(KEY_DELIVERY_CLAIMS_IDTOKEN)) {
+            tokenClaimsSet.getJSONObjectClaim(KEY_DELIVERY_CLAIMS_IDTOKEN);
+        }
+        if (tokenClaimsSet.getClaims().containsKey(KEY_DELIVERY_CLAIMS_USERINFO)) {
+            tokenClaimsSet.getJSONObjectClaim(KEY_DELIVERY_CLAIMS_USERINFO);
         }
         if (tokenClaimsSet.getClaims().containsKey(KEY_NONCE)) {
             tokenClaimsSet.getStringClaim(KEY_NONCE);

@@ -71,7 +71,7 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
                 authorizeCode.getClaimsSet().getIssuer(), authorizeCode.getClaimsSet().getSubject(),
                 new ACR(authorizeCode.getACR()), iat, exp, authorizeCode.getNonce(),
                 authorizeCode.getAuthenticationTime(), authorizeCode.getRedirectURI(), authorizeCode.getScope(),
-                authorizeCode.getClaimsRequest());
+                authorizeCode.getClaimsRequest(), null, null, null);
     }
 
     /**
@@ -96,7 +96,7 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
             @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
             @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
         super(VALUE_TYPE_AT, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, acr, iat, exp, nonce,
-                authTime, redirectURI, scope, claims);
+                authTime, redirectURI, scope, claims, null, null,null);
     }
 
     /**
