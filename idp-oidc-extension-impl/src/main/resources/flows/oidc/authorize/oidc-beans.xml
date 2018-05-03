@@ -87,6 +87,20 @@
         </property>
     </bean>
 
+    <bean id="SetTokenDeliveryAttributesToResponseContext" class="org.geant.idpextension.oidc.profile.impl.SetTokenDeliveryAttributesToResponseContext"
+        scope="prototype">
+        <property name="activationCondition">
+            <bean parent="shibboleth.Conditions.OR">
+                <constructor-arg>
+                    <ref bean="AuthorizeCodeRequested" />
+                </constructor-arg>
+                <constructor-arg>
+                    <ref bean="AccessTokenRequested" />
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+    
     <bean id="SetAuthorizationCodeToResponseContext" class="org.geant.idpextension.oidc.profile.impl.SetAuthorizationCodeToResponseContext"
         scope="prototype" c:sealer-ref="authorizeCodeSealer">
         <property name="identifierGeneratorLookupStrategy">
