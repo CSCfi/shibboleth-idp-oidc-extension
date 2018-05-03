@@ -47,8 +47,6 @@
     <action-state id="SetAuthenticationInformationToResponseContext">
         <evaluate expression="SetAuthenticationContextClassReferenceToResponseContext" />
         <evaluate expression="SetAuthenticationTimeToResponseContext" />
-        <evaluate expression="SetAuthorizationCodeToResponseContext" />
-        <evaluate expression="SetAccessTokenToResponseContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="AttributeResolution" />
     </action-state>
@@ -76,6 +74,14 @@
     <action-state id="SubjectResolution">
         <evaluate expression="SetNameIDToResponseContext" />
         <evaluate expression="VerifyRequestedSubjectIdentifier" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="BuildTokens" />
+    </action-state>
+
+    <action-state id="BuildTokens">
+        <evaluate expression="SetTokenDeliveryAttributesToResponseContext" />
+        <evaluate expression="SetAuthorizationCodeToResponseContext" />
+        <evaluate expression="SetAccessTokenToResponseContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="BuildResponse" />
     </action-state>
