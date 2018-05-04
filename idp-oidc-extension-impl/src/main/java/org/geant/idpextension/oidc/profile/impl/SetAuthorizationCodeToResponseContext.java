@@ -38,6 +38,9 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
+
 import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
@@ -45,6 +48,8 @@ import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
 
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseTokenClaimsContext;
+import org.geant.idpextension.oidc.profile.context.navigate.OIDCAuthenticationResponseContextLookupFunction;
 import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
@@ -98,12 +103,19 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     @Nonnull
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
 
+    /** Strategy used to locate the {@link OIDCAuthenticationResponseTokenClaimsContext}. */
+    @Nonnull
+    private Function<ProfileRequestContext, OIDCAuthenticationResponseTokenClaimsContext> tokenClaimsContextLookupStrategy;
+
     /**
      * Constructor.
      * 
      * @param sealer sealer to encrypt/hmac authz code.
      */
     public SetAuthorizationCodeToResponseContext(@Nonnull @ParameterName(name = "sealer") final DataSealer sealer) {
+        tokenClaimsContextLookupStrategy =
+                Functions.compose(new ChildContextLookup<>(OIDCAuthenticationResponseTokenClaimsContext.class),
+                        new OIDCAuthenticationResponseContextLookupFunction());
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
         issuerLookupStrategy = new ResponderIdLookupFunction();
         dataSealer = Constraint.isNotNull(sealer, "DataSealer cannot be null");
@@ -112,6 +124,19 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
                 return new SecureRandomIdentifierGenerationStrategy();
             }
         };
+    }
+
+    /**
+     * Set the strategy used to locate the {@link OIDCAuthenticationResponseTokenClaimsContext} associated with a given
+     * {@link ProfileRequestContext}.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setOIDCAuthenticationResponseTokenClaimsContextLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, OIDCAuthenticationResponseTokenClaimsContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        tokenClaimsContextLookupStrategy = Constraint.isNotNull(strategy,
+                "OIDCAuthenticationResponseTokenClaimsContextt lookup strategy cannot be null");
     }
 
     /**
@@ -187,15 +212,26 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+
+        ClaimsSet claims = null;
+        ClaimsSet claimsID = null;
+        ClaimsSet claimsUI = null;
+        OIDCAuthenticationResponseTokenClaimsContext tokenClaimsCtx =
+                tokenClaimsContextLookupStrategy.apply(profileRequestContext);
+        if (tokenClaimsCtx != null) {
+            claims = tokenClaimsCtx.getClaims();
+            claimsID = tokenClaimsCtx.getIdtokenClaims();
+            claimsUI = tokenClaimsCtx.getUserinfoClaims();
+        }
+
         Date dateExp = new Date(System.currentTimeMillis() + authCodeLifetime);
-        AuthorizeCodeClaimsSet claimsSet =
-                new AuthorizeCodeClaimsSet(idGenerator, getAuthenticationRequest().getClientID(),
-                        issuerLookupStrategy.apply(profileRequestContext), subjectCtx.getPrincipalName(),
-                        getOidcResponseContext().getAcr(), new Date(), dateExp, getAuthenticationRequest().getNonce(),
-                        getOidcResponseContext().getAuthTime(), getOidcResponseContext().getRedirectURI(),
-                        getAuthenticationRequest().getScope(), getAuthenticationRequest().getClaims());
+        AuthorizeCodeClaimsSet claimsSet = new AuthorizeCodeClaimsSet(idGenerator,
+                getAuthenticationRequest().getClientID(), issuerLookupStrategy.apply(profileRequestContext),
+                subjectCtx.getPrincipalName(), getOidcResponseContext().getAcr(), new Date(), dateExp,
+                getAuthenticationRequest().getNonce(), getOidcResponseContext().getAuthTime(),
+                getOidcResponseContext().getRedirectURI(), getAuthenticationRequest().getScope(),
+                getAuthenticationRequest().getClaims(), claims, claimsID, claimsUI);
         // We set token claims set to response context for possible access token generation.
-        // TODO: consider renaming setTokenClaimsSet method, confusing.
         getOidcResponseContext().setTokenClaimsSet(claimsSet);
         try {
             getOidcResponseContext().setAuthorizationCode(claimsSet.serialize(dataSealer));
