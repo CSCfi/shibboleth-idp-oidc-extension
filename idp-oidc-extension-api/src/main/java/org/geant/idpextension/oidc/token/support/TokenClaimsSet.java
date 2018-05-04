@@ -44,6 +44,7 @@ import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
+import net.minidev.json.JSONObject;
 import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
 import java.net.URI;
@@ -94,13 +95,13 @@ public class TokenClaimsSet {
 
     /** Claims request of the original authentication request. */
     public static final String KEY_CLAIMS = "claims";
-    
+
     /** Claims set for token delivery. */
     public static final String KEY_DELIVERY_CLAIMS = "dl_claims";
-    
+
     /** Claims set for token delivery, id token only. */
     public static final String KEY_DELIVERY_CLAIMS_IDTOKEN = "dl_claims_id";
-    
+
     /** Claims set for token delivery, user info only. */
     public static final String KEY_DELIVERY_CLAIMS_USERINFO = "dl_claims_ui";
 
@@ -140,7 +141,8 @@ public class TokenClaimsSet {
     protected TokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
             @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
-            @Nonnull Scope scope, @Nullable ClaimsRequest claims, @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI) {
+            @Nonnull Scope scope, @Nullable ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
+            @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI) {
         if (tokenType == null || tokenID == null || clientID == null || issuer == null || userPrincipal == null
                 || acr == null || iat == null || exp == null || authTime == null || redirectURI == null
                 || scope == null) {
@@ -153,8 +155,7 @@ public class TokenClaimsSet {
                 .claim(KEY_SCOPE, scope.toString()).claim(KEY_CLAIMS, claims == null ? null : claims.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS, dlClaims == null ? null : dlClaims.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS_IDTOKEN, dlClaimsID == null ? null : dlClaimsID.toJSONObject())
-                .claim(KEY_DELIVERY_CLAIMS_USERINFO, dlClaimsUI == null ? null : dlClaimsUI.toJSONObject())
-                .build();
+                .claim(KEY_DELIVERY_CLAIMS_USERINFO, dlClaimsUI == null ? null : dlClaimsUI.toJSONObject()).build();
     }
 
     // Checkstyle: CyclomaticComplexity ON
@@ -345,6 +346,68 @@ public class TokenClaimsSet {
             log.error("Error parsing claims request {}", tokenClaimsSet.getClaim(KEY_CLAIMS));
             return null;
         }
+    }
+
+    /**
+     * Get copy of the delivery claims in token.
+     * 
+     * @return copy of the delivery claims in token
+     */
+    public ClaimsSet getDeliveryClaims() {
+        TokenDeliveryClaimsClaimsSet claimsSet = new TokenDeliveryClaimsClaimsSet();
+        try {
+            JSONObject claims = tokenClaimsSet.getJSONObjectClaim(KEY_DELIVERY_CLAIMS);
+            if (claims == null) {
+                return null;
+            }
+            claimsSet.putAll(claims);
+        } catch (ParseException e) {
+            log.error("Error parsing delivery claims {}", tokenClaimsSet.getClaim(KEY_DELIVERY_CLAIMS));
+            return null;
+        }
+        return claimsSet;
+    }
+
+    /**
+     * Get copy of the id token delivery claims in token.
+     * 
+     * @return copy of the id token delivery claims in token
+     */
+    public ClaimsSet getIDTokenDeliveryClaims() {
+        TokenDeliveryClaimsClaimsSet claimsSet = new TokenDeliveryClaimsClaimsSet();
+        try {
+            JSONObject claims = tokenClaimsSet.getJSONObjectClaim(KEY_DELIVERY_CLAIMS_IDTOKEN);
+            if (claims == null) {
+                return null;
+            }
+            claimsSet.putAll(claims);
+        } catch (ParseException e) {
+            log.error("Error parsing id token delivery claims {}",
+                    tokenClaimsSet.getClaim(KEY_DELIVERY_CLAIMS_IDTOKEN));
+            return null;
+        }
+        return claimsSet;
+    }
+
+    /**
+     * Get copy of the user info delivery claims in token.
+     * 
+     * @return copy of the user info delivery claims in token
+     */
+    public ClaimsSet getUserinfoDeliveryClaims() {
+        TokenDeliveryClaimsClaimsSet claimsSet = new TokenDeliveryClaimsClaimsSet();
+        try {
+            JSONObject claims = tokenClaimsSet.getJSONObjectClaim(KEY_DELIVERY_CLAIMS_USERINFO);
+            if (claims == null) {
+                return null;
+            }
+            claimsSet.putAll(claims);
+        } catch (ParseException e) {
+            log.error("Error parsing id token delivery claims {}",
+                    tokenClaimsSet.getClaim(KEY_DELIVERY_CLAIMS_USERINFO));
+            return null;
+        }
+        return claimsSet;
     }
 
     /**
