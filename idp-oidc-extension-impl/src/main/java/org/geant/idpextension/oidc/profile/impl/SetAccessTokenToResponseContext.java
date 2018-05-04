@@ -38,7 +38,9 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
 import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.IdPEventIds;
@@ -47,6 +49,8 @@ import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
 
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseTokenClaimsContext;
+import org.geant.idpextension.oidc.profile.context.navigate.OIDCAuthenticationResponseContextLookupFunction;
 import org.geant.idpextension.oidc.token.support.AccessTokenClaimsSet;
 import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
@@ -106,12 +110,19 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     /** Authentication request the token is based on. */
     private AuthenticationRequest authenticationRequest;
 
+    /** Strategy used to locate the {@link OIDCAuthenticationResponseTokenClaimsContext}. */
+    @Nonnull
+    private Function<ProfileRequestContext, OIDCAuthenticationResponseTokenClaimsContext> tokenClaimsContextLookupStrategy;
+
     /**
      * Constructor.
      * 
      * @param sealer sealer to encrypt/hmac access token.
      */
     public SetAccessTokenToResponseContext(@Nonnull @ParameterName(name = "sealer") final DataSealer sealer) {
+        tokenClaimsContextLookupStrategy =
+                Functions.compose(new ChildContextLookup<>(OIDCAuthenticationResponseTokenClaimsContext.class),
+                        new OIDCAuthenticationResponseContextLookupFunction());
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
         dataSealer = Constraint.isNotNull(sealer, "DataSealer cannot be null");
         issuerLookupStrategy = new ResponderIdLookupFunction();
@@ -120,6 +131,19 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
                 return new SecureRandomIdentifierGenerationStrategy();
             }
         };
+    }
+
+    /**
+     * Set the strategy used to locate the {@link OIDCAuthenticationResponseTokenClaimsContext} associated with a given
+     * {@link ProfileRequestContext}.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setOIDCAuthenticationResponseTokenClaimsContextLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, OIDCAuthenticationResponseTokenClaimsContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        tokenClaimsContextLookupStrategy = Constraint.isNotNull(strategy,
+                "OIDCAuthenticationResponseTokenClaimsContextt lookup strategy cannot be null");
     }
 
     /**
@@ -224,12 +248,20 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
         if (authzCodeClaimsSet != null) {
             claimsSet = new AccessTokenClaimsSet(authzCodeClaimsSet, new Date(), dateExp);
         } else {
+            ClaimsSet claims = null;
+            ClaimsSet claimsUI = null;
+            OIDCAuthenticationResponseTokenClaimsContext tokenClaimsCtx =
+                    tokenClaimsContextLookupStrategy.apply(profileRequestContext);
+            if (tokenClaimsCtx != null) {
+                claims = tokenClaimsCtx.getClaims();
+                claimsUI = tokenClaimsCtx.getUserinfoClaims();
+            }
             // "token id_token" response type. Access token is not derived from Authorization code.
             claimsSet = new AccessTokenClaimsSet(idGenerator, authenticationRequest.getClientID(),
                     issuerLookupStrategy.apply(profileRequestContext), subjectCtx.getPrincipalName(),
                     getOidcResponseContext().getAcr(), new Date(), dateExp, authenticationRequest.getNonce(),
                     getOidcResponseContext().getAuthTime(), getOidcResponseContext().getRedirectURI(),
-                    authenticationRequest.getScope(), authenticationRequest.getClaims());
+                    authenticationRequest.getScope(), authenticationRequest.getClaims(), claims, claimsUI);
         }
 
         try {
