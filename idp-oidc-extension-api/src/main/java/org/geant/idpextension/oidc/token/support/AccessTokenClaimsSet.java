@@ -41,6 +41,8 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
+
 import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
 import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
@@ -71,7 +73,7 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
                 authorizeCode.getClaimsSet().getIssuer(), authorizeCode.getClaimsSet().getSubject(),
                 new ACR(authorizeCode.getACR()), iat, exp, authorizeCode.getNonce(),
                 authorizeCode.getAuthenticationTime(), authorizeCode.getRedirectURI(), authorizeCode.getScope(),
-                authorizeCode.getClaimsRequest(), null, null, null);
+                authorizeCode.getClaimsRequest(), authorizeCode.getDeliveryClaims(), null, authorizeCode.getUserinfoDeliveryClaims());
     }
 
     /**
@@ -94,9 +96,9 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
     public AccessTokenClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
             @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
-            @Nonnull Scope scope, @Nonnull ClaimsRequest claims) {
+            @Nonnull Scope scope, @Nonnull ClaimsRequest claims,  @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsUI) {
         super(VALUE_TYPE_AT, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, acr, iat, exp, nonce,
-                authTime, redirectURI, scope, claims, null, null,null);
+                authTime, redirectURI, scope, claims, dlClaims, null,dlClaimsUI);
     }
 
     /**
