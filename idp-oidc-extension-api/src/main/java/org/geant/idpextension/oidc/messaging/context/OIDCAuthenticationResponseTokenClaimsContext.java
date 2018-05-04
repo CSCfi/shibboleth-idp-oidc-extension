@@ -29,72 +29,65 @@
 package org.geant.idpextension.oidc.messaging.context;
 
 import javax.annotation.Nullable;
+
+import org.geant.idpextension.oidc.token.support.TokenDeliveryClaimsClaimsSet;
 import org.opensaml.messaging.context.BaseContext;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
 /**
- * Subcontext carrying information to form token/userinfo response for relying
- * party. This context appears as a subcontext of the
- * {@link OIDCAuthenticationResponseContext}.
+ * Subcontext carrying information to form token/userinfo response for relying party. This context appears as a
+ * subcontext of the {@link OIDCAuthenticationResponseContext}.
  * 
- * This context is populated if there are attributes that need to be delivered
- * via token.
+ * This context is populated if there are attributes that need to be delivered via token.
  */
 public class OIDCAuthenticationResponseTokenClaimsContext extends BaseContext {
 
-	/** Claims for id token and userinfo endpoint. */
-	@Nullable
-	private ClaimsSet claims;
+    /** Claims for id token and userinfo endpoint. */
+    @Nullable
+    private ClaimsSet claims;
 
-	/** Claims for id token only. */
-	@Nullable
-	private ClaimsSet idtokenClaims;
+    /** Claims for id token only. */
+    @Nullable
+    private ClaimsSet idtokenClaims;
 
-	/** Claims for userinfo only. */
-	@Nullable
-	private ClaimsSet userinfoClaims;
+    /** Claims for userinfo only. */
+    @Nullable
+    private ClaimsSet userinfoClaims;
 
-	/**
-	 * Get claims for id token and userinfo endpoint.
-	 * 
-	 * @return claims for id token and userinfo endpoint.
-	 */
-	public ClaimsSet getClaims() {
-		return claims;
-	}
+    /**
+     * Constructor.
+     */
+    public OIDCAuthenticationResponseTokenClaimsContext() {
+        claims = new TokenDeliveryClaimsClaimsSet();
+        idtokenClaims = new TokenDeliveryClaimsClaimsSet();
+        userinfoClaims = new TokenDeliveryClaimsClaimsSet();
+    }
 
-	/**
-	 * Get claims for id token only.
-	 * 
-	 * @return claims for id token only
-	 */
-	public ClaimsSet getIdtokenClaims() {
-		return idtokenClaims;
-	}
+    /**
+     * Get claims for id token and userinfo endpoint.
+     * 
+     * @return claims for id token and userinfo endpoint.
+     */
+    public ClaimsSet getClaims() {
+        return claims;
+    }
 
-	/**
-	 * Get claims for userinfo only.
-	 * 
-	 * @return claims for userinfo only
-	 */
-	public ClaimsSet getUserinfoClaims() {
-		return userinfoClaims;
-	}
+    /**
+     * Get claims for id token only.
+     * 
+     * @return claims for id token only
+     */
+    public ClaimsSet getIdtokenClaims() {
+        return idtokenClaims;
+    }
 
-	/**
-	 * Constructor.
-	 */
-	public OIDCAuthenticationResponseTokenClaimsContext() {
-		claims = new TokenClaimsClaimsSet();
-		idtokenClaims = new TokenClaimsClaimsSet();
-		userinfoClaims = new TokenClaimsClaimsSet();
-	}
-
-	private class TokenClaimsClaimsSet extends ClaimsSet {
-		TokenClaimsClaimsSet() {
-			super();
-		}
-
-	}
+    /**
+     * Get claims for userinfo only.
+     * 
+     * @return claims for userinfo only
+     */
+    public ClaimsSet getUserinfoClaims() {
+        return userinfoClaims;
+    }
 
 }
