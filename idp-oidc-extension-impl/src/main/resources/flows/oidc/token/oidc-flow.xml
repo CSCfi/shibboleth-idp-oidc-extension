@@ -1,5 +1,4 @@
-<flow xmlns="http://www.springframework.org/schema/webflow"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd">
 
     <action-state id="InitializeMandatoryContexts">
@@ -16,8 +15,7 @@
         <evaluate expression="SelectRelyingPartyConfiguration" />
         <evaluate expression="SelectProfileConfiguration" />
         <evaluate expression="'proceed'" />
-        <transition on="proceed"
-            to="OutboundContextsAndSecurityParameters" />
+        <transition on="proceed" to="OutboundContextsAndSecurityParameters" />
     </action-state>
 
     <action-state id="OutboundContextsAndSecurityParameters">
@@ -28,6 +26,7 @@
         <evaluate expression="SetRequestedClaimsToResponseContext" />
         <evaluate expression="SetAuthenticationContextClassReferenceToResponseContext" />
         <evaluate expression="SetAuthenticationTimeToResponseContext" />
+        <evaluate expression="SetTokenDeliveryAttributesToResponseContext" />
         <evaluate expression="PopulateIDTokenSignatureSigningParameters" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="PostInitialSetup" />
@@ -51,6 +50,7 @@
         <evaluate expression="SetAccessTokenToResponseContext" />
         <evaluate expression="AddIDTokenShell" />
         <evaluate expression="AddAttributeClaimsToIDToken" />
+        <evaluate expression="AddTokenDeliveryAttributesToIDToken" />
         <evaluate expression="AddAuthTimeToIDToken" />
         <evaluate expression="AddAcrToIDToken" />
         <evaluate expression="AddNonceToIDToken" />
@@ -91,10 +91,8 @@
 
     <!-- all unhandled non proceed results are turned into errors -->
     <global-transitions>
-        <transition on-exception="java.lang.RuntimeException"
-            to="LogRuntimeException" />
-        <transition on="#{!'proceed'.equals(currentEvent.id)}"
-            to="HandleError" />
+        <transition on-exception="java.lang.RuntimeException" to="LogRuntimeException" />
+        <transition on="#{!'proceed'.equals(currentEvent.id)}" to="HandleError" />
     </global-transitions>
 
 

@@ -9,8 +9,9 @@
 
 
     <!-- The profile and logging id used as arguments are for development phase only -->
-    <bean id="InitializeProfileRequestContext" class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
-        scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/userinfo" p:loggingId="%{idp.service.logging.saml2sso:SSO}" />
+    <bean id="InitializeProfileRequestContext"
+        class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" scope="prototype"
+        p:profileId="http://csc.fi/ns/profiles/oidc/userinfo" p:loggingId="%{idp.service.logging.saml2sso:SSO}" />
 
     <bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage" scope="prototype">
         <constructor-arg>
@@ -19,20 +20,21 @@
         </constructor-arg>
     </bean>
 
-    <bean id="InitializeOutboundMessageContext" class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundUserInfoResponseMessageContext"
+    <bean id="InitializeOutboundMessageContext"
+        class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundUserInfoResponseMessageContext"
         scope="prototype" />
 
-    <bean id="ValidateAccessToken" class="org.geant.idpextension.oidc.profile.impl.ValidateAccessToken" scope="prototype"
-        c:sealer-ref="accessTokenSealer" p:revocationCache-ref="shibboleth.RevocationCache" />
+    <bean id="ValidateAccessToken" class="org.geant.idpextension.oidc.profile.impl.ValidateAccessToken"
+        scope="prototype" c:sealer-ref="accessTokenSealer" p:revocationCache-ref="shibboleth.RevocationCache" />
 
     <bean id="accessTokenSealer" lazy-init="true" class="net.shibboleth.utilities.java.support.security.DataSealer"
         p:keyStrategy-ref="shibboleth.DataSealerKeyStrategy" p:encoder-ref="atBase64Codec" p:decoder-ref="atBase64Codec" />
 
-    <bean id="atBase64Codec" class="org.apache.commons.codec.binary.Base64" c:lineLength="0" c:lineSeparator="#{new byte[] {10} }"
-        c:urlSafe="true" />
+    <bean id="atBase64Codec" class="org.apache.commons.codec.binary.Base64" c:lineLength="0"
+        c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
 
-    <bean id="OIDCMetadataLookup" class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor" scope="prototype"
-        c:executionDirection="INBOUND">
+    <bean id="OIDCMetadataLookup" class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor"
+        scope="prototype" c:executionDirection="INBOUND">
         <constructor-arg name="messageHandler">
             <bean class="org.geant.idpextension.oidc.profile.impl.OIDCMetadataLookupHandler" scope="prototype">
                 <property name="clientInformationResolver">
@@ -45,78 +47,101 @@
         </constructor-arg>
     </bean>
 
-    <bean id="shibboleth.UserInfoRequestClientIDLookupStrategy" class="org.geant.idpextension.oidc.profile.context.navigate.UserInfoRequestClientIDLookupFunction"
+    <bean id="shibboleth.UserInfoRequestClientIDLookupStrategy"
+        class="org.geant.idpextension.oidc.profile.context.navigate.UserInfoRequestClientIDLookupFunction"
         scope="prototype" />
 
-    <bean id="InitializeRelyingPartyContext" class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext"
-        scope="prototype" p:clientIDLookupStrategy-ref="shibboleth.UserInfoRequestClientIDLookupStrategy" />
+    <bean id="InitializeRelyingPartyContext"
+        class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext" scope="prototype"
+        p:clientIDLookupStrategy-ref="shibboleth.UserInfoRequestClientIDLookupStrategy" />
 
-    <bean id="SelectRelyingPartyConfiguration" class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
-        scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+    <bean id="SelectRelyingPartyConfiguration"
+        class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration" scope="prototype"
+        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
 
-    <bean id="SelectProfileConfiguration" class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration" scope="prototype" />
+    <bean id="SelectProfileConfiguration" class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
+        scope="prototype" />
 
     <bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope" scope="prototype"
         p:scopeLookupStrategy-ref="shibboleth.TokenRequestScopeLookupStrategy" />
 
-    <bean id="shibboleth.TokenRequestScopeLookupStrategy" class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestScopeLookupFunction"
+    <bean id="shibboleth.TokenRequestScopeLookupStrategy"
+        class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestScopeLookupFunction" scope="prototype" />
+
+    <bean id="SetRequestedClaimsToResponseContext"
+        class="org.geant.idpextension.oidc.profile.impl.SetRequestedClaimsToResponseContext" scope="prototype"
+        p:requestedClaimsLookupStrategy-ref="shibboleth.TokenRequestRequestedClaimsLookupFunction" />
+
+    <bean id="SetTokenDeliveryAttributesToResponseContext"
+        class="org.geant.idpextension.oidc.profile.impl.SetTokenDeliveryAttributesFromTokenToResponseContext"
         scope="prototype" />
 
-    <bean id="SetRequestedClaimsToResponseContext" class="org.geant.idpextension.oidc.profile.impl.SetRequestedClaimsToResponseContext"
-        scope="prototype" p:requestedClaimsLookupStrategy-ref="shibboleth.TokenRequestRequestedClaimsLookupFunction" />
-
-    <bean id="shibboleth.TokenRequestRequestedClaimsLookupFunction" class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestRequestedClaimsLookupFunction"
+    <bean id="shibboleth.TokenRequestRequestedClaimsLookupFunction"
+        class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestRequestedClaimsLookupFunction"
         scope="prototype" />
 
     <bean id="InitializeSubjectContext" class="org.geant.idpextension.oidc.profile.impl.InitializeSubjectContext"
         scope="prototype" />
 
     <bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes" scope="prototype"
-        c:resolverService-ref="shibboleth.AttributeResolverService" p:maskFailures="%{idp.service.attribute.resolver.maskFailures:true}" />
+        c:resolverService-ref="shibboleth.AttributeResolverService"
+        p:maskFailures="%{idp.service.attribute.resolver.maskFailures:true}" />
 
     <bean id="FilterAttributes" class="net.shibboleth.idp.profile.impl.FilterAttributes" scope="prototype"
-        c:filterService-ref="shibboleth.AttributeFilterService" p:maskFailures="%{idp.service.attribute.filter.maskFailures:true}" />
+        c:filterService-ref="shibboleth.AttributeFilterService"
+        p:maskFailures="%{idp.service.attribute.filter.maskFailures:true}" />
 
-    <bean id="SetNameIDToResponseContext" class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext"
-        scope="prototype">
+    <bean id="SetNameIDToResponseContext"
+        class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext" scope="prototype">
         <property name="subjectTypeLookupStrategy">
             <bean class="org.geant.idpextension.oidc.profile.logic.DefaultSubjectTypeStrategy" />
         </property>
         <property name="nameIDGenerator">
-            <bean class="net.shibboleth.idp.saml.nameid.impl.ProxySAML2NameIDGenerator" c:service-ref="shibboleth.oidc.NameIdentifierGenerationService" />
+            <bean class="net.shibboleth.idp.saml.nameid.impl.ProxySAML2NameIDGenerator"
+                c:service-ref="shibboleth.oidc.NameIdentifierGenerationService" />
         </property>
     </bean>
 
     <bean id="AddUserInfoShell" class="org.geant.idpextension.oidc.profile.impl.AddUserInfoShell" scope="prototype"
         p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple"></bean>
 
-    <bean id="AddAttributeClaimsToUserInfo" class="org.geant.idpextension.oidc.profile.impl.AddAttributesToClaimsSet"
-        scope="prototype" p:responseClaimsSetLookupStrategy-ref="shibboleth.UserInfoResponseClaimsSetLookupStrategy" />
+    <bean id="AddAttributeClaimsToUserInfo"
+        class="org.geant.idpextension.oidc.profile.impl.AddAttributesToClaimsSet" scope="prototype"
+        p:responseClaimsSetLookupStrategy-ref="shibboleth.UserInfoResponseClaimsSetLookupStrategy" />
 
-    <bean id="shibboleth.UserInfoResponseClaimsSetLookupStrategy" class="org.geant.idpextension.oidc.profile.context.navigate.UserInfoResponseClaimsSetLookupFunction"
+    <bean id="AddTokenDeliveryAttributesToUserinfo"
+        class="org.geant.idpextension.oidc.profile.impl.AddTokenDeliveryAttributesToClaimsSet"
+        p:responseClaimsSetLookupStrategy-ref="shibboleth.UserInfoResponseClaimsSetLookupStrategy" scope="prototype" />
+
+    <bean id="shibboleth.UserInfoResponseClaimsSetLookupStrategy"
+        class="org.geant.idpextension.oidc.profile.context.navigate.UserInfoResponseClaimsSetLookupFunction"
         scope="prototype" />
 
-    <bean id="FormOutboundMessage" class="org.geant.idpextension.oidc.profile.impl.FormOutboundUserInfoResponseMessage"
-        scope="prototype" />
+    <bean id="FormOutboundMessage"
+        class="org.geant.idpextension.oidc.profile.impl.FormOutboundUserInfoResponseMessage" scope="prototype" />
 
-    <bean id="oidc.messageEncoderFactory" class="org.geant.idpextension.oidc.encoding.impl.OIDCResponseEncoderFactory"
+    <bean id="oidc.messageEncoderFactory"
+        class="org.geant.idpextension.oidc.encoding.impl.OIDCResponseEncoderFactory"
         p:messageEncoder-ref="oidc.nimbusEncoder" scope="prototype" />
 
-    <bean id="oidc.nimbusEncoder" class="org.geant.idpextension.oidc.encoding.impl.NimbusResponseEncoder" scope="prototype"
-        p:httpServletResponse-ref="shibboleth.HttpServletResponse" init-method="" />
+    <bean id="oidc.nimbusEncoder" class="org.geant.idpextension.oidc.encoding.impl.NimbusResponseEncoder"
+        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" init-method="" />
 
     <bean id="EncodeMessage" class="org.opensaml.profile.action.impl.EncodeMessage" scope="prototype"
-        p:messageEncoderFactory-ref="oidc.messageEncoderFactory" p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
+        p:messageEncoderFactory-ref="oidc.messageEncoderFactory"
+        p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
 
 
-    <bean id="BuildErrorResponseFromEvent" class="org.geant.idpextension.oidc.profile.impl.BuildUserInfoErrorResponseFromEvent"
-        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse">
+    <bean id="BuildErrorResponseFromEvent"
+        class="org.geant.idpextension.oidc.profile.impl.BuildUserInfoErrorResponseFromEvent" scope="prototype"
+        p:httpServletResponse-ref="shibboleth.HttpServletResponse">
         <property name="eventContextLookupStrategy">
             <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
         </property>
         <property name="mappedErrors">
             <map value-type="com.nimbusds.oauth2.sdk.ErrorObject">
-                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_GRANT}" value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_GRANT}" />
+                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_GRANT}"
+                    value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_GRANT}" />
             </map>
         </property>
     </bean>
@@ -128,10 +153,12 @@
         </property>
     </bean>
 
-    <bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete" scope="prototype" />
+    <bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
+        scope="prototype" />
 
-    <bean id="shibboleth.RevocationCache" class="org.geant.idpextension.oidc.storage.RevocationCache" depends-on="shibboleth.LoggingService"
-        p:entryExpiration="#{'%{idp.oidc.revocationCache.authorizeCode.lifetime:PT6H}'}" p:storage-ref="#{'%{idp.oidc.revocationCache.StorageService:shibboleth.StorageService}'.trim()}"
-        p:strict="true" />
+    <bean id="shibboleth.RevocationCache" class="org.geant.idpextension.oidc.storage.RevocationCache"
+        depends-on="shibboleth.LoggingService"
+        p:entryExpiration="#{'%{idp.oidc.revocationCache.authorizeCode.lifetime:PT6H}'}"
+        p:storage-ref="#{'%{idp.oidc.revocationCache.StorageService:shibboleth.StorageService}'.trim()}" p:strict="true" />
 
 </beans>

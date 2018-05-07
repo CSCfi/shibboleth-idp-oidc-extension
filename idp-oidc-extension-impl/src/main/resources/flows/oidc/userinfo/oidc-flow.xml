@@ -22,6 +22,7 @@
     <action-state id="OutboundContextsAndSecurityParameters">
         <evaluate expression="ValidateScope" />
         <evaluate expression="SetRequestedClaimsToResponseContext" />
+        <evaluate expression="SetTokenDeliveryAttributesToResponseContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="PostInitialSetup" />
     </action-state>
@@ -43,6 +44,7 @@
     <action-state id="BuildResponse">
         <evaluate expression="AddUserInfoShell" />
         <evaluate expression="AddAttributeClaimsToUserInfo" />
+        <evaluate expression="AddTokenDeliveryAttributesToUserinfo" />
         <evaluate expression="FormOutboundMessage" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="CommitResponse" />
