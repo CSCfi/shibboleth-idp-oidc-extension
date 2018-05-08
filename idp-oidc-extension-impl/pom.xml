@@ -47,6 +47,10 @@
         </dependency>
         <dependency>
             <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-consent-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-ui</artifactId>
         </dependency>
         <dependency>

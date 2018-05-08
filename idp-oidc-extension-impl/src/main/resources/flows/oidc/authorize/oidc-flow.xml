@@ -80,6 +80,7 @@
 
     <action-state id="BuildTokens">
         <evaluate expression="SetTokenDeliveryAttributesToResponseContext" />
+        <evaluate expression="SetConsentToResponseContext" />
         <evaluate expression="SetAuthorizationCodeToResponseContext" />
         <evaluate expression="SetAccessTokenToResponseContext" />
         <evaluate expression="'proceed'" />
