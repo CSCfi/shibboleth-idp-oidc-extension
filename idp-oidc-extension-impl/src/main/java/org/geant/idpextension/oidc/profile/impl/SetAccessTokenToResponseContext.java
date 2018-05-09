@@ -42,6 +42,7 @@ import com.google.common.base.Functions;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
+import net.minidev.json.JSONArray;
 import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
@@ -49,6 +50,7 @@ import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
 
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseConsentContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseTokenClaimsContext;
 import org.geant.idpextension.oidc.profile.context.navigate.OIDCAuthenticationResponseContextLookupFunction;
 import org.geant.idpextension.oidc.token.support.AccessTokenClaimsSet;
@@ -114,6 +116,10 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     @Nonnull
     private Function<ProfileRequestContext, OIDCAuthenticationResponseTokenClaimsContext> tokenClaimsContextLookupStrategy;
 
+    /** Strategy used to locate the {@link OIDCAuthenticationResponseConsentContext}. */
+    @Nonnull
+    private Function<ProfileRequestContext, OIDCAuthenticationResponseConsentContext> consentContextLookupStrategy;
+
     /**
      * Constructor.
      * 
@@ -122,6 +128,9 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     public SetAccessTokenToResponseContext(@Nonnull @ParameterName(name = "sealer") final DataSealer sealer) {
         tokenClaimsContextLookupStrategy =
                 Functions.compose(new ChildContextLookup<>(OIDCAuthenticationResponseTokenClaimsContext.class),
+                        new OIDCAuthenticationResponseContextLookupFunction());
+        consentContextLookupStrategy =
+                Functions.compose(new ChildContextLookup<>(OIDCAuthenticationResponseConsentContext.class),
                         new OIDCAuthenticationResponseContextLookupFunction());
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
         dataSealer = Constraint.isNotNull(sealer, "DataSealer cannot be null");
@@ -144,6 +153,19 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
         tokenClaimsContextLookupStrategy = Constraint.isNotNull(strategy,
                 "OIDCAuthenticationResponseTokenClaimsContextt lookup strategy cannot be null");
+    }
+
+    /**
+     * Set the strategy used to locate the {@link OIDCAuthenticationResponseTokenClaimsContext} associated with a given
+     * {@link ProfileRequestContext}.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setOIDCAuthenticationResponseConsentContextLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, OIDCAuthenticationResponseConsentContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        consentContextLookupStrategy = Constraint.isNotNull(strategy,
+                "OIDCAuthenticationResponseConsentContext lookup strategy cannot be null");
     }
 
     /**
@@ -248,6 +270,14 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
         if (authzCodeClaimsSet != null) {
             claimsSet = new AccessTokenClaimsSet(authzCodeClaimsSet, new Date(), dateExp);
         } else {
+            JSONArray consentable = null;
+            JSONArray consented = null;
+            OIDCAuthenticationResponseConsentContext consentCtx =
+                    consentContextLookupStrategy.apply(profileRequestContext);
+            if (consentCtx != null) {
+                consentable = consentCtx.getConsentableAttributes();
+                consented = consentCtx.getConsentedAttributes();
+            }
             ClaimsSet claims = null;
             ClaimsSet claimsUI = null;
             OIDCAuthenticationResponseTokenClaimsContext tokenClaimsCtx =
@@ -261,9 +291,9 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
                     issuerLookupStrategy.apply(profileRequestContext), subjectCtx.getPrincipalName(),
                     getOidcResponseContext().getAcr(), new Date(), dateExp, authenticationRequest.getNonce(),
                     getOidcResponseContext().getAuthTime(), getOidcResponseContext().getRedirectURI(),
-                    authenticationRequest.getScope(), authenticationRequest.getClaims(), claims, claimsUI);
+                    authenticationRequest.getScope(), authenticationRequest.getClaims(), claims, claimsUI, consentable,
+                    consented);
         }
-
         try {
             getOidcResponseContext().setAccessToken(claimsSet.serialize(dataSealer), accessTokenLifetime / 1000);
             log.debug("{} Setting access token {} as {} to response context ", getLogPrefix(), claimsSet.serialize(),
