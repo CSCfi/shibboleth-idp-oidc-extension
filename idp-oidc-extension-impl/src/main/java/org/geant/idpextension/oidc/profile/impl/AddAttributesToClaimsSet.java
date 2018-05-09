@@ -43,7 +43,10 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 import org.geant.idpextension.oidc.attribute.encoding.impl.AbstractOIDCAttributeEncoder;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseConsentContext;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseTokenClaimsContext;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultResponseClaimsSetLookupFunction;
+import org.geant.idpextension.oidc.profile.context.navigate.OIDCAuthenticationResponseContextLookupFunction;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -56,7 +59,8 @@ import com.google.common.base.Functions;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
 /**
- * Action that adds claims to a {@link ClaimsSet}. Claims are formed of resolved attributes having OIDC encoder.
+ * Action that adds claims to a {@link ClaimsSet}. Claims are formed of resolved attributes having OIDC encoder. Action
+ * also verifies user has consented to release attribute, if consent information is available.
  */
 @SuppressWarnings("rawtypes")
 public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
@@ -85,11 +89,18 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
     @Nullable
     private ClaimsSet claimsSet;
 
+    /** Strategy used to locate the {@link OIDCAuthenticationResponseConsentContext}. */
+    @Nonnull
+    private Function<ProfileRequestContext, OIDCAuthenticationResponseConsentContext> consentContextLookupStrategy;
+
     /** Constructor. */
     AddAttributesToClaimsSet() {
         attributeContextLookupStrategy = Functions.compose(new ChildContextLookup<>(AttributeContext.class),
                 new ChildContextLookup<ProfileRequestContext, RelyingPartyContext>(RelyingPartyContext.class));
         responseClaimsSetLookupStrategy = new DefaultResponseClaimsSetLookupFunction();
+        consentContextLookupStrategy =
+                Functions.compose(new ChildContextLookup<>(OIDCAuthenticationResponseConsentContext.class),
+                        new OIDCAuthenticationResponseContextLookupFunction());
     }
 
     /**
@@ -121,6 +132,19 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
                 Constraint.isNotNull(strategy, "AttributeContext lookup strategy cannot be null");
     }
 
+    /**
+     * Set the strategy used to locate the {@link OIDCAuthenticationResponseTokenClaimsContext} associated with a given
+     * {@link ProfileRequestContext}.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setOIDCAuthenticationResponseConsentContextLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, OIDCAuthenticationResponseConsentContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        consentContextLookupStrategy = Constraint.isNotNull(strategy,
+                "OIDCAuthenticationResponseConsentContext lookup strategy cannot be null");
+    }
+
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -145,6 +169,7 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
+        OIDCAuthenticationResponseConsentContext consentCtx = consentContextLookupStrategy.apply(profileRequestContext);
         for (IdPAttribute attribute : attributeCtx.getIdPAttributes().values()) {
             final Set<AttributeEncoder<?>> encoders = attribute.getEncoders();
             if (encoders.isEmpty()) {
@@ -162,8 +187,15 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
                         }
                         JSONObject obj = (JSONObject) encoder.encode(attribute);
                         for (String name : obj.keySet()) {
-                            log.debug("Adding claim {} with value {}", name, obj.get(name));
-                            claimsSet.setClaim(name, obj.get(name));
+                            if (consentCtx != null && consentCtx.getConsentableAttributes().contains(name)
+                                    && !consentCtx.getConsentedAttributes().contains(name)) {
+                                log.debug("{} Consentable attribute {} has no consent", getLogPrefix(), name,
+                                        obj.get(name));
+                            } else {
+                                log.debug("{} Adding claim {} with value {}", getLogPrefix(), name, obj.get(name));
+                                claimsSet.setClaim(name, obj.get(name));
+                            }
+
                         }
 
                     }
