@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -175,14 +176,14 @@ public abstract class AbstractReloadingOIDCEntityResolver<Key extends Identifier
                 log.debug("Metadata from '{}' has not changed since last refresh", mdId);
             } else {
                 log.debug("Processing new metadata from '{}'", mdId);
-                final Value information = parse(mdBytes);
-                final Key id = getKey(information);
-                log.info("Parsed entity information for {}", id);
+                final List<Value> resolvedInformation = parse(mdBytes);
                 final JsonBackingStore newBackingStore = new JsonBackingStore();
-                List<Value> allInformation = new ArrayList<>();
-                allInformation.add(information);
-                newBackingStore.getIndexedInformation().put(id, allInformation);
-                newBackingStore.getOrderedInformation().add(information);
+                for (Value information : resolvedInformation) {
+                    final Key id = getKey(information);
+                    log.info("Parsed entity information for {}", id);
+                    newBackingStore.getIndexedInformation().put(id, Arrays.asList(information));
+                    newBackingStore.getOrderedInformation().add(information);                    
+                }
                 setBackingStore(newBackingStore);
                 lastUpdate = now;
             }
@@ -226,7 +227,7 @@ public abstract class AbstractReloadingOIDCEntityResolver<Key extends Identifier
      * @param bytes The encoded entity.
      * @return The parsed entity.
      */
-    protected abstract Value parse(final byte[] bytes) throws ParseException;
+    protected abstract List<Value> parse(final byte[] bytes) throws ParseException;
     
     /**
      * Gets the identifier for the given entity.

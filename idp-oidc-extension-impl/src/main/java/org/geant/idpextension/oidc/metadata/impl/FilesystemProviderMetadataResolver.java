@@ -29,7 +29,9 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Timer;
 
 import javax.annotation.Nonnull;
@@ -114,8 +116,8 @@ public class FilesystemProviderMetadataResolver extends AbstractFileOIDCEntityRe
 
     /** {@inheritDoc} */
     @Override
-    protected OIDCProviderMetadata parse(byte[] bytes) throws ParseException {
-        return OIDCProviderMetadata.parse(JSONObjectUtils.parse(new String(bytes)));
+    protected List<OIDCProviderMetadata> parse(byte[] bytes) throws ParseException {
+        return Arrays.asList(OIDCProviderMetadata.parse(JSONObjectUtils.parse(new String(bytes))));
     }
 
     /** {@inheritDoc} */

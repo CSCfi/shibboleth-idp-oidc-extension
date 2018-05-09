@@ -29,7 +29,10 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Timer;
 
 import javax.annotation.Nonnull;
@@ -43,9 +46,12 @@ import org.slf4j.LoggerFactory;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.util.JSONArrayUtils;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
@@ -115,8 +121,26 @@ public class FilesystemClientInformationResolver
     
     /** {@inheritDoc} */
     @Override
-    protected OIDCClientInformation parse(byte[] bytes) throws ParseException {
-        return OIDCClientInformation.parse(JSONObjectUtils.parse(new String(bytes)));
+    protected List<OIDCClientInformation> parse(byte[] bytes) throws ParseException {
+        final String rawString = new String(bytes);
+        try {
+            final OIDCClientInformation single = OIDCClientInformation.parse(JSONObjectUtils.parse(rawString));
+            log.debug("Found single client information from the file");
+            return Arrays.asList(single);
+        } catch (ParseException e) {
+            log.debug("Could not parse single client information from the file, checking for array");
+        }
+        try {
+            final JSONArray parsedArray = JSONArrayUtils.parse(rawString);
+            final List<OIDCClientInformation> result = new ArrayList<OIDCClientInformation>();
+            for (final Object object : parsedArray) {
+                final OIDCClientInformation client = OIDCClientInformation.parse((JSONObject) object);
+                result.add(client);
+            }
+            return result;
+        } catch (ParseException e) {
+            throw new ParseException("Could not parse a single or an array of OIDC client information object(s).");
+        }
     }
 
     /** {@inheritDoc} */

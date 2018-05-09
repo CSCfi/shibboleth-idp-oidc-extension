@@ -29,7 +29,9 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
@@ -114,7 +116,7 @@ public class DynamicFilesystemProviderMetadataResolver extends FilesystemProvide
     
     /** {@inheritDoc} */
     @Override
-    protected OIDCProviderMetadata parse(byte[] bytes) throws ParseException {
+    protected List<OIDCProviderMetadata> parse(byte[] bytes) throws ParseException {
         final OIDCProviderMetadata result = OIDCProviderMetadata.parse(JSONObjectUtils.parse(new String(bytes)));
         final JSONObject jsonResult = result.toJSONObject();
         for (final String key : dynamicResolvers.keySet()) {
@@ -133,6 +135,6 @@ public class DynamicFilesystemProviderMetadataResolver extends FilesystemProvide
                 log.warn("Could not resolve a value for {̛}, ignoring it.", key, e);
             }
         }
-        return OIDCProviderMetadata.parse(jsonResult);
+        return Arrays.asList(OIDCProviderMetadata.parse(jsonResult));
     }
 }

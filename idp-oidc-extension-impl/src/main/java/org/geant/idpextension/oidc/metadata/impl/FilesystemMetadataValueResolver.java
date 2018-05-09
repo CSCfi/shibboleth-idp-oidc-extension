@@ -29,6 +29,8 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Timer;
 
 import javax.annotation.Nonnull;
@@ -99,8 +101,8 @@ public class FilesystemMetadataValueResolver extends AbstractFileOIDCEntityResol
 
     /** {@inheritDoc} */
     @Override
-    protected Object parse(byte[] bytes) throws ParseException {
-        return JSONValue.parse(bytes);
+    protected List<Object> parse(byte[] bytes) throws ParseException {
+        return Arrays.asList(JSONValue.parse(bytes));
     }
 
     /** {@inheritDoc} */
