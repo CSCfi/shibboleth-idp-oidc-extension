@@ -34,7 +34,6 @@ import java.util.Set;
 
 import org.geant.idpextension.oidc.criterion.ClientIDCriterion;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.nimbusds.oauth2.sdk.ResponseType;
@@ -55,27 +54,32 @@ public class FilesystemClientInformationResolverTest {
     FilesystemClientInformationResolver resolver;
     
     String clientId;
+    String clientId2;
     URI redirectUri;
+    URI redirectUri2;
     
-    @BeforeMethod
-    public void initTests() throws Exception {
+    public void initTest(final String filename) throws Exception {
         clientId = "demo_rp";
-        final File file = new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/oidc-client.json");
+        clientId2 = "demo_rp2";
+        final File file = new File(filename);
         resolver = new FilesystemClientInformationResolver(file);
         resolver.setId("mockId");
         resolver.initialize();
         redirectUri = new URI("https://192.168.0.150/static");
+        redirectUri2 = new URI("https://192.168.0.150/static2");
     }
     
     @Test
     public void testNotFound() throws Exception {
+        initTest("src/test/resources/org/geant/idpextension/oidc/metadata/impl/oidc-client.json");
         final ClientIDCriterion criterion = new ClientIDCriterion(new ClientID("not_found"));
         final ClientInformation clientInfo = resolver.resolveSingle(new CriteriaSet(criterion));
         Assert.assertNull(clientInfo);
     }
     
     @Test
-    public void testSuccess() throws Exception {
+    public void testSingleSuccess() throws Exception {
+        initTest("src/test/resources/org/geant/idpextension/oidc/metadata/impl/oidc-client.json");
         final ClientIDCriterion criterion = new ClientIDCriterion(new ClientID(clientId));
         final OIDCClientInformation clientInfo = resolver.resolveSingle(new CriteriaSet(criterion));
         Assert.assertNotNull(clientInfo);
@@ -83,7 +87,29 @@ public class FilesystemClientInformationResolverTest {
         final Set<URI> redirectUris = clientInfo.getOIDCMetadata().getRedirectionURIs();
         Assert.assertEquals(redirectUris.size(), 1);
         Assert.assertTrue(redirectUris.contains(redirectUri));
-        final Scope scope = clientInfo.getOIDCMetadata().getScope();
+        testScope(clientInfo.getOIDCMetadata().getScope());
+        final Set<ResponseType> responseTypes = clientInfo.getOIDCMetadata().getResponseTypes();
+        Assert.assertEquals(responseTypes.size(), 2);
+        Assert.assertTrue(responseTypes.contains(new ResponseType(OIDCResponseTypeValue.ID_TOKEN)));
+    }
+
+    @Test
+    public void testArraySuccess() throws Exception {
+        initTest("src/test/resources/org/geant/idpextension/oidc/metadata/impl/oidc-clients.json");
+        final ClientIDCriterion criterion = new ClientIDCriterion(new ClientID(clientId2));
+        final OIDCClientInformation clientInfo = resolver.resolveSingle(new CriteriaSet(criterion));
+        Assert.assertNotNull(clientInfo);
+        Assert.assertEquals(clientInfo.getID().getValue(), clientId2);
+        final Set<URI> redirectUris = clientInfo.getOIDCMetadata().getRedirectionURIs();
+        Assert.assertEquals(redirectUris.size(), 1);
+        Assert.assertTrue(redirectUris.contains(redirectUri2));
+        testScope(clientInfo.getOIDCMetadata().getScope());
+        final Set<ResponseType> responseTypes = clientInfo.getOIDCMetadata().getResponseTypes();
+        Assert.assertEquals(responseTypes.size(), 2);
+        Assert.assertTrue(responseTypes.contains(new ResponseType(OIDCResponseTypeValue.ID_TOKEN)));
+    }
+
+    protected static void testScope(final Scope scope) {
         Assert.assertEquals(scope.size(), 6);
         Assert.assertTrue(scope.contains(OIDCScopeValue.OPENID));
         Assert.assertTrue(scope.contains(OIDCScopeValue.ADDRESS));
@@ -91,8 +117,5 @@ public class FilesystemClientInformationResolverTest {
         Assert.assertTrue(scope.contains(OIDCScopeValue.PHONE));
         Assert.assertTrue(scope.contains(OIDCScopeValue.PROFILE));
         Assert.assertTrue(scope.contains("info"));
-        final Set<ResponseType> responseTypes = clientInfo.getOIDCMetadata().getResponseTypes();
-        Assert.assertEquals(responseTypes.size(), 2);
-        Assert.assertTrue(responseTypes.contains(new ResponseType(OIDCResponseTypeValue.ID_TOKEN)));
     }
 }
