@@ -23,6 +23,7 @@
         <evaluate expression="ValidateScope" />
         <evaluate expression="SetRequestedClaimsToResponseContext" />
         <evaluate expression="SetTokenDeliveryAttributesToResponseContext" />
+        <evaluate expression="SetConsentToResponseContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="PostInitialSetup" />
     </action-state>

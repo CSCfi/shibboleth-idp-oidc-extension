@@ -76,6 +76,10 @@
         class="org.geant.idpextension.oidc.profile.impl.SetTokenDeliveryAttributesFromTokenToResponseContext"
         scope="prototype" />
 
+    <bean id="SetConsentToResponseContext"
+        class="org.geant.idpextension.oidc.profile.impl.SetConsentFromTokenToResponseContext" scope="prototype">
+    </bean>
+
     <bean id="shibboleth.TokenRequestRequestedClaimsLookupFunction"
         class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestRequestedClaimsLookupFunction"
         scope="prototype" />
