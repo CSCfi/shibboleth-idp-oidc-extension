@@ -44,6 +44,7 @@ import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
+import net.minidev.json.JSONArray;
 import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
 import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
@@ -80,9 +81,12 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
     public AuthorizeCodeClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
             @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
-            @Nonnull Scope scope, @Nonnull ClaimsRequest claims, @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI) {
+            @Nonnull Scope scope, @Nonnull ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
+            @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI, JSONArray consentableClaims,
+            JSONArray consentedClaims) {
         super(VALUE_TYPE_AC, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, acr, iat, exp, nonce,
-                authTime, redirectURI, scope, claims, dlClaims, dlClaimsID, dlClaimsUI);
+                authTime, redirectURI, scope, claims, dlClaims, dlClaimsID, dlClaimsUI, consentableClaims,
+                consentedClaims);
     }
 
     /**

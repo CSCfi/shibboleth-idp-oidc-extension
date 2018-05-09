@@ -44,13 +44,16 @@ import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
 import java.net.URI;
 import java.text.ParseException;
 
-/** Class to extend for token claims sets. Offers the base functionality to Authorize Code and Access Token. */
+/**
+ * Class to extend for token claims sets. Offers the base functionality to Authorize Code and Access Token.
+ */
 public class TokenClaimsSet {
 
     /** OP issuer. */
@@ -105,6 +108,12 @@ public class TokenClaimsSet {
     /** Claims set for token delivery, user info only. */
     public static final String KEY_DELIVERY_CLAIMS_USERINFO = "dl_claims_ui";
 
+    /** Claims/Attributes requiring consent. */
+    public static final String KEY_CONSENTABLE_CLAIMS = "cnsntbl_claims";
+
+    /** Claims/Attributes having consent. */
+    public static final String KEY_CONSENTED_CLAIMS = "cnsntd_claims";
+
     /** Claims set for the claim. */
     protected JWTClaimsSet tokenClaimsSet;
 
@@ -142,7 +151,8 @@ public class TokenClaimsSet {
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
             @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
             @Nonnull Scope scope, @Nullable ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
-            @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI) {
+            @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI, JSONArray consentableClaims,
+            JSONArray consentedClaims) {
         if (tokenType == null || tokenID == null || clientID == null || issuer == null || userPrincipal == null
                 || acr == null || iat == null || exp == null || authTime == null || redirectURI == null
                 || scope == null) {
@@ -155,7 +165,8 @@ public class TokenClaimsSet {
                 .claim(KEY_SCOPE, scope.toString()).claim(KEY_CLAIMS, claims == null ? null : claims.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS, dlClaims == null ? null : dlClaims.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS_IDTOKEN, dlClaimsID == null ? null : dlClaimsID.toJSONObject())
-                .claim(KEY_DELIVERY_CLAIMS_USERINFO, dlClaimsUI == null ? null : dlClaimsUI.toJSONObject()).build();
+                .claim(KEY_DELIVERY_CLAIMS_USERINFO, dlClaimsUI == null ? null : dlClaimsUI.toJSONObject())
+                .claim(KEY_CONSENTABLE_CLAIMS, consentableClaims).claim(KEY_CONSENTED_CLAIMS, consentedClaims).build();
     }
 
     // Checkstyle: CyclomaticComplexity ON
@@ -206,6 +217,14 @@ public class TokenClaimsSet {
             throw new ParseException("claim scope must exist and not be null", 0);
         }
         // Voluntary fields
+        if (tokenClaimsSet.getClaims().containsKey(KEY_CONSENTABLE_CLAIMS)
+                && !(tokenClaimsSet.getClaim(KEY_CONSENTABLE_CLAIMS) instanceof JSONArray)) {
+            throw new ParseException("consentable claims is of wrong type", 0);
+        }
+        if (tokenClaimsSet.getClaims().containsKey(KEY_CONSENTED_CLAIMS)
+                && !(tokenClaimsSet.getClaim(KEY_CONSENTED_CLAIMS) instanceof JSONArray)) {
+            throw new ParseException("consented claims is of wrong type", 0);
+        }
         if (tokenClaimsSet.getClaims().containsKey(KEY_CLAIMS)) {
             tokenClaimsSet.getJSONObjectClaim(KEY_CLAIMS);
         }
@@ -408,6 +427,35 @@ public class TokenClaimsSet {
             return null;
         }
         return claimsSet;
+    }
+
+    /**
+     * Get copy of the consentable claims in token.
+     * 
+     * @return copy of the consentable claims in token
+     */
+    public JSONArray getConsentableClaims() {
+
+        JSONArray consentableClaims = (JSONArray) tokenClaimsSet.getClaim(KEY_CONSENTABLE_CLAIMS);
+        if (consentableClaims == null) {
+            return null;
+        }
+        return consentableClaims;
+
+    }
+
+    /**
+     * Get copy of the consented claims in token.
+     * 
+     * @return copy of the consented claims in token
+     */
+    public JSONArray getConsentedClaims() {
+
+        JSONArray consentedClaims = (JSONArray) tokenClaimsSet.getClaim(KEY_CONSENTED_CLAIMS);
+        if (consentedClaims == null) {
+            return null;
+        }
+        return consentedClaims;
     }
 
     /**
