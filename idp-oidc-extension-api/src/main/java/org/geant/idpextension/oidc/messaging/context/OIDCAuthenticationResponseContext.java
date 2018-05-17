@@ -31,10 +31,8 @@ package org.geant.idpextension.oidc.messaging.context;
 import java.net.URI;
 import java.util.Date;
 import javax.annotation.Nullable;
-
 import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
 import org.opensaml.messaging.context.BaseContext;
-import org.opensaml.saml.saml2.core.NameID;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -81,8 +79,8 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     @Nullable
     private String requestedSubject;
 
-    /** Name ID generated for response. Value is set to sub claim. */
-    private NameID nameId;
+    /** Subject generated for response. Value is set to sub claim. */
+    private String subject;
 
     /** Authorization code. */
     @Nullable
@@ -200,17 +198,17 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * 
      * @return Name ID generated for response
      */
-    public NameID getNameId() {
-        return nameId;
+    public String setSubject() {
+        return subject;
     }
 
     /**
-     * Sets Name ID generated for response.
+     * Sets generated subject for the response.
      * 
-     * @param id Name ID generated for response
+     * @param generated subject for the response
      */
-    public void setNameId(NameID id) {
-        nameId = id;
+    public void getSubject(String generatedSubject) {
+        subject = generatedSubject;
     }
 
     /**
