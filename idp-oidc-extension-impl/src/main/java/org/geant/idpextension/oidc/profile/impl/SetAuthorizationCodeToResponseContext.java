@@ -255,8 +255,8 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
         Date dateExp = new Date(System.currentTimeMillis() + authCodeLifetime);
         AuthorizeCodeClaimsSet claimsSet = new AuthorizeCodeClaimsSet(idGenerator,
                 getAuthenticationRequest().getClientID(), issuerLookupStrategy.apply(profileRequestContext),
-                subjectCtx.getPrincipalName(), getOidcResponseContext().getAcr(), new Date(), dateExp,
-                getAuthenticationRequest().getNonce(), getOidcResponseContext().getAuthTime(),
+                subjectCtx.getPrincipalName(), getOidcResponseContext().getSubject(), getOidcResponseContext().getAcr(),
+                new Date(), dateExp, getAuthenticationRequest().getNonce(), getOidcResponseContext().getAuthTime(),
                 getOidcResponseContext().getRedirectURI(), getAuthenticationRequest().getScope(),
                 getAuthenticationRequest().getClaims(), claims, claimsID, claimsUI, consentable, consented);
         // We set token claims set to response context for possible access token generation.

@@ -69,9 +69,9 @@ public class InitializeSubjectContext extends AbstractOIDCTokenResponseAction {
 
         log.debug("{} Initializing authentication context", getLogPrefix());
         SubjectContext subCtx = profileRequestContext.getSubcontext(SubjectContext.class, true);
-        subCtx.setPrincipalName(getOidcResponseContext().getTokenClaimsSet().getClaimsSet().getSubject());
+        subCtx.setPrincipalName(getOidcResponseContext().getTokenClaimsSet().getPrincipal());
         log.debug("{} Created subject context {} for user {}", getLogPrefix(), subCtx,
-                getOidcResponseContext().getTokenClaimsSet().getClaimsSet().getSubject());
+                getOidcResponseContext().getTokenClaimsSet().getPrincipal());
     }
 
 }

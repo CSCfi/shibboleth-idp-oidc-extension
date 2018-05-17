@@ -132,7 +132,7 @@ public class AddUserInfoShell extends AbstractOIDCResponseAction {
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         // TODO: add control to add/not add aud and iss depending on signing. They are resolved already by the action.
-        UserInfo userInfo = new UserInfo(new Subject(getOidcResponseContext().getNameId().getValue()));
+        UserInfo userInfo = new UserInfo(new Subject(getOidcResponseContext().getSubject()));
         log.debug("{} Setting userinfo response shell to response context {}", getLogPrefix(),
                 userInfo.toJSONObject().toJSONString());
         getOidcResponseContext().setUserInfo(userInfo);

@@ -75,7 +75,7 @@ public class OIDCAuthenticationResponseContextTest {
         Assert.assertNull(ctx.getAcr());
         Assert.assertNull(ctx.getAuthTime());
         Assert.assertNull(ctx.getIDToken());
-        Assert.assertNull(ctx.setSubject());
+        Assert.assertNull(ctx.getSubject());
         Assert.assertNull(ctx.getRedirectURI());
         Assert.assertNull(ctx.getScope());
         Assert.assertNull(ctx.getSignedIDToken());
@@ -92,7 +92,7 @@ public class OIDCAuthenticationResponseContextTest {
         IDTokenClaimsSet token = new IDTokenClaimsSet(issuer, sub, aud, new Date(), new Date());
         ctx.setIDToken(token);
         NameID id = new MockNameID();
-        ctx.getSubject(id.getValue());
+        ctx.setSubject(id.getValue());
         URI uri = new URI("https://example.org");
         ctx.setRedirectURI(uri);
         ctx.setRequestedSubject("sub");
@@ -106,7 +106,7 @@ public class OIDCAuthenticationResponseContextTest {
         Assert.assertNull(ctx.getAcr());
         Assert.assertEquals(ctx.getAuthTime(), new Date(1));
         Assert.assertEquals(ctx.getIDToken(), token);
-        Assert.assertEquals(ctx.setSubject(), id.getValue());
+        Assert.assertEquals(ctx.getSubject(), id.getValue());
         Assert.assertEquals(ctx.getSignedIDToken(), sJWT);
         Assert.assertEquals(ctx.getRedirectURI(), uri);
         Assert.assertEquals(ctx.getRequestedSubject(), "sub");

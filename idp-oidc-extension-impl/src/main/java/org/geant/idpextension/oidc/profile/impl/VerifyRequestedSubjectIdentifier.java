@@ -50,7 +50,7 @@ public class VerifyRequestedSubjectIdentifier extends AbstractOIDCAuthentication
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         final String requestedSubject = getOidcResponseContext().getRequestedSubject();
-        final String generatedSubject = getOidcResponseContext().getNameId().getValue();
+        final String generatedSubject = getOidcResponseContext().getSubject();
         if (requestedSubject == null) {
             log.debug("{} No requested subject, nothing to do", getLogPrefix());
             return;

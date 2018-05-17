@@ -154,7 +154,7 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return;
         }
-        getOidcResponseContext().setNameId(nameId);
+        getOidcResponseContext().setSubject(nameId.getValue());
         log.debug("{} Subject of type {} set to {}", getLogPrefix(), nameId.getFormat(), nameId.getValue());
 
     }

@@ -153,7 +153,7 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
         }
         IDTokenClaimsSet idToken = new IDTokenClaimsSet(new Issuer(issuerId),
-                new Subject(getOidcResponseContext().getNameId().getValue()), aud, exp, new Date());
+                new Subject(getOidcResponseContext().getSubject()), aud, exp, new Date());
         log.debug("{} Setting id token shell to response context {}", getLogPrefix(),
                 idToken.toJSONObject().toJSONString());
         getOidcResponseContext().setIDToken(idToken);

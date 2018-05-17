@@ -289,10 +289,10 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
             // "token id_token" response type. Access token is not derived from Authorization code.
             claimsSet = new AccessTokenClaimsSet(idGenerator, authenticationRequest.getClientID(),
                     issuerLookupStrategy.apply(profileRequestContext), subjectCtx.getPrincipalName(),
-                    getOidcResponseContext().getAcr(), new Date(), dateExp, authenticationRequest.getNonce(),
-                    getOidcResponseContext().getAuthTime(), getOidcResponseContext().getRedirectURI(),
-                    authenticationRequest.getScope(), authenticationRequest.getClaims(), claims, claimsUI, consentable,
-                    consented);
+                    getOidcResponseContext().getSubject(), getOidcResponseContext().getAcr(), new Date(), dateExp,
+                    authenticationRequest.getNonce(), getOidcResponseContext().getAuthTime(),
+                    getOidcResponseContext().getRedirectURI(), authenticationRequest.getScope(),
+                    authenticationRequest.getClaims(), claims, claimsUI, consentable, consented);
         }
         try {
             getOidcResponseContext().setAccessToken(claimsSet.serialize(dataSealer), accessTokenLifetime / 1000);
