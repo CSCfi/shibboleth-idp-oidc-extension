@@ -42,7 +42,7 @@
     <action-state id="AttributeResolution">
         <evaluate expression="ResolveAttributes" />
         <evaluate expression="FilterAttributes" />
-        <evaluate expression="SetNameIDToResponseContext" />
+        <evaluate expression="SetSubjectToResponseContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="BuildResponse" />
     </action-state>

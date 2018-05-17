@@ -149,16 +149,8 @@
         c:filterService-ref="shibboleth.AttributeFilterService"
         p:maskFailures="%{idp.service.attribute.filter.maskFailures:true}" />
 
-    <bean id="SetNameIDToResponseContext"
-        class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext" scope="prototype">
-        <property name="subjectTypeLookupStrategy">
-            <bean class="org.geant.idpextension.oidc.profile.logic.DefaultSubjectTypeStrategy" />
-        </property>
-        <property name="nameIDGenerator">
-            <bean class="net.shibboleth.idp.saml.nameid.impl.ProxySAML2NameIDGenerator"
-                c:service-ref="shibboleth.oidc.NameIdentifierGenerationService" />
-        </property>
-    </bean>
+    <bean id="SetSubjectToResponseContext"
+        class="org.geant.idpextension.oidc.profile.impl.SetSubjectToResponseContext" scope="prototype" />
 
     <bean id="AddIDTokenShell" class="org.geant.idpextension.oidc.profile.impl.AddIDTokenShell" scope="prototype"
         p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple" />
