@@ -198,7 +198,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * 
      * @return Name ID generated for response
      */
-    public String setSubject() {
+    public String getSubject() {
         return subject;
     }
 
@@ -207,7 +207,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * 
      * @param generated subject for the response
      */
-    public void getSubject(String generatedSubject) {
+    public void setSubject(String generatedSubject) {
         subject = generatedSubject;
     }
 
