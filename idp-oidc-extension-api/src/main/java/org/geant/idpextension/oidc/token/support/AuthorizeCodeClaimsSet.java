@@ -68,6 +68,7 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
      * @param clientID Client Id of the rp. Must not be NULL.
      * @param issuer OP issuer value. Must not be NULL.
      * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
+     * @param subject subject of the authenticated user. Must not be NULL
      * @param acr Authentication context class reference value of the authentication. Must not be NULL.
      * @param iat Issue time of the authorize code. Must not be NULL.
      * @param exp Expiration time of the authorize code. Must not be NULL.
@@ -79,13 +80,13 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
      * @throws RuntimeException if called with nonallowed null parameters
      */
     public AuthorizeCodeClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
-            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
-            @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
-            @Nonnull Scope scope, @Nonnull ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
+            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nonnull ACR acr,
+            @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
+            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nonnull ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
             @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI, JSONArray consentableClaims,
             JSONArray consentedClaims) {
-        super(VALUE_TYPE_AC, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, acr, iat, exp, nonce,
-                authTime, redirectURI, scope, claims, dlClaims, dlClaimsID, dlClaimsUI, consentableClaims,
+        super(VALUE_TYPE_AC, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, subject, acr, iat, exp,
+                nonce, authTime, redirectURI, scope, claims, dlClaims, dlClaimsID, dlClaimsUI, consentableClaims,
                 consentedClaims);
     }
 

@@ -71,10 +71,10 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
      */
     public AccessTokenClaimsSet(@Nonnull AuthorizeCodeClaimsSet authorizeCode, @Nonnull Date iat, @Nonnull Date exp) {
         super(VALUE_TYPE_AT, authorizeCode.getID(), authorizeCode.getClientID(),
-                authorizeCode.getClaimsSet().getIssuer(), authorizeCode.getClaimsSet().getSubject(),
-                new ACR(authorizeCode.getACR()), iat, exp, authorizeCode.getNonce(),
-                authorizeCode.getAuthenticationTime(), authorizeCode.getRedirectURI(), authorizeCode.getScope(),
-                authorizeCode.getClaimsRequest(), authorizeCode.getDeliveryClaims(), null,
+                authorizeCode.getClaimsSet().getIssuer(), authorizeCode.getPrincipal(),
+                authorizeCode.getClaimsSet().getSubject(), new ACR(authorizeCode.getACR()), iat, exp,
+                authorizeCode.getNonce(), authorizeCode.getAuthenticationTime(), authorizeCode.getRedirectURI(),
+                authorizeCode.getScope(), authorizeCode.getClaimsRequest(), authorizeCode.getDeliveryClaims(), null,
                 authorizeCode.getUserinfoDeliveryClaims(), authorizeCode.getConsentableClaims(),
                 authorizeCode.getConsentedClaims());
     }
@@ -86,6 +86,7 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
      * @param clientID Client Id of the rp. Must not be NULL.
      * @param issuer OP issuer value. Must not be NULL.
      * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
+     * @param subject subject of the authenticated user. Must not be NULL
      * @param acr Authentication context class reference value of the authentication. Must not be NULL.
      * @param iat Issue time of the authorize code. Must not be NULL.
      * @param exp Expiration time of the authorize code. Must not be NULL.
@@ -97,12 +98,13 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
      * @throws RuntimeException if called with nonallowed null parameters
      */
     public AccessTokenClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
-            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
-            @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
-            @Nonnull Scope scope, @Nonnull ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
+            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nonnull ACR acr,
+            @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
+            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nonnull ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
             @Nullable ClaimsSet dlClaimsUI, JSONArray consentableClaims, JSONArray consentedClaims) {
-        super(VALUE_TYPE_AT, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, acr, iat, exp, nonce,
-                authTime, redirectURI, scope, claims, dlClaims, null, dlClaimsUI, consentableClaims, consentedClaims);
+        super(VALUE_TYPE_AT, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, subject, acr, iat, exp,
+                nonce, authTime, redirectURI, scope, claims, dlClaims, null, dlClaimsUI, consentableClaims,
+                consentedClaims);
     }
 
     /**

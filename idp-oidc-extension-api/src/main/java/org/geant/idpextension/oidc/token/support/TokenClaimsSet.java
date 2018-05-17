@@ -60,7 +60,10 @@ public class TokenClaimsSet {
     public static final String KEY_ISSUER = "iss";
 
     /** User principal representing authenticated user. */
-    public static final String KEY_USER_PRINCIPAL = "sub";
+    public static final String KEY_USER_PRINCIPAL = "prncpl";
+
+    /** Subject of the user. */
+    public static final String KEY_SUBJECT = "sub";
 
     /**
      * Client Id of the rp the token is generated for. Type is string array (aud).
@@ -136,6 +139,7 @@ public class TokenClaimsSet {
      * @param clientID Client Id of the rp. Must not be NULL.
      * @param issuer OP issuer value. Must not be NULL.
      * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
+     * @param subject subject of the authenticated user. Must not be NULL.
      * @param acr Authentication context class reference value of the authentication. Must not be NULL.
      * @param iat Issue time of the token. Must not be NULL.
      * @param exp Expiration time of the token. Must not be NULL.
@@ -148,21 +152,22 @@ public class TokenClaimsSet {
      */
     // Checkstyle: CyclomaticComplexity OFF
     protected TokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,
-            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull ACR acr, @Nonnull Date iat,
-            @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime, @Nonnull URI redirectURI,
-            @Nonnull Scope scope, @Nullable ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
-            @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI, JSONArray consentableClaims,
-            JSONArray consentedClaims) {
+            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nonnull ACR acr,
+            @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
+            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nullable ClaimsRequest claims,
+            @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI,
+            JSONArray consentableClaims, JSONArray consentedClaims) {
         if (tokenType == null || tokenID == null || clientID == null || issuer == null || userPrincipal == null
-                || acr == null || iat == null || exp == null || authTime == null || redirectURI == null
-                || scope == null) {
+                || acr == null || iat == null || exp == null || authTime == null || redirectURI == null || scope == null
+                || subject == null) {
             throw new RuntimeException("Invalid parameters, programming error");
         }
         tokenClaimsSet = new JWTClaimsSet.Builder().claim(KEY_TYPE, tokenType).jwtID(tokenID)
-                .audience(clientID.getValue()).issuer(issuer).subject(userPrincipal).claim(KEY_ACR, acr.getValue())
-                .issueTime(iat).expirationTime(exp).claim(KEY_NONCE, nonce == null ? null : nonce.getValue())
-                .claim(KEY_AUTH_TIME, authTime).claim(KEY_REDIRECT_URI, redirectURI.toString())
-                .claim(KEY_SCOPE, scope.toString()).claim(KEY_CLAIMS, claims == null ? null : claims.toJSONObject())
+                .audience(clientID.getValue()).issuer(issuer).subject(subject).claim(KEY_USER_PRINCIPAL, userPrincipal)
+                .claim(KEY_ACR, acr.getValue()).issueTime(iat).expirationTime(exp)
+                .claim(KEY_NONCE, nonce == null ? null : nonce.getValue()).claim(KEY_AUTH_TIME, authTime)
+                .claim(KEY_REDIRECT_URI, redirectURI.toString()).claim(KEY_SCOPE, scope.toString())
+                .claim(KEY_CLAIMS, claims == null ? null : claims.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS, dlClaims == null ? null : dlClaims.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS_IDTOKEN, dlClaimsID == null ? null : dlClaimsID.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS_USERINFO, dlClaimsUI == null ? null : dlClaimsUI.toJSONObject())
@@ -190,6 +195,9 @@ public class TokenClaimsSet {
             throw new ParseException("claim iss must exist and not be null", 0);
         }
         if (tokenClaimsSet.getStringClaim(KEY_USER_PRINCIPAL) == null) {
+            throw new ParseException("claim prncpl must exist and not be null", 0);
+        }
+        if (tokenClaimsSet.getStringClaim(KEY_SUBJECT) == null) {
             throw new ParseException("claim sub must exist and not be null", 0);
         }
         if (tokenClaimsSet.getStringArrayClaim(KEY_CLIENTID) == null) {
@@ -318,6 +326,16 @@ public class TokenClaimsSet {
     @Nonnull
     public String getACR() {
         return (String) tokenClaimsSet.getClaim(KEY_ACR);
+    }
+
+    /**
+     * Get principal of the user.
+     * 
+     * @return principal of the user.
+     */
+    @Nonnull
+    public String getPrincipal() {
+        return (String) tokenClaimsSet.getClaim(KEY_USER_PRINCIPAL);
     }
 
     /**
