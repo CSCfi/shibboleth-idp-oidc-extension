@@ -28,38 +28,33 @@
 
 package org.geant.idpextension.oidc.encoding.impl;
 
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletResponse;
-import org.opensaml.messaging.encoder.MessageEncodingException;
-import org.opensaml.messaging.encoder.servlet.AbstractHttpServletResponseMessageEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.nimbusds.oauth2.sdk.Response;
+import java.util.Map;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.http.ServletUtils;
 
-/**
- * A message encodes that encodes the Nimbus {@link Response} in the message context inside the attached
- * {@link HttpServletResponse}.
- */
-public class NimbusResponseEncoder extends AbstractHttpServletResponseMessageEncoder<Response> {
+class ResponseUtil {
 
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(NimbusResponseEncoder.class);
-
-    /** {@inheritDoc} */
-    protected void doEncode() throws MessageEncodingException {
-        try {
-            final HttpServletResponse httpResponse = getHttpServletResponse();
-            final HTTPResponse resp = getMessageContext().getMessage().toHTTPResponse();
-            log.debug("Outbound response {}", ResponseUtil.toString(resp));
-            ServletUtils.applyHTTPResponse(resp, httpResponse);
-        } catch (IOException e) {
-            throw new MessageEncodingException("Problem encoding response", e);
+    /**
+     * Helper method to print response to string for logging.
+     * 
+     * @param httpResponse request to be printed
+     * @return response as formatted string.
+     */
+    protected static String toString(HTTPResponse httpResponse) {
+        if (httpResponse == null) {
+            return null;
         }
+        String nl = System.lineSeparator();
+        String ret = nl;
+        Map<String, String> headers = httpResponse.getHeaders();
+        if (headers != null) {
+            ret += "Headers:" + nl;
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                ret += "\t" + entry.getKey() + ":" + entry.getValue() + nl;
+            }
+        }
+        if (httpResponse.getContent() != null) {
+            ret += "Content:" + httpResponse.getContent();
+        }
+        return ret;
     }
-
 }
