@@ -36,6 +36,8 @@ import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.messaging.decoder.servlet.AbstractHttpServletRequestMessageDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 
@@ -55,7 +57,9 @@ public class OIDCUserInfoRequestDecoder extends AbstractHttpServletRequestMessag
         MessageContext<UserInfoRequest> messageContext = new MessageContext<>();
         UserInfoRequest req = null;
         try {
-            req = UserInfoRequest.parse(ServletUtils.createHTTPRequest(getHttpServletRequest()));
+            HTTPRequest httpReq = ServletUtils.createHTTPRequest(getHttpServletRequest());
+            log.debug("Inbound Request {}", RequestUtil.toString(httpReq));
+            req = UserInfoRequest.parse(httpReq);
         } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
             log.error("Unable to decode oidc userinfo request: {}", e.getMessage());
             throw new MessageDecodingException(e);

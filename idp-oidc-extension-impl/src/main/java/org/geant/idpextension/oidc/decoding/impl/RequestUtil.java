@@ -28,43 +28,38 @@
 
 package org.geant.idpextension.oidc.decoding.impl;
 
-import java.io.IOException;
-import javax.annotation.Nonnull;
-import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.messaging.decoder.MessageDecoder;
-import org.opensaml.messaging.decoder.MessageDecodingException;
-import org.opensaml.messaging.decoder.servlet.AbstractHttpServletRequestMessageDecoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.nimbusds.oauth2.sdk.TokenRequest;
+import java.util.Map;
+
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.http.ServletUtils;
 
-/**
- * Message decoder decoding OpenID Connect {@link TokenRequest}s.
- */
-public class OIDCTokenRequestDecoder extends AbstractHttpServletRequestMessageDecoder<TokenRequest>
-        implements MessageDecoder<TokenRequest> {
+class RequestUtil {
 
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(OIDCTokenRequestDecoder.class);
-
-    /** {@inheritDoc} */
-    @Override
-    protected void doDecode() throws MessageDecodingException {
-        MessageContext<TokenRequest> messageContext = new MessageContext<>();
-        TokenRequest req = null;
-        try {
-            HTTPRequest httpReq = ServletUtils.createHTTPRequest(getHttpServletRequest());
-            log.debug("Inbound Request {}", RequestUtil.toString(httpReq));
-            req = TokenRequest.parse(httpReq);
-        } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
-            log.error("Unable to decode oidc token request: {}", e.getMessage());
-            throw new MessageDecodingException(e);
+    /**
+     * Helper method to print request to string for logging.
+     * 
+     * @param httpReq request to be printed
+     * @return request as formatted string.
+     */
+    protected static String toString(HTTPRequest httpReq) {
+        if (httpReq == null) {
+            return null;
         }
-        messageContext.setMessage(req);
-        setMessageContext(messageContext);
+        String nl = System.lineSeparator();
+        String ret = httpReq.getMethod().toString() + nl;
+        Map<String, String> headers = httpReq.getHeaders();
+        if (headers != null) {
+            ret += "Headers:" + nl;
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                ret += "\t" + entry.getKey() + ":" + entry.getValue() + nl;
+            }
+        }
+        Map<String, String> parameters = httpReq.getQueryParameters();
+        if (parameters != null) {
+            ret += "Parameters:" + nl;
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                ret += "\t" + entry.getKey() + ":" + entry.getValue() + nl;
+            }
+        }
+        return ret;
     }
-
 }
