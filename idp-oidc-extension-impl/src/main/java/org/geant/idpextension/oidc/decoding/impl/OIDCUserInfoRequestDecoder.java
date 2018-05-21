@@ -58,10 +58,10 @@ public class OIDCUserInfoRequestDecoder extends AbstractHttpServletRequestMessag
         UserInfoRequest req = null;
         try {
             HTTPRequest httpReq = ServletUtils.createHTTPRequest(getHttpServletRequest());
-            log.debug("Inbound Request {}", RequestUtil.toString(httpReq));
+            log.debug("Inbound request {}", RequestUtil.toString(httpReq));
             req = UserInfoRequest.parse(httpReq);
         } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
-            log.error("Unable to decode oidc userinfo request: {}", e.getMessage());
+            log.error("Unable to decode inbound request: {}", e.getMessage());
             throw new MessageDecodingException(e);
         }
         messageContext.setMessage(req);

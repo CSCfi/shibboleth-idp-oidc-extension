@@ -59,13 +59,14 @@ public class OIDCAuthenticationRequestDecoder extends AbstractHttpServletRequest
         AuthenticationRequest req = null;
         try {
             HTTPRequest httpReq = ServletUtils.createHTTPRequest(getHttpServletRequest());
-            log.debug("Inbound Request {}", RequestUtil.toString(httpReq));
+            log.debug("Inbound request {}", RequestUtil.toString(httpReq));
             req = AuthenticationRequest.parse(httpReq);
         } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
-            log.error("Unable to decode oidc request: {}", e.getMessage());
+            log.error("Unable to decode inbound request: {}", e.getMessage());
             throw new MessageDecodingException(e);
         }
         messageContext.setMessage(req);
+        log.debug("Decoded inbound request query string {}", req.toQueryString());
         setMessageContext(messageContext);
     }
 
