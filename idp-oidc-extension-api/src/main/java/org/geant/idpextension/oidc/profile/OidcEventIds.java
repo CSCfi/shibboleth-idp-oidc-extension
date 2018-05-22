@@ -69,6 +69,11 @@ public final class OidcEventIds {
     @Nonnull @NotEmpty public static final String INVALID_RESPONSE_TYPE = "InvalidResponseType";
     
     /**
+     * The grant type in token request is not supported for RP.
+     */
+    @Nonnull @NotEmpty public static final String INVALID_GRANT_TYPE = "InvalidGrantType";
+    
+    /**
      * The subject resolved is not the expected one.
      */
     @Nonnull @NotEmpty public static final String INVALID_SUBJECT = "InvalidSubject";
