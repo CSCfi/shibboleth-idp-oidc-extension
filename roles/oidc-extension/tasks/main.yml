@@ -21,6 +21,9 @@
 - name: Ensure "{{ idp_home }}/flows/oidc/webfinger" dir exists
   file: path="{{ idp_home }}/flows/oidc/webfinger" state=directory
 
+- name: Ensure "{{ idp_home }}/flows/oidc/discovery" dir exists
+  file: path="{{ idp_home }}/flows/oidc/discovery" state=directory
+
 - name: Ensure "{{ idp_home }}/static" dir exists
   file: path="{{ idp_home }}/static/" state=directory
 
@@ -49,6 +52,8 @@
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/register/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/register/oidc-beans.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/webfinger/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/webfinger/oidc-flow.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/webfinger/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/webfinger/oidc-beans.xml" }
+    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/discovery/discovery-flow.xml", dest: "{{ idp_home }}/flows/oidc/discovery/discovery-flow.xml" }
+    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/discovery/discovery-beans.xml", dest: "{{ idp_home }}/flows/oidc/discovery/discovery-beans.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/views/oidc-error.vm", dest: "{{ idp_home }}/views/oidc/authorize-error.vm" }
 
 - name: Copy selected JARs for building new idp.war
