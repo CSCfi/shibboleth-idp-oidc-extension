@@ -172,6 +172,7 @@ public class ValidateGrant extends AbstractOIDCTokenResponseAction {
                         return;
                     }
                     getOidcResponseContext().setTokenClaimsSet(refreshTokenClaimsSet);
+                    return;
                 } catch (ParseException | DataSealerException e) {
                     log.error("{} Obtaining refresh token failed {}", getLogPrefix(), e.getMessage());
                     ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_GRANT);
