@@ -49,6 +49,7 @@
 
     <action-state id="BuildResponse">
         <evaluate expression="SetAccessTokenToResponseContext" />
+        <evaluate expression="SetRefreshTokenToResponseContext" />
         <evaluate expression="AddIDTokenShell" />
         <evaluate expression="AddAttributeClaimsToIDToken" />
         <evaluate expression="AddTokenDeliveryAttributesToIDToken" />

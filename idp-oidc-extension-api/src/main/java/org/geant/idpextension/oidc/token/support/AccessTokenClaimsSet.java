@@ -64,19 +64,19 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
     /**
      * Constructor for access token claims set when derived from authz code.
      * 
-     * @param authorizeCode Authorize Code this token is based on. Must not be NULL.
+     * @param tokenClaimSet Authorize Code / Refresh Token this token is based on. Must not be NULL.
      * @param iat Issue time of the token. Must not be NULL.
      * @param exp Expiration time of the token. Must not be NULL.
      * @throws RuntimeException if called with non allowed null parameters
      */
-    public AccessTokenClaimsSet(@Nonnull AuthorizeCodeClaimsSet authorizeCode, @Nonnull Date iat, @Nonnull Date exp) {
-        super(VALUE_TYPE_AT, authorizeCode.getID(), authorizeCode.getClientID(),
-                authorizeCode.getClaimsSet().getIssuer(), authorizeCode.getPrincipal(),
-                authorizeCode.getClaimsSet().getSubject(), new ACR(authorizeCode.getACR()), iat, exp,
-                authorizeCode.getNonce(), authorizeCode.getAuthenticationTime(), authorizeCode.getRedirectURI(),
-                authorizeCode.getScope(), authorizeCode.getClaimsRequest(), authorizeCode.getDeliveryClaims(), null,
-                authorizeCode.getUserinfoDeliveryClaims(), authorizeCode.getConsentableClaims(),
-                authorizeCode.getConsentedClaims());
+    public AccessTokenClaimsSet(@Nonnull TokenClaimsSet tokenClaimSet, @Nonnull Date iat, @Nonnull Date exp) {
+        super(VALUE_TYPE_AT, tokenClaimSet.getID(), tokenClaimSet.getClientID(),
+                tokenClaimSet.getClaimsSet().getIssuer(), tokenClaimSet.getPrincipal(),
+                tokenClaimSet.getClaimsSet().getSubject(), new ACR(tokenClaimSet.getACR()), iat, exp,
+                tokenClaimSet.getNonce(), tokenClaimSet.getAuthenticationTime(), tokenClaimSet.getRedirectURI(),
+                tokenClaimSet.getScope(), tokenClaimSet.getClaimsRequest(), tokenClaimSet.getDeliveryClaims(), null,
+                tokenClaimSet.getUserinfoDeliveryClaims(), tokenClaimSet.getConsentableClaims(),
+                tokenClaimSet.getConsentedClaims());
     }
 
     /**

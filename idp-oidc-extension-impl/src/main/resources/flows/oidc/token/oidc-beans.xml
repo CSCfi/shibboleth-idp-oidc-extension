@@ -57,7 +57,7 @@
         p:httpServletRequest-ref="shibboleth.HttpServletRequest" p:replayCache-ref="shibboleth.ReplayCache" />
 
     <bean id="ValidateAuthorizeCode" class="org.geant.idpextension.oidc.profile.impl.ValidateAuthorizeCode"
-        scope="prototype" c:sealer-ref="authorizeCodeSealer" p:replayCache-ref="shibboleth.ReplayCache"
+        scope="prototype" c:sealer-ref="tokenSealer" p:replayCache-ref="shibboleth.ReplayCache"
         p:revocationCache-ref="shibboleth.RevocationCache" />
 
     <bean id="ValidateRedirectURI" class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
@@ -128,11 +128,15 @@
 
     <bean id="SetAccessTokenToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetAccessTokenToResponseContext" scope="prototype"
-        c:sealer-ref="authorizeCodeSealer">
+        c:sealer-ref="tokenSealer">
     </bean>
 
-    <bean id="authorizeCodeSealer" lazy-init="true"
-        class="net.shibboleth.utilities.java.support.security.DataSealer"
+    <bean id="SetRefreshTokenToResponseContext"
+        class="org.geant.idpextension.oidc.profile.impl.SetRefreshTokenToResponseContext" scope="prototype"
+        c:sealer-ref="tokenSealer">
+    </bean>
+
+    <bean id="tokenSealer" lazy-init="true" class="net.shibboleth.utilities.java.support.security.DataSealer"
         p:keyStrategy-ref="shibboleth.DataSealerKeyStrategy" p:encoder-ref="acBase64Codec" p:decoder-ref="acBase64Codec" />
 
     <bean id="acBase64Codec" class="org.apache.commons.codec.binary.Base64" c:lineLength="0"

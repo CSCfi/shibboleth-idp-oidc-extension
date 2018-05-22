@@ -38,6 +38,7 @@ import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
@@ -93,6 +94,10 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     /** Access token. */
     @Nullable
     private AccessToken accessToken;
+
+    /** Refresh token. */
+    @Nullable
+    private RefreshToken refreshToken;
 
     /** Requested claims. */
     @Nullable
@@ -172,6 +177,25 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      */
     public void setAccessToken(@Nullable String token, long lifeTime) {
         accessToken = token == null ? null : new BearerAccessToken(token, lifeTime, null);
+    }
+
+    /**
+     * Get refresh token.
+     * 
+     * @return refresh token
+     */
+    @Nullable
+    public RefreshToken getRefreshToken() {
+        return refreshToken;
+    }
+
+    /**
+     * Set refresh token.
+     * 
+     * @param token String to form refresh token
+     */
+    public void setRefreshToken(@Nullable String token) {
+        refreshToken = token == null ? null : new RefreshToken(token);
     }
 
     /**

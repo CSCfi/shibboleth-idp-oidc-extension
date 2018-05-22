@@ -86,7 +86,8 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
     @SuppressWarnings("unchecked")
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        TokenResponse resp = new OIDCTokenResponse(new OIDCTokens(idToken, accessToken, null));
+        TokenResponse resp =
+                new OIDCTokenResponse(new OIDCTokens(idToken, accessToken, getOidcResponseContext().getRefreshToken()));
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
 }
