@@ -81,7 +81,15 @@ public class FilesystemMetadataValueResolver extends AbstractFileOIDCEntityResol
         super(backgroundTaskTimer, metadata);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Returns all the resolved objects.
+     * 
+     * @param criteria the criteria to evaluate or process, currently ignored. May be null.
+     * 
+     * @return all the resolved objects.
+     * 
+     * @throws ResolverException thrown if there is an error during resolution.
+     */
     @Override
     public Iterable<Object> resolve(CriteriaSet criteria) throws ResolverException {
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
@@ -93,7 +101,15 @@ public class FilesystemMetadataValueResolver extends AbstractFileOIDCEntityResol
         return getBackingStore().getOrderedInformation();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Returns a single resolved object. If many were resolved, a single one is selected randomly from the set.
+     * 
+     * @param criteria the criteria to evaluate or process, currently ignored. May be null.
+     * 
+     * @return a single resolved object.
+     * 
+     * @throws ResolverException thrown if there is an error during resolution.
+     */
     @Override
     public Object resolveSingle(CriteriaSet criteria) throws ResolverException {
         return resolve(criteria).iterator().next();
