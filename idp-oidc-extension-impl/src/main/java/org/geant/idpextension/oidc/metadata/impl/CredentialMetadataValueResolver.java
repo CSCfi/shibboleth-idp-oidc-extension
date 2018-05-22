@@ -48,6 +48,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 
 import net.minidev.json.JSONObject;
 import net.shibboleth.utilities.java.support.component.AbstractIdentifiableInitializableComponent;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
@@ -65,6 +66,15 @@ public class CredentialMetadataValueResolver extends AbstractIdentifiableInitial
 
     /** The credential as JSON. */
     private JSONObject jsonCredential;
+    
+    /** {@inheritDoc} */
+    @Override
+    protected void doInitialize() throws ComponentInitializationException {
+        super.doInitialize();
+        if (jsonCredential == null) {
+            throw new ComponentInitializationException("The credential cannot be null");
+        }
+    }
 
     /**
      * Set the credential to be resolved as JSON.
