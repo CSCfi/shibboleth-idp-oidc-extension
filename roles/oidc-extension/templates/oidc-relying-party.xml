@@ -31,10 +31,9 @@
     <bean id="OIDC.UserInfo" class="org.geant.idpextension.oidc.config.OIDCUserInfoConfiguration"
         p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
         p:servletRequest-ref="shibboleth.HttpServletRequest" />
-    <!-- Refresh tokens are not supported. Do not turn it on in OIDC.Registration -->
     <bean id="OIDC.Registration" class="org.geant.idpextension.oidc.config.OIDCDynamicRegistrationConfiguration"
         p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
-        p:refreshTokensEnabled="false" p:servletRequest-ref="shibboleth.HttpServletRequest"
+        p:servletRequest-ref="shibboleth.HttpServletRequest"
         p:tokenEndpointAuthMethods="%{idp.oidc.dynreg.tokenEndpointAuthMethods:client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt}" />
 
     <!-- Security Configuration Defaults These settings establish the default security configurations for signatures and 
