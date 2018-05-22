@@ -56,13 +56,20 @@
         class="org.geant.idpextension.oidc.profile.impl.ValidateEndpointAuthentication" scope="prototype"
         p:httpServletRequest-ref="shibboleth.HttpServletRequest" p:replayCache-ref="shibboleth.ReplayCache" />
 
-    <bean id="ValidateAuthorizeCode" class="org.geant.idpextension.oidc.profile.impl.ValidateAuthorizeCode"
-        scope="prototype" c:sealer-ref="tokenSealer" p:replayCache-ref="shibboleth.ReplayCache"
+    <bean id="ValidateGrantType" class="org.geant.idpextension.oidc.profile.impl.ValidateGrantType"
+        scope="prototype" />
+
+    <bean id="ValidateGrant" class="org.geant.idpextension.oidc.profile.impl.ValidateGrant" scope="prototype"
+        c:sealer-ref="tokenSealer" p:replayCache-ref="shibboleth.ReplayCache"
         p:revocationCache-ref="shibboleth.RevocationCache" />
 
     <bean id="ValidateRedirectURI" class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
         scope="prototype" p:redirectURILookupStrategy-ref="shibboleth.TokenRequestRedirectURILookupStrategy"
-        p:validRedirectURIsLookupStrategy-ref="shibboleth.TokenRequestValidRequestUrisLookupStrategy" />
+        p:validRedirectURIsLookupStrategy-ref="shibboleth.TokenRequestValidRequestUrisLookupStrategy">
+        <property name="activationCondition">
+            <ref bean="GrantTypeAuthorizationCode" />
+        </property>
+    </bean>
 
     <bean id="shibboleth.TokenRequestRedirectURILookupStrategy"
         class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestRedirectURILookupFunction"
@@ -228,5 +235,13 @@
         depends-on="shibboleth.LoggingService"
         p:entryExpiration="#{'%{idp.oidc.revocationCache.authorizeCode.lifetime:PT6H}'}"
         p:storage-ref="#{'%{idp.oidc.revocationCache.StorageService:shibboleth.StorageService}'.trim()}" p:strict="true" />
+
+    <bean id="GrantTypeAuthorizationCode" parent="shibboleth.Conditions.Expression">
+        <constructor-arg>
+            <value>
+                #profileContext.getInboundMessageContext().getMessage().getAuthorizationGrant().getType().equals(T(com.nimbusds.oauth2.sdk.GrantType).AUTHORIZATION_CODE)
+            </value>
+        </constructor-arg>
+    </bean>
 
 </beans>

@@ -20,7 +20,8 @@
 
     <action-state id="OutboundContextsAndSecurityParameters">
         <evaluate expression="ValidateEndpointAuthentication" />
-        <evaluate expression="ValidateAuthorizeCode" />
+        <evaluate expression="ValidateGrantType" />
+        <evaluate expression="ValidateGrant" />
         <evaluate expression="ValidateRedirectURI" />
         <evaluate expression="ValidateScope" />
         <evaluate expression="SetRequestedClaimsToResponseContext" />
