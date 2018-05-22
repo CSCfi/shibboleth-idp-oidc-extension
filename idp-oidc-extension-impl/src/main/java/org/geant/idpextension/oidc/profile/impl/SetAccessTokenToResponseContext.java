@@ -55,6 +55,8 @@ import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseT
 import org.geant.idpextension.oidc.profile.context.navigate.OIDCAuthenticationResponseContextLookupFunction;
 import org.geant.idpextension.oidc.token.support.AccessTokenClaimsSet;
 import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
+import org.geant.idpextension.oidc.token.support.RefreshTokenClaimsSet;
+import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 
@@ -91,8 +93,8 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     @Nonnull
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
 
-    /** Authorize Code the access token is based on. */
-    private AuthorizeCodeClaimsSet authzCodeClaimsSet;
+    /** Authorize Code / Refresh Token the access token is based on. */
+    private TokenClaimsSet tokenClaimsSet;
 
     /** Strategy used to obtain the response issuer value. */
     @Nonnull
@@ -228,8 +230,13 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
             return false;
         }
-        authzCodeClaimsSet = (AuthorizeCodeClaimsSet) getOidcResponseContext().getTokenClaimsSet();
-        if (authzCodeClaimsSet == null) {
+        tokenClaimsSet = getOidcResponseContext().getTokenClaimsSet();
+        if (tokenClaimsSet != null && (!(tokenClaimsSet instanceof RefreshTokenClaimsSet)
+                && !(tokenClaimsSet instanceof AuthorizeCodeClaimsSet))) {
+            log.error("{} No tokn grant if of illegal type", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+            return false;
+        } else if (tokenClaimsSet == null) {
 
             /**
              * Alternate path possible only when access token is to be provided by authz endpoint without authorization
@@ -267,8 +274,8 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         Date dateExp = new Date(System.currentTimeMillis() + accessTokenLifetime);
         AccessTokenClaimsSet claimsSet;
-        if (authzCodeClaimsSet != null) {
-            claimsSet = new AccessTokenClaimsSet(authzCodeClaimsSet, new Date(), dateExp);
+        if (tokenClaimsSet != null) {
+            claimsSet = new AccessTokenClaimsSet(tokenClaimsSet, new Date(), dateExp);
         } else {
             JSONArray consentable = null;
             JSONArray consented = null;
