@@ -35,6 +35,9 @@
     </AttributeDefinition>
 
 
+
+    <!-- examples of claim splitting by defining two different email claim definitions -->
+
     <!-- In the rest of the world, the email address is the standard identifier, despite the problems with that practice. 
         Consider making the EPPN value the same as your official email addresses whenever possible. This demonstrates use of OIDCString 
         encoder. -->
@@ -50,40 +53,24 @@
         <SourceAttribute>uid</SourceAttribute>
     </AttributeDefinition>
 
-    <!-- examples of claim splitting by defining two different email claim definitions -->
-
-    <!-- claim that may be encoded only for userinfo response -->
-    <AttributeDefinition id="email_userinfo" xsi:type="Simple">
-        <Dependency ref="email" />
-        <AttributeEncoder xsi:type="oidcext:OIDCString" activationConditionRef="UserInfoPredicate"
-            name="email" />
-    </AttributeDefinition>
-
-    <!-- claim that may be encoded only for id token -->
+    <!-- claim that is placed always to id token -->
     <AttributeDefinition id="email_idtoken" xsi:type="Simple">
         <Dependency ref="email" />
-        <AttributeEncoder xsi:type="oidcext:OIDCString" activationConditionRef="IDTokenPredicate" name="email" />
+        <AttributeEncoder xsi:type="oidcext:OIDCString" placeToIDToken="true" denyUserinfo="true" name="email" />
     </AttributeDefinition>
 
+    <!-- examples of claim splitting by defining two different name claim definitions -->
+    
     <!-- standard claim name fetched from static connector -->
     <AttributeDefinition id="name" xsi:type="Simple" sourceAttributeID="name">
         <Dependency ref="staticAttributes" />
         <AttributeEncoder xsi:type="oidcext:OIDCString" name="name" />
     </AttributeDefinition>
-
-    <!-- example of claim splitting by defining two different name claim definitions -->
-
-    <!-- claim that may be encoded only for userinfo response -->
-    <AttributeDefinition id="name_userinfo" xsi:type="Simple">
-        <Dependency ref="name" />
-        <AttributeEncoder xsi:type="oidcext:OIDCString" activationConditionRef="UserInfoPredicate"
-            name="name" />
-    </AttributeDefinition>
-
-    <!-- claim that is encoded only for id token -->
+   
+    <!-- claim that is placed always to id token -->
     <AttributeDefinition id="name_idtoken" xsi:type="Simple">
         <Dependency ref="name" />
-        <AttributeEncoder xsi:type="oidcext:OIDCString" activationConditionRef="IDTokenPredicate" name="name" />
+        <AttributeEncoder xsi:type="oidcext:OIDCString" placeToIDToken="true" denyUserinfo="true" name="name" />
     </AttributeDefinition>
 
     <!-- Start of static attributes. In actual deployment you would use something else than static attributes for most of 

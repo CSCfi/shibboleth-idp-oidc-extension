@@ -94,9 +94,9 @@
 
 
     <!-- Example rules for requesting and splitting claims. -->
-    <AttributeFilterPolicy id="SPLITTING_CLAIMS">
+    <AttributeFilterPolicy id="REQUESTED_CLAIMS">
         <PolicyRequirementRule xsi:type="ANY" />
-        <!-- Release picture in id token and userinfo if asked in any way to be released -->
+        <!-- Release picture if asked in any way to be released -->
         <AttributeRule attributeID="picture">
             <PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" />
         </AttributeRule>
@@ -104,12 +104,12 @@
         <AttributeRule attributeID="email_idtoken">
             <PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" matchOnlyIDToken="true" />
         </AttributeRule>
-        <!-- Release email in userinfo if specifically asked to be released for userinfo -->
-        <AttributeRule attributeID="email_userinfo">
+        <!-- Release email if specifically asked to be released for userinfo.  -->
+        <AttributeRule attributeID="email">
             <PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" matchOnlyUserInfo="true" />
         </AttributeRule>
         <!-- Release name in userinfo if specifically asked to be released for userinfo -->
-        <AttributeRule attributeID="name_userinfo">
+        <AttributeRule attributeID="name">
             <PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" matchOnlyUserInfo="true" />
         </AttributeRule>
     </AttributeFilterPolicy>
