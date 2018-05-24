@@ -91,8 +91,14 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /** Name of the key field if the value is wrapped into JSON Object. */
     private String fieldName;
 
-    /** Whether to to interpret value as boolean. */
+    /** Whether to interpret value as boolean. */
     private boolean asBoolean;
+
+    /** Whether to force encode the attribute to id token. */
+    private boolean placeToIDToken;
+
+    /** Whether to deny the attribute encoding for userinfo responses. */
+    private boolean denyUserinfo;
 
     /** Condition for use of this encoder. */
     @SuppressWarnings("rawtypes")
@@ -102,6 +108,42 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     /** Default constructor. */
     public AbstractOIDCAttributeEncoder() {
         stringDelimiter = " ";
+    }
+
+    /**
+     * Sets to force encode the attribute to id token.
+     * 
+     * @param flag whether to force encode the attribute to id token
+     */
+    public void setPlaceToIDToken(boolean flag) {
+        placeToIDToken = flag;
+    }
+
+    /**
+     * Gets whether to force encode the attribute to id token.
+     * 
+     * @return whether to force encode the attribute to id token
+     */
+    public boolean getPlaceToIDToken() {
+        return placeToIDToken;
+    }
+
+    /**
+     * Sets to deny the attribute encoding for userinfo responses.
+     * 
+     * @param flag whether to deny the attribute encoding for userinfo responses
+     */
+    public void setDenyUserinfo(boolean flag) {
+        denyUserinfo = flag;
+    }
+
+    /**
+     * Gets whether to deny the attribute encoding for userinfo responses.
+     * 
+     * @return whether to deny the attribute encoding for userinfo responses
+     */
+    public boolean getDenyUserinfo() {
+        return denyUserinfo;
     }
 
     /**

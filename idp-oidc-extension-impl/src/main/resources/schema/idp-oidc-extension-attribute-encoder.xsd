@@ -112,6 +112,24 @@
                         </documentation>
                     </annotation>
                 </attribute>
+                <attribute name="placeToIDToken" type="string" use="optional">
+                    <annotation>
+                        <documentation>
+                            By default attributes are delivered in userinfo response unless response type is
+                            id_token. This flag is false by default and setting it true will include it in id token
+                            regardless of response type.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="denyUserinfo" type="string" use="optional">
+                    <annotation>
+                        <documentation>
+                            By default attributes are delivered in userinfo response unless response type is
+                            id_token. This flag is false by default and setting it true excludes it from userinfo
+                            response.
+                        </documentation>
+                    </annotation>
+                </attribute>
             </extension>
         </complexContent>
     </complexType>

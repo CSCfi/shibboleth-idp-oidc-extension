@@ -76,6 +76,16 @@ public abstract class AbstractOIDCEncoderParser extends BaseAttributeEncoderPars
     @NotEmpty
     public static final String AS_BOOLEAN_ATTRIBUTE_NAME = "asBoolean";
 
+    /** Local name of force to id token attribute. */
+    @Nonnull
+    @NotEmpty
+    public static final String PLACE_TO_IDTOKEN_ATTRIBUTE_NAME = "placeToIDToken";
+
+    /** Local name of deny userinfo attribute. */
+    @Nonnull
+    @NotEmpty
+    public static final String DENY_USERINFO_ATTRIBUTE_NAME = "denyUserinfo";
+
     /** {@inheritDoc} */
     @Override
     protected void doParse(@Nonnull final Element config, @Nonnull final ParserContext parserContext,
@@ -109,6 +119,14 @@ public abstract class AbstractOIDCEncoderParser extends BaseAttributeEncoderPars
         if (config.hasAttributeNS(null, AS_BOOLEAN_ATTRIBUTE_NAME)) {
             builder.addPropertyValue("asBoolean",
                     StringSupport.trimOrNull(config.getAttributeNS(null, AS_BOOLEAN_ATTRIBUTE_NAME)));
+        }
+        if (config.hasAttributeNS(null, PLACE_TO_IDTOKEN_ATTRIBUTE_NAME)) {
+            builder.addPropertyValue("placeToIDToken",
+                    StringSupport.trimOrNull(config.getAttributeNS(null, PLACE_TO_IDTOKEN_ATTRIBUTE_NAME)));
+        }
+        if (config.hasAttributeNS(null, DENY_USERINFO_ATTRIBUTE_NAME)) {
+            builder.addPropertyValue("denyUserinfo",
+                    StringSupport.trimOrNull(config.getAttributeNS(null, DENY_USERINFO_ATTRIBUTE_NAME)));
         }
     }
 
