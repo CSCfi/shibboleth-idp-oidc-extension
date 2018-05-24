@@ -135,7 +135,18 @@ public class SetTokenDeliveryAttributesToResponseContext extends AbstractOIDCRes
                                         getLogPrefix(), name);
                                 OIDCAuthenticationResponseTokenClaimsContext tokenClaimsCtx = getOidcResponseContext()
                                         .getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, true);
-                                tokenClaimsCtx.getClaims().setClaim(name, obj.get(name));
+                                if (((AbstractOIDCAttributeEncoder) encoder).getPlaceToIDToken()
+                                        && !((AbstractOIDCAttributeEncoder) encoder).getDenyUserinfo()) {
+                                    // Deliver for userinfo and id token
+                                    tokenClaimsCtx.getClaims().setClaim(name, obj.get(name));
+                                } else if (((AbstractOIDCAttributeEncoder) encoder).getPlaceToIDToken()) {
+                                    // Deliver only for idtoken
+                                    tokenClaimsCtx.getIdtokenClaims().setClaim(name, obj.get(name));
+                                } else if (!((AbstractOIDCAttributeEncoder) encoder).getDenyUserinfo()) {
+                                    // Deliver only for userinfo
+                                    tokenClaimsCtx.getUserinfoClaims().setClaim(name, obj.get(name));
+                                }
+
                             }
                         }
                     }

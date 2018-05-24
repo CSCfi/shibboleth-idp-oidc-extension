@@ -56,6 +56,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
+import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
 /**
@@ -88,6 +90,23 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
     /** Claims Set to use. */
     @Nullable
     private ClaimsSet claimsSet;
+
+    /** Whether we are adding claims to ID Token. */
+    @Nonnull
+    private boolean targetIDToken;
+
+    /** Whether we can add claims to IDToken by default i.e. response type is "id_token". */
+    @Nonnull
+    private boolean addToIDTokenByDefault;
+
+    /**
+     * Set whether target is id token claims set. If this flag is set addToIDTokenByDefault flag is active.
+     * 
+     * @param flag whether target is id token claims set
+     */
+    public void setTargetIDToken(boolean flag) {
+        targetIDToken = flag;
+    }
 
     /** Strategy used to locate the {@link OIDCAuthenticationResponseConsentContext}. */
     @Nonnull
@@ -162,6 +181,13 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
+        if (targetIDToken) {
+            Object msg = profileRequestContext.getInboundMessageContext().getMessage();
+            if (msg instanceof AuthenticationRequest) {
+                addToIDTokenByDefault =
+                        !((AuthenticationRequest) msg).getResponseType().contains(ResponseType.Value.TOKEN);
+            }
+        }
         return true;
     }
 
@@ -183,6 +209,18 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
                         if (encoder.getActivationCondition() != null
                                 && !encoder.getActivationCondition().apply(profileRequestContext)) {
                             log.debug("{} Encoder not active", getLogPrefix());
+                            continue;
+                        }
+                        if (targetIDToken) {
+                            if (!addToIDTokenByDefault
+                                    && !((AbstractOIDCAttributeEncoder) encoder).getPlaceToIDToken()) {
+                                log.debug("{} Attribute {} not targeted for ID Token", getLogPrefix(),
+                                        attribute.getId());
+                                continue;
+                            }
+                        } else if (((AbstractOIDCAttributeEncoder) encoder).getDenyUserinfo()) {
+                            log.debug("{} Attribute {} not targeted for Userinfo response", getLogPrefix(),
+                                    attribute.getId());
                             continue;
                         }
                         JSONObject obj = (JSONObject) encoder.encode(attribute);

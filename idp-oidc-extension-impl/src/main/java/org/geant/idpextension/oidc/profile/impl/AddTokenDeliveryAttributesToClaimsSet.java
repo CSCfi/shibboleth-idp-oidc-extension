@@ -77,9 +77,22 @@ public class AddTokenDeliveryAttributesToClaimsSet extends AbstractOIDCResponseA
     @Nullable
     private ClaimsSet claimsSet;
 
+    /** Whether we are adding claims to ID Token. */
+    @Nonnull
+    private boolean targetIDToken;
+
     /** delivery claims to copy to claims set. */
     @Nullable
     private OIDCAuthenticationResponseTokenClaimsContext tokenClaimsCtx;
+
+    /**
+     * Set whether target is id token claims set.
+     * 
+     * @param flag whether target is id token claims set
+     */
+    public void setTargetIDToken(boolean flag) {
+        targetIDToken = flag;
+    }
 
     /** Constructor. */
     AddTokenDeliveryAttributesToClaimsSet() {
@@ -142,10 +155,10 @@ public class AddTokenDeliveryAttributesToClaimsSet extends AbstractOIDCResponseA
         if (tokenClaimsCtx.getClaims() != null) {
             claimsSet.putAll(tokenClaimsCtx.getClaims());
         }
-        if (tokenClaimsCtx.getIdtokenClaims() != null) {
+        if (tokenClaimsCtx.getIdtokenClaims() != null && targetIDToken) {
             claimsSet.putAll(tokenClaimsCtx.getIdtokenClaims());
         }
-        if (tokenClaimsCtx.getUserinfoClaims() != null) {
+        if (tokenClaimsCtx.getUserinfoClaims() != null && !targetIDToken) {
             claimsSet.putAll(tokenClaimsCtx.getUserinfoClaims());
         }
         log.debug("{} claims set after adding token delivery claims {}", getLogPrefix(),
