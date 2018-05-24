@@ -178,7 +178,8 @@
     </bean>
 
     <bean id="AddAttributeClaimsToIDToken"
-        class="org.geant.idpextension.oidc.profile.impl.AddAttributesToClaimsSet" scope="prototype">
+        class="org.geant.idpextension.oidc.profile.impl.AddAttributesToClaimsSet" scope="prototype"
+        p:targetIDToken="true">
         <property name="activationCondition">
             <ref bean="IDTokenRequested" />
         </property>
