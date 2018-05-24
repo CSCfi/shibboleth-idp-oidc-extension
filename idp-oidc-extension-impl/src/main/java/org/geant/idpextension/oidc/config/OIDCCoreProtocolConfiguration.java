@@ -138,10 +138,10 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
         defaultAuthenticationContexts = Collections.emptyList();
         nameIDFormatPrecedence = Collections.emptyList();
         pairwiseSubject = Predicates.alwaysFalse();
-        idTokenLifetime = 5 * 60 * 1000;
+        idTokenLifetime = 60 * 60 * 1000;
         authorizeCodeLifetime = 5 * 60 * 1000;
-        accessTokenLifetime = 5 * 60 * 1000;
-        refreshTokenLifetime = 5 * 60 * 1000;
+        accessTokenLifetime = 10 * 60 * 1000;
+        refreshTokenLifetime = 120 * 60 * 1000;
     }
     
     /**
