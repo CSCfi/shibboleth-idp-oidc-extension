@@ -107,9 +107,10 @@
     </bean>
 
     <bean id="SetConsentToResponseContext"
-        class="org.geant.idpextension.oidc.profile.impl.SetConsentFromTokenToResponseContext" scope="prototype">
-    </bean>
+        class="org.geant.idpextension.oidc.profile.impl.SetConsentFromTokenToResponseContext" scope="prototype" />
 
+    <bean id="ReduceValidatedScope" class="org.geant.idpextension.oidc.profile.impl.ReduceValidatedScope"
+        scope="prototype" />
 
     <bean id="shibboleth.TokenRequestAuthTimeLookupFunction"
         class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestAuthTimeLookupFunction"

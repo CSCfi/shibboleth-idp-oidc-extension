@@ -273,9 +273,19 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         Date dateExp = new Date(System.currentTimeMillis() + accessTokenLifetime);
+        ClaimsSet claims = null;
+        ClaimsSet claimsUI = null;
+        OIDCAuthenticationResponseTokenClaimsContext tokenClaimsCtx =
+                tokenClaimsContextLookupStrategy.apply(profileRequestContext);
+        if (tokenClaimsCtx != null) {
+            claims = tokenClaimsCtx.getClaims();
+            claimsUI = tokenClaimsCtx.getUserinfoClaims();
+        }
         AccessTokenClaimsSet claimsSet;
         if (tokenClaimsSet != null) {
-            claimsSet = new AccessTokenClaimsSet(tokenClaimsSet, new Date(), dateExp);
+            // We may not use original claims as input for scope / delivery claims as they may have been reduced.
+            claimsSet = new AccessTokenClaimsSet(tokenClaimsSet, getOidcResponseContext().getScope(), claims, claimsUI,
+                    new Date(), dateExp);
         } else {
             JSONArray consentable = null;
             JSONArray consented = null;
@@ -285,15 +295,7 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
                 consentable = consentCtx.getConsentableAttributes();
                 consented = consentCtx.getConsentedAttributes();
             }
-            ClaimsSet claims = null;
-            ClaimsSet claimsUI = null;
-            OIDCAuthenticationResponseTokenClaimsContext tokenClaimsCtx =
-                    tokenClaimsContextLookupStrategy.apply(profileRequestContext);
-            if (tokenClaimsCtx != null) {
-                claims = tokenClaimsCtx.getClaims();
-                claimsUI = tokenClaimsCtx.getUserinfoClaims();
-            }
-            // "token id_token" response type. Access token is not derived from Authorization code.
+            // "token id_token" response type. Access token is not derived from Authorization code / Refresh token..
             claimsSet = new AccessTokenClaimsSet(idGenerator, authenticationRequest.getClientID(),
                     issuerLookupStrategy.apply(profileRequestContext), subjectCtx.getPrincipalName(),
                     getOidcResponseContext().getSubject(), getOidcResponseContext().getAcr(), new Date(), dateExp,

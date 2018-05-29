@@ -65,17 +65,18 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
      * Constructor for access token claims set when derived from authz code.
      * 
      * @param tokenClaimSet Authorize Code / Refresh Token this token is based on. Must not be NULL.
+     * @param scope Validated and possibly reduced scope of the authentication request. Must not be NULL.
      * @param iat Issue time of the token. Must not be NULL.
      * @param exp Expiration time of the token. Must not be NULL.
      * @throws RuntimeException if called with non allowed null parameters
      */
-    public AccessTokenClaimsSet(@Nonnull TokenClaimsSet tokenClaimSet, @Nonnull Date iat, @Nonnull Date exp) {
+    public AccessTokenClaimsSet(@Nonnull TokenClaimsSet tokenClaimSet, @Nonnull Scope scope,
+            @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsUI, @Nonnull Date iat, @Nonnull Date exp) {
         super(VALUE_TYPE_AT, tokenClaimSet.getID(), tokenClaimSet.getClientID(),
                 tokenClaimSet.getClaimsSet().getIssuer(), tokenClaimSet.getPrincipal(),
                 tokenClaimSet.getClaimsSet().getSubject(), new ACR(tokenClaimSet.getACR()), iat, exp,
-                tokenClaimSet.getNonce(), tokenClaimSet.getAuthenticationTime(), tokenClaimSet.getRedirectURI(),
-                tokenClaimSet.getScope(), tokenClaimSet.getClaimsRequest(), tokenClaimSet.getDeliveryClaims(), null,
-                tokenClaimSet.getUserinfoDeliveryClaims(), tokenClaimSet.getConsentableClaims(),
+                tokenClaimSet.getNonce(), tokenClaimSet.getAuthenticationTime(), tokenClaimSet.getRedirectURI(), scope,
+                tokenClaimSet.getClaimsRequest(), dlClaims, null, dlClaimsUI, tokenClaimSet.getConsentableClaims(),
                 tokenClaimSet.getConsentedClaims());
     }
 
