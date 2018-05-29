@@ -143,10 +143,10 @@ public class SetRefreshTokenToResponseContext extends AbstractOIDCResponseAction
         claimsSet = new RefreshTokenClaimsSet(tokenClaimsSet, new Date(), dateExp);
         try {
             getOidcResponseContext().setRefreshToken(claimsSet.serialize(dataSealer));
-            log.debug("{} Setting access token {} as {} to response context ", getLogPrefix(), claimsSet.serialize(),
-                    getOidcResponseContext().getAccessToken());
+            log.debug("{} Setting refresh token {} as {} to response context ", getLogPrefix(), claimsSet.serialize(),
+                    getOidcResponseContext().getRefreshToken());
         } catch (DataSealerException e) {
-            log.error("{} Access Token generation failed {}", getLogPrefix(), e.getMessage());
+            log.error("{} Refresh Token generation failed {}", getLogPrefix(), e.getMessage());
             ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_ENCRYPT);
         }
 
