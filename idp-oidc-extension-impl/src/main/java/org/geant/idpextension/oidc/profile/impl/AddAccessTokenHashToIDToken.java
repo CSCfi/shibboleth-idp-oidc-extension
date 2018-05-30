@@ -53,6 +53,11 @@ public class AddAccessTokenHashToIDToken extends AbstractOIDCSigningResponseActi
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
+        if (getOidcResponseContext().getIDToken() == null) {
+            log.error("{} No id token", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return;
+        }
         if (getOidcResponseContext().getAccessToken() == null) {
             log.error("{} No access token to calculate hash on", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
