@@ -25,6 +25,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.geant.idpextension.oidc.profile.impl;
 
 import net.shibboleth.idp.authn.context.SubjectContext;
@@ -32,7 +33,6 @@ import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
@@ -63,23 +63,22 @@ public class AddIDTokenShellTest extends BaseOIDCResponseActionTest {
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_PROFILE_CTX);
     }
-    
+
     /**
      * Test that id token shell is generated.
      * 
      * @throws ComponentInitializationException
      */
-    //@Test
+    @Test
     public void testSuccess() throws ComponentInitializationException {
         init();
-        @SuppressWarnings("rawtypes")
-        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        SubjectContext subCtx= prc.getSubcontext(SubjectContext.class, true);
+        @SuppressWarnings("rawtypes") final ProfileRequestContext prc =
+                new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+        SubjectContext subCtx = prc.getSubcontext(SubjectContext.class, true);
         subCtx.setPrincipalName("name");
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        //check client id to be sure
         Assert.assertTrue(respCtx.getIDToken().getAudience().contains(new Audience(request.getClientID())));
-        
+
     }
 }
