@@ -32,27 +32,18 @@ import java.net.URISyntaxException;
 import java.util.Date;
 
 import net.shibboleth.idp.profile.ActionTestingSupport;
-import net.shibboleth.idp.profile.RequestContextBuilder;
-import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-
-import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
-import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.EventIds;
-import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link FormOutboundAuthenticationResponseMessage} unit test. */
 public class FormOutboundAuthenticationResponseMessageTest extends BaseOIDCResponseActionTest {
 
     private FormOutboundAuthenticationResponseMessage action;

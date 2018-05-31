@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link AddAccessTokenHashToIDToken} unit test. */
 public class AddAccessTokenHashToIDTokenTest extends BaseOIDCResponseActionTest {
 
     private AddAccessTokenHashToIDToken action;

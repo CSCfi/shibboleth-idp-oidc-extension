@@ -44,7 +44,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link AbstractOIDCAuthenticationResponseAction} unit test. */
 public class AbstractOIDCAuthenticationResponseActionTest {
 
     private MockOIDCResponseAction action;

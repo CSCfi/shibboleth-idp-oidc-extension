@@ -50,7 +50,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.oauth2.sdk.ParseException;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link SignIDToken} unit test. */
 public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     private SignIDToken action = new SignIDToken();

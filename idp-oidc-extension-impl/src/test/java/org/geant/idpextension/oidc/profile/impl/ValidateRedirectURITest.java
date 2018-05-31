@@ -44,7 +44,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link ValidateRedirectURI} unit test. */
 public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
 
     private ValidateRedirectURI action;

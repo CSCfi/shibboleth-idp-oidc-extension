@@ -41,7 +41,7 @@ import org.testng.annotations.Test;
 
 import com.nimbusds.oauth2.sdk.id.Audience;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link AddIDTokenShell} unit test. */
 public class AddIDTokenShellTest extends BaseOIDCResponseActionTest {
 
     private AddIDTokenShell action;

@@ -39,7 +39,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link InitializeRelyingPartyContext} unit test. */
 public class InitializeRelyingPartyContextTest {
 
   

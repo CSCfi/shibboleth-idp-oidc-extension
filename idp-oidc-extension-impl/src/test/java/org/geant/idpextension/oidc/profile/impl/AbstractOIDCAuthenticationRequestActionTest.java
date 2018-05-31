@@ -39,7 +39,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link AbstractOIDCAuthenticationRequestAction} unit test. */
 public class AbstractOIDCAuthenticationRequestActionTest {
 
     /**

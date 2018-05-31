@@ -72,7 +72,7 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** base class for tests expecting to have request and credentials in place. */
 abstract class BaseOIDCResponseActionTest {
 
     protected RequestContext requestCtx;

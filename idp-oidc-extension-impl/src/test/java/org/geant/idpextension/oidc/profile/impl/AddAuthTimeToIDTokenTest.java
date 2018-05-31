@@ -37,7 +37,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.ParseException;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link AddAuthTimeToIDToken} unit test. */
 public class AddAuthTimeToIDTokenTest extends BaseOIDCResponseActionTest {
 
     private AddAuthTimeToIDToken action;

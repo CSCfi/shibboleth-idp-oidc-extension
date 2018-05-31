@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link AddAcrToIDToken} unit test. */
 public class AddAcrToIDTokenTest extends BaseOIDCResponseActionTest {
 
     private AddAcrToIDToken action;

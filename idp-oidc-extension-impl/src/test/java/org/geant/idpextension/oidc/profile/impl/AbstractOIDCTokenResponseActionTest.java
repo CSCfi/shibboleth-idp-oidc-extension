@@ -52,7 +52,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link AbstractOIDCTokenResponseAction} unit test. */
 public class AbstractOIDCTokenResponseActionTest {
 
     private MockOIDCTokenResponseAction action;

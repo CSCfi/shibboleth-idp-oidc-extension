@@ -39,7 +39,7 @@ import org.testng.annotations.Test;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link AddNonceToIDToken} unit test. */
 public class AddNonceToIDTokenTest extends BaseOIDCResponseActionTest {
 
     private AddNonceToIDToken action;

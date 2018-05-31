@@ -52,7 +52,7 @@ import org.testng.annotations.Test;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 
-/** {@link InitializeAuthenticationContext} unit test. */
+/** {@link AddAttributesToClaimsSet} unit test. */
 public class AddAttributesToClaimsSetTest extends BaseOIDCResponseActionTest {
 
     private AddAttributesToClaimsSet action;
