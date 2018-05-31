@@ -80,6 +80,9 @@ abstract class BaseOIDCResponseActionTest {
     protected OIDCAuthenticationResponseContext respCtx;
 
     protected AuthenticationRequest request;
+    
+    final protected String subject="generatedSubject";
+    final protected String clientId="s6BhdRkqt3";
 
     @SuppressWarnings("rawtypes")
     protected ProfileRequestContext profileRequestCtx;
@@ -107,8 +110,8 @@ abstract class BaseOIDCResponseActionTest {
         profileRequestCtx.getOutboundMessageContext().addSubcontext(respCtx);
         profileRequestCtx.getInboundMessageContext().addSubcontext(new OIDCMetadataContext());
         RelyingPartyContext rpCtx = profileRequestCtx.getSubcontext(RelyingPartyContext.class, true);
-        rpCtx.setRelyingPartyId("s6BhdRkqt3");
-        respCtx.setSubject("generatedSubject");
+        rpCtx.setRelyingPartyId(clientId);
+        respCtx.setSubject(subject);
         rpCtx.setProfileConfig(new OIDCCoreProtocolConfiguration());
 
     }
