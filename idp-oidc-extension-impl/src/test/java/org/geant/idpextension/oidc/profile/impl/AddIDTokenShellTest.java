@@ -28,13 +28,9 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
-import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import org.opensaml.profile.action.EventIds;
-import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -53,18 +49,6 @@ public class AddIDTokenShellTest extends BaseOIDCResponseActionTest {
     }
 
     /**
-     * Test that action copes with no subject context.
-     * 
-     * @throws ComponentInitializationException
-     */
-    @Test
-    public void testNoSubjectCtx() throws ComponentInitializationException {
-        init();
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertEvent(event, EventIds.INVALID_PROFILE_CTX);
-    }
-
-    /**
      * Test that id token shell is generated.
      * 
      * @throws ComponentInitializationException
@@ -72,13 +56,10 @@ public class AddIDTokenShellTest extends BaseOIDCResponseActionTest {
     @Test
     public void testSuccess() throws ComponentInitializationException {
         init();
-        @SuppressWarnings("rawtypes") final ProfileRequestContext prc =
-                new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        SubjectContext subCtx = prc.getSubcontext(SubjectContext.class, true);
-        subCtx.setPrincipalName("name");
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertTrue(respCtx.getIDToken().getAudience().contains(new Audience(request.getClientID())));
+        Assert.assertEquals(respCtx.getIDToken().getSubject().getValue(), subject);
 
     }
 }
