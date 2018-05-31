@@ -25,6 +25,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.geant.idpextension.oidc.profile.impl;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -41,8 +42,10 @@ import java.util.List;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
+import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 
+import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.opensaml.messaging.context.MessageContext;
@@ -73,21 +76,29 @@ import net.shibboleth.idp.profile.RequestContextBuilder;
 abstract class BaseOIDCResponseActionTest {
 
     protected RequestContext requestCtx;
+
     protected OIDCAuthenticationResponseContext respCtx;
+
     protected AuthenticationRequest request;
+
     @SuppressWarnings("rawtypes")
     protected ProfileRequestContext profileRequestCtx;
+
     Credential credentialRSA = new BaseOIDCResponseActionTest.mockCredential("RSA");
+
     Credential credentialEC256 = new BaseOIDCResponseActionTest.mockCredential("EC256");
+
     Credential credentialEC384 = new BaseOIDCResponseActionTest.mockCredential("EC384");
+
     Credential credentialEC512 = new BaseOIDCResponseActionTest.mockCredential("EC512");
+
     Credential credentialHMAC = new BaseOIDCResponseActionTest.mockCredential("HMAC");
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     @BeforeMethod
     protected void setUp() throws Exception {
-        request = AuthenticationRequest
-                .parse("response_type=id_token+token&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
+        request = AuthenticationRequest.parse(
+                "response_type=id_token+token&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
         requestCtx = new RequestContextBuilder().setInboundMessage(request).buildRequestContext();
         final MessageContext<AuthenticationResponse> msgCtx = new MessageContext<AuthenticationResponse>();
         profileRequestCtx = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
@@ -95,6 +106,10 @@ abstract class BaseOIDCResponseActionTest {
         respCtx = new OIDCAuthenticationResponseContext();
         profileRequestCtx.getOutboundMessageContext().addSubcontext(respCtx);
         profileRequestCtx.getInboundMessageContext().addSubcontext(new OIDCMetadataContext());
+        RelyingPartyContext rpCtx = profileRequestCtx.getSubcontext(RelyingPartyContext.class, true);
+        rpCtx.setRelyingPartyId("s6BhdRkqt3");
+        respCtx.setSubject("generatedSubject");
+        rpCtx.setProfileConfig(new OIDCCoreProtocolConfiguration());
 
     }
 
@@ -107,8 +122,8 @@ abstract class BaseOIDCResponseActionTest {
 
     protected void signIdTokenInResponseContext() throws ParseException, JOSEException {
         SignedJWT jwt = null;
-        jwt = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("id").build(), respCtx.getIDToken()
-                .toJWTClaimsSet());
+        jwt = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("id").build(),
+                respCtx.getIDToken().toJWTClaimsSet());
         jwt.sign(new RSASSASigner(credentialRSA.getPrivateKey()));
         respCtx.setSignedIDToken(jwt);
 
@@ -117,7 +132,9 @@ abstract class BaseOIDCResponseActionTest {
     public class mockCredential implements Credential {
 
         PrivateKey priv;
+
         PublicKey pub;
+
         SecretKey sec;
 
         mockCredential(String algo) {
