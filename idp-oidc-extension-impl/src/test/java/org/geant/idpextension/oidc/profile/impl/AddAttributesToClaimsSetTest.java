@@ -25,6 +25,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.geant.idpextension.oidc.profile.impl;
 
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileR
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
 import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCStringAttributeEncoder;
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseConsentContext;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
@@ -57,16 +59,18 @@ public class AddAttributesToClaimsSetTest extends BaseOIDCResponseActionTest {
 
     private void init() throws ComponentInitializationException {
         action = new AddAttributesToClaimsSet();
+        action.setTargetIDToken(true);
         action.initialize();
     }
 
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({"rawtypes"})
     private void setAttributeContext() {
-        // build 2 attributes
 
+        // Attribute to be encoded to id token regardless
         Collection<AttributeEncoder<?>> newEncoders = new ArrayList<AttributeEncoder<?>>();
         OIDCStringAttributeEncoder encoder = new OIDCStringAttributeEncoder();
         encoder.setName("test1");
+        encoder.setPlaceToIDToken(true);
         newEncoders.add(encoder);
         IdPAttribute attribute1 = new IdPAttribute("test1");
         List<StringAttributeValue> stringAttributeValues1 = new ArrayList<StringAttributeValue>();
@@ -75,6 +79,7 @@ public class AddAttributesToClaimsSetTest extends BaseOIDCResponseActionTest {
         attribute1.setValues(stringAttributeValues1);
         attribute1.setEncoders(newEncoders);
 
+        // Attribute to be encoded to id token only in implicit "id_token" case
         Collection<AttributeEncoder<?>> newEncoders2 = new ArrayList<AttributeEncoder<?>>();
         OIDCStringAttributeEncoder encoder2 = new OIDCStringAttributeEncoder();
         encoder2.setName("test2");
@@ -84,26 +89,52 @@ public class AddAttributesToClaimsSetTest extends BaseOIDCResponseActionTest {
         stringAttributeValues2.add(new StringAttributeValue("value"));
         attribute2.setValues(stringAttributeValues2);
         attribute2.setEncoders(newEncoders2);
-        
+
+        // Attribute having no encoder
         IdPAttribute attribute3 = new IdPAttribute("test3");
         List<StringAttributeValue> stringAttributeValues3 = new ArrayList<StringAttributeValue>();
         stringAttributeValues3.add(new StringAttributeValue("value3"));
         attribute3.setValues(stringAttributeValues3);
-        
+
+        // Attribute to be encoded to id token regardless
+        Collection<AttributeEncoder<?>> newEncoders4 = new ArrayList<AttributeEncoder<?>>();
+        OIDCStringAttributeEncoder encoder4 = new OIDCStringAttributeEncoder();
+        encoder4.setName("test4");
+        encoder4.setPlaceToIDToken(true);
+        newEncoders4.add(encoder4);
+        IdPAttribute attribute4 = new IdPAttribute("test4");
+        List<StringAttributeValue> stringAttributeValues4 = new ArrayList<StringAttributeValue>();
+        stringAttributeValues4.add(new StringAttributeValue("value4"));
+        attribute4.setValues(stringAttributeValues4);
+        attribute4.setEncoders(newEncoders4);
+
+        // Attribute to be encoded to id token regardless
+        Collection<AttributeEncoder<?>> newEncoders5 = new ArrayList<AttributeEncoder<?>>();
+        OIDCStringAttributeEncoder encoder5 = new OIDCStringAttributeEncoder();
+        encoder5.setName("test5");
+        encoder5.setPlaceToIDToken(true);
+        newEncoders5.add(encoder5);
+        IdPAttribute attribute5 = new IdPAttribute("test5");
+        List<StringAttributeValue> stringAttributeValues5 = new ArrayList<StringAttributeValue>();
+        stringAttributeValues5.add(new StringAttributeValue("value5"));
+        attribute5.setValues(stringAttributeValues5);
+        attribute5.setEncoders(newEncoders5);
+
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
         AttributeContext attributeCtx = new AttributeContext();
         Collection<IdPAttribute> attributes = new ArrayList<IdPAttribute>();
         attributes.add(attribute1);
         attributes.add(attribute2);
         attributes.add(attribute3);
+        attributes.add(attribute4);
+        attributes.add(attribute5);
         attributeCtx.setIdPAttributes(attributes);
         prc.getSubcontext(RelyingPartyContext.class).addSubcontext(attributeCtx);
 
     }
 
     /**
-     * Test that action copes with no attribute context. Action should just move
-     * forward without action taken.
+     * Test that action copes with no attribute context. Action should just move forward without action taken.
      * 
      * @throws ComponentInitializationException
      */
@@ -121,7 +152,7 @@ public class AddAttributesToClaimsSetTest extends BaseOIDCResponseActionTest {
      * @throws ComponentInitializationException
      * @throws ParseException
      */
-    //@Test
+    @Test
     public void testNoIdToken() throws ComponentInitializationException, ParseException {
         init();
         setAttributeContext();
@@ -130,22 +161,48 @@ public class AddAttributesToClaimsSetTest extends BaseOIDCResponseActionTest {
     }
 
     /**
-     * Test that action copes with no id token in response context.
+     * Success case without consent information.
      * 
      * @throws ComponentInitializationException
      * @throws ParseException
      */
-    //@Test
-    public void testSuccess() throws ComponentInitializationException, ParseException {
+    @Test
+    public void testSuccessNoConsent() throws ComponentInitializationException, ParseException {
         init();
         setIdTokenToResponseContext("iss", "sub", "aud", new Date(), new Date());
         setAttributeContext();
-        action.setTargetIDToken(true);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertTrue(respCtx.getIDToken().getClaim("test1").equals("value1 value2"));
-        Assert.assertTrue(respCtx.getIDToken().getClaim("test2").equals("value"));
+        Assert.assertNull(respCtx.getIDToken().getClaim("test2"));
         Assert.assertNull(respCtx.getIDToken().getClaim("test3"));
+        Assert.assertTrue(respCtx.getIDToken().getClaim("test4").equals("value4"));
+        Assert.assertTrue(respCtx.getIDToken().getClaim("test5").equals("value5"));
+    }
+
+    /**
+     * Success case with consent information.
+     * 
+     * @throws ComponentInitializationException
+     * @throws ParseException
+     */
+    @Test
+    public void testSuccessConsent() throws ComponentInitializationException, ParseException {
+        init();
+        setIdTokenToResponseContext("iss", "sub", "aud", new Date(), new Date());
+        setAttributeContext();
+        OIDCAuthenticationResponseConsentContext ctx = (OIDCAuthenticationResponseConsentContext) respCtx
+                .addSubcontext(new OIDCAuthenticationResponseConsentContext());
+        ctx.getConsentableAttributes().add("test1");
+        ctx.getConsentableAttributes().add("test4");
+        ctx.getConsentedAttributes().add("test1");
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertTrue(respCtx.getIDToken().getClaim("test1").equals("value1 value2"));
+        Assert.assertNull(respCtx.getIDToken().getClaim("test2"));
+        Assert.assertNull(respCtx.getIDToken().getClaim("test3"));
+        Assert.assertNull(respCtx.getIDToken().getClaim("test4"));
+        Assert.assertTrue(respCtx.getIDToken().getClaim("test5").equals("value5"));
     }
 
 }
