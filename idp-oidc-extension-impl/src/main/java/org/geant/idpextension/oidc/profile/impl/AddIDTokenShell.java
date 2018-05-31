@@ -33,22 +33,17 @@ import java.util.Date;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
@@ -73,10 +68,7 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
     /** EntityID to populate into Issuer element. */
     @Nonnull
     private String issuerId;
-
-    /** Subject context. */
-    private SubjectContext subjectCtx;
-
+   
     /**
      * Strategy used to locate the {@link RelyingPartyContext} associated with a given {@link ProfileRequestContext}.
      */
@@ -128,12 +120,6 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
             return false;
         }
         issuerId = issuerLookupStrategy.apply(profileRequestContext);
-        subjectCtx = profileRequestContext.getSubcontext(SubjectContext.class, false);
-        if (subjectCtx == null) {
-            log.error("{} No subject context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-            return false;
-        }
         return super.doPreExecute(profileRequestContext);
     }
 
