@@ -53,6 +53,11 @@ public class AddAuthorizationCodeHashToIDToken extends AbstractOIDCSigningRespon
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
+        if (getOidcResponseContext().getIDToken() == null) {
+            log.error("{} No id token", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
+            return;
+        }
         if (getOidcResponseContext().getAuthorizationCode() == null) {
             log.error("{} No authz code to calculate hash on", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
