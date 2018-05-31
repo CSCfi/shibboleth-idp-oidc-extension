@@ -87,7 +87,7 @@ abstract class BaseOIDCResponseActionTest {
     @BeforeMethod
     protected void setUp() throws Exception {
         request = AuthenticationRequest
-                .parse("response_type=id_token&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
+                .parse("response_type=id_token+token&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
         requestCtx = new RequestContextBuilder().setInboundMessage(request).buildRequestContext();
         final MessageContext<AuthenticationResponse> msgCtx = new MessageContext<AuthenticationResponse>();
         profileRequestCtx = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
