@@ -151,6 +151,7 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
         } else {
             log.debug("{} No oidc profile configuration associated with this profile request", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
+            return;
         }
         IDTokenClaimsSet idToken = new IDTokenClaimsSet(new Issuer(issuerId),
                 new Subject(getOidcResponseContext().getSubject()), aud, exp, new Date());
