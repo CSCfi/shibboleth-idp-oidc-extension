@@ -28,6 +28,7 @@
 
 package org.geant.idpextension.oidc.messaging.context;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.geant.idpextension.oidc.token.support.TokenDeliveryClaimsClaimsSet;
@@ -43,15 +44,15 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 public class OIDCAuthenticationResponseTokenClaimsContext extends BaseContext {
 
     /** Claims for id token and userinfo endpoint. */
-    @Nullable
+    @Nonnull
     private ClaimsSet claims;
 
     /** Claims for id token only. */
-    @Nullable
+    @Nonnull
     private ClaimsSet idtokenClaims;
 
     /** Claims for userinfo only. */
-    @Nullable
+    @Nonnull
     private ClaimsSet userinfoClaims;
 
     /**
@@ -68,6 +69,7 @@ public class OIDCAuthenticationResponseTokenClaimsContext extends BaseContext {
      * 
      * @return claims for id token and userinfo endpoint.
      */
+    @Nonnull
     public ClaimsSet getClaims() {
         return claims;
     }
@@ -77,6 +79,7 @@ public class OIDCAuthenticationResponseTokenClaimsContext extends BaseContext {
      * 
      * @return claims for id token only
      */
+    @Nonnull
     public ClaimsSet getIdtokenClaims() {
         return idtokenClaims;
     }
@@ -86,6 +89,7 @@ public class OIDCAuthenticationResponseTokenClaimsContext extends BaseContext {
      * 
      * @return claims for userinfo only
      */
+    @Nonnull
     public ClaimsSet getUserinfoClaims() {
         return userinfoClaims;
     }
