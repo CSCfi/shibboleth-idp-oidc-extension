@@ -99,15 +99,6 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
     @Nonnull
     private boolean addToIDTokenByDefault;
 
-    /**
-     * Set whether target is id token claims set. If this flag is set addToIDTokenByDefault flag is active.
-     * 
-     * @param flag whether target is id token claims set
-     */
-    public void setTargetIDToken(boolean flag) {
-        targetIDToken = flag;
-    }
-
     /** Strategy used to locate the {@link OIDCAuthenticationResponseConsentContext}. */
     @Nonnull
     private Function<ProfileRequestContext, OIDCAuthenticationResponseConsentContext> consentContextLookupStrategy;
@@ -120,6 +111,16 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
         consentContextLookupStrategy =
                 Functions.compose(new ChildContextLookup<>(OIDCAuthenticationResponseConsentContext.class),
                         new OIDCAuthenticationResponseContextLookupFunction());
+    }
+    
+    /**
+     * Set whether target is id token claims set. If this flag is set addToIDTokenByDefault flag is active.
+     * 
+     * @param flag whether target is id token claims set
+     */
+    public void setTargetIDToken(boolean flag) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        targetIDToken = flag;
     }
 
     /**
