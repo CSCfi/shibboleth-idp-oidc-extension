@@ -152,13 +152,10 @@ public class AddTokenDeliveryAttributesToClaimsSet extends AbstractOIDCResponseA
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        if (tokenClaimsCtx.getClaims() != null) {
-            claimsSet.putAll(tokenClaimsCtx.getClaims());
-        }
-        if (tokenClaimsCtx.getIdtokenClaims() != null && targetIDToken) {
+        claimsSet.putAll(tokenClaimsCtx.getClaims());
+        if (targetIDToken) {
             claimsSet.putAll(tokenClaimsCtx.getIdtokenClaims());
-        }
-        if (tokenClaimsCtx.getUserinfoClaims() != null && !targetIDToken) {
+        } else {
             claimsSet.putAll(tokenClaimsCtx.getUserinfoClaims());
         }
         log.debug("{} claims set after adding token delivery claims {}", getLogPrefix(),
