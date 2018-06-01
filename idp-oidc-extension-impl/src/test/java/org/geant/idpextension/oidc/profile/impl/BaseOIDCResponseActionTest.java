@@ -63,16 +63,18 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
-/** base class for tests expecting to have request and credentials in place. */
+/** base class for tests expecting to have inbound and outbound msg ctxs etc in place. */
 abstract class BaseOIDCResponseActionTest {
 
     protected RequestContext requestCtx;
@@ -80,9 +82,10 @@ abstract class BaseOIDCResponseActionTest {
     protected OIDCAuthenticationResponseContext respCtx;
 
     protected AuthenticationRequest request;
-    
-    final protected String subject="generatedSubject";
-    final protected String clientId="s6BhdRkqt3";
+
+    final protected String subject = "generatedSubject";
+
+    final protected String clientId = "s6BhdRkqt3";
 
     @SuppressWarnings("rawtypes")
     protected ProfileRequestContext profileRequestCtx;
@@ -97,6 +100,11 @@ abstract class BaseOIDCResponseActionTest {
 
     Credential credentialHMAC = new BaseOIDCResponseActionTest.mockCredential("HMAC");
 
+    /**
+     * Default setup. 
+     * 
+     * @throws Exception
+     */
     @SuppressWarnings({"unchecked"})
     @BeforeMethod
     protected void setUp() throws Exception {
@@ -113,7 +121,21 @@ abstract class BaseOIDCResponseActionTest {
         rpCtx.setRelyingPartyId(clientId);
         respCtx.setSubject(subject);
         rpCtx.setProfileConfig(new OIDCCoreProtocolConfiguration());
+    }
 
+    @SuppressWarnings("unchecked")
+    protected void setAuthenticationRequest(AuthenticationRequest req) {
+        profileRequestCtx.getInboundMessageContext().setMessage(req);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void setTokenRequest(TokenRequest req) {
+        profileRequestCtx.getInboundMessageContext().setMessage(req);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void setUserInfoRequest(UserInfoRequest req) {
+        profileRequestCtx.getInboundMessageContext().setMessage(req);
     }
 
     protected void setIdTokenToResponseContext(String iss, String sub, String aud, Date exp, Date iat) {
