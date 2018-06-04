@@ -7,6 +7,9 @@
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
     default-init-method="initialize" default-destroy-method="destroy">
 
+    <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
+    <import resource="../../../system/conf/audit-system.xml" />
+
     <bean id="InitializeProfileRequestContext"
         class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" scope="prototype"
         p:profileId="http://csc.fi/ns/profiles/oidc/sso/browser" p:loggingId="%{idp.service.logging.saml2sso:SSO}"
@@ -289,6 +292,22 @@
 
     <bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
         scope="prototype" />
+
+    <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
+        p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>
+    </bean>
+
+    <bean id="WriteAuditLog" class="net.shibboleth.idp.profile.audit.impl.WriteAuditLog" scope="prototype"
+        p:httpServletRequest-ref="shibboleth.HttpServletRequest" p:formattingMap-ref="shibboleth.AuditFormattingMap" />
+
+    <bean id="ErrorViewPopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext"
+        p:fieldExtractors="#{getObject('shibboleth.ErrorViewAuditExtractors') ?: getObject('shibboleth.DefaultErrorViewAuditExtractors')}" />
+
+    <bean id="MapEventToView" class="net.shibboleth.idp.profile.context.navigate.SpringEventToViewLookupFunction"
+        p:defaultView-ref="shibboleth.DefaultErrorView" p:eventMap="#{getObject('shibboleth.EventViewMap')}" />
 
     <bean id="IDTokenRequested" parent="shibboleth.Conditions.Expression">
         <constructor-arg>
