@@ -34,6 +34,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -44,6 +45,10 @@ import javax.crypto.SecretKey;
 
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.security.BasicKeystoreKeyStrategy;
+import net.shibboleth.utilities.java.support.security.DataSealer;
+import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
 
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
@@ -53,6 +58,7 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.CredentialContextSet;
 import org.opensaml.security.credential.UsageType;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.webflow.execution.RequestContext;
 import org.testng.annotations.BeforeMethod;
 
@@ -72,6 +78,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
+import net.shibboleth.ext.spring.resource.ResourceHelper;
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
 /** base class for tests expecting to have inbound and outbound msg ctxs etc in place. */
@@ -152,6 +159,21 @@ abstract class BaseOIDCResponseActionTest {
         jwt.sign(new RSASSASigner(credentialRSA.getPrivateKey()));
         respCtx.setSignedIDToken(jwt);
 
+    }
+    
+    protected DataSealer getDataSealer() throws ComponentInitializationException, NoSuchAlgorithmException {
+        final BasicKeystoreKeyStrategy strategy = new BasicKeystoreKeyStrategy();
+        strategy.setKeystoreResource(ResourceHelper.of(new ClassPathResource("credentials/sealer.jks")));
+        strategy.setKeyVersionResource(ResourceHelper.of(new ClassPathResource("credentials/sealer.kver")));
+        strategy.setKeystorePassword("password");
+        strategy.setKeyAlias("secret");
+        strategy.setKeyPassword("password");
+        strategy.initialize();
+        final DataSealer sealer = new DataSealer();
+        sealer.setKeyStrategy(strategy);
+        sealer.setRandom(SecureRandom.getInstance("SHA1PRNG"));
+        sealer.initialize();
+        return sealer;
     }
 
     public class mockCredential implements Credential {
@@ -236,6 +258,20 @@ abstract class BaseOIDCResponseActionTest {
         @Override
         public UsageType getUsageType() {
             return null;
+        }
+
+    }
+    
+    public class idStrat implements IdentifierGenerationStrategy {
+
+        @Override
+        public String generateIdentifier() {
+            return "identifier";
+        }
+
+        @Override
+        public String generateIdentifier(boolean xmlSafe) {
+            return "identifier";
         }
 
     }
