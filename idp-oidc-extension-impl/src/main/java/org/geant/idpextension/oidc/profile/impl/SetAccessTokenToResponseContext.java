@@ -218,7 +218,7 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
         }
         RelyingPartyContext rpCtx = relyingPartyContextLookupStrategy.apply(profileRequestContext);
         if (rpCtx == null) {
-            log.debug("{} No relying party context associated with this profile request", getLogPrefix());
+            log.error("{} No relying party context associated with this profile request", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
             return false;
         }
@@ -226,7 +226,7 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
         if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
             accessTokenLifetime = ((OIDCCoreProtocolConfiguration) pc).getAccessTokenLifetime();
         } else {
-            log.debug("{} No oidc profile configuration associated with this profile request", getLogPrefix());
+            log.error("{} No oidc profile configuration associated with this profile request", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
             return false;
         }
@@ -251,14 +251,14 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
             }
             idGenerator = idGeneratorLookupStrategy.apply(profileRequestContext);
             if (idGenerator == null) {
-                log.debug("{} No identifier generation strategy", getLogPrefix());
+                log.error("{} No identifier generation strategy", getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
                 return false;
             }
             if (profileRequestContext.getInboundMessageContext() == null
                     || profileRequestContext.getInboundMessageContext().getMessage() == null || !(profileRequestContext
                             .getInboundMessageContext().getMessage() instanceof AuthenticationRequest)) {
-                log.debug("{} No authentication request avalailable", getLogPrefix());
+                log.error("{} No authentication request avalailable", getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
                 return false;
             }
