@@ -47,7 +47,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.Scope;
 
-/** {@link SetAccessTokenToResponseContext} unit test. */
+/** {@link SetAuthorizationCodeToResponseContext} unit test. */
 public class SetAuthorizationCodeToResponseContextTest extends BaseOIDCResponseActionTest {
 
     private SetAuthorizationCodeToResponseContext action;
