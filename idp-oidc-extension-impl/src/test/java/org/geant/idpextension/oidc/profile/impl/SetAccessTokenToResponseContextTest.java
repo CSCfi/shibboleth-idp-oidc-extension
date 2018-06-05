@@ -198,6 +198,25 @@ public class SetAccessTokenToResponseContextTest extends BaseOIDCResponseActionT
     }
 
     /**
+     * fails as there is no subject ctx.
+     * 
+     * @throws URISyntaxException
+     * @throws ComponentInitializationException
+     * @throws NoSuchAlgorithmException
+     * 
+     * 
+     */
+    @Test
+    public void testFailNoSubjectCtxCase2()
+            throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
+        init();
+        respCtx.setTokenClaimsSet(null);
+        profileRequestCtx.removeSubcontext(SubjectContext.class);
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, EventIds.INVALID_PROFILE_CTX);
+    }
+
+    /**
      * fails as there is no rp ctx.
      * 
      * @throws URISyntaxException
