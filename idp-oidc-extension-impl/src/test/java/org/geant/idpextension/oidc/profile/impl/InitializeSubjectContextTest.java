@@ -89,19 +89,6 @@ public class InitializeSubjectContextTest extends BaseOIDCResponseActionTest {
         Assert.assertEquals(ctx.getPrincipalName(), "userPrin");
 
     }
-
-    public class idStrat implements IdentifierGenerationStrategy {
-
-        @Override
-        public String generateIdentifier() {
-            return "identifier";
-        }
-
-        @Override
-        public String generateIdentifier(boolean xmlSafe) {
-            return "identifier";
-        }
-
-    }
+   
 
 }
