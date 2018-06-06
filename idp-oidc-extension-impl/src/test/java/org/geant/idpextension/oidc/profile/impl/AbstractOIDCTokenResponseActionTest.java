@@ -109,7 +109,7 @@ public class AbstractOIDCTokenResponseActionTest {
     }
 
     /**
-     * Test that the action functions properly in success case.
+     * Test that the action functions properly if metadata context is missing.
      */
 
     @Test
