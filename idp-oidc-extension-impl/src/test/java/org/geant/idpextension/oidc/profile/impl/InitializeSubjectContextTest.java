@@ -31,7 +31,6 @@ package org.geant.idpextension.oidc.profile.impl;
 import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
