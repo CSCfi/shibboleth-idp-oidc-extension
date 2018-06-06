@@ -129,23 +129,22 @@ public class SetConsentToResponseContext extends AbstractOIDCResponseAction {
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        OIDCAuthenticationResponseConsentContext consentCtx =
+        OIDCAuthenticationResponseConsentContext oidcConsentCtx =
                 getOidcResponseContext().getSubcontext(OIDCAuthenticationResponseConsentContext.class, true);
-        if (consentContext != null) {
-            final Map<String, Consent> consents = consentContext.getCurrentConsents().isEmpty()
-                    ? consentContext.getPreviousConsents() : consentContext.getCurrentConsents();
-            for (String key : consents.keySet()) {
-                if (consents.get(key) != null && consents.get(key).isApproved()) {
-                    consentCtx.getConsentedAttributes().add(key);
-                }
+        final Map<String, Consent> consents = consentContext.getCurrentConsents().isEmpty()
+                ? consentContext.getPreviousConsents() : consentContext.getCurrentConsents();
+        for (String key : consents.keySet()) {
+            if (consents.get(key) != null && consents.get(key).isApproved()) {
+                oidcConsentCtx.getConsentedAttributes().add(key);
             }
         }
         if (attributeReleaseContext.getConsentableAttributes() != null) {
-            consentCtx.getConsentableAttributes().addAll(attributeReleaseContext.getConsentableAttributes().keySet());
+            oidcConsentCtx.getConsentableAttributes()
+                    .addAll(attributeReleaseContext.getConsentableAttributes().keySet());
         }
         log.debug("{} Set to response context consented attributes {} and consentable attributes {}", getLogPrefix(),
-                consentCtx.getConsentedAttributes().toJSONString(),
-                consentCtx.getConsentableAttributes().toJSONString());
+                oidcConsentCtx.getConsentedAttributes().toJSONString(),
+                oidcConsentCtx.getConsentableAttributes().toJSONString());
 
     }
 }
