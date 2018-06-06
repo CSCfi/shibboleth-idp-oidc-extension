@@ -34,8 +34,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseTokenClaimsContext;
-import org.springframework.util.Assert;
 import org.springframework.webflow.execution.Event;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.RefreshTokenGrant;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -82,9 +82,9 @@ public class ReduceValidatedScopeTest extends BaseOIDCResponseActionTest {
         final Event event = action.execute(requestCtx);
         Scope reducedScope = respCtx.getScope();
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.isTrue(reducedScope.contains("2"));
-        Assert.isTrue(reducedScope.size() == 1);
-        Assert.isNull(respCtx.getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, false));
+        Assert.assertTrue(reducedScope.contains("2"));
+        Assert.assertTrue(reducedScope.size() == 1);
+        Assert.assertNull(respCtx.getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, false));
     }
 
     /**
@@ -113,9 +113,9 @@ public class ReduceValidatedScopeTest extends BaseOIDCResponseActionTest {
         final Event event = action.execute(requestCtx);
         Scope reducedScope = respCtx.getScope();
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.isTrue(!reducedScope.contains("4"));
-        Assert.isTrue(reducedScope.size() == 3);
-        Assert.notNull(respCtx.getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, false));
+        Assert.assertTrue(!reducedScope.contains("4"));
+        Assert.assertTrue(reducedScope.size() == 3);
+        Assert.assertNotNull(respCtx.getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, false));
     }
 
     /**
@@ -137,8 +137,8 @@ public class ReduceValidatedScopeTest extends BaseOIDCResponseActionTest {
         final Event event = action.execute(requestCtx);
         Scope reducedScope = respCtx.getScope();
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.isTrue(reducedScope.size() == 3);
-        Assert.notNull(respCtx.getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, false));
+        Assert.assertTrue(reducedScope.size() == 3);
+        Assert.assertNotNull(respCtx.getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, false));
     }
 
 }

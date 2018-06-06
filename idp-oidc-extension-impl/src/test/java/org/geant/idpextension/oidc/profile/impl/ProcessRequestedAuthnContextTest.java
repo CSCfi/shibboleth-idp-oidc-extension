@@ -38,8 +38,8 @@ import java.util.List;
 import org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal;
 import org.geant.idpextension.oidc.messaging.context.OIDCRequestedPrincipalContext;
 import org.opensaml.profile.action.EventIds;
-import org.springframework.util.Assert;
 import org.springframework.webflow.execution.Event;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -114,11 +114,11 @@ public class ProcessRequestedAuthnContextTest extends BaseOIDCResponseActionTest
         RequestedPrincipalContext rpCtx = ctx.getSubcontext(RequestedPrincipalContext.class, false);
         OIDCRequestedPrincipalContext oidcRPCtx = ctx.getSubcontext(OIDCRequestedPrincipalContext.class, false);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.notNull(rpCtx);
-        Assert.notNull(oidcRPCtx);
-        Assert.isTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("1")));
-        Assert.isTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("2")));
-        Assert.isTrue(!oidcRPCtx.isEssential());
+        Assert.assertNotNull(rpCtx);
+        Assert.assertNotNull(oidcRPCtx);
+        Assert.assertTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("1")));
+        Assert.assertTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("2")));
+        Assert.assertTrue(!oidcRPCtx.isEssential());
     }
 
     /**
@@ -142,10 +142,10 @@ public class ProcessRequestedAuthnContextTest extends BaseOIDCResponseActionTest
         RequestedPrincipalContext rpCtx = ctx.getSubcontext(RequestedPrincipalContext.class, false);
         OIDCRequestedPrincipalContext oidcRPCtx = ctx.getSubcontext(OIDCRequestedPrincipalContext.class, false);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.notNull(rpCtx);
-        Assert.notNull(oidcRPCtx);
-        Assert.isTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("1")));
-        Assert.isTrue(!oidcRPCtx.isEssential());
+        Assert.assertNotNull(rpCtx);
+        Assert.assertNotNull(oidcRPCtx);
+        Assert.assertTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("1")));
+        Assert.assertTrue(!oidcRPCtx.isEssential());
     }
 
     /**
@@ -172,11 +172,11 @@ public class ProcessRequestedAuthnContextTest extends BaseOIDCResponseActionTest
         RequestedPrincipalContext rpCtx = ctx.getSubcontext(RequestedPrincipalContext.class, false);
         OIDCRequestedPrincipalContext oidcRPCtx = ctx.getSubcontext(OIDCRequestedPrincipalContext.class, false);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.notNull(rpCtx);
-        Assert.notNull(oidcRPCtx);
-        Assert.isTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("1")));
-        Assert.isTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("2")));
-        Assert.isTrue(oidcRPCtx.isEssential());
+        Assert.assertNotNull(rpCtx);
+        Assert.assertNotNull(oidcRPCtx);
+        Assert.assertTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("1")));
+        Assert.assertTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("2")));
+        Assert.assertTrue(oidcRPCtx.isEssential());
     }
 
     /**
@@ -199,8 +199,8 @@ public class ProcessRequestedAuthnContextTest extends BaseOIDCResponseActionTest
         RequestedPrincipalContext rpCtx = ctx.getSubcontext(RequestedPrincipalContext.class, false);
         OIDCRequestedPrincipalContext oidcRPCtx = ctx.getSubcontext(OIDCRequestedPrincipalContext.class, false);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.isNull(rpCtx);
-        Assert.isNull(oidcRPCtx);
+        Assert.assertNull(rpCtx);
+        Assert.assertNull(oidcRPCtx);
     }
 
 }
