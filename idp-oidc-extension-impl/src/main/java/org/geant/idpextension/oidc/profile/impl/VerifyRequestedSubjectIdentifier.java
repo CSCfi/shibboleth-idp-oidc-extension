@@ -59,6 +59,7 @@ public class VerifyRequestedSubjectIdentifier extends AbstractOIDCAuthentication
             log.error("{} client requested for subject {}, the produced subject is {}, mismatch", getLogPrefix(),
                     requestedSubject, generatedSubject);
             ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_SUBJECT);
+            return;
         }
         log.debug("{} Requested subject matched the generated subject {}", getLogPrefix(), generatedSubject);
     }
