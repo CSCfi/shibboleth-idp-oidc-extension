@@ -183,6 +183,14 @@
     <bean id="AddNonceToIDToken" class="org.geant.idpextension.oidc.profile.impl.AddNonceToIDToken"
         scope="prototype" p:requestNonceLookupStrategy-ref="shibboleth.TokenRequestNonceLookupStrategy" />
 
+    <bean id="AddAccessTokenHashToIDToken"
+        class="org.geant.idpextension.oidc.profile.impl.AddAccessTokenHashToIDToken" scope="prototype">
+        <property name="securityParametersLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+    </bean>
+
     <bean id="shibboleth.TokenRequestNonceLookupStrategy"
         class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestNonceLookupFunction" scope="prototype" />
 
