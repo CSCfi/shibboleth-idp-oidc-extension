@@ -74,7 +74,8 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
             @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsUI, @Nonnull Date iat, @Nonnull Date exp) {
         super(VALUE_TYPE_AT, tokenClaimSet.getID(), tokenClaimSet.getClientID(),
                 tokenClaimSet.getClaimsSet().getIssuer(), tokenClaimSet.getPrincipal(),
-                tokenClaimSet.getClaimsSet().getSubject(), new ACR(tokenClaimSet.getACR()), iat, exp,
+                tokenClaimSet.getClaimsSet().getSubject(),
+                tokenClaimSet.getACR() == null ? null : new ACR(tokenClaimSet.getACR()), iat, exp,
                 tokenClaimSet.getNonce(), tokenClaimSet.getAuthenticationTime(), tokenClaimSet.getRedirectURI(), scope,
                 tokenClaimSet.getClaimsRequest(), dlClaims, null, dlClaimsUI, tokenClaimSet.getConsentableClaims(),
                 tokenClaimSet.getConsentedClaims());
@@ -88,7 +89,7 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
      * @param issuer OP issuer value. Must not be NULL.
      * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
      * @param subject subject of the authenticated user. Must not be NULL
-     * @param acr Authentication context class reference value of the authentication. Must not be NULL.
+     * @param acr Authentication context class reference value of the authentication. May be NULL.
      * @param iat Issue time of the authorize code. Must not be NULL.
      * @param exp Expiration time of the authorize code. Must not be NULL.
      * @param nonce Nonce of the authentication request. May be NULL.
@@ -99,7 +100,7 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
      * @throws RuntimeException if called with nonallowed null parameters
      */
     public AccessTokenClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
-            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nonnull ACR acr,
+            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nullable ACR acr,
             @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
             @Nonnull URI redirectURI, @Nonnull Scope scope, @Nonnull ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
             @Nullable ClaimsSet dlClaimsUI, JSONArray consentableClaims, JSONArray consentedClaims) {

@@ -61,7 +61,8 @@ public final class RefreshTokenClaimsSet extends TokenClaimsSet {
     public RefreshTokenClaimsSet(@Nonnull TokenClaimsSet tokenClaimsSet, @Nonnull Date iat, @Nonnull Date exp) {
         super(VALUE_TYPE_RF, tokenClaimsSet.getID(), tokenClaimsSet.getClientID(),
                 tokenClaimsSet.getClaimsSet().getIssuer(), tokenClaimsSet.getPrincipal(),
-                tokenClaimsSet.getClaimsSet().getSubject(), new ACR(tokenClaimsSet.getACR()), iat, exp,
+                tokenClaimsSet.getClaimsSet().getSubject(),
+                tokenClaimsSet.getACR() == null ? null : new ACR(tokenClaimsSet.getACR()), iat, exp,
                 tokenClaimsSet.getNonce(), tokenClaimsSet.getAuthenticationTime(), tokenClaimsSet.getRedirectURI(),
                 tokenClaimsSet.getScope(), tokenClaimsSet.getClaimsRequest(), tokenClaimsSet.getDeliveryClaims(), null,
                 tokenClaimsSet.getUserinfoDeliveryClaims(), tokenClaimsSet.getConsentableClaims(),

@@ -140,7 +140,7 @@ public class TokenClaimsSet {
      * @param issuer OP issuer value. Must not be NULL.
      * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
      * @param subject subject of the authenticated user. Must not be NULL.
-     * @param acr Authentication context class reference value of the authentication. Must not be NULL.
+     * @param acr Authentication context class reference value of the authentication. May be NULL.
      * @param iat Issue time of the token. Must not be NULL.
      * @param exp Expiration time of the token. Must not be NULL.
      * @param nonce Nonce of the authentication request. May be NULL.
@@ -152,19 +152,19 @@ public class TokenClaimsSet {
      */
     // Checkstyle: CyclomaticComplexity OFF
     protected TokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,
-            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nonnull ACR acr,
+            @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nullable ACR acr,
             @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
             @Nonnull URI redirectURI, @Nonnull Scope scope, @Nullable ClaimsRequest claims,
             @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI,
             JSONArray consentableClaims, JSONArray consentedClaims) {
         if (tokenType == null || tokenID == null || clientID == null || issuer == null || userPrincipal == null
-                || acr == null || iat == null || exp == null || authTime == null || redirectURI == null || scope == null
+                || iat == null || exp == null || authTime == null || redirectURI == null || scope == null
                 || subject == null) {
             throw new RuntimeException("Invalid parameters, programming error");
         }
         tokenClaimsSet = new JWTClaimsSet.Builder().claim(KEY_TYPE, tokenType).jwtID(tokenID)
                 .audience(clientID.getValue()).issuer(issuer).subject(subject).claim(KEY_USER_PRINCIPAL, userPrincipal)
-                .claim(KEY_ACR, acr.getValue()).issueTime(iat).expirationTime(exp)
+                .claim(KEY_ACR, acr == null ? null : acr.getValue()).issueTime(iat).expirationTime(exp)
                 .claim(KEY_NONCE, nonce == null ? null : nonce.getValue()).claim(KEY_AUTH_TIME, authTime)
                 .claim(KEY_REDIRECT_URI, redirectURI.toString()).claim(KEY_SCOPE, scope.toString())
                 .claim(KEY_CLAIMS, claims == null ? null : claims.toJSONObject())
@@ -212,9 +212,6 @@ public class TokenClaimsSet {
         if (tokenClaimsSet.getStringClaim(KEY_AC_ID) == null) {
             throw new ParseException("claim jti must exist and not be null", 0);
         }
-        if (tokenClaimsSet.getStringClaim(KEY_ACR) == null) {
-            throw new ParseException("claim acr must exist and not be null", 0);
-        }
         if (tokenClaimsSet.getDateClaim(KEY_AUTH_TIME) == null) {
             throw new ParseException("claim auth_time must exist and not be null", 0);
         }
@@ -225,6 +222,9 @@ public class TokenClaimsSet {
             throw new ParseException("claim scope must exist and not be null", 0);
         }
         // Voluntary fields
+        if (tokenClaimsSet.getClaims().containsKey(KEY_ACR)) {
+            tokenClaimsSet.getStringClaim(KEY_ACR);
+        }
         if (tokenClaimsSet.getClaims().containsKey(KEY_CONSENTABLE_CLAIMS)
                 && !(tokenClaimsSet.getClaim(KEY_CONSENTABLE_CLAIMS) instanceof JSONArray)) {
             throw new ParseException("consentable claims is of wrong type", 0);
