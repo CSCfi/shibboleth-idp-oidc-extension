@@ -24,6 +24,7 @@
         <evaluate expression="SetRequestedClaimsToResponseContext" />
         <evaluate expression="SetTokenDeliveryAttributesToResponseContext" />
         <evaluate expression="SetConsentToResponseContext" />
+        <evaluate expression="PopulateUserInfoResponseSignatureSigningParameters" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="PostInitialSetup" />
     </action-state>
@@ -46,6 +47,7 @@
         <evaluate expression="AddUserInfoShell" />
         <evaluate expression="AddAttributeClaimsToUserInfo" />
         <evaluate expression="AddTokenDeliveryAttributesToUserinfo" />
+        <evaluate expression="SignUserInfoResponse" />
         <evaluate expression="FormOutboundMessage" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="CommitResponse" />

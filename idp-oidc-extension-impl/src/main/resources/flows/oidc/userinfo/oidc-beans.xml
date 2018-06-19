@@ -80,6 +80,21 @@
         class="org.geant.idpextension.oidc.profile.impl.SetConsentFromTokenToResponseContext" scope="prototype">
     </bean>
 
+    <bean id="PopulateUserInfoResponseSignatureSigningParameters"
+        class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters" scope="prototype"
+        p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
+        p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
+        <property name="securityParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters"
+                c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+        <property name="existingParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
+        </property>
+    </bean>
+
     <bean id="shibboleth.TokenRequestRequestedClaimsLookupFunction"
         class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestRequestedClaimsLookupFunction"
         scope="prototype" />
@@ -112,6 +127,14 @@
     <bean id="shibboleth.UserInfoResponseClaimsSetLookupStrategy"
         class="org.geant.idpextension.oidc.profile.context.navigate.UserInfoResponseClaimsSetLookupFunction"
         scope="prototype" />
+
+    <bean id="SignUserInfoResponse" class="org.geant.idpextension.oidc.profile.impl.SignUserInfoResponse"
+        scope="prototype">
+        <property name="securityParametersLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+    </bean>
 
     <bean id="FormOutboundMessage"
         class="org.geant.idpextension.oidc.profile.impl.FormOutboundUserInfoResponseMessage" scope="prototype" />
