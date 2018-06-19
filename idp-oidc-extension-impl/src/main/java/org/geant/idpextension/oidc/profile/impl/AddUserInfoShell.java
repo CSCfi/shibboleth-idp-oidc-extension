@@ -34,18 +34,24 @@ import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultUserInfoSigningAlgLookupFunction;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 /**
  * Action that creates a {@link UserInfo} object shell, and sets it to work context
  * {@link OIDCAuthenticationResponseContext} located under {@link ProfileRequestContext#getOutboundMessageContext()}.
+ * 
+ * By default sub claim is added. If the response is to be signed, also iss and aud claims are added.
  */
 @SuppressWarnings("rawtypes")
 public class AddUserInfoShell extends AbstractOIDCResponseAction {
@@ -61,7 +67,7 @@ public class AddUserInfoShell extends AbstractOIDCResponseAction {
     /** OP ID to populate into Issuer element. */
     @Nonnull
     private String issuerId;
-    
+
     /**
      * Strategy used to locate the {@link RelyingPartyContext} associated with a given {@link ProfileRequestContext}.
      */
@@ -72,9 +78,27 @@ public class AddUserInfoShell extends AbstractOIDCResponseAction {
     @Nullable
     private RelyingPartyContext rpCtx;
 
+    /** Strategy used to determine user info response signing algorithm. */
+    @Nonnull
+    private Function<ProfileRequestContext, JWSAlgorithm> userInfoSigAlgStrategy;
+
     /** Constructor. */
     public AddUserInfoShell() {
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
+        userInfoSigAlgStrategy = new DefaultUserInfoSigningAlgLookupFunction();
+    }
+
+    /**
+     * Set the strategy used to user info signing algorithm lookup strategy.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void
+            setUserInfoSigningAlgLookupStrategy(@Nonnull final Function<ProfileRequestContext, JWSAlgorithm> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        userInfoSigAlgStrategy =
+                Constraint.isNotNull(strategy, "User Info Signing Algorithm lookup strategy cannot be null");
     }
 
     /**
@@ -119,9 +143,13 @@ public class AddUserInfoShell extends AbstractOIDCResponseAction {
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        // TODO: add control to add/not add aud and iss depending on signing. They are resolved already by the action.
         UserInfo userInfo = new UserInfo(new Subject(getOidcResponseContext().getSubject()));
+        if (userInfoSigAlgStrategy.apply(profileRequestContext) != null) {
+            // TODO: claims set parsing fails if aud set as array. Has to be set "manually". See where the actual
+            // problem lies.
+            userInfo.setClaim("aud", rpCtx.getRelyingPartyId());
+            userInfo.setIssuer(new Issuer(issuerId));
+        }
         log.debug("{} Setting userinfo response shell to response context {}", getLogPrefix(),
                 userInfo.toJSONObject().toJSONString());
         getOidcResponseContext().setUserInfo(userInfo);
