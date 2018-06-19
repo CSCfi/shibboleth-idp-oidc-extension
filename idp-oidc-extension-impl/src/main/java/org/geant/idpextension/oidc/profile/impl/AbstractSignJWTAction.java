@@ -63,7 +63,7 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCSigningResponseA
 
     /** resolved credential. */
     private Credential credential;
-
+    
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -117,7 +117,7 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCSigningResponseA
      * 
      * @return JWS algorithm
      */
-    private JWSAlgorithm resolveAlgorithm() {
+    protected JWSAlgorithm resolveAlgorithm() {
 
         JWSAlgorithm algorithm = new JWSAlgorithm(signatureSigningParameters.getSignatureAlgorithm());
         if (credential instanceof JWKCredential) {
