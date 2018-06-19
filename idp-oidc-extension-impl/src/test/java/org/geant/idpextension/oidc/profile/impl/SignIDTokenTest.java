@@ -76,7 +76,7 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         action.initialize();
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNull(respCtx.getSignedIDToken());
+        Assert.assertNull(respCtx.getSignedToken());
     }
 
     /**
@@ -91,7 +91,7 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         spCtx.setSignatureSigningParameters(null);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNull(respCtx.getSignedIDToken());
+        Assert.assertNull(respCtx.getSignedToken());
     }
 
     /**
@@ -113,8 +113,8 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         setIdTokenToResponseContext("iss", "sub", "aud", new Date(), new Date());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNotNull(respCtx.getSignedIDToken());
-        Assert.assertTrue(respCtx.getSignedIDToken().verify(verifier));
+        Assert.assertNotNull(respCtx.getSignedToken());
+        Assert.assertTrue(respCtx.getSignedToken().verify(verifier));
 
     }
 

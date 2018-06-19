@@ -73,7 +73,7 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
         }
-        idToken = getOidcResponseContext().getSignedIDToken();
+        idToken = getOidcResponseContext().getSignedToken();
         if (idToken == null) {
             log.error("{} unable to provide id token (required)", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);

@@ -89,7 +89,7 @@ public class FormOutboundUserInfoResponseMessage extends AbstractOIDCTokenRespon
         if (userInfoSigAlgStrategy.apply(profileRequestContext) == null) {
             resp = new UserInfoSuccessResponse(getOidcResponseContext().getUserInfo());
         } else {
-            resp = new UserInfoSuccessResponse(getOidcResponseContext().getSignedIDToken());
+            resp = new UserInfoSuccessResponse(getOidcResponseContext().getSignedToken());
         }
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }

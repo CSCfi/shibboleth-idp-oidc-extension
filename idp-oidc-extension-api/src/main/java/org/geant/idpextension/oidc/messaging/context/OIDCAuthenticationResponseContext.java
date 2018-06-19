@@ -58,9 +58,9 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     @Nullable
     private UserInfo userInfo;
 
-    /** The id token formed. */
+    /** The signed id token / user info response formed. */
     @Nullable
-    private SignedJWT signedIDToken;
+    private SignedJWT signedToken;
 
     /** the acr used in response. **/
     @Nullable
@@ -354,21 +354,21 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     }
 
     /**
-     * Get the signed id token.
+     * Get the signed id token / user info response.
      * 
-     * @return The signed id token
+     * @return The signed id token / user info response
      */
     @Nullable
-    public SignedJWT getSignedIDToken() {
-        return signedIDToken;
+    public SignedJWT getSignedToken() {
+        return signedToken;
     }
 
     /**
-     * Set the signed id token.
+     * Set the signed id token / user info response.
      * 
-     * @param token The signed id token
+     * @param token The signed id token / user info response
      */
-    public void setSignedIDToken(@Nullable SignedJWT token) {
-        signedIDToken = token;
+    public void setSignedToken(@Nullable SignedJWT token) {
+        signedToken = token;
     }
 }

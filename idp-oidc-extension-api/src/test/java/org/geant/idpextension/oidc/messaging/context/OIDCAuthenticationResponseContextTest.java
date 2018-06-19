@@ -78,7 +78,7 @@ public class OIDCAuthenticationResponseContextTest {
         Assert.assertNull(ctx.getSubject());
         Assert.assertNull(ctx.getRedirectURI());
         Assert.assertNull(ctx.getScope());
-        Assert.assertNull(ctx.getSignedIDToken());
+        Assert.assertNull(ctx.getSignedToken());
     }
 
     @Test
@@ -100,14 +100,14 @@ public class OIDCAuthenticationResponseContextTest {
         ctx.setScope(scope);
         JWSHeader header = new JWSHeader(JWSAlgorithm.ES256);
         SignedJWT sJWT = new SignedJWT(header, token.toJWTClaimsSet());
-        ctx.setSignedIDToken(sJWT);
+        ctx.setSignedToken(sJWT);
         Assert.assertEquals(ctx.getAcr().toString(), "acrValue");
         ctx.setAcr(null);
         Assert.assertNull(ctx.getAcr());
         Assert.assertEquals(ctx.getAuthTime(), new Date(1));
         Assert.assertEquals(ctx.getIDToken(), token);
         Assert.assertEquals(ctx.getSubject(), id.getValue());
-        Assert.assertEquals(ctx.getSignedIDToken(), sJWT);
+        Assert.assertEquals(ctx.getSignedToken(), sJWT);
         Assert.assertEquals(ctx.getRedirectURI(), uri);
         Assert.assertEquals(ctx.getRequestedSubject(), "sub");
         Assert.assertEquals(ctx.getScope(), scope);

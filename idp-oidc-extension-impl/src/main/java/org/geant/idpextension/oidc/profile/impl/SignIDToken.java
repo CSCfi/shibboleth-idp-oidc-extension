@@ -91,7 +91,7 @@ public class SignIDToken extends AbstractSignJWTAction {
      */
     @Override
     protected void setSignedJWT(SignedJWT jwt) {
-        getOidcResponseContext().setSignedIDToken(jwt);
+        getOidcResponseContext().setSignedToken(jwt);
 
     }
 

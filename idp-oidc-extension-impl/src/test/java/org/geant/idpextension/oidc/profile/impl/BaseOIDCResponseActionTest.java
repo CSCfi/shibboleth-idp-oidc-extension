@@ -157,7 +157,7 @@ abstract class BaseOIDCResponseActionTest {
         jwt = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("id").build(),
                 respCtx.getIDToken().toJWTClaimsSet());
         jwt.sign(new RSASSASigner(credentialRSA.getPrivateKey()));
-        respCtx.setSignedIDToken(jwt);
+        respCtx.setSignedToken(jwt);
 
     }
     
