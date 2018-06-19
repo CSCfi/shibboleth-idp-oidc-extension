@@ -30,32 +30,67 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultUserInfoSigningAlgLookupFunction;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Function;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
+
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
+import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
  * Action that forms outbound message based on user info request and response context. Formed message is set to
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
- *
- * TODO: Separate action to signing and or encrypt response is still missing. This method should form correct type of
- * response (encrypted and or signed).
+ * 
+ * Depending on registered metadata, the message is either signed jwt or claims set. Encryption is not yet supported.
  */
-@SuppressWarnings("rawtypes")
 public class FormOutboundUserInfoResponseMessage extends AbstractOIDCTokenResponseAction {
 
     /** Class logger. */
     @Nonnull
     private Logger log = LoggerFactory.getLogger(FormOutboundUserInfoResponseMessage.class);
 
+    /** Strategy used to determine user info response signing algorithm. */
+    @SuppressWarnings("rawtypes")
+    @Nonnull
+    private Function<ProfileRequestContext, JWSAlgorithm> userInfoSigAlgStrategy;
+
+    /**
+     * Constructor.
+     */
+    public FormOutboundUserInfoResponseMessage() {
+        userInfoSigAlgStrategy = new DefaultUserInfoSigningAlgLookupFunction();
+    }
+
+    /**
+     * Set the strategy used to user info signing algorithm lookup strategy.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setUserInfoSigningAlgLookupStrategy(
+            @SuppressWarnings("rawtypes") @Nonnull final Function<ProfileRequestContext, JWSAlgorithm> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        userInfoSigAlgStrategy =
+                Constraint.isNotNull(strategy, "User Info Signing Algorithm lookup strategy cannot be null");
+    }
+
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        UserInfoSuccessResponse resp = new UserInfoSuccessResponse(getOidcResponseContext().getUserInfo());
+        UserInfoSuccessResponse resp;
+        if (userInfoSigAlgStrategy.apply(profileRequestContext) == null) {
+            resp = new UserInfoSuccessResponse(getOidcResponseContext().getUserInfo());
+        } else {
+            resp = new UserInfoSuccessResponse(getOidcResponseContext().getSignedIDToken());
+        }
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
 }
