@@ -119,6 +119,10 @@
     <bean id="AddClientNameToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddClientNameToClientMetadata"
         scope="prototype" />
+        
+    <bean id="AddUserInfoSignedResponseAlgToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddUserInfoSignedResponseAlgToClientMetadata"
+        scope="prototype" />
 
     <bean id="shibboleth.oidc.ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
