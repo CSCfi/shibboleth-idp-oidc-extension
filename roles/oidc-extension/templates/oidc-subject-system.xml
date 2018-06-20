@@ -57,6 +57,7 @@
 
     <bean id="shibboleth.oidc.subject.ComputedPersistentIdGenerator" lazy-init="true"
         class="net.shibboleth.idp.saml.nameid.impl.ComputedPersistentIdGenerationStrategy"
+        p:encoding="BASE32"
         p:salt="%{idp.oidc.subject.salt:}"
         p:encodedSalt="%{idp.oidc.subject.encodedSalt:}"
         p:algorithm="%{idp.oidc.subject.algorithm:SHA}" />
