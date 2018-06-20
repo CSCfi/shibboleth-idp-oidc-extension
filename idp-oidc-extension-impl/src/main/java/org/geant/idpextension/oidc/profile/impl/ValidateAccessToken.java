@@ -117,7 +117,7 @@ public class ValidateAccessToken extends AbstractOIDCUserInfoValidationResponseA
             ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_GRANT);
             return;
         }
-        log.error("{} access token {} validated", getLogPrefix(), accessTokenClaimsSet.getID());
+        log.debug("{} access token {} validated", getLogPrefix(), accessTokenClaimsSet.getID());
         getOidcResponseContext().setTokenClaimsSet(accessTokenClaimsSet);
         return;
 
