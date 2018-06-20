@@ -6,7 +6,7 @@
     <parent>
         <groupId>net.shibboleth.idp</groupId>
         <artifactId>idp-parent</artifactId>
-        <version>3.3.0</version>
+        <version>3.3.3</version>
     </parent>
     <groupId>org.geant</groupId>
     <artifactId>idp-oidc-extension-parent</artifactId>
