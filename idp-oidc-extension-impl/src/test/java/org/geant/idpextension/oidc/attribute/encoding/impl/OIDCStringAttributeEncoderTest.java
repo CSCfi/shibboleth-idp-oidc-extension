@@ -147,14 +147,11 @@ public class OIDCStringAttributeEncoderTest {
         init();
         IdPAttribute attribute = new IdPAttribute("test");
         List<StringAttributeValue> stringAttributeValues = new ArrayList<StringAttributeValue>();
-        stringAttributeValues.add(new StringAttributeValue("true"));
-        stringAttributeValues.add(new StringAttributeValue("2"));
+        stringAttributeValues.add(new StringAttributeValue("{ \"name\":\"John\", \"age\":30, \"car\":null }"));
         attribute.setValues(stringAttributeValues);
-        encoder.setAsBoolean(true);
         encoder.setAsObject(true);
-        encoder.setFieldName("verified");
         JSONObject object = encoder.encode(attribute);
-        Assert.assertTrue((boolean)((JSONObject)object.get("attributeName")).get("verified"));
+        Assert.assertEquals(((JSONObject)object.get("attributeName")).toJSONString(), "{\"car\":null,\"name\":\"John\",\"age\":30}");
     }
 
     @Test

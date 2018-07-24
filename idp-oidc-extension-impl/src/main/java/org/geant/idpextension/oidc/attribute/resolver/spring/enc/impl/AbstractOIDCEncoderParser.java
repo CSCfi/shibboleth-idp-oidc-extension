@@ -65,12 +65,7 @@ public abstract class AbstractOIDCEncoderParser extends BaseAttributeEncoderPars
     @Nonnull
     @NotEmpty
     public static final String AS_OBJECT_ATTRIBUTE_NAME = "asObject";
-
-    /** Local name of as object attribute. */
-    @Nonnull
-    @NotEmpty
-    public static final String FIELD_NAME_ATTRIBUTE_NAME = "fieldName";
-
+   
     /** Local name of as boolean attribute. */
     @Nonnull
     @NotEmpty
@@ -111,10 +106,6 @@ public abstract class AbstractOIDCEncoderParser extends BaseAttributeEncoderPars
         if (config.hasAttributeNS(null, AS_OBJECT_ATTRIBUTE_NAME)) {
             builder.addPropertyValue("asObject",
                     StringSupport.trimOrNull(config.getAttributeNS(null, AS_OBJECT_ATTRIBUTE_NAME)));
-        }
-        if (config.hasAttributeNS(null, FIELD_NAME_ATTRIBUTE_NAME)) {
-            builder.addPropertyValue("fieldName",
-                    StringSupport.trimOrNull(config.getAttributeNS(null, FIELD_NAME_ATTRIBUTE_NAME)));
         }
         if (config.hasAttributeNS(null, AS_BOOLEAN_ATTRIBUTE_NAME)) {
             builder.addPropertyValue("asBoolean",

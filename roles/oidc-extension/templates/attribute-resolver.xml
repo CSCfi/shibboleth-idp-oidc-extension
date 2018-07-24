@@ -53,7 +53,7 @@
         <SourceAttribute>uid</SourceAttribute>
     </AttributeDefinition>
 
-    <!-- claim that is placed always to id token -->
+    <!-- This demonstrates a claim that is placed always to id token -->
     <AttributeDefinition id="email_idtoken" xsi:type="Simple">
         <Dependency ref="email" />
         <AttributeEncoder xsi:type="oidcext:OIDCString" placeToIDToken="true" denyUserinfo="true" name="email" />
@@ -67,7 +67,7 @@
         <AttributeEncoder xsi:type="oidcext:OIDCString" name="name" />
     </AttributeDefinition>
    
-    <!-- claim that is placed always to id token -->
+    <!-- This demonstrates a claim that is placed always to id token -->
     <AttributeDefinition id="name_idtoken" xsi:type="Simple">
         <Dependency ref="name" />
         <AttributeEncoder xsi:type="oidcext:OIDCString" placeToIDToken="true" denyUserinfo="true" name="name" />
@@ -77,20 +77,30 @@
         these attributes/claims -->
 
 
-    <!-- This is an example of an attribute sourced from a data connector. This demonstrates use of OIDCString as array encoder. -->
+    <!-- This demonstrates use of OIDCString as array encoder. -->
     <AttributeDefinition id="eduPersonAffiliation" xsi:type="Simple" sourceAttributeID="affiliation">
         <Dependency ref="staticAttributes" />
         <AttributeEncoder xsi:type="oidcext:OIDCString" asArray="true" name="affiliation" />
     </AttributeDefinition>
 
-    <!-- This is an example of an attribute sourced from a data connector. This demonstrates use of OIDCString as int encoder. -->
+    <!-- This demonstrates use of OIDCString as int encoder. -->
     <AttributeDefinition id="age" xsi:type="Simple" sourceAttributeID="age">
         <Dependency ref="staticAttributes" />
         <AttributeEncoder xsi:type="oidcext:OIDCString" asInt="true" name="age" />
     </AttributeDefinition>
 
+    <!-- This demonstrates complex claim constructed by forming JSON String and declaring it to be encoded as JSON Object -->
+    <AttributeDefinition id="address" xsi:type="ScriptedAttribute">
+        <Dependency ref="staticAttributes" />
+        <Script><![CDATA[address.addValue("{\"street_address\":\""+street_address.getValues().get(0) + "\","
+            +"\"locality\":\""+locality.getValues().get(0) + "\","
+            +"\"region\":\""+region.getValues().get(0) + "\","
+            +"\"postal_code\":\""+postal_code.getValues().get(0) + "\","
+            +"\"country\":\""+country.getValues().get(0) + "\"}");]]></Script>
+        <AttributeEncoder xsi:type="oidcext:OIDCString" asObject="true" name="address" />
+    </AttributeDefinition>
 
-    <!-- rest of the claims needed to have set of standard claims -->
+    <!-- rest of the claims needed to have full set of standard claims -->
 
     <AttributeDefinition id="phone_number" xsi:type="Simple" sourceAttributeID="phone_number">
         <Dependency ref="staticAttributes" />
@@ -100,11 +110,6 @@
     <AttributeDefinition id="phone_number_verified" xsi:type="Simple" sourceAttributeID="phone_number_verified">
         <Dependency ref="staticAttributes" />
         <AttributeEncoder xsi:type="oidcext:OIDCString" asBoolean="true" name="phone_number_verified" />
-    </AttributeDefinition>
-
-    <AttributeDefinition id="address" xsi:type="Simple" sourceAttributeID="address">
-        <Dependency ref="staticAttributes" />
-        <AttributeEncoder xsi:type="oidcext:OIDCString" asObject="true" fieldName="formatted" name="address" />
     </AttributeDefinition>
 
     <AttributeDefinition id="email_verified" xsi:type="Simple" sourceAttributeID="email_verified">
@@ -245,8 +250,20 @@
         <Attribute id="updated_at">
             <Value>1509450347</Value>
         </Attribute>
-        <Attribute id="address">
-            <Value>Street Address P.O. Box 555 Finland</Value>
+        <Attribute id="street_address">
+            <Value>234 Hollywood Blvd.</Value>
+        </Attribute>
+        <Attribute id="locality">
+            <Value>Los Angeles</Value>
+        </Attribute>
+        <Attribute id="region">
+            <Value>CA</Value>
+        </Attribute>
+        <Attribute id="postal_code">
+            <Value>90210</Value>
+        </Attribute>
+        <Attribute id="country">
+            <Value>US</Value>
         </Attribute>
     </DataConnector>
 </AttributeResolver>

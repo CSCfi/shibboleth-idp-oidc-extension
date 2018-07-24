@@ -8,6 +8,5 @@
         asBoolean="true"
         asInt="false"
         asObject="true"
-        fieldName="field"
         stringDelimiter="|"
 	xsi:schemaLocation="urn:mace:shibboleth:2.0:resolver http://shibboleth.net/schema/idp/shibboleth-attribute-resolver.xsd org.geant.idpextension.oidc.attribute.encoder classpath:/schema/idp-oidc-extension-attribute-encoder.xsd" />

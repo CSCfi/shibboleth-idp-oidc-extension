@@ -68,13 +68,6 @@
                         </documentation>
                     </annotation>
                 </attribute>
-                <attribute name="fieldName" type="string" use="optional">
-                    <annotation>
-                        <documentation>
-                            If values are wrapped into JSON Object, the name of the value.
-                        </documentation>
-                    </annotation>
-                </attribute>
                 <attribute name="asBoolean" type="string" use="optional">
                     <annotation>
                         <documentation>

@@ -42,6 +42,7 @@ import com.google.common.base.Predicate;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
 import net.shibboleth.idp.attribute.AttributeEncoder;
 import net.shibboleth.idp.attribute.AttributeEncodingException;
 import net.shibboleth.idp.attribute.IdPAttribute;
@@ -87,10 +88,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
 
     /** Whether to wrap the value to JSON Object. */
     private boolean asObject;
-
-    /** Name of the key field if the value is wrapped into JSON Object. */
-    private String fieldName;
-
+    
     /** Whether to interpret value as boolean. */
     private boolean asBoolean;
 
@@ -163,25 +161,7 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
     public void setAsObject(boolean flag) {
         asObject = flag;
     }
-
-    /**
-     * Gets name of the key field if the value is wrapped into JSON Object.
-     * 
-     * @return name of the key field if the value is wrapped into JSON Object
-     */
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    /**
-     * Sets name of the key field if the value is wrapped into JSON Object.
-     * 
-     * @param field of the key field if the value is wrapped into JSON Object
-     */
-    public void setFieldName(String field) {
-        fieldName = field;
-    }
-
+   
     /**
      * Gets Whether to to interpret value as boolean.
      * 
@@ -328,67 +308,72 @@ public abstract class AbstractOIDCAttributeEncoder extends AbstractInitializable
         if (name == null) {
             throw new ComponentInitializationException("Attribute name cannot be null or empty");
         }
-        if (asObject && (fieldName == null || fieldName.length() == 0)) {
-            throw new ComponentInitializationException("JSON Object field name cannot be null");
-        }
     }
 
     /**
-     * Wraps object to JSON object if flag is set.
+     * Parses string as JSONObject.
      * 
-     * @param obj to be wrapped
-     * @return original object or object wrapped to JSON object
+     * @param value String parsed
+     * @return string parsed as JSONObject or null if parsing failed.
      */
-    private Object wrapToJSONObject(Object obj) {
-        if (getAsObject()) {
-            log.debug("value instructed to be wrapped to a JSON object with key{} ", fieldName);
-            JSONObject jsonObj = new JSONObject();
-            jsonObj.put(fieldName, obj);
-            return jsonObj;
+    private Object toJSONObject(String value) {
+        JSONObject jsonObj = null;
+        try {
+            jsonObj = (JSONObject) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(value);
+        } catch (Exception e) {
+            log.warn("Unable to parse value {} as JSONObject for claim {}", value, name);
         }
-        return obj;
+        return jsonObj;
     }
 
     // Checkstyle: CyclomaticComplexity OFF
     /**
-     * Either catenates a list of string or places them to array depending on configuration. The result may still be
-     * wrapped to JSON object depending on configuration.
+     * Performs encoding based on encoding instructions.
      * 
      * @param <T> Integer, Boolean or String
      * @param values list of strings
-     * @return String, JSON Array or JSON Object
+     * @return Integer, Boolean, String, JSON Array or JSON Object value for attribute.
      */
     protected <T extends Object> Object encodeValues(List<T> values) {
-        if (values == null) {
+        if (values == null || values.size() == 0) {
             return null;
         }
+        // First String value parsed as JSON Object
+        if (getAsObject()) {
+            T value = values.get(0);
+            if (!(value instanceof String)) {
+                log.error("Attribute {} is defined to be parsed as JSON Object but is not String. Unable to encode",
+                        name);
+                return null;
+            }
+            return toJSONObject((String) value);
+        }
+        // Values of type T placed to Array
         if (getAsArray()) {
-            log.debug("value(s) instructed to be set to array");
             JSONArray array = new JSONArray();
             for (T value : values) {
                 array.add(value);
             }
-            return wrapToJSONObject(array);
-        } else {
-            log.debug("value(s) instructed to be set as single value");
-            String attributeString = "";
-            for (T value : values) {
-                if (value instanceof Integer || value instanceof Boolean) {
-                    log.debug("for int and boolean first value is considered the result");
-                    return wrapToJSONObject(value);
-                }
-                if (value instanceof String) {
-                    if (attributeString.length() > 0 && getStringDelimiter() != null) {
-                        attributeString += getStringDelimiter();
-                    }
-                    attributeString += value;
-                } else {
-                    log.warn("unrecognised type of value, {}", value.getClass().getName());
-                    return null;
-                }
-            }
-            return attributeString.length() != 0 ? wrapToJSONObject(attributeString) : null;
+            return array;
         }
+        // String catenation / integer or boolean value
+        String attributeString = "";
+        for (T value : values) {
+            if (value instanceof Integer || value instanceof Boolean) {
+                log.debug("for int and boolean first value is considered the result");
+                return value;
+            }
+            if (value instanceof String) {
+                if (attributeString.length() > 0 && getStringDelimiter() != null) {
+                    attributeString += getStringDelimiter();
+                }
+                attributeString += value;
+            } else {
+                log.warn("unrecognised type of value, {}", value.getClass().getName());
+                return null;
+            }
+        }
+        return attributeString.length() != 0 ? attributeString : null;
     }
     // Checkstyle: CyclomaticComplexity ON
 

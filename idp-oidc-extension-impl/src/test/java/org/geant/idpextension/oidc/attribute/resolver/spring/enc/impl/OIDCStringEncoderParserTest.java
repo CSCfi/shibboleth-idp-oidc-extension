@@ -49,7 +49,6 @@ public class OIDCStringEncoderParserTest extends BaseAttributeDefinitionParserTe
         Assert.assertEquals(encoder.getAsBoolean(), true);
         Assert.assertEquals(encoder.getAsInt(), false);
         Assert.assertEquals(encoder.getAsObject(), true);
-        Assert.assertEquals(encoder.getFieldName(), "field");
         Assert.assertEquals(encoder.getStringDelimiter(), "|");
     }
 
