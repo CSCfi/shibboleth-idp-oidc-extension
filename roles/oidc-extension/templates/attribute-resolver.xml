@@ -54,7 +54,7 @@
     </AttributeDefinition>
 
     <!-- This demonstrates a claim that is placed always to id token -->
-    <AttributeDefinition id="email_idtoken" xsi:type="Simple">
+    <AttributeDefinition id="email_idtoken" xsi:type="Simple" sourceAttributeID="email">
         <Dependency ref="email" />
         <AttributeEncoder xsi:type="oidcext:OIDCString" placeToIDToken="true" denyUserinfo="true" name="email" />
     </AttributeDefinition>
@@ -68,7 +68,7 @@
     </AttributeDefinition>
    
     <!-- This demonstrates a claim that is placed always to id token -->
-    <AttributeDefinition id="name_idtoken" xsi:type="Simple">
+    <AttributeDefinition id="name_idtoken" xsi:type="Simple" sourceAttributeID="name">
         <Dependency ref="name" />
         <AttributeEncoder xsi:type="oidcext:OIDCString" placeToIDToken="true" denyUserinfo="true" name="name" />
     </AttributeDefinition>
