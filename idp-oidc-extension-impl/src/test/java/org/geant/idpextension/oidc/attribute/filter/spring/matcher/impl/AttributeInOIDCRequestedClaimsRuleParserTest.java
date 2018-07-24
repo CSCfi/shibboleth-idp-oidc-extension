@@ -29,9 +29,9 @@
 package org.geant.idpextension.oidc.attribute.filter.spring.matcher.impl;
 
 import org.geant.idpextension.oidc.attribute.filter.matcher.impl.AttributeInOIDCRequestedClaimsMatcher;
-import org.junit.Assert;
-import org.junit.Test;
 import org.springframework.context.support.GenericApplicationContext;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import net.shibboleth.ext.spring.context.FilesystemGenericApplicationContext;
 import net.shibboleth.idp.attribute.filter.AttributeRule;

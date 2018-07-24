@@ -28,9 +28,9 @@
 package org.geant.idpextension.oidc.attribute.resolver.spring.enc.impl;
 
 import org.geant.idpextension.oidc.attribute.encoding.impl.OIDCScopedStringAttributeEncoder;
-import org.junit.Assert;
-import org.junit.Test;
 import org.springframework.context.support.GenericApplicationContext;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import net.shibboleth.idp.attribute.AttributeEncoder;
 import net.shibboleth.idp.attribute.resolver.spring.BaseAttributeDefinitionParserTest;
