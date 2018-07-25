@@ -12,7 +12,7 @@
     dest: /tmp
   with_fileglob:
     - java-identity-provider/idp-distribution/target/shibboleth-identity-provider-*.tar.gz
-  when: stat_local_snapshot.stat.exists
+  when: stat_local_snapshot.stat.exists == True
 
 - name: IDP SNAPSHOT | git, maven
   package: name={{ item }} state=present
@@ -35,11 +35,15 @@
   become: yes
   when: stat_local_snapshot.stat.exists == false
 
+- name: IDP SNAPSHOT | Get distribution package path
+  shell: ls /tmp/idp_snapshot/idp-distribution/target/shibboleth-identity-provider-*.tar.gz
+  register: path_file
+  when: stat_local_snapshot.stat.exists == false
+
 - name: IDP SNAPSHOT | Copy complied distribution package to /tmp
   copy:
     src: "{{ item }}"
     dest: /tmp
     remote_src: True
-  with_fileglob:
-    - /tmp/idp_snapshot/idp-distribution/target/shibboleth-identity-provider-*.tar.gz
+  with_items: "{{ path_file.stdout_lines }}"
   when: stat_local_snapshot.stat.exists == false
