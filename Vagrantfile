@@ -9,6 +9,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.ssh.insert_key = false
     config.ssh.shell = 'bash --noprofile -l'
 
+    config.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--memory", "2048" ]
+    end
+
     config.vm.define "app" do |app|
         app.vm.network "private_network", ip: "192.168.0.150"
         app.vm.hostname = "gn43-oidcshibop-devel.local"
