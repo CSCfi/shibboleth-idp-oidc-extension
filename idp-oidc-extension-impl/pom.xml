@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- See LICENSE.txt file in the root directory of this repository for the 
     copyright/license information. -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -57,6 +58,11 @@
             <groupId>org.geant.fedoidc</groupId>
             <artifactId>oidcfederatedmetadatastatement</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${slf4j.groupId}</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -76,50 +82,50 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-           <groupId>org.opensaml</groupId>
-           <artifactId>opensaml-core</artifactId>
-           <type>test-jar</type>
-           <scope>test</scope>
-       </dependency>
-       <dependency>
-           <groupId>net.shibboleth.idp</groupId>
-           <artifactId>idp-attribute-resolver-spring</artifactId>
-           <type>test-jar</type>
-           <scope>test</scope>
-       </dependency>
-       <dependency>
-           <groupId>net.shibboleth.idp</groupId>
-           <artifactId>idp-authn-impl</artifactId>
-           <type>test-jar</type>
-           <scope>test</scope>
-       </dependency>
-       <dependency>
-           <groupId>net.shibboleth.idp</groupId>
-           <artifactId>idp-authn-impl</artifactId>
-           <scope>test</scope>
-       </dependency>
-       <dependency>
-           <groupId>net.shibboleth.idp</groupId>
-           <artifactId>idp-authn-api</artifactId>
-           <type>test-jar</type>
-           <scope>test</scope>
-       </dependency>
-       <dependency>
-           <groupId>org.opensaml</groupId>
-           <artifactId>opensaml-profile-impl</artifactId>
-           <type>test-jar</type>
-           <scope>test</scope>
-       </dependency>
-       <dependency>
-           <groupId>org.opensaml</groupId>
-           <artifactId>opensaml-profile-api</artifactId>
-           <type>test-jar</type>
-           <scope>test</scope>
-       </dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-core</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-attribute-resolver-spring</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-authn-impl</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-authn-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-authn-api</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-profile-impl</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-profile-api</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-storage-impl</artifactId>
-           <scope>test</scope>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
