@@ -92,8 +92,7 @@ public class ValidateUserPresence extends AbstractOIDCAuthenticationResponseActi
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         if (getOidcResponseContext().getScope().contains(OIDCScopeValue.OFFLINE_ACCESS)) {
-            log.debug("{} Authentication request had offline_access scope, user presence not required", getLogPrefix(),
-                    getMetadataContext().getClientInformation().getID());
+            log.debug("{} Authentication request had offline_access scope, user presence not required", getLogPrefix());
             return;
         }
         String id = getOidcResponseContext().getTokenClaimsSet().getSessionId();
@@ -108,6 +107,6 @@ public class ValidateUserPresence extends AbstractOIDCAuthenticationResponseActi
             log.error("{} Unable to validate user presence", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.ACCESS_DENIED);
         }
-
+        
     }
 }
