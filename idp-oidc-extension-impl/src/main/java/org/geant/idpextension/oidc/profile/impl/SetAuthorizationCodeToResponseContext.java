@@ -47,6 +47,7 @@ import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
+import net.shibboleth.idp.session.context.SessionContext;
 
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseConsentContext;
@@ -80,6 +81,9 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     /** Strategy used to obtain the response issuer value. */
     @Nonnull
     private Function<ProfileRequestContext, String> issuerLookupStrategy;
+    
+    /** Lookup function for SessionContext. */
+    @Nonnull private Function<ProfileRequestContext,SessionContext> sessionContextLookupStrategy;
 
     /** Subject context. */
     private SubjectContext subjectCtx;
@@ -94,6 +98,9 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     /** The generator to use. */
     @Nullable
     private IdentifierGenerationStrategy idGenerator;
+    
+    /** Session id stored to authz code. */
+    private String sessiondId;
 
     /** Strategy used to locate the {@link IdentifierGenerationStrategy} to use. */
     @Nonnull
@@ -133,8 +140,22 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
                 return new SecureRandomIdentifierGenerationStrategy();
             }
         };
+        sessionContextLookupStrategy = new ChildContextLookup<>(SessionContext.class);
     }
 
+    /**
+     * Set the lookup strategy for the SessionContext to access.
+     * 
+     * @param strategy  lookup strategy
+     */
+    public void setSessionContextLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext,SessionContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        
+        sessionContextLookupStrategy = Constraint.isNotNull(strategy,
+                "SessionContext lookup strategy cannot be null");
+    }
+    
     /**
      * Set the strategy used to locate the {@link OIDCAuthenticationResponseTokenClaimsContext} associated with a given
      * {@link ProfileRequestContext}.
@@ -202,6 +223,15 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+        
+        final SessionContext sessionCtx = sessionContextLookupStrategy.apply(profileRequestContext);
+        if (sessionCtx == null) {
+            log.error("{} No session context", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+            return false;
+        }
+        sessiondId = sessionCtx.getIdPSession().getId();
+        
         subjectCtx = profileRequestContext.getSubcontext(SubjectContext.class, false);
         if (subjectCtx == null) {
             log.error("{} No subject context", getLogPrefix());
@@ -257,7 +287,7 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
                 getAuthenticationRequest().getClientID(), issuerLookupStrategy.apply(profileRequestContext),
                 subjectCtx.getPrincipalName(), getOidcResponseContext().getSubject(), getOidcResponseContext().getAcr(),
                 new Date(), dateExp, getAuthenticationRequest().getNonce(), getOidcResponseContext().getAuthTime(),
-                getOidcResponseContext().getRedirectURI(), getAuthenticationRequest().getScope(),
+                getOidcResponseContext().getRedirectURI(), getAuthenticationRequest().getScope(), sessiondId,
                 getAuthenticationRequest().getClaims(), claims, claimsID, claimsUI, consentable, consented);
         // We set token claims set to response context for possible access token generation.
         getOidcResponseContext().setTokenClaimsSet(claimsSet);

@@ -32,6 +32,7 @@ import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
+import net.shibboleth.idp.session.context.SessionContext;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
 import java.net.URI;
@@ -61,6 +62,8 @@ public class SetAuthorizationCodeToResponseContextTest extends BaseOIDCResponseA
         action = new SetAuthorizationCodeToResponseContext(getDataSealer());
         action.initialize();
         SubjectContext subjectCtx = profileRequestCtx.getSubcontext(SubjectContext.class, true);
+        SessionContext sessionCtx = profileRequestCtx.getSubcontext(SessionContext.class, true);
+        sessionCtx.setIdPSession(new SetAccessTokenToResponseContextTest.MockIdPSession());
         subjectCtx.setPrincipalName("userPrin");
     }
 

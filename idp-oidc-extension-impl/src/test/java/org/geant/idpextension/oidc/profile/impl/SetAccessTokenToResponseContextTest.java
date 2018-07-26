@@ -28,10 +28,15 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
+import net.shibboleth.idp.authn.AuthenticationResult;
 import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
+import net.shibboleth.idp.session.IdPSession;
+import net.shibboleth.idp.session.SPSession;
+import net.shibboleth.idp.session.SessionException;
+import net.shibboleth.idp.session.context.SessionContext;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
 import java.net.URI;
@@ -39,6 +44,7 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Set;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseConsentContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseTokenClaimsContext;
@@ -67,7 +73,7 @@ public class SetAccessTokenToResponseContextTest extends BaseOIDCResponseActionT
         respCtx.setScope(new Scope());
         TokenClaimsSet claims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null, null);
+                new Scope(), "id",null, null, null, null, null, null);
         respCtx.setSubject("subject");
         respCtx.setAuthTime(System.currentTimeMillis());
         respCtx.setTokenClaimsSet(claims);
@@ -76,6 +82,8 @@ public class SetAccessTokenToResponseContextTest extends BaseOIDCResponseActionT
         action = new SetAccessTokenToResponseContext(getDataSealer());
         action.initialize();
         SubjectContext subjectCtx = profileRequestCtx.getSubcontext(SubjectContext.class, true);
+        SessionContext sessionCtx = profileRequestCtx.getSubcontext(SessionContext.class, true);
+        sessionCtx.setIdPSession(new MockIdPSession());
         subjectCtx.setPrincipalName("userPrin");
     }
 
@@ -268,10 +276,102 @@ public class SetAccessTokenToResponseContextTest extends BaseOIDCResponseActionT
         init();
         TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null);
+                new Scope(), "id", null, null, null, null, null);
         respCtx.setTokenClaimsSet(claims);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_PROFILE_CTX);
     }
+  
+    static class MockIdPSession implements IdPSession{
 
+        @Override
+        public String getId() {
+            return "id";
+        }
+
+        @Override
+        public AuthenticationResult addAuthenticationResult(AuthenticationResult arg0) throws SessionException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public SPSession addSPSession(SPSession arg0) throws SessionException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public boolean checkAddress(String arg0) throws SessionException {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        @Override
+        public boolean checkTimeout() throws SessionException {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        @Override
+        public AuthenticationResult getAuthenticationResult(String arg0) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Set<AuthenticationResult> getAuthenticationResults() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public long getCreationInstant() {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        @Override
+        public long getLastActivityInstant() {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        @Override
+        public String getPrincipalName() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public SPSession getSPSession(String arg0) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Set<SPSession> getSPSessions() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public boolean removeAuthenticationResult(AuthenticationResult arg0) throws SessionException {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        @Override
+        public boolean removeSPSession(SPSession arg0) throws SessionException {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        @Override
+        public void updateAuthenticationResultActivity(AuthenticationResult arg0) throws SessionException {
+            // TODO Auto-generated method stub
+            
+        }
+        
+    }
 }

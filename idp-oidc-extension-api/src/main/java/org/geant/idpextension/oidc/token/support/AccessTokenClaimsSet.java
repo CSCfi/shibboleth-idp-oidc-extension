@@ -76,7 +76,7 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
                 tokenClaimSet.getClaimsSet().getIssuer(), tokenClaimSet.getPrincipal(),
                 tokenClaimSet.getClaimsSet().getSubject(),
                 tokenClaimSet.getACR() == null ? null : new ACR(tokenClaimSet.getACR()), iat, exp,
-                tokenClaimSet.getNonce(), tokenClaimSet.getAuthenticationTime(), tokenClaimSet.getRedirectURI(), scope,
+                tokenClaimSet.getNonce(), tokenClaimSet.getAuthenticationTime(), tokenClaimSet.getRedirectURI(), scope, tokenClaimSet.getSessionId(),
                 tokenClaimSet.getClaimsRequest(), dlClaims, null, dlClaimsUI, tokenClaimSet.getConsentableClaims(),
                 tokenClaimSet.getConsentedClaims());
     }
@@ -102,10 +102,10 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
     public AccessTokenClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nullable ACR acr,
             @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
-            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nonnull ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
+            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nonnull String idpSessionId, @Nonnull ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
             @Nullable ClaimsSet dlClaimsUI, JSONArray consentableClaims, JSONArray consentedClaims) {
         super(VALUE_TYPE_AT, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, subject, acr, iat, exp,
-                nonce, authTime, redirectURI, scope, claims, dlClaims, null, dlClaimsUI, consentableClaims,
+                nonce, authTime, redirectURI, scope, idpSessionId, claims, dlClaims, null, dlClaimsUI, consentableClaims,
                 consentedClaims);
     }
 

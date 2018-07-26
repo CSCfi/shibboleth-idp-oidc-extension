@@ -21,6 +21,7 @@
 
     <action-state id="OutboundContextsAndSecurityParameters">
         <evaluate expression="ValidateScope" />
+        <evaluate expression="ValidateUserPresence" />
         <evaluate expression="SetRequestedClaimsToResponseContext" />
         <evaluate expression="SetTokenDeliveryAttributesToResponseContext" />
         <evaluate expression="SetConsentToResponseContext" />

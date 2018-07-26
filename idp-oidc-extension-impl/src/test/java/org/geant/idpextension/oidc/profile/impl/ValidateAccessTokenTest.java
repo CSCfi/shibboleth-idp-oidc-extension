@@ -90,7 +90,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
         init();
         TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(System.currentTimeMillis() + 1000), new Nonce(), new Date(),
-                new URI("http://example.com"), new Scope(), null, null, null, null, null);
+                new URI("http://example.com"), new Scope(), "id", null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);
@@ -112,7 +112,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
         init();
         TokenClaimsSet claims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null, null);
+                new Scope(), "id", null, null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);
@@ -134,7 +134,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
         init();
         TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(System.currentTimeMillis() - 1), new Nonce(), new Date(),
-                new URI("http://example.com"), new Scope(), null, null, null, null, null);
+                new URI("http://example.com"), new Scope(), "id", null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);
@@ -158,7 +158,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
         action.initialize();
         TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(System.currentTimeMillis() + 1000), new Nonce(), new Date(),
-                new URI("http://example.com"), new Scope(), null, null, null, null, null);
+                new URI("http://example.com"), new Scope(), "id", null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);

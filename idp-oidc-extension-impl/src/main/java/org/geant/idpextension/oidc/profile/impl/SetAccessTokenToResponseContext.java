@@ -48,6 +48,7 @@ import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
+import net.shibboleth.idp.session.context.SessionContext;
 
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseConsentContext;
@@ -99,6 +100,9 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     /** Strategy used to obtain the response issuer value. */
     @Nonnull
     private Function<ProfileRequestContext, String> issuerLookupStrategy;
+    
+    /** Lookup function for SessionContext. */
+    @Nonnull private Function<ProfileRequestContext,SessionContext> sessionContextLookupStrategy;
 
     /** Subject context. */
     private SubjectContext subjectCtx;
@@ -106,6 +110,10 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     /** The generator to use. */
     @Nullable
     private IdentifierGenerationStrategy idGenerator;
+    
+    /** Session id stored to access token. */
+    @Nullable
+    private String sessiondId;
 
     /** Strategy used to locate the {@link IdentifierGenerationStrategy} to use. */
     @Nonnull
@@ -142,6 +150,20 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
                 return new SecureRandomIdentifierGenerationStrategy();
             }
         };
+        sessionContextLookupStrategy = new ChildContextLookup<>(SessionContext.class);
+    }
+    
+    /**
+     * Set the lookup strategy for the SessionContext to access.
+     * 
+     * @param strategy  lookup strategy
+     */
+    public void setSessionContextLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext,SessionContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        
+        sessionContextLookupStrategy = Constraint.isNotNull(strategy,
+                "SessionContext lookup strategy cannot be null");
     }
 
     /**
@@ -241,6 +263,13 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
              * Alternate path possible only when access token is to be provided by authz endpoint without authorization
              * code This is the case only with "token id_token" response type. Unusually complex initialization.
              */
+            final SessionContext sessionCtx = sessionContextLookupStrategy.apply(profileRequestContext);
+            if (sessionCtx == null) {
+                log.error("{} No session context", getLogPrefix());
+                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+                return false;
+            }
+            sessiondId = sessionCtx.getIdPSession().getId();
 
             subjectCtx = profileRequestContext.getSubcontext(SubjectContext.class, false);
             if (subjectCtx == null) {
@@ -299,7 +328,7 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
                     issuerLookupStrategy.apply(profileRequestContext), subjectCtx.getPrincipalName(),
                     getOidcResponseContext().getSubject(), getOidcResponseContext().getAcr(), new Date(), dateExp,
                     authenticationRequest.getNonce(), getOidcResponseContext().getAuthTime(),
-                    getOidcResponseContext().getRedirectURI(), authenticationRequest.getScope(),
+                    getOidcResponseContext().getRedirectURI(), authenticationRequest.getScope(), sessiondId,
                     authenticationRequest.getClaims(), claims, claimsUI, consentable, consented);
         }
         try {

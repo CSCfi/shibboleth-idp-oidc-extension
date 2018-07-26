@@ -106,7 +106,7 @@ public class SetSubjectToResponseContextTest extends BaseOIDCResponseActionTest 
         init();
         TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null);
+                new Scope(), "id", null, null, null, null, null);
         respCtx.setTokenClaimsSet(claims);
         profileRequestCtx.removeSubcontext(ConsentContext.class);
         final Event event = action.execute(requestCtx);

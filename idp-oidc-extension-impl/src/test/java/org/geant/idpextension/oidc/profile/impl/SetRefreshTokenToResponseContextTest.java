@@ -60,7 +60,7 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
         respCtx.setScope(new Scope());
         TokenClaimsSet claims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null, null);
+                new Scope(), "id", null, null, null, null, null, null);
         respCtx.setTokenClaimsSet(claims);
         action = new SetRefreshTokenToResponseContext(getDataSealer());
         action.initialize();
@@ -138,7 +138,7 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
         init();
         TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null);
+                new Scope(), "id", null, null, null, null, null);
         respCtx.setTokenClaimsSet(claims);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_PROFILE_CTX);
