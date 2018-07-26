@@ -94,7 +94,7 @@
 - name: configure shibboleth-idp idp.properties
   lineinfile: dest={{ idp_home }}/conf/idp.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
   with_items:
-    - { option: 'idp.session.StorageService', value: 'shibboleth.StorageService' }
+    - { option: 'idp.session.StorageService', value: 'shibboleth.JPAStorageService' }
     - { option: 'idp.entityID', value: 'https://{{ service_name }}' }
 
 - name: Set oidc issuer to idp.properties
