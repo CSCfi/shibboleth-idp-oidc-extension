@@ -164,7 +164,7 @@ public class TokenClaimsSet {
             throw new RuntimeException("Invalid parameters, programming error");
         }
         tokenClaimsSet = new JWTClaimsSet.Builder().claim(KEY_TYPE, tokenType).jwtID(tokenID)
-                .audience(clientID.getValue()).issuer(issuer).subject(subject).claim(KEY_USER_PRINCIPAL, userPrincipal)
+                .claim(KEY_CLIENTID, clientID.getValue()).issuer(issuer).subject(subject).claim(KEY_USER_PRINCIPAL, userPrincipal)
                 .claim(KEY_ACR, acr == null ? null : acr.getValue()).issueTime(iat).expirationTime(exp)
                 .claim(KEY_NONCE, nonce == null ? null : nonce.getValue()).claim(KEY_AUTH_TIME, authTime)
                 .claim(KEY_REDIRECT_URI, redirectURI.toString()).claim(KEY_SCOPE, scope.toString())
@@ -201,8 +201,8 @@ public class TokenClaimsSet {
         if (tokenClaimsSet.getStringClaim(KEY_SUBJECT) == null) {
             throw new ParseException("claim sub must exist and not be null", 0);
         }
-        if (tokenClaimsSet.getStringArrayClaim(KEY_CLIENTID) == null) {
-            throw new ParseException("claim aud must exist and not be null", 0);
+        if (tokenClaimsSet.getStringClaim(KEY_CLIENTID) == null) {
+            throw new ParseException("claim clid must exist and not be null", 0);
         }
         if (tokenClaimsSet.getDateClaim(KEY_EXPIRATION_TIME) == null) {
             throw new ParseException("claim exp must exist and not be null", 0);
@@ -523,7 +523,7 @@ public class TokenClaimsSet {
      */
     @Nonnull
     public ClientID getClientID() {
-        return new ClientID(tokenClaimsSet.getAudience().get(0));
+    	return new ClientID((String) tokenClaimsSet.getClaim(KEY_CLIENTID));
     }
 
 }
