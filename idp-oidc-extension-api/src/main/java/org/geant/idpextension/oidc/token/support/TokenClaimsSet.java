@@ -68,10 +68,8 @@ public class TokenClaimsSet {
     /** Subject of the user. */
     public static final String KEY_SUBJECT = "sub";
 
-    /**
-     * Client Id of the rp the token is generated for. Type is string array (aud).
-     */
-    public static final String KEY_CLIENTID = "aud";
+    /** Client id of the rp the token is generated for.*/
+    public static final String KEY_CLIENTID = "clid";
 
     /** Expiration time of the token. */
     public static final String KEY_EXPIRATION_TIME = "exp";
