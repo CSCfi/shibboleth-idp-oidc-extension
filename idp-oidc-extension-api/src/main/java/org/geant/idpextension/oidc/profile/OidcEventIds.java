@@ -77,6 +77,11 @@ public final class OidcEventIds {
      * The subject resolved is not the expected one.
      */
     @Nonnull @NotEmpty public static final String INVALID_SUBJECT = "InvalidSubject";
+    
+    /**
+     * The request object cannot be validated.
+     */
+    @Nonnull @NotEmpty public static final String INVALID_REQUEST_OBJECT = "InvalidRequestObject";
 
     /**
      * Constructor.

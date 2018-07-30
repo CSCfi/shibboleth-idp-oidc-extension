@@ -33,6 +33,8 @@ import java.util.Date;
 import javax.annotation.Nullable;
 import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
 import org.opensaml.messaging.context.BaseContext;
+
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -87,10 +89,6 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     @Nullable
     private AuthorizationCode authorizationCode;
 
-    /** Token (authz code, access token) claims. */
-    @Nullable
-    private TokenClaimsSet tokenClaims;
-
     /** Access token. */
     @Nullable
     private AccessToken accessToken;
@@ -99,9 +97,36 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     @Nullable
     private RefreshToken refreshToken;
 
+    /** Token (authz code, access token) claims. */
+    @Nullable
+    private TokenClaimsSet tokenClaims;
+
     /** Requested claims. */
     @Nullable
     private ClaimsRequest requestedClaims;
+
+    /** Validated request object. */
+    @Nullable
+    private JWT requestObject;
+
+    /**
+     * Get validated request object.
+     * 
+     * @return validated request object.
+     */
+    @Nullable
+    public JWT getRequestObject() {
+        return requestObject;
+    }
+
+    /**
+     * Set validated request object.
+     * 
+     * @param requestObj validated request object.
+     */
+    public void setRequestObject(@Nullable JWT requestObj) {
+        requestObject = requestObj;
+    }
 
     /**
      * Get requested claims.
