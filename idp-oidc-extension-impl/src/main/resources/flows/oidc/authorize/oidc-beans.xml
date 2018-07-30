@@ -73,6 +73,9 @@
         class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundAuthenticationResponseMessageContext"
         scope="prototype" />
 
+    <bean id="ValidateRequestObject" class="org.geant.idpextension.oidc.profile.impl.ValidateRequestObject"
+        scope="prototype" />
+        
     <bean id="ValidateRedirectURI" class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
         scope="prototype" />
 
