@@ -28,21 +28,47 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
+import java.text.ParseException;
+
 import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
  * A function that returns copy of requested scopes via a lookup function. This default lookup locates scope from oidc
- * authentication request if available. If information is not available, null is returned.
+ * authentication request if available. If information is not available, null is returned. If there is scope in request
+ * object it is used instead of scope parameter.
  */
 public class DefaultRequestedScopeLookupFunction extends AbstractAuthenticationRequestLookupFunction<Scope> {
+
+    /** Class logger. */
+    @Nonnull
+    private Logger log = LoggerFactory.getLogger(DefaultRequestedScopeLookupFunction.class);
 
     /** {@inheritDoc} */
     @Override
     Scope doLookup(@Nonnull AuthenticationRequest req) {
-        Scope scope = new Scope();
-        scope.addAll(req.getScope());
-        return scope;
+        JWT requestObject = req.getRequestObject();
+        try {
+            if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("scope") != null) {
+                Scope reqObjectScope = new Scope();
+                String[] scopes = ((String) requestObject.getJWTClaimsSet().getClaim("scope")).split(" ");
+                for (String scope : scopes) {
+                    reqObjectScope.add(scope);
+                }
+                return reqObjectScope;
+            }
+        } catch (ParseException e) {
+            log.error("Unable to parse scope from request object scope value");
+            return null;
+        }
+        Scope requestParameterScope = new Scope();
+        requestParameterScope.addAll(req.getScope());
+        return requestParameterScope;
     }
 }
