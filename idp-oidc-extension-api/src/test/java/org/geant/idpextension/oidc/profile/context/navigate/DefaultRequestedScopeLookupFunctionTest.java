@@ -51,9 +51,11 @@ import junit.framework.Assert;
 public class DefaultRequestedScopeLookupFunctionTest {
 
     private DefaultRequestedScopeLookupFunction lookup;
+
     @SuppressWarnings("rawtypes")
     private ProfileRequestContext prc;
-    private MessageContext<AuthenticationRequest> msgCtx; 
+
+    private MessageContext<AuthenticationRequest> msgCtx;
 
     @SuppressWarnings("unchecked")
     @BeforeMethod
@@ -64,30 +66,29 @@ public class DefaultRequestedScopeLookupFunctionTest {
         msgCtx = new MessageContext<AuthenticationRequest>();
         prc.setInboundMessageContext(msgCtx);
     }
-    
+
     @Test
     public void testSuccessNoReqObject() {
-        Scope parameterScope=new Scope("openid","email");
+        Scope parameterScope = new Scope("openid", "email");
         AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), parameterScope,
-                new ClientID("000123"), URI.create("https://example.com/callback"))
-                        .state(new State()).build();
+                new ClientID("000123"), URI.create("https://example.com/callback")).state(new State()).build();
         msgCtx.setMessage(req);
         Assert.assertTrue(lookup.apply(prc).contains("openid"));
         Assert.assertTrue(lookup.apply(prc).contains("email"));
         Assert.assertEquals(2, lookup.apply(prc).size());
     }
-    
+
     @Test
     public void testSuccessReqObject() {
-        Scope parameterScope=new Scope("openid");
+        Scope parameterScope = new Scope("openid");
         JWTClaimsSet ro = new JWTClaimsSet.Builder().claim("scope", "openid email").build();
         AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), parameterScope,
-                new ClientID("000123"), URI.create("https://example.com/callback"))
-                        .state(new State()).requestObject(new PlainJWT(ro)).build();
+                new ClientID("000123"), URI.create("https://example.com/callback")).state(new State())
+                        .requestObject(new PlainJWT(ro)).build();
         msgCtx.setMessage(req);
         Assert.assertTrue(lookup.apply(prc).contains("openid"));
         Assert.assertTrue(lookup.apply(prc).contains("email"));
         Assert.assertEquals(2, lookup.apply(prc).size());
     }
-    
+
 }
