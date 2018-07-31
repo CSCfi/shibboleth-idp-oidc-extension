@@ -58,7 +58,6 @@ public class DefaultRequestedScopeLookupFunctionTest {
     @SuppressWarnings("unchecked")
     @BeforeMethod
     protected void setUp() throws Exception {
-        //sector = new URI("https://example.org/uri");
         lookup = new DefaultRequestedScopeLookupFunction();
         final RequestContext requestCtx = new RequestContextBuilder().buildRequestContext();
         prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
