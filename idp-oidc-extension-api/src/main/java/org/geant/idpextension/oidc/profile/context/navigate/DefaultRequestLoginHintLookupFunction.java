@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 
 /**
  * A function that returns request login hint via a lookup function. This default lookup locates hint from oidc
