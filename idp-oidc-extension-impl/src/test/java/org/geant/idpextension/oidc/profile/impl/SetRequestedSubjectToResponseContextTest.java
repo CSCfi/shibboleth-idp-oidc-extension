@@ -104,6 +104,7 @@ public class SetRequestedSubjectToResponseContextTest extends BaseOIDCResponseAc
                 new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
                         URI.create("https://example.com/callback")).claims(claims).state(new State()).build();
         setAuthenticationRequest(req);
+        respCtx.setRequestedClaims(claims);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertEquals(respCtx.getRequestedSubject(), "reqsubclaims");
@@ -126,6 +127,7 @@ public class SetRequestedSubjectToResponseContextTest extends BaseOIDCResponseAc
                 new ClientID("000123"), URI.create("https://example.com/callback")).idTokenHint(idTokenHint)
                         .claims(claims).state(new State()).build();
         setAuthenticationRequest(req);
+        respCtx.setRequestedClaims(claims);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertEquals(respCtx.getRequestedSubject(), "reqsubclaims");

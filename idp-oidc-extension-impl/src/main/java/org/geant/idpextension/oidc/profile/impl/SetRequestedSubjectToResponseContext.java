@@ -66,9 +66,11 @@ public class SetRequestedSubjectToResponseContext extends AbstractOIDCAuthentica
             log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
-        if (getAuthenticationRequest().getClaims() != null) {
-            idTokenClaims = getAuthenticationRequest().getClaims().getIDTokenClaims();
+        if (getOidcResponseContext().getRequestedClaims() != null) {
+            idTokenClaims = getOidcResponseContext().getRequestedClaims().getIDTokenClaims();
         }
+        // TODO: As id token hint validation is implemented update to use validated hint instead of request message
+        // plain hint.
         idTokenHint = getAuthenticationRequest().getIDTokenHint();
         if (idTokenClaims == null && idTokenHint == null) {
             log.debug("{} No requested claims nor id token hint, nothing to do", getLogPrefix());
