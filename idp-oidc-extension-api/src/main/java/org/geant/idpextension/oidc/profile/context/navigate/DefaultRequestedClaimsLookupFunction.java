@@ -28,19 +28,43 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
+import java.text.ParseException;
 import javax.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 
 /**
  * A function that returns copy of requested claims via a lookup function. This default lookup locates requested claims
- * from oidc authentication request if available. If information is not available, null is returned.
+ * from oidc authentication request if available. If information is not available, null is returned. If there is claims
+ * request in request object it is used instead of claims parameter.
  */
 public class DefaultRequestedClaimsLookupFunction extends AbstractAuthenticationRequestLookupFunction<ClaimsRequest> {
+
+    /** Class logger. */
+    @Nonnull
+    private Logger log = LoggerFactory.getLogger(DefaultRequestedClaimsLookupFunction.class);
 
     /** {@inheritDoc} */
     @Override
     ClaimsRequest doLookup(@Nonnull AuthenticationRequest req) {
+        JWT requestObject = req.getRequestObject();
+        try {
+            if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("claims") != null) {
+                Object claims = requestObject.getJWTClaimsSet().getClaim("claims");
+                if (claims instanceof ClaimsRequest) {
+                    return (ClaimsRequest) claims;
+                } else {
+                    log.error("claims claim is not of expected type");
+                    return null;
+                }
+            }
+        } catch (ParseException e) {
+            log.error("unable to parse claims claim {}", e.getMessage());
+            return null;
+        }
         if (req.getClaims() == null) {
             return null;
         }
