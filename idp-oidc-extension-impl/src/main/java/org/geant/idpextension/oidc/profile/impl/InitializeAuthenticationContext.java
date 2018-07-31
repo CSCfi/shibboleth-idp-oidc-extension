@@ -31,9 +31,15 @@ package org.geant.idpextension.oidc.profile.impl;
 import javax.annotation.Nonnull;
 
 import net.shibboleth.idp.authn.context.AuthenticationContext;
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
+import net.shibboleth.utilities.java.support.logic.Constraint;
+
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestLoginHintLookupFunction;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestedPromptLookupFunction;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.base.Function;
 import com.nimbusds.openid.connect.sdk.Prompt;
 
 /**
@@ -54,18 +60,58 @@ public class InitializeAuthenticationContext extends AbstractOIDCAuthenticationR
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(InitializeAuthenticationContext.class);
 
+    /** Strategy used to obtain the requested prompt value. */
+    @Nonnull
+    private Function<ProfileRequestContext, Prompt> promptLookupStrategy;
+
+    /** Strategy used to obtain the request login hint value. */
+    @Nonnull
+    private Function<ProfileRequestContext, String> loginHintLookupStrategy;
+
+    /**
+     * Constructor.
+     */
+    public InitializeAuthenticationContext() {
+        promptLookupStrategy = new DefaultRequestedPromptLookupFunction();
+        loginHintLookupStrategy = new DefaultRequestLoginHintLookupFunction();
+    }
+
+    /**
+     * Set the strategy used to locate the requested prompt.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setPromptLookupStrategy(@Nonnull final Function<ProfileRequestContext, Prompt> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        promptLookupStrategy = Constraint.isNotNull(strategy, "PromptLookupStrategy lookup strategy cannot be null");
+    }
+
+    /**
+     * Set the strategy used to locate the request login hint.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setLoginHintLookupStrategy(@Nonnull final Function<ProfileRequestContext, String> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        loginHintLookupStrategy =
+                Constraint.isNotNull(strategy, "LoginHintLookupStrategy lookup strategy cannot be null");
+    }
+
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         log.debug("{} Initializing authentication context", getLogPrefix());
         final AuthenticationContext authnCtx = new AuthenticationContext();
-        if (getAuthenticationRequest().getPrompt() != null) {
-            authnCtx.setIsPassive(getAuthenticationRequest().getPrompt().contains(Prompt.Type.NONE));
-            authnCtx.setForceAuthn(getAuthenticationRequest().getPrompt().contains(Prompt.Type.LOGIN));
+
+        Prompt prompt = promptLookupStrategy.apply(profileRequestContext);
+        if (prompt != null) {
+            authnCtx.setIsPassive(prompt.contains(Prompt.Type.NONE));
+            authnCtx.setForceAuthn(prompt.contains(Prompt.Type.LOGIN));
         }
-        if (getAuthenticationRequest().getLoginHint() != null) {
-            authnCtx.setHintedName(getAuthenticationRequest().getLoginHint());
+        String loginHint = loginHintLookupStrategy.apply(profileRequestContext);
+        if (loginHint != null) {
+            authnCtx.setHintedName(loginHint);
         }
         final AuthenticationContext initialAuthnContext =
                 profileRequestContext.getSubcontext(AuthenticationContext.class);
