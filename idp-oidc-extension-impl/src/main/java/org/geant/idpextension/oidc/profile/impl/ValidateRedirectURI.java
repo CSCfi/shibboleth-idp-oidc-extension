@@ -32,7 +32,7 @@ import java.net.URI;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.geant.idpextension.oidc.profile.OidcEventIds;
-import org.geant.idpextension.oidc.profile.context.navigate.DefaultRedirectURILookupFunction;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestRedirectURILookupFunction;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultValidRedirectUrisLookupFunction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -64,7 +64,7 @@ public class ValidateRedirectURI extends AbstractOIDCAuthenticationResponseActio
      * Constructor.
      */
     public ValidateRedirectURI() {
-        redirectURILookupStrategy = new DefaultRedirectURILookupFunction();
+        redirectURILookupStrategy = new DefaultRequestRedirectURILookupFunction();
         validRedirectURIsLookupStrategy = new DefaultValidRedirectUrisLookupFunction();
     }
 

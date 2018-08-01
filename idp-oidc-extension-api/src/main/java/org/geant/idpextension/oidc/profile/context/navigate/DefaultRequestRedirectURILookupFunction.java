@@ -29,19 +29,43 @@
 package org.geant.idpextension.oidc.profile.context.navigate;
 
 import java.net.URI;
-
+import java.net.URISyntaxException;
+import java.text.ParseException;
 import javax.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
  * A function that returns redirect uri of the authentication request via a lookup function. This default lookup locates
- * redirect uri from oidc authentication request if available. If information is not available, null is returned.
+ * redirect uri from oidc authentication request if available. If information is not available, null is returned. If
+ * there is redirect uri in request object it is used instead of redirect_uri parameter.
  */
-public class DefaultRedirectURILookupFunction extends AbstractAuthenticationRequestLookupFunction<URI> {
+public class DefaultRequestRedirectURILookupFunction extends AbstractAuthenticationRequestLookupFunction<URI> {
 
+    /** Class logger. */
+    @Nonnull
+    private Logger log = LoggerFactory.getLogger(DefaultRequestRedirectURILookupFunction.class);
+    
     /** {@inheritDoc} */
     @Override
     URI doLookup(@Nonnull AuthenticationRequest req) {
+        try {
+            JWT requestObject = req.getRequestObject();
+            if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("redirect_uri") != null) {
+                Object redirect_uri = requestObject.getJWTClaimsSet().getClaim("redirect_uri");
+                if (redirect_uri instanceof String) {
+                    return new URI((String)redirect_uri);
+                } else {
+                    log.error("login_hint claim is not of expected type");
+                    return null;
+                }
+            }
+        } catch (ParseException | URISyntaxException e) {
+            log.error("Unable to parse login hint from request object login_hint value");
+            return null;
+        }
         return req.getRedirectionURI();
     }
 }
