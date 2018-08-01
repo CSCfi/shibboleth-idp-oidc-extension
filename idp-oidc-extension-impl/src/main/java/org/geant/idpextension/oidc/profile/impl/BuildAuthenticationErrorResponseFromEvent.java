@@ -30,8 +30,8 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import java.net.URI;
 
-import org.geant.idpextension.oidc.profile.context.navigate.DefaultResponseModeLookupFunction;
-import org.geant.idpextension.oidc.profile.context.navigate.DefaultStateLookupFunction;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestResponseModeLookupFunction;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestStateLookupFunction;
 import org.geant.idpextension.oidc.profile.context.navigate.ValidatedRedirectURILookupFunction;
 import org.opensaml.profile.context.EventContext;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -55,8 +55,8 @@ public class BuildAuthenticationErrorResponseFromEvent
             return null;
         }
         return new AuthenticationErrorResponse(redirectURI, error,
-                new DefaultStateLookupFunction().apply(profileRequestContext),
-                new DefaultResponseModeLookupFunction().apply(profileRequestContext));
+                new DefaultRequestStateLookupFunction().apply(profileRequestContext),
+                new DefaultRequestResponseModeLookupFunction().apply(profileRequestContext));
     }
 
 }

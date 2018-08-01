@@ -28,23 +28,50 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
+import java.text.ParseException;
+
 import javax.annotation.Nonnull;
-import com.nimbusds.oauth2.sdk.id.State;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
- * A function that returns copy of the state the request via a lookup function. This default lookup locates state from
- * oidc authentication request if available. If information is not available, null is returned.
+ * A function that returns copy of the response mode of the request via a lookup function. This default lookup locates
+ * response mode from oidc authentication request if available. If information is not available, null is returned. If
+ * there is response mode in request object it is used instead of response_mode parameter.
  */
-public class DefaultStateLookupFunction extends AbstractAuthenticationRequestLookupFunction<State> {
+public class DefaultRequestResponseModeLookupFunction
+        extends AbstractAuthenticationRequestLookupFunction<ResponseMode> {
+
+    /** Class logger. */
+    @Nonnull
+    private Logger log = LoggerFactory.getLogger(DefaultRequestResponseModeLookupFunction.class);
 
     /** {@inheritDoc} */
     @Override
-    State doLookup(@Nonnull AuthenticationRequest req) {
-        if (req.getState() == null) {
+    ResponseMode doLookup(@Nonnull AuthenticationRequest req) {
+        JWT requestObject = req.getRequestObject();
+        try {
+            if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("response_mode") != null) {
+                Object rMode = requestObject.getJWTClaimsSet().getClaim("response_mode");
+                if (rMode instanceof String) {
+                    return new ResponseMode((String) rMode);
+                } else {
+                    log.error("response_mode claim is not of expected type");
+                    return null;
+                }
+            }
+        } catch (ParseException e) {
+            log.error("Unable to parse response mode from request object response_mode value");
             return null;
         }
-        State clientID = new State(req.getState().getValue());
-        return clientID;
+        if (req.getResponseMode() == null) {
+            return null;
+        }
+        ResponseMode responseMode = new ResponseMode(req.getResponseMode().getValue());
+        return responseMode;
     }
 }

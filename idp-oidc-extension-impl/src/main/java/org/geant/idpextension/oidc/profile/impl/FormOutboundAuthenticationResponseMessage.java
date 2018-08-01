@@ -29,6 +29,9 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
+
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestResponseModeLookupFunction;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestStateLookupFunction;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -61,8 +64,9 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
         }
         AuthenticationResponse resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
                 getOidcResponseContext().getAuthorizationCode(), getOidcResponseContext().getSignedToken(),
-                getOidcResponseContext().getAccessToken(), getAuthenticationRequest().getState(), null,
-                getAuthenticationRequest().getResponseMode());
+                getOidcResponseContext().getAccessToken(),
+                new DefaultRequestStateLookupFunction().apply(profileRequestContext), null,
+                new DefaultRequestResponseModeLookupFunction().apply(profileRequestContext));
         log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
