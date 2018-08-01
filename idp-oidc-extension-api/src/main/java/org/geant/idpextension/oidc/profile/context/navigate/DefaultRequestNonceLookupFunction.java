@@ -28,21 +28,46 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
+import java.text.ParseException;
+
 import javax.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
 
 /**
  * A function that returns copy of Nonce via a lookup function. This default lookup locates nonce from oidc
- * authentication request if available. If information is not available, null is returned.
+ * authentication request if available. If information is not available, null is returned. If there is nonce in request
+ * object it is used instead of nonce parameter.
  */
 public class DefaultRequestNonceLookupFunction extends AbstractAuthenticationRequestLookupFunction<Nonce> {
+
+    /** Class logger. */
+    @Nonnull
+    private Logger log = LoggerFactory.getLogger(DefaultRequestLoginHintLookupFunction.class);
 
     /** {@inheritDoc} */
     @Override
     Nonce doLookup(@Nonnull AuthenticationRequest req) {
+        JWT requestObject = req.getRequestObject();
+        try {
+            if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("nonce") != null) {
+                Object nonce = requestObject.getJWTClaimsSet().getClaim("nonce");
+                if (nonce instanceof String) {
+                    return new Nonce((String) nonce);
+                } else {
+                    log.error("nonce claim is not of expected type");
+                    return null;
+                }
+            }
+        } catch (ParseException e) {
+            log.error("Unable to parse nonce from request object nonce value");
+            return null;
+        }
         if (req.getNonce() != null) {
-            return Nonce.parse(req.getNonce().getValue());
+            return new Nonce(req.getNonce().getValue());
         }
         return null;
     }
