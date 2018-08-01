@@ -61,7 +61,7 @@ public class DefaultRequestLoginHintLookupFunction extends AbstractAuthenticatio
                 }
             }
         } catch (ParseException e) {
-            log.error("Unable to parse scope from request object scope value");
+            log.error("Unable to parse login hint from request object login_hint value");
             return null;
         }
         return req.getLoginHint();
