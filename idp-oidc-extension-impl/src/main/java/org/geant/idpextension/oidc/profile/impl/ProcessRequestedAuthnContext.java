@@ -32,9 +32,12 @@ import javax.annotation.Nonnull;
 
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.RequestedPrincipalContext;
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
+import net.shibboleth.utilities.java.support.logic.Constraint;
 
 import org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal;
 import org.geant.idpextension.oidc.messaging.context.OIDCRequestedPrincipalContext;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestedACRLookupFunction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -42,6 +45,7 @@ import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest.Entry;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
@@ -59,14 +63,14 @@ import java.util.List;
  * If the incoming message contains acr values we create requested principal context populated with matching
  * {@link AuthenticationContextClassReferencePrincipal}.
  * 
- * Acr values may be be given as authentication request parameter (acr_values) or as requested id token claim (acr) in
- * requested claims parameter. If they are given in both, the outcome is unspecified.
+ * Acr values may be be given as authentication request parameter/request object (acr_values) or as requested id token
+ * claim (acr) in requested claims parameter. If they are given in both, the outcome is unspecified.
  * 
  * The information of essentiality of requested acr is stored to {@link OIDCRequestedPrincipalContext}.
  * </p>
  */
 @SuppressWarnings("rawtypes")
-public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequestAction {
+public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationResponseAction {
 
     /** Class logger. */
     @Nonnull
@@ -75,11 +79,32 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
     /** Authentication context. */
     private AuthenticationContext authenticationContext;
 
-    /** acr values parameter. */
+    /** Strategy used to obtain the requested acr values. */
+    @Nonnull
+    private Function<ProfileRequestContext, List<ACR>> acrLookupStrategy;
+
+    /** acr values. */
     private List<ACR> acrValues;
 
     /** requested acr claim. */
     private Entry acrClaim;
+
+    /**
+     * Constructor.
+     */
+    public ProcessRequestedAuthnContext() {
+        acrLookupStrategy = new DefaultRequestedACRLookupFunction();
+    }
+
+    /**
+     * Set the strategy used to locate the requested acr values.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setACRLookupStrategy(@Nonnull final Function<ProfileRequestContext, List<ACR>> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        acrLookupStrategy = Constraint.isNotNull(strategy, "ACRLookupStrategy lookup strategy cannot be null");
+    }
 
     // Checkstyle: CyclomaticComplexity OFF
     /** {@inheritDoc} */
@@ -89,10 +114,11 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationRequ
             log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
-        acrValues = getAuthenticationRequest().getACRValues();
-        if (getAuthenticationRequest().getClaims() != null
-                && getAuthenticationRequest().getClaims().getIDTokenClaims() != null) {
-            for (Entry entry : getAuthenticationRequest().getClaims().getIDTokenClaims()) {
+
+        acrValues = acrLookupStrategy.apply(profileRequestContext);
+        if (getOidcResponseContext().getRequestedClaims() != null
+                && getOidcResponseContext().getRequestedClaims().getIDTokenClaims() != null) {
+            for (Entry entry : getOidcResponseContext().getRequestedClaims().getIDTokenClaims()) {
                 if (IDTokenClaimsSet.ACR_CLAIM_NAME.equals(entry.getClaimName())) {
                     acrClaim = entry;
                     break;

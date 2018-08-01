@@ -132,6 +132,7 @@ public class ProcessRequestedAuthnContextTest extends BaseOIDCResponseActionTest
         Entry entry = new Entry("acr", ClaimRequirement.VOLUNTARY, null, "1");
         ClaimsRequest claims = new ClaimsRequest();
         claims.addIDTokenClaim(entry);
+        respCtx.setRequestedClaims(claims);
         AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
                 new ClientID("clientid"), URI.create("https://example.com/callback")).claims(claims).state(new State())
                         .build();
@@ -162,6 +163,7 @@ public class ProcessRequestedAuthnContextTest extends BaseOIDCResponseActionTest
         Entry entry = new Entry("acr", ClaimRequirement.ESSENTIAL, null, acrs);
         ClaimsRequest claims = new ClaimsRequest();
         claims.addIDTokenClaim(entry);
+        respCtx.setRequestedClaims(claims);
         AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
                 new ClientID("clientid"), URI.create("https://example.com/callback")).claims(claims).state(new State())
                         .build();
