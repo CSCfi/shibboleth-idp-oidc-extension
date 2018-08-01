@@ -38,7 +38,7 @@ import com.nimbusds.openid.connect.sdk.Prompt;
 
 /**
  * A function that returns copy of requested prompt via a lookup function. This default lookup locates prompt from oidc
- * authentication request if available. If information is not available, null is returned. If there is scope in request
+ * authentication request if available. If information is not available, null is returned. If there is prompt in request
  * object it is used instead of prompt parameter.
  */
 public class DefaultRequestedPromptLookupFunction extends AbstractAuthenticationRequestLookupFunction<Prompt> {
