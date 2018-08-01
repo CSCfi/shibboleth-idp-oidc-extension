@@ -199,7 +199,7 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
             if (requestObject.getJWTClaimsSet().getClaims().containsKey("response_type")
                     && !getAuthenticationRequest().getResponseType().equals(new ResponseType(
                             ((String) requestObject.getJWTClaimsSet().getClaim("response_type")).split(" ")))) {
-                log.error("{} respone_type in request object not matching client_id request parameter", getLogPrefix());
+                log.error("{} response_type in request object not matching client_id request parameter", getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
                 return;
             }
@@ -208,6 +208,5 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
             ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
             return;
         }
-        getOidcResponseContext().setRequestObject(requestObject);
     }
 }

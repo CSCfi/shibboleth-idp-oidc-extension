@@ -127,7 +127,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNotNull(respCtx.getRequestObject());
     }
 
     /**
@@ -145,7 +144,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
-        Assert.assertNull(respCtx.getRequestObject());
     }
 
     /**
@@ -163,7 +161,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNotNull(respCtx.getRequestObject());
     }
 
     /**
@@ -180,7 +177,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
-        Assert.assertNull(respCtx.getRequestObject());
     }
 
     /**
@@ -197,7 +193,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
-        Assert.assertNull(respCtx.getRequestObject());
     }
 
     /**
@@ -218,7 +213,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNotNull(respCtx.getRequestObject());
     }
 
     /**
@@ -244,7 +238,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNotNull(respCtx.getRequestObject());
     }
 
     /**
@@ -270,7 +263,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNotNull(respCtx.getRequestObject());
     }
 
     /**
@@ -295,7 +287,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
-        Assert.assertNull(respCtx.getRequestObject());
     }
 
     /**
@@ -318,7 +309,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
-        Assert.assertNull(respCtx.getRequestObject());
     }
 
     /**
@@ -339,7 +329,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNotNull(respCtx.getRequestObject());
     }
 
     /**
@@ -360,7 +349,6 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         setAuthenticationRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
-        Assert.assertNull(respCtx.getRequestObject());
     }
 
     /**

@@ -104,30 +104,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     /** Requested claims. */
     @Nullable
     private ClaimsRequest requestedClaims;
-
-    /** Validated request object. */
-    @Nullable
-    private JWT requestObject;
-
-    /**
-     * Get validated request object.
-     * 
-     * @return validated request object.
-     */
-    @Nullable
-    public JWT getRequestObject() {
-        return requestObject;
-    }
-
-    /**
-     * Set validated request object.
-     * 
-     * @param requestObj validated request object.
-     */
-    public void setRequestObject(@Nullable JWT requestObj) {
-        requestObject = requestObj;
-    }
-
+    
     /**
      * Get requested claims.
      * 
