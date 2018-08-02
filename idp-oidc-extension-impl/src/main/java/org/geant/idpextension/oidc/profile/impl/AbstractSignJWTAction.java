@@ -63,7 +63,7 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCSigningResponseA
 
     /** resolved credential. */
     private Credential credential;
-    
+
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -90,7 +90,11 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCSigningResponseA
             return new RSASSASigner(credential.getPrivateKey());
         }
         if (JWSAlgorithm.Family.HMAC_SHA.contains(jwsAlgorithm)) {
-            return new MACSigner(credential.getSecretKey());
+            if (getMetadataContext().getClientInformation() == null
+                    || getMetadataContext().getClientInformation().getSecret() == null) {
+                throw new JOSEException("Client secret not located, required to sign with HS algorithms");
+            }
+            return new MACSigner(getMetadataContext().getClientInformation().getSecret().getValue());
         }
         throw new JOSEException("Unsupported algorithm " + jwsAlgorithm.getName());
     }
