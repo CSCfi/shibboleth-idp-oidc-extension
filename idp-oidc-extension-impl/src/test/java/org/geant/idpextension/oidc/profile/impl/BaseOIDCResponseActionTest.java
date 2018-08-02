@@ -61,7 +61,6 @@ import org.opensaml.security.credential.UsageType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.webflow.execution.RequestContext;
 import org.testng.annotations.BeforeMethod;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -77,7 +76,6 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
-
 import net.shibboleth.ext.spring.resource.ResourceHelper;
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
@@ -87,6 +85,8 @@ abstract class BaseOIDCResponseActionTest {
     protected RequestContext requestCtx;
 
     protected OIDCAuthenticationResponseContext respCtx;
+
+    protected OIDCMetadataContext metadataCtx;
 
     protected AuthenticationRequest request;
 
@@ -108,7 +108,7 @@ abstract class BaseOIDCResponseActionTest {
     Credential credentialHMAC = new BaseOIDCResponseActionTest.mockCredential("HMAC");
 
     /**
-     * Default setup. 
+     * Default setup.
      * 
      * @throws Exception
      */
@@ -123,7 +123,8 @@ abstract class BaseOIDCResponseActionTest {
         profileRequestCtx.setOutboundMessageContext(msgCtx);
         respCtx = new OIDCAuthenticationResponseContext();
         profileRequestCtx.getOutboundMessageContext().addSubcontext(respCtx);
-        profileRequestCtx.getInboundMessageContext().addSubcontext(new OIDCMetadataContext());
+        metadataCtx = (OIDCMetadataContext) profileRequestCtx.getInboundMessageContext()
+                .addSubcontext(new OIDCMetadataContext());
         RelyingPartyContext rpCtx = profileRequestCtx.getSubcontext(RelyingPartyContext.class, true);
         rpCtx.setRelyingPartyId(clientId);
         respCtx.setSubject(subject);
@@ -160,7 +161,7 @@ abstract class BaseOIDCResponseActionTest {
         respCtx.setSignedToken(jwt);
 
     }
-    
+
     protected DataSealer getDataSealer() throws ComponentInitializationException, NoSuchAlgorithmException {
         final BasicKeystoreKeyStrategy strategy = new BasicKeystoreKeyStrategy();
         strategy.setKeystoreResource(ResourceHelper.of(new ClassPathResource("credentials/sealer.jks")));
@@ -261,7 +262,7 @@ abstract class BaseOIDCResponseActionTest {
         }
 
     }
-    
+
     public class idStrat implements IdentifierGenerationStrategy {
 
         @Override
