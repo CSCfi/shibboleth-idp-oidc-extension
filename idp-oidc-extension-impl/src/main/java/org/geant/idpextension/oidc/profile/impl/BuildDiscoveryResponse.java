@@ -33,7 +33,6 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletResponse;
 
-import org.geant.idpextension.oidc.criterion.IssuerCriterion;
 import org.geant.idpextension.oidc.metadata.resolver.ProviderMetadataResolver;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -41,14 +40,12 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import net.minidev.json.JSONValue;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
@@ -64,9 +61,6 @@ public class BuildDiscoveryResponse extends AbstractProfileAction {
     /** The resolver for the metadata that is being distributed. */
     private ProviderMetadataResolver metadataResolver;
     
-    /** The OIDC issuer name to be fetched from the resolver. */
-    private String oidcIssuer;
-
     /** Constructor. */
     public BuildDiscoveryResponse() {
         super();
@@ -79,9 +73,6 @@ public class BuildDiscoveryResponse extends AbstractProfileAction {
         if (metadataResolver == null) {
             throw new ComponentInitializationException("The metadata resolver cannot be null!");
         }
-        if (oidcIssuer == null) {
-            throw new ComponentInitializationException("The issuer cannot be null!");            
-        }
     }
     
     /**
@@ -92,14 +83,6 @@ public class BuildDiscoveryResponse extends AbstractProfileAction {
         metadataResolver = Constraint.isNotNull(resolver, "The metadata resolver cannot be null!");
     }
     
-    /**
-     * Set the OIDC issuer name to be fetched from the resolver.
-     * @param issuer What to set.
-     */
-    public void setIssuer(final String issuer) {
-        oidcIssuer = Constraint.isNotEmpty(issuer, "The issuer cannot be null!");
-    }
-    
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -107,9 +90,9 @@ public class BuildDiscoveryResponse extends AbstractProfileAction {
         servletResponse.setContentType("application/json");
         try {
             final OIDCProviderMetadata metadata = 
-                    metadataResolver.resolveSingle(new CriteriaSet(new IssuerCriterion(new Issuer(oidcIssuer))));
+                    metadataResolver.resolveSingle(profileRequestContext);
             if (metadata == null) {
-                log.error("{} Could not resolve any metadata with issuer {}", getLogPrefix(), oidcIssuer);
+                log.error("{} Could not resolve any metadata", getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, EventIds.IO_ERROR);
             } else {
                 JSONValue.writeJSONString(metadata.toJSONObject(), servletResponse.getWriter());
