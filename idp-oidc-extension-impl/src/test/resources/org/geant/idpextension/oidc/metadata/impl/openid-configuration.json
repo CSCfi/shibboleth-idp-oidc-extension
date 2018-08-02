@@ -1,5 +1,5 @@
 {
- "issuer": "https://op.example.org",
+ "issuer": "http://idp.example.org",
  "authorization_endpoint": "https://op.example.org/idp/profile/oidc/authorize",
  "registration_endpoint": "https://op.example.org/idp/profile/oidc/register",
  "jwks_uri": "https://op.example.org/oidc/keyset.jwk",
