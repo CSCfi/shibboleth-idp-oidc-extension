@@ -31,16 +31,13 @@ package org.geant.idpextension.oidc.metadata.impl;
 import java.io.File;
 import java.util.HashMap;
 
-import org.geant.idpextension.oidc.criterion.IssuerCriterion;
 import org.geant.idpextension.oidc.metadata.resolver.RefreshableMetadataValueResolver;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
-
-import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 
 /**
  * Unit tests for {@link DynamicFilesystemProviderMetadataResolver}.
@@ -70,12 +67,11 @@ public class DynamicFilesystemProviderMetadataResolverTest extends FilesystemPro
     
     @Test
     public void testDynamic() throws Exception {
-        final IssuerCriterion criterion = new IssuerCriterion(new Issuer(issuer));
-        OIDCProviderMetadata metadata = resolver.resolveSingle(new CriteriaSet(criterion));
+        OIDCProviderMetadata metadata = resolver.resolveSingle(new ProfileRequestContext());
         Assert.assertNotNull(metadata);
-        Assert.assertEquals(metadata.getIssuer().getValue(), issuer);
+        Assert.assertEquals(metadata.getIssuer().getValue(), "http://idp.example.org");
         ((DynamicFilesystemProviderMetadataResolver)resolver).refresh();
-        metadata = resolver.resolveSingle(new CriteriaSet(criterion));
+        metadata = resolver.resolveSingle(new ProfileRequestContext());
         Assert.assertNotNull(metadata.getCustomParameter(name));
         Assert.assertEquals(metadata.getCustomParameter(name), value);
     }

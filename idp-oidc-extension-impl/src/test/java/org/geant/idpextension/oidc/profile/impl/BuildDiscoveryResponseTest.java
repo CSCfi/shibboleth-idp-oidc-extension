@@ -38,7 +38,7 @@ import org.geant.idpextension.oidc.metadata.impl.FilesystemProviderMetadataResol
 import org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver;
 import org.geant.idpextension.oidc.metadata.resolver.ProviderMetadataResolver;
 import org.mockito.Mockito;
-import org.opensaml.profile.action.EventIds;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.webflow.execution.RequestContext;
@@ -52,7 +52,6 @@ import net.minidev.json.JSONObject;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 
 /**
  * Unit tests for {@link BuildDiscoveryResponse}.
@@ -63,24 +62,21 @@ public class BuildDiscoveryResponseTest {
 
     protected RequestContext requestCtx;
     
-    protected String issuer;
     protected File opfile;
     protected String dynamicClaim;
     protected String dynamicClaimValue;
 
     @BeforeMethod
     protected void setUpContext() throws ComponentInitializationException {
-        issuer = "https://op.example.org";
-        action = buildAction(issuer);
+        action = buildAction();
         requestCtx = new RequestContextBuilder().buildRequestContext();
         opfile = new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/openid-configuration.json");
         dynamicClaim = "dynamicClaimName";
         dynamicClaimValue = "dynamicClaimValue";
     }
     
-    protected BuildDiscoveryResponse buildAction(final String issuer) {
+    protected BuildDiscoveryResponse buildAction() {
         action = new BuildDiscoveryResponse();
-        action.setIssuer(issuer);
         action.setHttpServletRequest(new MockHttpServletRequest());
         action.setHttpServletResponse(new MockHttpServletResponse());
         return action;
@@ -93,14 +89,6 @@ public class BuildDiscoveryResponseTest {
         return resolver;
     }
 
-    @Test
-    public void testIssuerNotFound() throws Exception {
-        action = buildAction("https://notfound.example.org");
-        action.setMetadataResolver(initMetadataResolver());
-        action.initialize();
-        ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.IO_ERROR);
-    }
-    
     @Test
     public void testStatic() throws Exception {
         action.setMetadataResolver(initMetadataResolver());
@@ -138,8 +126,8 @@ public class BuildDiscoveryResponseTest {
     
     protected MetadataValueResolver initMockResolver(final Object value) throws Exception {
         MetadataValueResolver resolver = Mockito.mock(MetadataValueResolver.class);
-        Mockito.when(resolver.resolve((CriteriaSet)Mockito.any())).thenReturn(Arrays.asList(value));
-        Mockito.when(resolver.resolveSingle((CriteriaSet)Mockito.any())).thenReturn(value);
+        Mockito.when(resolver.resolve((ProfileRequestContext)Mockito.any())).thenReturn(Arrays.asList(value));
+        Mockito.when(resolver.resolveSingle((ProfileRequestContext)Mockito.any())).thenReturn(value);
         return resolver;
     }
 }
