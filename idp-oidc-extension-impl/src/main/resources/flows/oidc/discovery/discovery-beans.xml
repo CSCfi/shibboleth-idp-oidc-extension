@@ -29,10 +29,21 @@
         phase only -->
     <bean id="InitializeProfileRequestContext"
         class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
-        scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/discovery"
+        scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/configuration"
         p:loggingId="%{idp.service.logging.saml2sso:SSO}"
         p:browserProfile="true" />
 
+    <bean id="InitializeRelyingPartyContext"
+        class="org.geant.idpextension.oidc.profile.impl.InitializeRegistrationRelyingPartyContext"
+        scope="prototype" />
+
+    <bean id="SelectRelyingPartyConfiguration"
+        class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
+        scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+
+    <bean id="SelectProfileConfiguration"
+        class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
+        scope="prototype" />
 
     <bean id="SetResponseStatusCodeFromEvent"
         class="org.geant.idpextension.oidc.profile.impl.SetResponseStatusCodeFromEvent"
@@ -53,29 +64,18 @@
     <bean id="BuildDiscoveryResponse"
         class="org.geant.idpextension.oidc.profile.impl.BuildDiscoveryResponse"
         scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse"
-        p:metadataResolver-ref="shibboleth.oidc.OpenIdConfigurationResolver"
-        p:issuer="%{idp.oidc.issuer}" />
+        p:metadataResolver-ref="shibboleth.oidc.OpenIdConfigurationResolver" />
 
     <bean id="shibboleth.oidc.OpenIdConfigurationResolver"
         class="org.geant.idpextension.oidc.metadata.impl.DynamicFilesystemProviderMetadataResolver">
         <property name="dynamicValueResolvers">
             <map
                 value-type="org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver">
-                <entry key="signing-keys" value-ref="ArrayResolverExample" />
+                <entry key="signing-keys" value-ref="CredentialResolver" />
             </map>
         </property>
         <constructor-arg type="java.io.File"
             value="/opt/shibboleth-idp/static/.well-known/openid-configuration" />
-    </bean>
-
-    <bean id="shibboleth.oidc.DefaultSigningCredential"
-        class="org.geant.idpextension.oidc.profile.spring.factory.BasicJWKCredentialFactoryBean">
-        <property name="jWKResource">
-            <bean class="org.springframework.core.io.FileSystemResource">
-                <constructor-arg type="java.lang.String"
-                    value="%{idp.signing.oidc.key}" />
-            </bean>
-        </property>
     </bean>
 
     <bean id="ArrayResolverExample"
@@ -90,8 +90,7 @@
     </bean>
 
     <bean id="CredentialResolver"
-        class="org.geant.idpextension.oidc.metadata.impl.CredentialMetadataValueResolver"
-        p:credential-ref="shibboleth.oidc.DefaultSigningCredential" />
+        class="org.geant.idpextension.oidc.metadata.impl.CredentialMetadataValueResolver"/>
 
     <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent"
         scope="prototype"
