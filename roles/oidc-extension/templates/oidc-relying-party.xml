@@ -16,6 +16,7 @@
     <util:map id="profileResponders">
         <entry key-ref="OIDC.SSO" value="#{getObject('issuer')}" />
         <entry key-ref="OIDC.Registration" value="#{getObject('issuer')}" />
+        <entry key-ref="OIDC.Configuration" value="#{getObject('issuer')}" />
     </util:map>
 
     <!-- Lookup method to select responder id -->
@@ -36,6 +37,8 @@
         p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
         p:servletRequest-ref="shibboleth.HttpServletRequest"
         p:tokenEndpointAuthMethods="%{idp.oidc.dynreg.tokenEndpointAuthMethods:client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt}" />
+    <bean id="OIDC.Configuration" class="org.geant.idpextension.oidc.config.OIDCProviderInformationConfiguration"
+        p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}" p:servletRequest-ref="shibboleth.HttpServletRequest"/>
 
     <!-- Security Configuration Defaults These settings establish the default security configurations for signatures and 
         loads the default credentials used. -->
