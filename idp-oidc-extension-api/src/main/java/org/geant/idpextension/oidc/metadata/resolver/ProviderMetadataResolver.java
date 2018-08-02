@@ -28,15 +28,17 @@
 
 package org.geant.idpextension.oidc.metadata.resolver;
 
+import org.opensaml.profile.context.ProfileRequestContext;
+
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import net.shibboleth.utilities.java.support.component.IdentifiedComponent;
-import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.Resolver;
 
 /**
  * A resolver that is capable of resolving {@link OIDCProviderMetadata} instances which meet certain supplied criteria.
  */
-public interface ProviderMetadataResolver extends Resolver<OIDCProviderMetadata, CriteriaSet>, IdentifiedComponent {
+public interface ProviderMetadataResolver
+        extends Resolver<OIDCProviderMetadata, ProfileRequestContext>, IdentifiedComponent {
 
 }

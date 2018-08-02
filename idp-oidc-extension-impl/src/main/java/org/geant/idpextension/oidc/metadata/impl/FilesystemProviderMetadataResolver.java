@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -37,19 +38,22 @@ import java.util.Timer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.geant.idpextension.oidc.criterion.IssuerCriterion;
 import org.geant.idpextension.oidc.metadata.resolver.ProviderMetadataResolver;
 import org.geant.idpextension.oidc.metadata.resolver.RefreshableProviderMetadataResolver;
+import org.opensaml.messaging.context.navigate.ChildContextLookup;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
+import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
-import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
@@ -62,6 +66,12 @@ public class FilesystemProviderMetadataResolver extends AbstractFileOIDCEntityRe
     private final Logger log = LoggerFactory.getLogger(FilesystemProviderMetadataResolver.class);
 
     /**
+     * Strategy used to locate the {@link RelyingPartyContext} associated with a given {@link ProfileRequestContext}.
+     */
+    @Nonnull
+    private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
+
+    /**
      * Constructor.
      * 
      * @param metadata the metadata file
@@ -70,6 +80,7 @@ public class FilesystemProviderMetadataResolver extends AbstractFileOIDCEntityRe
      */
     public FilesystemProviderMetadataResolver(@Nonnull final File metadata) throws ResolverException {
         super(metadata);
+        relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
     }
 
     /**
@@ -83,27 +94,51 @@ public class FilesystemProviderMetadataResolver extends AbstractFileOIDCEntityRe
     public FilesystemProviderMetadataResolver(@Nullable final Timer backgroundTaskTimer, @Nonnull final File metadata)
             throws ResolverException {
         super(backgroundTaskTimer, metadata);
+        relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
+    }
+
+    /**
+     * Set the strategy used to locate the {@link RelyingPartyContext} associated with a given
+     * {@link ProfileRequestContext}.
+     * 
+     * @param strategy strategy used to locate the {@link RelyingPartyContext} associated with a given
+     *            {@link ProfileRequestContext}
+     */
+    public void setRelyingPartyContextLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        relyingPartyContextLookupStrategy =
+                Constraint.isNotNull(strategy, "RelyingPartyContext lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
     @Override
-    public Iterable<OIDCProviderMetadata> resolve(CriteriaSet criteria) throws ResolverException {
+    public Iterable<OIDCProviderMetadata> resolve(ProfileRequestContext profileRequestContext)
+            throws ResolverException {
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
         ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
 
-        final IssuerCriterion issuerCriterion = criteria.get(IssuerCriterion.class);
-        if (issuerCriterion == null || issuerCriterion.getIssuer() == null) {
-            log.trace("No issuer criteria found, returning all");
-            return getBackingStore().getOrderedInformation();
+        final RelyingPartyContext rpCtx = relyingPartyContextLookupStrategy.apply(profileRequestContext);
+        final List<OIDCProviderMetadata> entities = getBackingStore().getOrderedInformation();
+        final List<OIDCProviderMetadata> result = new ArrayList<>();
+        if (rpCtx == null || rpCtx.getConfiguration() == null || rpCtx.getConfiguration().getResponderId() == null) {
+            log.warn("Could not find relying party ID from context, returning all");
+            return entities;
         }
-        // TODO: support other criterion
-        return lookupIdentifier(issuerCriterion.getIssuer());
+        for (OIDCProviderMetadata entity : entities) {
+            if (entity.getIssuer().getValue().equals(rpCtx.getConfiguration().getResponderId())) {
+                rpCtx.getConfiguration().getResponderId();
+                result.add(entity);
+            }
+        }
+        return result;
     }
 
     /** {@inheritDoc} */
     @Override
-    public OIDCProviderMetadata resolveSingle(CriteriaSet criteria) throws ResolverException {
-        final Iterable<OIDCProviderMetadata> iterable = resolve(criteria);
+    public OIDCProviderMetadata resolveSingle(ProfileRequestContext profileRequestContext) throws ResolverException {
+        final Iterable<OIDCProviderMetadata> iterable = resolve(profileRequestContext);
         if (iterable != null) {
             final Iterator<OIDCProviderMetadata> iterator = iterable.iterator();
             if (iterator != null && iterator.hasNext()) {

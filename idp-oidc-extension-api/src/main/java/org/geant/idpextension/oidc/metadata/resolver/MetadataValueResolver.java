@@ -28,14 +28,15 @@
 
 package org.geant.idpextension.oidc.metadata.resolver;
 
+import org.opensaml.profile.context.ProfileRequestContext;
+
 import net.shibboleth.utilities.java.support.component.IdentifiedComponent;
-import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.Resolver;
 
 /**
- * A resolver that is capable of resolving dynamic metadata values (as {@link Object}s) which meet certain supplied 
+ * A resolver that is capable of resolving dynamic metadata values (as {@link Object}s) which meet certain supplied
  * criteria.
  */
-public interface MetadataValueResolver extends Resolver<Object, CriteriaSet>, IdentifiedComponent {
-    
+public interface MetadataValueResolver extends Resolver<Object, ProfileRequestContext>, IdentifiedComponent {
+
 }

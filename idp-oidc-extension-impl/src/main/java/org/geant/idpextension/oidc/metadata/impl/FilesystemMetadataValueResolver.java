@@ -37,6 +37,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.geant.idpextension.oidc.metadata.resolver.RefreshableMetadataValueResolver;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,6 @@ import com.nimbusds.oauth2.sdk.id.Identifier;
 
 import net.minidev.json.JSONValue;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
-import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
@@ -91,13 +91,10 @@ public class FilesystemMetadataValueResolver extends AbstractFileOIDCEntityResol
      * @throws ResolverException thrown if there is an error during resolution.
      */
     @Override
-    public Iterable<Object> resolve(CriteriaSet criteria) throws ResolverException {
+    public Iterable<Object> resolve(ProfileRequestContext profileRequestContext) throws ResolverException {
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
         ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
 
-        if (criteria != null) {
-            log.warn("All criteria for this resolver are currently ignored");
-        }
         return getBackingStore().getOrderedInformation();
     }
 
@@ -111,8 +108,8 @@ public class FilesystemMetadataValueResolver extends AbstractFileOIDCEntityResol
      * @throws ResolverException thrown if there is an error during resolution.
      */
     @Override
-    public Object resolveSingle(CriteriaSet criteria) throws ResolverException {
-        return resolve(criteria).iterator().next();
+    public Object resolveSingle(ProfileRequestContext profileRequestContext) throws ResolverException {
+        return resolve(profileRequestContext).iterator().next();
     }
 
     /** {@inheritDoc} */

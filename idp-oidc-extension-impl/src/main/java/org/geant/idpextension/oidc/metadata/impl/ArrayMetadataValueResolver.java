@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,6 @@ import net.shibboleth.utilities.java.support.component.AbstractIdentifiableIniti
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
-import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
@@ -93,23 +93,20 @@ public class ArrayMetadataValueResolver extends AbstractIdentifiableInitializabl
 
     /** {@inheritDoc} */
     @Override
-    public Iterable<Object> resolve(CriteriaSet criteria) throws ResolverException {
-        if (criteria != null && !criteria.isEmpty()) {
-            log.warn("All the criteria are currently ignored");
-        }
+    public Iterable<Object> resolve(ProfileRequestContext profileRequestContext) throws ResolverException {
         final List<Object> result = new ArrayList<>();
         for (final MetadataValueResolver resolver : embeddedResolvers) {
             log.debug("Adding the result from the resolver {}", resolver.getId());
-            result.add(resolver.resolveSingle(criteria));
+            result.add(resolver.resolveSingle(profileRequestContext));
         }
         return result;
     }
 
     /** {@inheritDoc} */
     @Override
-    public Object resolveSingle(CriteriaSet criteria) throws ResolverException {
+    public Object resolveSingle(ProfileRequestContext profileRequestContext) throws ResolverException {
         final JSONArray jsonArray = new JSONArray();
-        final Iterator<Object> iterator = resolve(criteria).iterator();
+        final Iterator<Object> iterator = resolve(profileRequestContext).iterator();
         while (iterator.hasNext()) {
             jsonArray.add(iterator.next());
         }
