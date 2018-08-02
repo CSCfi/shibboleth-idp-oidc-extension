@@ -25,16 +25,15 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.geant.idpextension.oidc.profile.impl;
 
 import java.net.URISyntaxException;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
-
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.SignatureSigningParameters;
@@ -42,18 +41,25 @@ import org.opensaml.xmlsec.context.SecurityParametersContext;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 /** {@link SignIDToken} unit test. */
 public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     private SignIDToken action = new SignIDToken();
+
+    String secret =
+            "longsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecret";
+
     SecurityParametersContext spCtx;
 
     private void init(String algo, Credential credential) throws ComponentInitializationException, URISyntaxException {
@@ -64,6 +70,9 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         params.setSigningCredential(credential);
         params.setSignatureAlgorithm(algo);
         profileRequestCtx.addSubcontext(spCtx);
+        OIDCClientInformation information =
+                new OIDCClientInformation(new ClientID(), new Date(), new OIDCClientMetadata(), new Secret(secret));
+        metadataCtx.setClientInformation(information);
     }
 
     /**
@@ -84,6 +93,7 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * 
      * @throws ComponentInitializationException
      * @throws URISyntaxException
+     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testNoSigningParameters() throws ComponentInitializationException, URISyntaxException {
@@ -99,6 +109,7 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * 
      * @throws ComponentInitializationException
      * @throws URISyntaxException
+     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testNoIdToken() throws ComponentInitializationException, URISyntaxException {
@@ -108,8 +119,8 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_MSG_CTX);
     }
 
-    private void testSuccessMessage(JWSVerifier verifier) throws ComponentInitializationException, URISyntaxException,
-            JOSEException, ParseException {
+    private void testSuccessMessage(JWSVerifier verifier)
+            throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         setIdTokenToResponseContext("iss", "sub", "aud", new Date(), new Date());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
@@ -125,10 +136,11 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * @throws URISyntaxException
      * @throws JOSEException
      * @throws ParseException
+     * @throws NoSuchAlgorithmException
      */
     @Test
-    public void testSuccessMessageRS256() throws ComponentInitializationException, URISyntaxException, JOSEException,
-            ParseException {
+    public void testSuccessMessageRS256()
+            throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("RS256", credentialRSA);
         testSuccessMessage(new RSASSAVerifier((RSAPublicKey) credentialRSA.getPublicKey()));
 
@@ -141,10 +153,11 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * @throws URISyntaxException
      * @throws JOSEException
      * @throws ParseException
+     * @throws NoSuchAlgorithmException
      */
     @Test
-    public void testSuccessMessageRS384() throws ComponentInitializationException, URISyntaxException, JOSEException,
-            ParseException {
+    public void testSuccessMessageRS384()
+            throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("RS384", credentialRSA);
         testSuccessMessage(new RSASSAVerifier((RSAPublicKey) credentialRSA.getPublicKey()));
     }
@@ -156,10 +169,11 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * @throws URISyntaxException
      * @throws JOSEException
      * @throws ParseException
+     * @throws NoSuchAlgorithmException
      */
     @Test
-    public void testSuccessMessageRS512() throws ComponentInitializationException, URISyntaxException, JOSEException,
-            ParseException {
+    public void testSuccessMessageRS512()
+            throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("RS512", credentialRSA);
         testSuccessMessage(new RSASSAVerifier((RSAPublicKey) credentialRSA.getPublicKey()));
 
@@ -172,10 +186,11 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * @throws URISyntaxException
      * @throws JOSEException
      * @throws ParseException
+     * @throws NoSuchAlgorithmException
      */
     @Test
-    public void testSuccessMessageES256() throws ComponentInitializationException, URISyntaxException, JOSEException,
-            ParseException {
+    public void testSuccessMessageES256()
+            throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("ES256", credentialEC256);
         testSuccessMessage(new ECDSAVerifier((ECPublicKey) credentialEC256.getPublicKey()));
 
@@ -188,10 +203,11 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * @throws URISyntaxException
      * @throws JOSEException
      * @throws ParseException
+     * @throws NoSuchAlgorithmException
      */
     @Test
-    public void testSuccessMessageES384() throws ComponentInitializationException, URISyntaxException, JOSEException,
-            ParseException {
+    public void testSuccessMessageES384()
+            throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("ES384", credentialEC384);
         testSuccessMessage(new ECDSAVerifier((ECPublicKey) credentialEC384.getPublicKey()));
 
@@ -204,10 +220,11 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * @throws URISyntaxException
      * @throws JOSEException
      * @throws ParseException
+     * @throws NoSuchAlgorithmException
      */
     @Test
-    public void testSuccessMessageES512() throws ComponentInitializationException, URISyntaxException, JOSEException,
-            ParseException {
+    public void testSuccessMessageES512()
+            throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("ES512", credentialEC512);
         testSuccessMessage(new ECDSAVerifier((ECPublicKey) credentialEC512.getPublicKey()));
 
@@ -220,13 +237,13 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * @throws URISyntaxException
      * @throws JOSEException
      * @throws ParseException
+     * @throws NoSuchAlgorithmException
      */
     @Test
-    public void testSuccessMessageHS256() throws ComponentInitializationException, URISyntaxException, JOSEException,
-            ParseException {
+    public void testSuccessMessageHS256()
+            throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("HS256", credentialHMAC);
-        testSuccessMessage(new MACVerifier(credentialHMAC.getSecretKey()));
-
+        testSuccessMessage(new MACVerifier(metadataCtx.getClientInformation().getSecret().getValue()));
     }
 
     /**
@@ -236,13 +253,13 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * @throws URISyntaxException
      * @throws JOSEException
      * @throws ParseException
+     * @throws NoSuchAlgorithmException
      */
     @Test
-    public void testSuccessMessageHS384() throws ComponentInitializationException, URISyntaxException, JOSEException,
-            ParseException {
+    public void testSuccessMessageHS384()
+            throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("HS384", credentialHMAC);
-        testSuccessMessage(new MACVerifier(credentialHMAC.getSecretKey()));
-
+        testSuccessMessage(new MACVerifier(metadataCtx.getClientInformation().getSecret().getValue()));
     }
 
     /**
@@ -252,13 +269,13 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
      * @throws URISyntaxException
      * @throws JOSEException
      * @throws ParseException
+     * @throws NoSuchAlgorithmException
      */
     @Test
-    public void testSuccessMessageHS512() throws ComponentInitializationException, URISyntaxException, JOSEException,
-            ParseException {
+    public void testSuccessMessageHS512()
+            throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("HS512", credentialHMAC);
-        testSuccessMessage(new MACVerifier(credentialHMAC.getSecretKey()));
-
+        testSuccessMessage(new MACVerifier(metadataCtx.getClientInformation().getSecret().getValue()));
     }
 
 }
