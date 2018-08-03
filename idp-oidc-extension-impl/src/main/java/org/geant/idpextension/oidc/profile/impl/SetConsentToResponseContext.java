@@ -40,9 +40,9 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
-import net.shibboleth.idp.consent.context.impl.AttributeReleaseContext;
-import net.shibboleth.idp.consent.context.impl.ConsentContext;
-import net.shibboleth.idp.consent.impl.Consent;
+import net.shibboleth.idp.consent.context.AttributeReleaseContext;
+import net.shibboleth.idp.consent.context.ConsentContext;
+import net.shibboleth.idp.consent.Consent;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**

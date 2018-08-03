@@ -28,9 +28,9 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import net.shibboleth.idp.consent.context.impl.AttributeReleaseContext;
-import net.shibboleth.idp.consent.context.impl.ConsentContext;
-import net.shibboleth.idp.consent.impl.Consent;
+import net.shibboleth.idp.consent.context.AttributeReleaseContext;
+import net.shibboleth.idp.consent.context.ConsentContext;
+import net.shibboleth.idp.consent.Consent;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseConsentContext;
