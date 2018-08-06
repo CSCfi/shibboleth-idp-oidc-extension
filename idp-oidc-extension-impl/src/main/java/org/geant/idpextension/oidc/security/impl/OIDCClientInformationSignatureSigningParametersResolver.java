@@ -28,6 +28,8 @@
 
 package org.geant.idpextension.oidc.security.impl;
 
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -47,8 +49,8 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 /**
  * A specialization of {@link BasicSignatureSigningParametersResolver} which supports selecting credential based on
- * client registration data and instantiating HS credentials when needed. If the resolver fails to resolve parameters it
- * leaves the job to the hands of the super class method.
+ * client registration data and instantiating HS credentials when needed. If the resolver fails to credentials it leaves
+ * the job to the hands of the super class method.
  * 
  * <p>
  * In addition to the {@link net.shibboleth.utilities.java.support.resolver.Criterion} inputs documented in
@@ -103,11 +105,12 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
             if (userInfoSigningResolver) {
                 log.debug("No userinfo_signed_response_alg in client information, nothing to do");
                 super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
+                return;
             }
             algorithm = JWSAlgorithm.RS256;
         }
         if (!algorithms.contains(algorithm.getName())) {
-            log.warn("Client requests algorithm {} which is not available", algorithm.getName());
+            log.warn("Client requests algorithm {} that is not available", algorithm.getName());
             super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
             return;
         }
@@ -126,14 +129,18 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
             params.setSignatureAlgorithm(algorithm.getName());
             return;
         }
+        // For EC&RSA family we locate the first credential of correct type
         for (Credential credential : credentials) {
-            if (credentialSupportsAlgorithm(credential, algorithm.getName())) {
+            if ((JWSAlgorithm.Family.RSA.contains(algorithm) && (credential.getPrivateKey() instanceof RSAPrivateKey))
+                    || (JWSAlgorithm.Family.EC.contains(algorithm)
+                            && (credential.getPrivateKey() instanceof ECPrivateKey))) {
                 log.trace("Credential picked for algorithm {}", algorithm.getName());
                 params.setSigningCredential(credential);
                 params.setSignatureAlgorithm(algorithm.getName());
                 return;
             }
         }
+        log.debug("Not able to resolve signing credential based on provided client information");
         super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
     }
 }
