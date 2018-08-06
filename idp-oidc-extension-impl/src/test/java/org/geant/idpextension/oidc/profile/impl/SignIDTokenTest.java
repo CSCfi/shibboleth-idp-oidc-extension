@@ -47,19 +47,13 @@ import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
-import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 /** {@link SignIDToken} unit test. */
 public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     private SignIDToken action = new SignIDToken();
 
-    String secret =
-            "longsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecret";
-
+   
     SecurityParametersContext spCtx;
 
     private void init(String algo, Credential credential) throws ComponentInitializationException, URISyntaxException {
@@ -70,9 +64,7 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         params.setSigningCredential(credential);
         params.setSignatureAlgorithm(algo);
         profileRequestCtx.addSubcontext(spCtx);
-        OIDCClientInformation information =
-                new OIDCClientInformation(new ClientID(), new Date(), new OIDCClientMetadata(), new Secret(secret));
-        metadataCtx.setClientInformation(information);
+   
     }
 
     /**
@@ -243,7 +235,7 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
     public void testSuccessMessageHS256()
             throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("HS256", credentialHMAC);
-        testSuccessMessage(new MACVerifier(metadataCtx.getClientInformation().getSecret().getValue()));
+        testSuccessMessage(new MACVerifier(credentialHMAC.getSecretKey()));
     }
 
     /**
@@ -259,7 +251,7 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
     public void testSuccessMessageHS384()
             throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("HS384", credentialHMAC);
-        testSuccessMessage(new MACVerifier(metadataCtx.getClientInformation().getSecret().getValue()));
+        testSuccessMessage(new MACVerifier(credentialHMAC.getSecretKey()));
     }
 
     /**
@@ -275,7 +267,7 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
     public void testSuccessMessageHS512()
             throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
         init("HS512", credentialHMAC);
-        testSuccessMessage(new MACVerifier(metadataCtx.getClientInformation().getSecret().getValue()));
+        testSuccessMessage(new MACVerifier(credentialHMAC.getSecretKey()));
     }
 
 }
