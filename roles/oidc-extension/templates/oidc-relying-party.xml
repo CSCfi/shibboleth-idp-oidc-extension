@@ -103,8 +103,7 @@
             </list>
         </property>
     </bean>
-    <bean id="shibboleth.SigningConfiguration.HS256" parent="shibboleth.BasicSignatureSigningConfiguration"
-        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.SigningConfiguration.HS256" parent="shibboleth.BasicSignatureSigningConfiguration">
         <property name="signatureAlgorithms">
             <list>
                 <util:constant
@@ -112,8 +111,7 @@
             </list>
         </property>
     </bean>
-    <bean id="shibboleth.SigningConfiguration.HS384" parent="shibboleth.BasicSignatureSigningConfiguration"
-        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.SigningConfiguration.HS384" parent="shibboleth.BasicSignatureSigningConfiguration">
         <property name="signatureAlgorithms">
             <list>
                 <util:constant
@@ -121,8 +119,7 @@
             </list>
         </property>
     </bean>
-    <bean id="shibboleth.SigningConfiguration.HS512" parent="shibboleth.BasicSignatureSigningConfiguration"
-        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.SigningConfiguration.HS512" parent="shibboleth.BasicSignatureSigningConfiguration">
         <property name="signatureAlgorithms">
             <list>
                 <util:constant

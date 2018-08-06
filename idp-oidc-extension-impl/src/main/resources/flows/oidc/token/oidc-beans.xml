@@ -117,9 +117,9 @@
         scope="prototype" />
 
     <bean id="PopulateIDTokenSignatureSigningParameters"
-        class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters" scope="prototype"
+        class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCSignatureSigningParameters " scope="prototype"
         p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
-        p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
+        p:signatureSigningParametersResolver-ref="shibboleth.oidc.t.SignatureSigningParametersResolver">
         <property name="securityParametersContextLookupStrategy">
             <bean class="com.google.common.base.Functions" factory-method="compose"
                 c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters"
@@ -130,6 +130,9 @@
                 c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
         </property>
     </bean>
+
+    <bean id="shibboleth.oidc.t.SignatureSigningParametersResolver"
+        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver" />
 
     <bean id="shibboleth.TokenRequestScopeLookupStrategy"
         class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestScopeLookupFunction" scope="prototype" />
