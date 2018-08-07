@@ -45,86 +45,44 @@
 
     <bean id="shibboleth.oidc.DefaultSecurityConfiguration" class="net.shibboleth.idp.profile.config.SecurityConfiguration">
         <property name="signatureSigningConfiguration">
-            <ref bean="#{'%{idp.oidc.signing.config:shibboleth.SigningConfiguration.RS256}'.trim()}" />
+            <ref bean="#{'%{idp.oidc.signing.config:shibboleth.oidc.SigningConfiguration}'.trim()}" />
         </property>
     </bean>
 
-    <bean id="shibboleth.SigningConfiguration.RS256" parent="shibboleth.BasicSignatureSigningConfiguration"
-        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
+    <bean id="shibboleth.oidc.SigningConfiguration" parent="shibboleth.BasicSignatureSigningConfiguration">
+        <property name="signingCredentials">
+            <list>
+                <ref bean="shibboleth.oidc.DefaultRSSigningCredential" />
+                <ref bean="shibboleth.oidc.DefaultESSigningCredential" />
+            </list>
+        </property>
         <property name="signatureAlgorithms">
             <list>
                 <util:constant
                     static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_256" />
-            </list>
-        </property>
-    </bean>
-    <bean id="shibboleth.SigningConfiguration.RS384" parent="shibboleth.BasicSignatureSigningConfiguration"
-        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-        <property name="signatureAlgorithms">
-            <list>
                 <util:constant
                     static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_384" />
-            </list>
-        </property>
-    </bean>
-    <bean id="shibboleth.SigningConfiguration.RS512" parent="shibboleth.BasicSignatureSigningConfiguration"
-        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-        <property name="signatureAlgorithms">
-            <list>
                 <util:constant
                     static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_512" />
-            </list>
-        </property>
-    </bean>
-    <bean id="shibboleth.SigningConfiguration.ES256" parent="shibboleth.BasicSignatureSigningConfiguration"
-        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-        <property name="signatureAlgorithms">
-            <list>
                 <util:constant
                     static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_256" />
-            </list>
-        </property>
-    </bean>
-    <bean id="shibboleth.SigningConfiguration.ES384" parent="shibboleth.BasicSignatureSigningConfiguration"
-        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-        <property name="signatureAlgorithms">
-            <list>
+
+<!-- Not supported by the configured EC key
+
                 <util:constant
                     static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_384" />
-            </list>
-        </property>
-    </bean>
-    <bean id="shibboleth.SigningConfiguration.ES512" parent="shibboleth.BasicSignatureSigningConfiguration"
-        p:signingCredentials-ref="shibboleth.oidc.DefaultSigningCredential">
-        <property name="signatureAlgorithms">
-            <list>
                 <util:constant
                     static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_512" />
-            </list>
-        </property>
-    </bean>
-    <bean id="shibboleth.SigningConfiguration.HS256" parent="shibboleth.BasicSignatureSigningConfiguration">
-        <property name="signatureAlgorithms">
-            <list>
+-->
+
                 <util:constant
                     static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_256" />
-            </list>
-        </property>
-    </bean>
-    <bean id="shibboleth.SigningConfiguration.HS384" parent="shibboleth.BasicSignatureSigningConfiguration">
-        <property name="signatureAlgorithms">
-            <list>
                 <util:constant
                     static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_384" />
-            </list>
-        </property>
-    </bean>
-    <bean id="shibboleth.SigningConfiguration.HS512" parent="shibboleth.BasicSignatureSigningConfiguration">
-        <property name="signatureAlgorithms">
-            <list>
                 <util:constant
                     static-field="org.geant.idpextension.oidc.signature.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_512" />
             </list>
         </property>
     </bean>
+
 </beans>

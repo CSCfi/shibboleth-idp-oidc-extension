@@ -162,11 +162,14 @@
   blockinfile:
     dest: "{{ idp_home }}/conf/credentials.xml"
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertafter: "default signing key"
+    insertafter: "default signing keys"
     content: |
-         <bean id="shibboleth.oidc.DefaultSigningCredential"
+         <bean id="shibboleth.oidc.DefaultRSSigningCredential"
              class="org.geant.idpextension.oidc.profile.spring.factory.BasicJWKCredentialFactoryBean"
-             p:jWKResource="%{idp.signing.oidc.key}" />
+             p:jWKResource="%{idp.signing.oidc.rs.key}" />
+         <bean id="shibboleth.oidc.DefaultESSigningCredential"
+             class="org.geant.idpextension.oidc.profile.spring.factory.BasicJWKCredentialFactoryBean"
+             p:jWKResource="%{idp.signing.oidc.es.key}" />
 
 - name: Set oidc credential to idp.properties       
   blockinfile:
@@ -174,33 +177,10 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
     insertafter: "idp.signing.key"
     content: |
-         # Signing key for oidc id tokens
-         idp.signing.oidc.key= %{idp.home}/credentials/idp-signing-rs256.jwk
+         # Signing keys for oidc id tokens
+         idp.signing.oidc.rs.key= %{idp.home}/credentials/idp-signing-rs.jwk
+         idp.signing.oidc.es.key= %{idp.home}/credentials/idp-signing-es.jwk
 
-- name: Add metadata filter for trusted test SP
-  blockinfile:
-    dest: "{{ idp_home }}/conf/attribute-filter.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertbefore: "</AttributeFilterPolicyGroup>"
-    content: |
-         <AttributeFilterPolicy id="demo_rp">
-             <PolicyRequirementRule xsi:type="Requester" value="demo_rp" />
-             <AttributeRule attributeID="eduPersonPrincipalName">
-                 <PermitValueRule xsi:type="ANY" />
-             </AttributeRule>
-             <AttributeRule attributeID="age">
-                 <PermitValueRule xsi:type="ANY" />
-             </AttributeRule>
-             <AttributeRule attributeID="eduPersonAffiliation">
-                 <PermitValueRule xsi:type="ANY" />
-             </AttributeRule>
-             <AttributeRule attributeID="uid">
-                 <PermitValueRule xsi:type="ANY" />
-             </AttributeRule>
-             <AttributeRule attributeID="mail">
-                 <PermitValueRule xsi:type="ANY" />
-             </AttributeRule>
-         </AttributeFilterPolicy>
 
 - name: Add FilterActiveAuthenticationResultsByMaxAge and OIDCSelectAuthenticationFlow beans to authn-beans.xml. SYSTEM FILE CHANGE!!
   blockinfile:
@@ -329,7 +309,8 @@
 - name: copying jwk for signing id tokens
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/credentials/{{item}}
   with_items:
-    - "idp-signing-rs256.jwk"
+    - "idp-signing-rs.jwk"
+    - "idp-signing-es.jwk"
 
 - name: copying key to be published
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/static/oidc/{{item}}
