@@ -1,40 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:c="http://www.springframework.org/schema/c" xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
     default-init-method="initialize" default-destroy-method="destroy">
 
-    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
+    <bean
+        class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
         p:placeholderPrefix="%{" p:placeholderSuffix="}" />
 
-    <bean class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
-    <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
+    <bean
+        class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
+    <bean
+        class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
 
     <bean id="PopulateMetricContext"
-        class="org.opensaml.profile.action.impl.PopulateMetricContext" scope="prototype"
+        class="org.opensaml.profile.action.impl.PopulateMetricContext"
+        scope="prototype"
         p:metricStrategy="#{getObject('shibboleth.metrics.MetricStrategy')}" />
 
-    <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
+    <!-- Declares audit field extractor functions injected into beans that 
+        populate the audit context. -->
     <import resource="../../../system/conf/audit-system.xml" />
 
     <!-- The profile and logging id used as arguments are for development 
         phase only -->
     <bean id="InitializeProfileRequestContext"
         class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
-        scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/registration"
+        scope="prototype"
+        p:profileId="http://csc.fi/ns/profiles/oidc/registration"
         p:loggingId="%{idp.service.logging.saml2sso:SSO}"
         p:browserProfile="true" />
 
-    <bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage"
+    <bean id="DecodeMessage"
+        class="org.opensaml.profile.action.impl.DecodeMessage"
         scope="prototype">
         <constructor-arg>
             <bean
                 class="org.geant.idpextension.oidc.decoding.impl.OIDCClientRegistrationRequestDecoder"
-                scope="prototype" p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
+                scope="prototype"
+                p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
         </constructor-arg>
     </bean>
 
@@ -43,9 +53,9 @@
         scope="prototype" />
 
     <bean id="CheckRedirectURIs"
-        class="org.geant.idpextension.oidc.profile.impl.CheckRedirectURIs" p:httpClientBuilder-ref="httpClientBuilder"
-        scope="prototype" />
-        
+        class="org.geant.idpextension.oidc.profile.impl.CheckRedirectURIs"
+        p:httpClientBuilder-ref="httpClientBuilder" scope="prototype" />
+
     <bean id="httpClientBuilder"
         class="net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder" />
 
@@ -55,13 +65,13 @@
 
     <bean id="GenerateClientSecret"
         class="org.geant.idpextension.oidc.profile.impl.GenerateClientSecret"
-        scope="prototype" 
+        scope="prototype"
         p:defaultSecretExpirationPeriod="#{'%{idp.oidc.dynreg.defaultSecretExpiration:P12M}'.trim()}" />
 
     <bean id="AddRedirectUrisToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddRedirectUrisToClientMetadata"
         scope="prototype" />
-        
+
     <bean id="AddTokenEndpointAuthMethodsToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddTokenEndpointAuthMethodsToClientMetadata"
         scope="prototype" />
@@ -69,14 +79,16 @@
     <bean id="AddApplicationTypeToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddApplicationTypeToClientMetadata"
         scope="prototype" />
-        
+
     <bean id="AddScopeToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddScopeToClientMetadata"
-        scope="prototype" p:defaultScope-ref="shibboleth.oidc.DefaultScope"/>
-        
+        scope="prototype"
+        p:defaultScope-ref="shibboleth.oidc.DefaultScope" />
+
     <bean id="shibboleth.oidc.DefaultScope"
         class="com.nimbusds.oauth2.sdk.Scope" factory-method="parse">
-        <constructor-arg type="java.lang.String" value="#{'%{idp.oidc.dynreg.defaultScope:openid}'.trim()}"/>
+        <constructor-arg type="java.lang.String"
+            value="#{'%{idp.oidc.dynreg.defaultScope:openid}'.trim()}" />
     </bean>
 
     <bean id="AddContactsToClientMetadata"
@@ -89,11 +101,14 @@
 
     <bean id="AddSubjectTypeToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddSubjectTypeToClientMetadata"
-        scope="prototype" p:defaultSubjectType-ref="shibboleth.oidc.DefaultSubjectType" />
+        scope="prototype"
+        p:defaultSubjectType-ref="shibboleth.oidc.DefaultSubjectType" />
 
     <bean id="shibboleth.oidc.DefaultSubjectType"
-        class="com.nimbusds.openid.connect.sdk.SubjectType" factory-method="parse">
-        <constructor-arg type="java.lang.String" value="#{'%{idp.oidc.dynreg.defaultSubjectType:public}'.trim()}"/>
+        class="com.nimbusds.openid.connect.sdk.SubjectType"
+        factory-method="parse">
+        <constructor-arg type="java.lang.String"
+            value="#{'%{idp.oidc.dynreg.defaultSubjectType:public}'.trim()}" />
     </bean>
 
     <bean id="AddResponseTypesToClientMetadata"
@@ -115,67 +130,89 @@
     <bean id="AddTosUrisToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddTosUrisToClientMetadata"
         scope="prototype" />
-        
+
     <bean id="AddClientNameToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddClientNameToClientMetadata"
         scope="prototype" />
-        
-    <bean id="AddUserInfoSignedResponseAlgToClientMetadata"
-        class="org.geant.idpextension.oidc.profile.impl.AddUserInfoSignedResponseAlgToClientMetadata"
+
+    <bean id="AddSecurityConfigurationToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddSecurityConfigurationToClientMetadata"
         scope="prototype" />
 
     <bean id="shibboleth.oidc.ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
         scope="prototype" p:id="OIDCClientInformationManager"
-        p:storageService-ref="#{'%{idp.oidc.dynreg.StorageService:shibboleth.JPAStorageService}'.trim()}"/>
+        p:storageService-ref="#{'%{idp.oidc.dynreg.StorageService:shibboleth.JPAStorageService}'.trim()}" />
 
     <bean id="StoreClientInformation"
         class="org.geant.idpextension.oidc.profile.impl.StoreClientInformation"
-        scope="prototype" p:clientInformationManager-ref="shibboleth.oidc.ClientInformationManager"
+        scope="prototype"
+        p:clientInformationManager-ref="shibboleth.oidc.ClientInformationManager"
         p:defaultRegistrationValidityPeriod="#{'%{idp.oidc.dynreg.defaultRegistrationValidity:PT24H}'.trim()}">
         <property name="registrationValidityPeriodStrategy">
-            <bean class="org.geant.idpextension.oidc.config.navigate.RegistrationValidityPeriodLookupFunction" />
+            <bean
+                class="org.geant.idpextension.oidc.config.navigate.RegistrationValidityPeriodLookupFunction" />
         </property>
     </bean>
-    
+
     <bean id="SelectRelyingPartyConfiguration"
         class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
-        scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+        scope="prototype"
+        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
 
     <bean id="SelectProfileConfiguration"
         class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
         scope="prototype" />
 
-    <bean id="InitializeOutboundMessageContext" class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundRegistrationResponseMessageContext"
+    <bean id="InitializeOutboundMessageContext"
+        class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundRegistrationResponseMessageContext"
         scope="prototype">
     </bean>
-    
-    <bean id="BuildErrorResponseFromEvent" class="org.geant.idpextension.oidc.profile.impl.BuildRegistrationErrorResponseFromEvent"
-        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse">
+
+    <bean id="BuildErrorResponseFromEvent"
+        class="org.geant.idpextension.oidc.profile.impl.BuildRegistrationErrorResponseFromEvent"
+        scope="prototype"
+        p:httpServletResponse-ref="shibboleth.HttpServletResponse">
         <property name="eventContextLookupStrategy">
-            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+            <bean
+                class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
         </property>
         <property name="mappedErrors">
             <map value-type="com.nimbusds.oauth2.sdk.ErrorObject">
-                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).MISSING_REDIRECT_URIS}" value="#{T(com.nimbusds.oauth2.sdk.client.RegistrationError).INVALID_REDIRECT_URI}" />
-            </map>        
+                <entry
+                    key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).MISSING_REDIRECT_URIS}"
+                    value="#{T(com.nimbusds.oauth2.sdk.client.RegistrationError).INVALID_REDIRECT_URI}" />
+            </map>
         </property>
     </bean>
 
-    <bean id="BuildClientInformation" class="org.geant.idpextension.oidc.profile.impl.BuildClientInformation"
+    <bean id="BuildClientInformation"
+        class="org.geant.idpextension.oidc.profile.impl.BuildClientInformation"
         scope="prototype" />
 
-    <bean id="oidc.messageEncoderFactory" class="org.geant.idpextension.oidc.encoding.impl.OIDCResponseEncoderFactory" p:messageEncoder-ref="oidc.nimbusEncoder" scope="prototype" />
+    <bean id="oidc.messageEncoderFactory"
+        class="org.geant.idpextension.oidc.encoding.impl.OIDCResponseEncoderFactory"
+        p:messageEncoder-ref="oidc.nimbusEncoder" scope="prototype" />
 
-    <bean id="oidc.nimbusEncoder" class="org.geant.idpextension.oidc.encoding.impl.NimbusResponseEncoder" scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" init-method="" />
+    <bean id="oidc.nimbusEncoder"
+        class="org.geant.idpextension.oidc.encoding.impl.NimbusResponseEncoder"
+        scope="prototype"
+        p:httpServletResponse-ref="shibboleth.HttpServletResponse"
+        init-method="" />
 
-    <bean id="EncodeMessage" class="org.opensaml.profile.action.impl.EncodeMessage" scope="prototype"
-        p:messageEncoderFactory-ref="oidc.messageEncoderFactory" p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
+    <bean id="EncodeMessage"
+        class="org.opensaml.profile.action.impl.EncodeMessage"
+        scope="prototype"
+        p:messageEncoderFactory-ref="oidc.messageEncoderFactory"
+        p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
 
-    <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
-            p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
+    <bean id="LogEvent"
+        class="org.opensaml.profile.action.impl.LogEvent"
+        scope="prototype"
+        p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
         <property name="eventContextLookupStrategy">
-            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+            <bean
+                class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
         </property>
     </bean>
 
