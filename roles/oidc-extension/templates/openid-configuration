@@ -47,7 +47,7 @@
       "private_key_jwt"
    ],
    "claims_parameter_supported":true,
-   "request_parameter_supported":false,
+   "request_parameter_supported":true,
    "request_uri_parameter_supported":false,
    "require_request_uri_registration":false,
    "display_values_supported":[
