@@ -72,25 +72,26 @@
             <map
                 value-type="org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver">
                 <entry key="signing-keys" value-ref="CredentialResolver" />
+                <entry key="id_token_signing_alg_values_supported" value-ref="SignatureAlgorithmInfoResolver" />
+                <entry key="userinfo_signing_alg_values_supported" value-ref="SignatureAlgorithmInfoResolver" />
+                <entry key="id_token_encryption_alg_values_supported" value-ref="EncryptionAlgorithmInfoResolver" />
+                <entry key="userinfo_encryption_alg_values_supported" value-ref="EncryptionAlgorithmInfoResolver" />
             </map>
         </property>
         <constructor-arg type="java.io.File"
             value="/opt/shibboleth-idp/static/.well-known/openid-configuration" />
     </bean>
 
-    <bean id="ArrayResolverExample"
-        class="org.geant.idpextension.oidc.metadata.impl.ArrayMetadataValueResolver"
-        p:objectName="keys">
-        <property name="embeddedResolvers">
-            <list
-                value-type="org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver">
-                <ref bean="CredentialResolver" />
-            </list>
-        </property>
-    </bean>
-
     <bean id="CredentialResolver"
         class="org.geant.idpextension.oidc.metadata.impl.CredentialMetadataValueResolver"/>
+        
+    <bean id="SignatureAlgorithmInfoResolver"
+        class="org.geant.idpextension.oidc.metadata.impl.AlgorithmInfoMetadataValueResolver"
+        p:resolveEncryptionAlgs="false" />
+         
+    <bean id="EncryptionAlgorithmInfoResolver"
+        class="org.geant.idpextension.oidc.metadata.impl.AlgorithmInfoMetadataValueResolver"
+        p:resolveEncryptionAlgs="true" />
 
     <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent"
         scope="prototype"
