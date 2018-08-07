@@ -162,7 +162,7 @@
   blockinfile:
     dest: "{{ idp_home }}/conf/credentials.xml"
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertafter: "default signing keys"
+    insertafter: "default signing key"
     content: |
          <bean id="shibboleth.oidc.DefaultRSSigningCredential"
              class="org.geant.idpextension.oidc.profile.spring.factory.BasicJWKCredentialFactoryBean"
