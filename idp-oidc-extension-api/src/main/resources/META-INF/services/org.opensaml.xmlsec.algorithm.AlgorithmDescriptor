@@ -7,3 +7,4 @@ org.geant.idpextension.oidc.algorithm.descriptors.SignatureES512
 org.geant.idpextension.oidc.algorithm.descriptors.SignatureHS256
 org.geant.idpextension.oidc.algorithm.descriptors.SignatureHS384
 org.geant.idpextension.oidc.algorithm.descriptors.SignatureHS512
+org.geant.idpextension.oidc.algorithm.descriptors.KeyTransportRSA1_5
