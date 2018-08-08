@@ -59,7 +59,7 @@
       "email",
       "address",
       "phone",
-      "info"
+      "offline_access"
    ],
    "claims_supported":[
       "aud",

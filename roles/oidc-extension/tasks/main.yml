@@ -115,7 +115,7 @@
          idp.oidc.dynreg.StorageService = shibboleth.JPAStorageService
          idp.oidc.dynreg.defaultRegistrationValidity = PT24H
          idp.oidc.dynreg.defaultSecretExpiration = P12M
-         idp.oidc.dynreg.defaultScope = openid phone email address profile
+         idp.oidc.dynreg.defaultScope = openid profile email address phone offline_access
          idp.oidc.dynreg.defaultSubjectType = public
          idp.oidc.dynreg.tokenEndpointAuthMethods = client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt
          idp.oidc.tokenEndpointAuthMethods = client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt
