@@ -25,5 +25,5 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/** OIDC signature constants etc.*/
+/** Constants related to OIDC crypto features, like signature and ecryption.*/
 package org.geant.idpextension.oidc.crypto.support;
