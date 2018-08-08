@@ -33,7 +33,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.geant.idpextension.oidc.signature.support.SignatureConstants;
+import org.geant.idpextension.oidc.crypto.support.SignatureConstants;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;

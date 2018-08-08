@@ -26,7 +26,7 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.geant.idpextension.oidc.signature.support;
+package org.geant.idpextension.oidc.crypto.support;
 
 /** Algorithm Header Parameter Values for JWS. */
 public final class SignatureConstants {

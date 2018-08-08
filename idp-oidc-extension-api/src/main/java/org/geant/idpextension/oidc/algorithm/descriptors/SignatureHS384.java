@@ -30,7 +30,7 @@ package org.geant.idpextension.oidc.algorithm.descriptors;
 
 import javax.annotation.Nonnull;
 
-import org.geant.idpextension.oidc.signature.support.SignatureConstants;
+import org.geant.idpextension.oidc.crypto.support.SignatureConstants;
 import org.opensaml.security.crypto.JCAConstants;
 import org.opensaml.xmlsec.algorithm.MACAlgorithm;
 

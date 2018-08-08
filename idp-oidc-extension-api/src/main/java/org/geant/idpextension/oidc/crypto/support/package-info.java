@@ -26,4 +26,4 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /** OIDC signature constants etc.*/
-package org.geant.idpextension.oidc.signature.support;
+package org.geant.idpextension.oidc.crypto.support;
