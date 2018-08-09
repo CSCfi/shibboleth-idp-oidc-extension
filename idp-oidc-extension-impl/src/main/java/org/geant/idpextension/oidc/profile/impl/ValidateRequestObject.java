@@ -46,6 +46,7 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.KeyType;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.SignedJWT;
@@ -64,7 +65,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
  * than the RP. The aud value SHOULD be or include the OP's Issuer Identifier URL.
  */
 // TODO: Decryption
-
+// TODO: Algorithm whitelist/blacklist verification and runtime checks.
 @SuppressWarnings("rawtypes")
 public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAction {
 
@@ -131,20 +132,20 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
                 return false;
             }
             for (JWK key : keySet.getKeys()) {
-                if (!reqObjSignAlgorithm.equals(key.getAlgorithm())) {
+                if (key.getAlgorithm() != null && !reqObjSignAlgorithm.equals(key.getAlgorithm())) {
                     continue;
                 }
                 if (KeyUse.ENCRYPTION.equals(key.getKeyUse())) {
                     continue;
                 }
-                if (JWSAlgorithm.Family.RSA.contains(reqObjSignAlgorithm)) {
+                if (JWSAlgorithm.Family.RSA.contains(reqObjSignAlgorithm) && key.getKeyType().equals(KeyType.RSA)) {
                     try {
                         verifier = new RSASSAVerifier(((RSAKey) key).toRSAPublicKey());
                     } catch (JOSEException e) {
                         log.error("{} unable to verify request object signature {}", getLogPrefix(), e.getMessage());
                         return false;
                     }
-                } else if (JWSAlgorithm.Family.EC.contains(reqObjSignAlgorithm)) {
+                } else if (JWSAlgorithm.Family.EC.contains(reqObjSignAlgorithm) && key.getKeyType().equals(KeyType.EC)) {
                     try {
                         verifier = new ECDSAVerifier(((ECKey) key).toECPublicKey());
                     } catch (JOSEException e) {
