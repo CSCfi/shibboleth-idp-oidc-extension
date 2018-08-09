@@ -40,6 +40,18 @@
       "HS512",
       "ES256"
    ],
+   "request_object_signing_alg_values_supported":[
+      "none",
+      "RS256",
+      "RS384",
+      "RS512",
+      "HS256",
+      "HS384",
+      "HS512",
+      "ES256",
+      "ES384",
+      "ES512"
+   ],
    "token_endpoint_auth_methods_supported":[
       "client_secret_basic",
       "client_secret_post",
