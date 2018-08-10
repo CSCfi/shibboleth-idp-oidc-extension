@@ -121,6 +121,9 @@
 
     <bean id="SetConsentToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetConsentToResponseContext" scope="prototype" />
+        
+    <bean id="RevokeConsentForOfflineAccess"
+        class="org.geant.idpextension.oidc.profile.impl.RevokeConsentForOfflineAccess" scope="prototype" />
 
     <bean id="SetAuthorizationCodeToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetAuthorizationCodeToResponseContext" scope="prototype"
