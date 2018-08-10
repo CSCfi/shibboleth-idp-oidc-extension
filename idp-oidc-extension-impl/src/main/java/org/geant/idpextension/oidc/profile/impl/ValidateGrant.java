@@ -186,7 +186,7 @@ public class ValidateGrant extends AbstractOIDCTokenResponseAction {
                     }
                     tokenClaimsSet = authzCodeClaimsSet;
                 } catch (DataSealerException | ParseException e) {
-                    log.error("{} Obtaining auhz code failed {}", getLogPrefix(), e.getMessage());
+                    log.error("{} Obtaining authz code failed {}", getLogPrefix(), e.getMessage());
                     ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_GRANT);
                     return;
                 }
