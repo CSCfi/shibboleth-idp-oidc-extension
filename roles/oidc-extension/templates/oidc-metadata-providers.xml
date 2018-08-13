@@ -19,6 +19,14 @@
         p:embeddedResolver-ref="shibboleth.oidc.ChainingClientInformationResolver">
     </bean>
 
+    <bean id="shibboleth.oidc.RemoteJwkSetCache"
+        class="org.geant.idpextension.oidc.metadata.resolver.RemoteJwkSetCache"
+        p:storage-ref="shibboleth.JPAStorageService"
+        p:httpClientBuilder-ref="shibboleth.oidc.HttpClientBuilder" />
+
+    <bean id="shibboleth.oidc.HttpClientBuilder"
+        class="net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder" />
+
     <bean id="shibboleth.oidc.ChainingClientInformationResolver"
         class="org.geant.idpextension.oidc.metadata.impl.ChainingClientInformationResolver"
         p:id="InternalEmbeddedChainResolver" 
@@ -36,7 +44,9 @@
     </util:list>
 
     <bean id="ExampleFileResolver"
-        class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" p:id="ExampleFileResolver1">
+        class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" 
+        p:id="ExampleFileResolver1"
+        p:remoteJwkSetCache-ref="shibboleth.oidc.RemoteJwkSetCache">
         <constructor-arg>
             <bean class="java.io.File" id="ExampleFile">
                 <constructor-arg type="String" value="/opt/shibboleth-idp/metadata/oidc-client.json" />
@@ -46,7 +56,9 @@
 
     <bean id="ExampleStorageClientInformationResolver"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationResolver"
-        p:id="ExampleStorageResolver1" p:storageService-ref="shibboleth.JPAStorageService"/>
+        p:id="ExampleStorageResolver1"
+        p:storageService-ref="shibboleth.JPAStorageService"
+        p:remoteJwkSetCache-ref="shibboleth.oidc.RemoteJwkSetCache"/>
     
 </beans>
 
