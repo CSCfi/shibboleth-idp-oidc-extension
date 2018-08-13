@@ -65,7 +65,7 @@ public abstract class AbstractOIDCEntityResolver<Key extends Identifier, Value>
     private JsonBackingStore jsonBackingStore;
     
     /** {@inheritDoc} */
-    @Override protected final void doInitialize() throws ComponentInitializationException {
+    @Override protected void doInitialize() throws ComponentInitializationException {
         super.doInitialize();
         try {
             initOIDCResolver();
