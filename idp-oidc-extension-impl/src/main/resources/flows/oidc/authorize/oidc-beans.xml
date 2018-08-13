@@ -187,6 +187,9 @@
         <property name="activationCondition">
             <ref bean="IDTokenRequested" />
         </property>
+        <property name="audienceRestrictionsLookupStrategy">
+            <bean class="org.geant.idpextension.oidc.config.navigate.AudienceRestrictionsLookupFunction" />
+        </property>
     </bean>
 
     <bean id="AddAttributeClaimsToIDToken"

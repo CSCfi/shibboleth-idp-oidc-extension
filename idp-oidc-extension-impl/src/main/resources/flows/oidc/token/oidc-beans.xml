@@ -168,7 +168,11 @@
         class="org.geant.idpextension.oidc.profile.impl.SetSubjectToResponseContext" scope="prototype" />
 
     <bean id="AddIDTokenShell" class="org.geant.idpextension.oidc.profile.impl.AddIDTokenShell" scope="prototype"
-        p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple" />
+        p:issuerLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple">
+        <property name="audienceRestrictionsLookupStrategy">
+            <bean class="org.geant.idpextension.oidc.config.navigate.AudienceRestrictionsLookupFunction" />
+        </property>
+    </bean>
 
     <bean id="AddAttributeClaimsToIDToken"
         class="org.geant.idpextension.oidc.profile.impl.AddAttributesToClaimsSet" scope="prototype"
