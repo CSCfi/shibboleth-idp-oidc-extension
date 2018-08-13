@@ -50,9 +50,7 @@ import com.google.common.base.Function;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 
 /**
- * Uses saml2 name id generator to form name id for response context.
- * 
- * Based on shibboleth class implementing same for SAML2.
+ * Uses saml2 nameID generator to generate Subject to response context.
  *
  */
 @SuppressWarnings("rawtypes")
