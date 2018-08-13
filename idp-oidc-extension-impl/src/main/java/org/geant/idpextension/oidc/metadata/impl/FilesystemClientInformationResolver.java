@@ -161,7 +161,7 @@ public class FilesystemClientInformationResolver extends AbstractFileOIDCEntityR
      */
     protected List<OIDCClientInformation> updateKeys(final List<OIDCClientInformation> clientInformations) {
         final List<OIDCClientInformation> result = new ArrayList<>();
-        for (final OIDCClientInformation clientInformation : getBackingStore().getOrderedInformation()) {
+        for (final OIDCClientInformation clientInformation : clientInformations) {
             if (clientInformation.getOIDCMetadata().getJWKSetURI() != null && remoteJwkSetCache != null) {
                 clientInformation.getOIDCMetadata().setJWKSet(
                         remoteJwkSetCache.fetch(clientInformation.getOIDCMetadata().getJWKSetURI(), keyFetchInterval));
