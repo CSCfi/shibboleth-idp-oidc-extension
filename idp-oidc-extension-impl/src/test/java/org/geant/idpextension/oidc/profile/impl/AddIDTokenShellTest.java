@@ -31,6 +31,8 @@ package org.geant.idpextension.oidc.profile.impl;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+
+import org.geant.idpextension.oidc.config.navigate.AudienceRestrictionsLookupFunction;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -45,6 +47,7 @@ public class AddIDTokenShellTest extends BaseOIDCResponseActionTest {
     private void init() throws ComponentInitializationException {
         action = new AddIDTokenShell();
         action.setIssuerLookupStrategy(new ResponderIdLookupFunction());
+        action.setAudienceRestrictionsLookupStrategy(new AudienceRestrictionsLookupFunction());
         action.initialize();
     }
 

@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -36,6 +37,7 @@ import javax.annotation.Nullable;
 import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
@@ -64,6 +66,9 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
     /** Strategy used to obtain the response issuer value. */
     @Nonnull
     private Function<ProfileRequestContext, String> issuerLookupStrategy;
+    
+    /** Strategy used to obtain the audiences to add. */
+    @Nullable private Function<ProfileRequestContext,Collection<String>> audienceRestrictionsLookupStrategy;
 
     /** EntityID to populate into Issuer element. */
     @Nonnull
@@ -78,6 +83,9 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
     /** The RelyingPartyContext to operate on. */
     @Nullable
     private RelyingPartyContext rpCtx;
+    
+    /** Audiences to add. */
+    @Nullable private Collection<String> audiences;
 
     /** Constructor. */
     public AddIDTokenShell() {
@@ -109,6 +117,29 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
         issuerLookupStrategy = Constraint.isNotNull(strategy, "IssuerLookupStrategy lookup strategy cannot be null");
     }
 
+    /**
+     * Set the strategy used to obtain the audience restrictions to apply.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setAudienceRestrictionsLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext,Collection<String>> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        audienceRestrictionsLookupStrategy =
+                Constraint.isNotNull(strategy, "Audience restriction lookup strategy cannot be null");
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void doInitialize() throws ComponentInitializationException {
+        super.doInitialize();
+        
+        if (audienceRestrictionsLookupStrategy == null) {
+            throw new ComponentInitializationException("Audience restriction lookup strategy cannot be null");
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -120,15 +151,24 @@ public class AddIDTokenShell extends AbstractOIDCResponseAction {
             return false;
         }
         issuerId = issuerLookupStrategy.apply(profileRequestContext);
+        
+        audiences = audienceRestrictionsLookupStrategy.apply(profileRequestContext);
+        if (audiences == null || audiences.isEmpty()) {
+            log.debug("{} No audiences to add, nothing to do", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
+            return false;
+        }
+
         return super.doPreExecute(profileRequestContext);
     }
 
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-
-        List<Audience> aud = new ArrayList<Audience>();
-        aud.add(new Audience(rpCtx.getRelyingPartyId()));
+        List<Audience> aud = new ArrayList<>();
+        for (String audience : audiences) {
+            aud.add(new Audience(audience));
+        }
         Date exp = null;
         final ProfileConfiguration pc = rpCtx.getProfileConfig();
         if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
