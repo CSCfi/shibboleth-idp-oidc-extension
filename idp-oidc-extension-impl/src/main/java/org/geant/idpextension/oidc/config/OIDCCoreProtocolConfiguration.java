@@ -118,7 +118,9 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
     
     /** Lifetime of an refresh token in milliseconds. Default value: 5 minutes */
     @Positive @Duration private long refreshTokenLifetime;
-    
+ 
+    /** Audiences to which an ID token may be shared. */
+    @Nonnull @NonnullElements @NotLive @Unmodifiable private Set<String> additionalAudiences;
     /**
      * Constructor.
      */
@@ -142,6 +144,7 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
         authorizeCodeLifetime = 5 * 60 * 1000;
         accessTokenLifetime = 10 * 60 * 1000;
         refreshTokenLifetime = 120 * 60 * 1000;
+        additionalAudiences = Collections.emptySet();
     }
     
     /**
@@ -364,5 +367,26 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
         return Constraint.isGreaterThan(0, getIndirectProperty(refreshTokenLifetimeLookupStrategy, 
                 refreshTokenLifetime), "refresh token lifetime must be greater than 0");
     }
-
+    
+    /**
+     * Set an unmodifiable set of audiences, in addition to the relying party(ies) to which the IdP is issuing the
+     * ID token, with which an ID token may be shared.
+     * 
+     * @param audiences What to set.
+     */
+    public void setAdditionalAudiencesForIdToken(@Nonnull @NonnullElements @NotLive @Unmodifiable Collection<String> audiences) {
+        Constraint.isNotNull(audiences, "Collection of additional audiences cannot be null");
+        
+        additionalAudiences = new HashSet<>(StringSupport.normalizeStringCollection(audiences));
+    }
+    
+    /**
+     * Get an unmodifiable set of audiences, in addition to the relying party(ies) to which the IdP is issuing the
+     * ID token, with which an ID token may be shared.
+     * 
+     * @return additional audiences to which an ID token may be shared
+     */
+    @Nonnull @NonnullElements @NotLive @Unmodifiable public Set<String> getAdditionalAudiencesForIdToken() {
+        return ImmutableSet.copyOf(additionalAudiences);
+    }
 }
