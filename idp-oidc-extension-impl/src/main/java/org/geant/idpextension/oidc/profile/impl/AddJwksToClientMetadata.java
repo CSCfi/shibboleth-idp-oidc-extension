@@ -107,7 +107,6 @@ public class AddJwksToClientMetadata extends AbstractOIDCClientMetadataPopulatio
             if (containsKeys(remoteSet)) {
                 log.debug("{} The jwks_uri endpoint available and contains key(s)", getLogPrefix());
                 getOutputMetadata().setJWKSetURI(jwkUri);
-                getOutputMetadata().setJWKSet(remoteSet);
             } else {
                 log.warn("{} The jwks_uri was defined, but the endpoint does not contain key(s)", getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);                
