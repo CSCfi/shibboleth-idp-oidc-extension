@@ -10,7 +10,6 @@
     },
     {
       "kty": "EC",
-      "d": "CO-ctmQcB-hS042i2omOIPpaaAaKkBAU6s_v4W09oA0",
       "use": "sig",
       "crv": "P-256",
       "kid": "testkeyES",
