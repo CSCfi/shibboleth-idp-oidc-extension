@@ -89,9 +89,14 @@
     </bean>
 
     <bean id="shibboleth.oidc.EncryptionConfiguration" parent="shibboleth.BasicEncryptionConfiguration">
-        <property name="dataEncryptionAlgorithms">
+        <property name="keyTransportEncryptionAlgorithms">
             <list>
                 <util:constant static-field="org.geant.idpextension.oidc.crypto.support.KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5" />
+            </list>
+         </property>
+        <property name="dataEncryptionAlgorithms">
+            <list>
+                <util:constant static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256" />
             </list>
          </property>
     </bean>
