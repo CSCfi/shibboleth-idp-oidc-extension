@@ -122,7 +122,7 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCSigningResponseA
         JWSAlgorithm algorithm = new JWSAlgorithm(signatureSigningParameters.getSignatureAlgorithm());
         if (credential instanceof JWKCredential) {
             if (!algorithm.equals(((JWKCredential) credential).getAlgorithm())) {
-                log.warn("{} Signature signing algorithm {} differs from JWK algorithm {}", getLogPrefix(),
+                log.debug("{} Signature signing algorithm {} differs from JWK algorithm {}", getLogPrefix(),
                         algorithm.getName(), ((JWKCredential) credential).getAlgorithm());
             }
         }
@@ -149,16 +149,16 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCSigningResponseA
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         SignedJWT jwt = null;
-        Algorithm jwsAlgorithm = resolveAlgorithm();
-        String kid = resolveKid();
         JWTClaimsSet jwtClaimSet = getClaimsSetToSign();
         if (jwtClaimSet == null) {
             log.debug("Claim set is null, nothing to do");
             return;
         }
         try {
+            Algorithm jwsAlgorithm = resolveAlgorithm();
             JWSSigner signer = getSigner(jwsAlgorithm);
-            jwt = new SignedJWT(new JWSHeader.Builder(new JWSAlgorithm(jwsAlgorithm.getName())).keyID(kid).build(),
+            jwt = new SignedJWT(
+                    new JWSHeader.Builder(new JWSAlgorithm(jwsAlgorithm.getName())).keyID(resolveKid()).build(),
                     jwtClaimSet);
             jwt.sign(signer);
         } catch (JOSEException e) {
