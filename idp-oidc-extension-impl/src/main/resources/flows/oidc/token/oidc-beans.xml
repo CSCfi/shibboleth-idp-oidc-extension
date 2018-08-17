@@ -134,6 +134,15 @@
     <bean id="shibboleth.oidc.t.SignatureSigningParametersResolver"
         class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver" />
 
+    <bean id="PopulateIDTokenEncryptionParameters"
+        class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCEncryptionParameters" scope="prototype"
+        p:configurationLookupStrategy-ref="shibboleth.EncryptionConfigurationLookup"
+        p:encryptionParametersResolver-ref="shibboleth.oidc.EncryptionParametersResolver" />
+
+    <bean id="shibboleth.oidc.EncryptionParametersResolver"
+        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver" />
+
+
     <bean id="shibboleth.TokenRequestScopeLookupStrategy"
         class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestScopeLookupFunction" scope="prototype" />
 
@@ -207,6 +216,9 @@
                 c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
         </property>
     </bean>
+
+    <bean id="EncryptIDToken" class="org.geant.idpextension.oidc.profile.impl.EncryptProcessedToken"
+        scope="prototype" />
 
     <bean id="FormOutboundMessage"
         class="org.geant.idpextension.oidc.profile.impl.FormOutboundTokenResponseMessage" scope="prototype" />

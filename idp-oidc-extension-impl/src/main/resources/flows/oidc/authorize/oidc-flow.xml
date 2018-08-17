@@ -28,6 +28,7 @@
         <evaluate expression="SetRequestedClaimsToResponseContext" />
         <evaluate expression="SetRequestedSubjectToResponseContext" />
         <evaluate expression="PopulateIDTokenSignatureSigningParameters" />
+        <evaluate expression="PopulateIDTokenEncryptionParameters" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="PostInitialSetup" />
     </action-state>
@@ -98,6 +99,7 @@
         <evaluate expression="AddAccessTokenHashToIDToken" />
         <evaluate expression="AddAuthorizationCodeHashToIDToken" />
         <evaluate expression="SignIDToken" />
+        <evaluate expression="EncryptIDToken" />
         <evaluate expression="FormOutboundMessage" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="CommitResponse" />

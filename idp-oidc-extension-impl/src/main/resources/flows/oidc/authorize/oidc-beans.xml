@@ -75,7 +75,7 @@
 
     <bean id="ValidateRequestObject" class="org.geant.idpextension.oidc.profile.impl.ValidateRequestObject"
         scope="prototype" />
-        
+
     <bean id="ValidateRedirectURI" class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
         scope="prototype" />
 
@@ -101,9 +101,22 @@
                 c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
         </property>
     </bean>
-    
+
     <bean id="shibboleth.oidc.a.SignatureSigningParametersResolver"
         class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver" />
+
+    <bean id="PopulateIDTokenEncryptionParameters"
+        class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCEncryptionParameters" scope="prototype"
+        p:configurationLookupStrategy-ref="shibboleth.EncryptionConfigurationLookup"
+        p:encryptionParametersResolver-ref="shibboleth.oidc.EncryptionParametersResolver">
+        <property name="activationCondition">
+            <ref bean="IDTokenRequested" />
+        </property>
+    </bean>
+
+    <bean id="shibboleth.oidc.EncryptionParametersResolver"
+        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver" />
+
 
     <bean id="SetTokenDeliveryAttributesToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetTokenDeliveryAttributesToResponseContext" scope="prototype">
@@ -121,7 +134,7 @@
 
     <bean id="SetConsentToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetConsentToResponseContext" scope="prototype" />
-        
+
     <bean id="RevokeConsentForOfflineAccess"
         class="org.geant.idpextension.oidc.profile.impl.RevokeConsentForOfflineAccess" scope="prototype" />
 
@@ -261,6 +274,13 @@
             <bean class="com.google.common.base.Functions" factory-method="compose"
                 c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
         </property>
+        <property name="activationCondition">
+            <ref bean="IDTokenRequested" />
+        </property>
+    </bean>
+
+    <bean id="EncryptIDToken" class="org.geant.idpextension.oidc.profile.impl.EncryptProcessedToken"
+        scope="prototype">
         <property name="activationCondition">
             <ref bean="IDTokenRequested" />
         </property>

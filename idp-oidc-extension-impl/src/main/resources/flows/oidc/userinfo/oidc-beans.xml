@@ -63,7 +63,7 @@
         scope="prototype" />
 
     <bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope" scope="prototype"
-    p:scopeLookupStrategy-ref="shibboleth.TokenRequestScopeLookupStrategy" />
+        p:scopeLookupStrategy-ref="shibboleth.TokenRequestScopeLookupStrategy" />
 
     <bean id="ValidateUserPresence" class="org.geant.idpextension.oidc.profile.impl.ValidateUserPresence"
         scope="prototype" c:sessionResolver-ref="shibboleth.SessionManager"
@@ -101,6 +101,15 @@
 
     <bean id="shibboleth.oidc.u.SignatureSigningParametersResolver"
         class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver"
+        p:userInfoSigningResolver="true" />
+
+    <bean id="PopulateUserInfoResponseEncryptionParameters"
+        class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCEncryptionParameters" scope="prototype"
+        p:configurationLookupStrategy-ref="shibboleth.EncryptionConfigurationLookup"
+        p:encryptionParametersResolver-ref="shibboleth.oidc.EncryptionParametersResolver" />
+
+    <bean id="shibboleth.oidc.EncryptionParametersResolver"
+        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver"
         p:userInfoSigningResolver="true" />
 
     <bean id="shibboleth.TokenRequestRequestedClaimsLookupFunction"
@@ -143,6 +152,9 @@
                 c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
         </property>
     </bean>
+
+    <bean id="EncryptUserInfoResponse" class="org.geant.idpextension.oidc.profile.impl.EncryptProcessedToken"
+        scope="prototype" />
 
     <bean id="FormOutboundMessage"
         class="org.geant.idpextension.oidc.profile.impl.FormOutboundUserInfoResponseMessage" scope="prototype" />

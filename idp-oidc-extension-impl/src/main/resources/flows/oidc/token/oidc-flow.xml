@@ -31,6 +31,7 @@
         <evaluate expression="SetConsentToResponseContext" />
         <evaluate expression="ReduceValidatedScope" />
         <evaluate expression="PopulateIDTokenSignatureSigningParameters" />
+        <evaluate expression="PopulateIDTokenEncryptionParameters" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="PostInitialSetup" />
     </action-state>
@@ -60,6 +61,7 @@
         <evaluate expression="AddNonceToIDToken" />
         <evaluate expression="AddAccessTokenHashToIDToken" />
         <evaluate expression="SignIDToken" />
+        <evaluate expression="EncryptIDToken" />
         <evaluate expression="FormOutboundMessage" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="CommitResponse" />
