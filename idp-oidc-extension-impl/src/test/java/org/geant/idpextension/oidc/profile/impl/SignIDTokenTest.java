@@ -47,6 +47,7 @@ import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.jwt.SignedJWT;
 
 /** {@link SignIDToken} unit test. */
 public class SignIDTokenTest extends BaseOIDCResponseActionTest {
@@ -77,7 +78,7 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         action.initialize();
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNull(respCtx.getSignedToken());
+        Assert.assertNull(respCtx.getProcessedToken());
     }
 
     /**
@@ -93,7 +94,7 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         spCtx.setSignatureSigningParameters(null);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNull(respCtx.getSignedToken());
+        Assert.assertNull(respCtx.getProcessedToken());
     }
 
     /**
@@ -116,8 +117,8 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         setIdTokenToResponseContext("iss", "sub", "aud", new Date(), new Date());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNotNull(respCtx.getSignedToken());
-        Assert.assertTrue(respCtx.getSignedToken().verify(verifier));
+        Assert.assertNotNull(respCtx.getProcessedToken());
+        Assert.assertTrue(((SignedJWT)respCtx.getProcessedToken()).verify(verifier));
 
     }
 

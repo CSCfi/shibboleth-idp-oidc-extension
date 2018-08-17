@@ -63,7 +63,7 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
             return;
         }
         AuthenticationResponse resp = new AuthenticationSuccessResponse(getOidcResponseContext().getRedirectURI(),
-                getOidcResponseContext().getAuthorizationCode(), getOidcResponseContext().getSignedToken(),
+                getOidcResponseContext().getAuthorizationCode(), getOidcResponseContext().getProcessedToken(),
                 getOidcResponseContext().getAccessToken(),
                 new DefaultRequestStateLookupFunction().apply(profileRequestContext), null,
                 new DefaultRequestResponseModeLookupFunction().apply(profileRequestContext));

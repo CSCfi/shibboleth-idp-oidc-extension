@@ -56,10 +56,7 @@ public class SignUserInfoResponse extends AbstractSignJWTAction {
 
     /** token claims set to sign. */
     private JWTClaimsSet userInfoClaims;
-
-    /** algorithm used for signing response. */
-    private JWSAlgorithm algorithm;
-
+    
     /** Strategy used to determine user info response signing algorithm. */
     @SuppressWarnings("rawtypes")
     @Nonnull
@@ -89,22 +86,7 @@ public class SignUserInfoResponse extends AbstractSignJWTAction {
     @Override
     protected boolean
             doPreExecute(@SuppressWarnings("rawtypes") @Nonnull final ProfileRequestContext profileRequestContext) {
-        algorithm = userInfoSigAlgStrategy.apply(profileRequestContext);
-        if (algorithm == null) {
-            return false;
-        }
-        if (!super.doPreExecute(profileRequestContext)) {
-            if (algorithm != null) {
-                log.warn("{} unable to sign userinfo response, requested algorithm is {}", getLogPrefix(),
-                        algorithm.getName());
-            }
-            return false;
-        }
-        final JWSAlgorithm algConfigured = resolveAlgorithm();
-        if (!algorithm.equals(algConfigured)) {
-            log.error("{} unable to sign userinfo response, requested algorithm is {} and configured is {}",
-                    getLogPrefix(), algorithm, algConfigured.getName());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_SEC_CFG);
+        if (!super.doPreExecute(profileRequestContext) || userInfoSigAlgStrategy.apply(profileRequestContext) == null) {
             return false;
         }
         if (getOidcResponseContext().getUserInfo() == null) {
@@ -139,7 +121,7 @@ public class SignUserInfoResponse extends AbstractSignJWTAction {
      */
     @Override
     protected void setSignedJWT(SignedJWT jwt) {
-       getOidcResponseContext().setSignedToken(jwt);
+        getOidcResponseContext().setProcessedToken(jwt);
     }
 
 }

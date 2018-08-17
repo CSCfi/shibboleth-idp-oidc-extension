@@ -33,9 +33,7 @@ import java.util.Date;
 import javax.annotation.Nullable;
 import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
 import org.opensaml.messaging.context.BaseContext;
-
 import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
@@ -60,9 +58,9 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     @Nullable
     private UserInfo userInfo;
 
-    /** The signed id token / user info response formed. */
+    /** The signed/encrypted id token / user info response formed. */
     @Nullable
-    private SignedJWT signedToken;
+    private JWT processedToken;
 
     /** the acr used in response. **/
     @Nullable
@@ -104,7 +102,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     /** Requested claims. */
     @Nullable
     private ClaimsRequest requestedClaims;
-    
+
     /**
      * Get requested claims.
      * 
@@ -356,21 +354,21 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     }
 
     /**
-     * Get the signed id token / user info response.
+     * Get the signed/encrypted id token / user info response.
      * 
      * @return The signed id token / user info response
      */
     @Nullable
-    public SignedJWT getSignedToken() {
-        return signedToken;
+    public JWT getProcessedToken() {
+        return processedToken;
     }
 
     /**
-     * Set the signed id token / user info response.
+     * Set the signed/encrypted id token / user info response.
      * 
      * @param token The signed id token / user info response
      */
-    public void setSignedToken(@Nullable SignedJWT token) {
-        signedToken = token;
+    public void setProcessedToken(@Nullable JWT token) {
+        processedToken = token;
     }
 }
