@@ -59,7 +59,14 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Action that encrypts a signed id token / userinfo response.
+ * Action that serves both id token and user info response encryption. Existence of encryption parameters is taken as
+ * indication whether the encryption should take place. Action assumes the content to be encrypted is located primarily
+ * by {@link OidcResponseContext#getProcessedToken()} returning either signed id token or signed user info response. If
+ * such information is not available action assumes the data to be encrypted is
+ * {@link OidcResponseContext#.getUserInfo()} containing bare user info response. If neither of the sources for
+ * encryption exists the actions fails.
+ * 
+ * TODO: Currently supports only RSA & EC families of encryption methods.
  */
 @SuppressWarnings("rawtypes")
 public class EncryptProcessedToken extends AbstractOIDCResponseAction {
@@ -71,6 +78,12 @@ public class EncryptProcessedToken extends AbstractOIDCResponseAction {
     /** Strategy used to look up the {@link EncryptionContext} to store parameters in. */
     @Nonnull
     private Function<ProfileRequestContext, EncryptionContext> encryptionContextLookupStrategy;
+
+    /** Encryption parameters for encrypting payload. */
+    private EncryptionParameters params;
+
+    /** Payload to encrypt. */
+    private Payload payload;
 
     /**
      * Constructor.
@@ -95,32 +108,45 @@ public class EncryptProcessedToken extends AbstractOIDCResponseAction {
 
     /** {@inheritDoc} */
     @Override
-    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+        if (!super.doPreExecute(profileRequestContext)) {
+            return false;
+        }
         final EncryptionContext encryptCtx = encryptionContextLookupStrategy.apply(profileRequestContext);
         if (encryptCtx == null) {
             log.error("{} No EncryptionContext returned by lookup strategy", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-            return;
+            return false;
         }
-        EncryptionParameters params = encryptCtx.getAssertionEncryptionParameters();
+        params = encryptCtx.getAssertionEncryptionParameters();
         if (params == null) {
             log.debug("{} No Encryption parameters, nothing to do", getLogPrefix());
-            return;
+            return false;
         }
-        if (getOidcResponseContext().getProcessedToken() == null) {
-            log.error("{} Instructed to encrypt but no signed token available", getLogPrefix());
+        if (getOidcResponseContext().getProcessedToken() != null) {
+            payload = new Payload((SignedJWT) getOidcResponseContext().getProcessedToken());
+        } else if (getOidcResponseContext().getUserInfo() != null) {
+            payload = new Payload(getOidcResponseContext().getUserInfo().toJSONObject());
+        }
+        if (payload == null) {
+            log.error("{} Instructed to encrypt but no plain text source available", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_ENCRYPT);
-            return;
+            return false;
         }
+        return true;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+
         JWEAlgorithm alg = JWEAlgorithm.parse(params.getKeyTransportEncryptionAlgorithm());
-        // TODO: Add support for Symmetric family
         if (JWEAlgorithm.Family.ASYMMETRIC.contains(alg)) {
             JWKCredential credential = (JWKCredential) params.getKeyTransportEncryptionCredential();
             EncryptionMethod enc = EncryptionMethod.parse(params.getDataEncryptionAlgorithm());
-            log.debug("{} encrypting id token with key {} and params alg: {} enc: {}", getLogPrefix(),
-                    credential.getKid(), alg.getName(), enc.getName());
-            JWEObject jweObject = new JWEObject(new JWEHeader.Builder(alg, enc).contentType("JWT").build(),
-                    new Payload((SignedJWT) getOidcResponseContext().getProcessedToken()));
+            log.debug("{} encrypting with key {} and params alg: {} enc: {}", getLogPrefix(), credential.getKid(),
+                    alg.getName(), enc.getName());
+            JWEObject jweObject = new JWEObject(new JWEHeader.Builder(alg, enc).contentType("JWT").build(), payload);
             try {
                 if (JWEAlgorithm.Family.RSA.contains(alg)) {
                     jweObject.encrypt(new RSAEncrypter((RSAPublicKey) credential.getPublicKey()));
@@ -133,7 +159,8 @@ public class EncryptProcessedToken extends AbstractOIDCResponseAction {
                 log.error("{} Encryption failed {}", getLogPrefix(), e.getMessage());
             }
         }
-        log.error("{} id token has not been encrypted", getLogPrefix());
+        log.error("{} Encryption did not take place propably because of missing implementation support for algorithm",
+                getLogPrefix());
         ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_ENCRYPT);
     }
 
