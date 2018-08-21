@@ -28,6 +28,7 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -45,11 +46,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.nimbusds.jose.Algorithm;
+import com.nimbusds.jose.EncryptionMethod;
+import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.oauth2.sdk.ResponseType;
 
 import net.shibboleth.idp.profile.IdPEventIds;
-import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
@@ -69,9 +71,23 @@ public class AddSecurityConfigurationToClientMetadata extends AbstractOIDCClient
     @Nonnull
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
 
-    /** The RelyingPartyContext to operate on. */
+    /**
+     * List of supported signing algorithms obtained from the security configuration.
+     */
     @Nullable
-    private RelyingPartyContext rpCtx;
+    List<String> supportedSigningAlgs;
+
+    /**
+     * List of supported data encryption algorithms obtained from the security configuration.
+     */
+    @Nullable
+    List<String> supportedEncryptionEncs;
+
+    /**
+     * List of supported key transport algorithms obtained from the security configuration.
+     */
+    @Nullable
+    List<String> supportedEncryptionAlgs;
 
     public AddSecurityConfigurationToClientMetadata() {
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
@@ -99,8 +115,8 @@ public class AddSecurityConfigurationToClientMetadata extends AbstractOIDCClient
         if (!super.doPreExecute(profileRequestContext)) {
             return false;
         }
-
-        rpCtx = relyingPartyContextLookupStrategy.apply(profileRequestContext);
+        
+        final RelyingPartyContext rpCtx = relyingPartyContextLookupStrategy.apply(profileRequestContext);
         if (rpCtx == null) {
             log.debug("{} No relying party context associated with this profile request", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
@@ -112,61 +128,142 @@ public class AddSecurityConfigurationToClientMetadata extends AbstractOIDCClient
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
             return false;
         }
+        
+        if (rpCtx.getProfileConfig().getSecurityConfiguration() == null) {
+            supportedSigningAlgs = Collections.emptyList();
+            supportedEncryptionAlgs = Collections.emptyList();
+            supportedEncryptionEncs = Collections.emptyList();
+        } else {
+            final SignatureSigningConfiguration sigConfig =
+                    rpCtx.getProfileConfig().getSecurityConfiguration().getSignatureSigningConfiguration();
+            if (sigConfig != null) {
+                supportedSigningAlgs = sigConfig.getSignatureAlgorithms();
+            } else {
+                supportedSigningAlgs = Collections.emptyList();
+            }
+            final EncryptionConfiguration encConfig =
+                    rpCtx.getProfileConfig().getSecurityConfiguration().getEncryptionConfiguration();
+            if (encConfig != null) {
+                supportedEncryptionAlgs = encConfig.getKeyTransportEncryptionAlgorithms();
+                supportedEncryptionEncs = encConfig.getDataEncryptionAlgorithms();
+            } else {
+                supportedEncryptionAlgs = Collections.emptyList();
+                supportedEncryptionEncs = Collections.emptyList();
+            }
+        }
         return true;
     }
 
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        final ProfileConfiguration profileConfig = rpCtx.getProfileConfig();
-
-        final SignatureSigningConfiguration sigConfig =
-                profileConfig.getSecurityConfiguration().getSignatureSigningConfiguration();
-        final List<String> supportedSigningAlgs = sigConfig.getSignatureAlgorithms();
-
         final JWSAlgorithm reqIdTokenSigAlg = getInputMetadata().getIDTokenJWSAlg();
         if (reqIdTokenSigAlg == null) {
-            // TODO: should we double-check that RS256 is supported by the profile configuration?
             getOutputMetadata().setIDTokenJWSAlg(new JWSAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_RS_256));
         } else {
-            final String algName = reqIdTokenSigAlg.getName();
-            if (supportedSigningAlgs.contains(algName)) {
-                boolean implicitOrHybrid = false;
+            getOutputMetadata().setIDTokenJWSAlg(reqIdTokenSigAlg);
+        }
+        if (supportedSigningAlgs.contains(getOutputMetadata().getIDTokenJWSAlg().getName())) {
+            boolean implicitOrHybrid = false;
+            if (getOutputMetadata().getResponseTypes() != null) {
                 for (final ResponseType responseType : getOutputMetadata().getResponseTypes()) {
                     if (responseType.impliesHybridFlow() || responseType.impliesImplicitFlow()) {
                         implicitOrHybrid = true;
                         break;
                     }
                 }
-                if (reqIdTokenSigAlg.equals(Algorithm.NONE) && implicitOrHybrid) {
-                    log.warn(
-                            "{} The requested id_token_signed_response_alg 'none' is not supported when implicit or hybrid flow in response type",
-                            getLogPrefix());
-                    ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
-                    return;
-                }
-                getOutputMetadata().setIDTokenJWSAlg(reqIdTokenSigAlg);
-            } else {
-                log.warn("{} The requested id_token_signed_response_alg {} is not supported", getLogPrefix(), algName);
+            }
+            if (getOutputMetadata().getIDTokenJWSAlg().equals(Algorithm.NONE) && implicitOrHybrid) {
+                log.warn(
+                        "{} The requested id_token_signed_response_alg 'none' is not supported when implicit or hybrid flow in response type",
+                        getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
                 return;
             }
+        } else {
+            log.warn("{} The requested id_token_signed_response_alg {} is not supported", getLogPrefix(),
+                    getOutputMetadata().getIDTokenJWSAlg().getName());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+            return;
         }
 
         final JWSAlgorithm reqUserInfoSigAlg = getInputMetadata().getUserInfoJWSAlg();
         if (reqUserInfoSigAlg != null) {
-            final String algName = reqUserInfoSigAlg.getName();
-            if (supportedSigningAlgs.contains(algName)) {
+            if (supportedSigningAlgs.contains(reqUserInfoSigAlg.getName())) {
                 getOutputMetadata().setUserInfoJWSAlg(reqUserInfoSigAlg);
             } else {
-                log.warn("{} The requested userinfo_signed_response_alg {} is not supported", getLogPrefix(), algName);
+                log.warn("{} The requested userinfo_signed_response_alg {} is not supported", getLogPrefix(),
+                        reqUserInfoSigAlg.getName());
                 ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
                 return;
             }
         }
 
-        // TODO: finish this
-        final EncryptionConfiguration encConfig = profileConfig.getSecurityConfiguration().getEncryptionConfiguration();
+        final JWEAlgorithm reqIdTokenEncAlg = getInputMetadata().getIDTokenJWEAlg();
+        final EncryptionMethod reqIdTokenEncEnc = getInputMetadata().getIDTokenJWEEnc();
+        if ((reqIdTokenEncAlg == null) != (reqIdTokenEncEnc == null)) {
+            if (reqIdTokenEncAlg == null) {
+                log.warn("{} The requested id_token_encrypted_response_alg was not defined even though _enc was",
+                        getLogPrefix());
+                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+                return;
+            } else {
+                log.debug("{} Using default algorithm for id_token_encrypted_response_alg", getLogPrefix());
+                getOutputMetadata().setIDTokenJWEEnc(EncryptionMethod.A128CBC_HS256);
+                getOutputMetadata().setIDTokenJWEAlg(reqIdTokenEncAlg);
+            }
+        } else {
+            getOutputMetadata().setIDTokenJWEAlg(getInputMetadata().getIDTokenJWEAlg());
+            getOutputMetadata().setIDTokenJWEEnc(getInputMetadata().getIDTokenJWEEnc());
+        }
+
+        if (getOutputMetadata().getIDTokenJWEAlg() != null
+                && !supportedEncryptionAlgs.contains(getOutputMetadata().getIDTokenJWEAlg().getName())) {
+            log.warn("{} The requested id_token_encrypted_response_alg {} is not supported", getLogPrefix(),
+                    getOutputMetadata().getIDTokenJWEAlg());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+            return;
+        }
+        if (getOutputMetadata().getIDTokenJWEEnc() != null
+                && !supportedEncryptionEncs.contains(getOutputMetadata().getIDTokenJWEEnc().getName())) {
+            log.warn("{} The requested id_token_encrypted_response_enc {} is not supported", getLogPrefix(),
+                    getOutputMetadata().getIDTokenJWEEnc());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+            return;
+        }
+
+        final JWEAlgorithm reqUserInfoEncAlg = getInputMetadata().getUserInfoJWEAlg();
+        final EncryptionMethod reqUserInfoEncEnc = getInputMetadata().getUserInfoJWEEnc();
+        if ((reqUserInfoEncAlg == null) != (reqUserInfoEncEnc == null)) {
+            if (reqUserInfoEncAlg == null) {
+                log.warn("{} The requested userinfo_encrypted_response_alg was not defined even though _enc was",
+                        getLogPrefix());
+                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+                return;
+            } else {
+                log.debug("{} Using default algorithm for userinfo_encrypted_response_alg", getLogPrefix());
+                getOutputMetadata().setUserInfoJWEEnc(EncryptionMethod.A128CBC_HS256);
+                getOutputMetadata().setUserInfoJWEAlg(reqUserInfoEncAlg);
+            }
+        } else {
+            getOutputMetadata().setUserInfoJWEAlg(getInputMetadata().getUserInfoJWEAlg());
+            getOutputMetadata().setUserInfoJWEEnc(getInputMetadata().getUserInfoJWEEnc());
+        }
+
+        if (getOutputMetadata().getUserInfoJWEAlg() != null
+                && !supportedEncryptionAlgs.contains(getOutputMetadata().getUserInfoJWEAlg().getName())) {
+            log.warn("{} The requested userinfo_encrypted_response_alg {} is not supported", getLogPrefix(),
+                    getOutputMetadata().getUserInfoJWEAlg());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+            return;
+        }
+        if (getOutputMetadata().getUserInfoJWEEnc() != null
+                && !supportedEncryptionEncs.contains(getOutputMetadata().getUserInfoJWEEnc().getName())) {
+            log.warn("{} The requested userinfo_encrypted_response_enc {} is not supported", getLogPrefix(),
+                    getOutputMetadata().getUserInfoJWEEnc());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+            return;
+        }
 
         // org.opensaml.xmlsec.signature.support.SignatureConstants.ALGO_ID_MAC_HMAC_SHA512;
     }
