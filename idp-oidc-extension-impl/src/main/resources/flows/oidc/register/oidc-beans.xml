@@ -139,6 +139,10 @@
         class="org.geant.idpextension.oidc.profile.impl.AddSecurityConfigurationToClientMetadata"
         scope="prototype" />
 
+    <bean id="AddRequestObjectSecurityConfigurationToClientMetadata"
+        class="org.geant.idpextension.oidc.profile.impl.AddRequestObjectSecurityConfigurationToClientMetadata"
+        scope="prototype" />
+
     <bean id="shibboleth.oidc.ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
         scope="prototype" p:id="OIDCClientInformationManager"

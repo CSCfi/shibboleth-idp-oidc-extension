@@ -45,6 +45,7 @@
         <evaluate expression="AddTosUrisToClientMetadata" />
         <evaluate expression="AddClientNameToClientMetadata" />
         <evaluate expression="AddSecurityConfigurationToClientMetadata" />
+        <evaluate expression="AddRequestObjectSecurityConfigurationToClientMetadata" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="HandleOutboundMessage" />
     </action-state>
