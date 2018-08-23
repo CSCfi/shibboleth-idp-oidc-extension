@@ -28,19 +28,18 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.geant.idpextension.oidc.config.navigate.DataEncryptionAlgorithmsLookupFunction;
+import org.geant.idpextension.oidc.config.navigate.KeyTransportEncryptionAlgorithmsLookupFunction;
+import org.geant.idpextension.oidc.config.navigate.SignatureAlgorithmsLookupFunction;
 import org.geant.idpextension.oidc.crypto.support.SignatureConstants;
-import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
-import org.opensaml.xmlsec.EncryptionConfiguration;
-import org.opensaml.xmlsec.SignatureSigningConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +50,6 @@ import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.oauth2.sdk.ResponseType;
 
-import net.shibboleth.idp.profile.IdPEventIds;
-import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
@@ -65,11 +62,14 @@ public class AddSecurityConfigurationToClientMetadata extends AbstractOIDCClient
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(AddSecurityConfigurationToClientMetadata.class);
 
-    /**
-     * Strategy used to locate the {@link RelyingPartyContext} associated with a given {@link ProfileRequestContext}.
-     */
-    @Nonnull
-    private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
+    /** Strategy to obtain list of supported signature algorithms. */
+    @Nullable private Function<ProfileRequestContext,List<String>> signatureAlgorithmsLookupStrategy;
+
+    /** Strategy to obtain list of supported data encryption algorithms. */
+    @Nullable private Function<ProfileRequestContext,List<String>> dataEncryptionAlgorithmsLookupStrategy;
+
+    /** Strategy to obtain list of supported key transport encryption algorithms. */
+    @Nullable private Function<ProfileRequestContext,List<String>> keyTransportEncryptionAlgorithmsLookupStrategy;
 
     /**
      * List of supported signing algorithms obtained from the security configuration.
@@ -90,22 +90,48 @@ public class AddSecurityConfigurationToClientMetadata extends AbstractOIDCClient
     List<String> supportedEncryptionAlgs;
 
     public AddSecurityConfigurationToClientMetadata() {
-        relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
+        signatureAlgorithmsLookupStrategy = new SignatureAlgorithmsLookupFunction();
+        dataEncryptionAlgorithmsLookupStrategy = new DataEncryptionAlgorithmsLookupFunction();
+        keyTransportEncryptionAlgorithmsLookupStrategy = new KeyTransportEncryptionAlgorithmsLookupFunction();
     }
 
     /**
-     * Set the strategy used to locate the {@link RelyingPartyContext} associated with a given
-     * {@link ProfileRequestContext}.
+     * Set the strategy used to obtain list of supported signature algorithms.
      * 
-     * @param strategy strategy used to locate the {@link RelyingPartyContext} associated with a given
-     *            {@link ProfileRequestContext}
+     * @param strategy What to set.
      */
-    public void setRelyingPartyContextLookupStrategy(
-            @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
+    public void setSignatureAlgorithmsLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext,List<String>> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
 
-        relyingPartyContextLookupStrategy =
-                Constraint.isNotNull(strategy, "RelyingPartyContext lookup strategy cannot be null");
+        signatureAlgorithmsLookupStrategy =
+                Constraint.isNotNull(strategy, "Signature algorithms lookup strategy cannot be null");
+    }
+
+    /**
+     * Set the strategy used to obtain list of supported signature algorithms.
+     * 
+     * @param strategy What to set.
+     */
+    public void setDataEncryptionAlgorithmsLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext,List<String>> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        dataEncryptionAlgorithmsLookupStrategy =
+                Constraint.isNotNull(strategy, "Data encryption algorithms lookup strategy cannot be null");
+    }
+
+    /**
+     * Set the strategy used to obtain list of supported signature algorithms.
+     * 
+     * @param strategy What to set.
+     */
+    public void setKeyTransportAlgorithmsLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext,List<String>> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        keyTransportEncryptionAlgorithmsLookupStrategy =
+                Constraint.isNotNull(strategy, "Key transport encryption algorithms lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -116,40 +142,19 @@ public class AddSecurityConfigurationToClientMetadata extends AbstractOIDCClient
             return false;
         }
         
-        final RelyingPartyContext rpCtx = relyingPartyContextLookupStrategy.apply(profileRequestContext);
-        if (rpCtx == null) {
-            log.debug("{} No relying party context associated with this profile request", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
-            return false;
+        supportedSigningAlgs = signatureAlgorithmsLookupStrategy.apply(profileRequestContext);
+        if (supportedSigningAlgs.isEmpty()) {
+            log.warn("{} No supported signature signing algorithms resolved", getLogPrefix());
         }
 
-        if (rpCtx.getProfileConfig() == null) {
-            log.debug("{} No profile configuration associated with this profile request", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
-            return false;
+        supportedEncryptionAlgs = keyTransportEncryptionAlgorithmsLookupStrategy.apply(profileRequestContext);
+        if (supportedEncryptionAlgs.isEmpty()) {
+            log.warn("{} No supported key transport encryption algorithms resolved", getLogPrefix());
         }
         
-        if (rpCtx.getProfileConfig().getSecurityConfiguration() == null) {
-            supportedSigningAlgs = Collections.emptyList();
-            supportedEncryptionAlgs = Collections.emptyList();
-            supportedEncryptionEncs = Collections.emptyList();
-        } else {
-            final SignatureSigningConfiguration sigConfig =
-                    rpCtx.getProfileConfig().getSecurityConfiguration().getSignatureSigningConfiguration();
-            if (sigConfig != null) {
-                supportedSigningAlgs = sigConfig.getSignatureAlgorithms();
-            } else {
-                supportedSigningAlgs = Collections.emptyList();
-            }
-            final EncryptionConfiguration encConfig =
-                    rpCtx.getProfileConfig().getSecurityConfiguration().getEncryptionConfiguration();
-            if (encConfig != null) {
-                supportedEncryptionAlgs = encConfig.getKeyTransportEncryptionAlgorithms();
-                supportedEncryptionEncs = encConfig.getDataEncryptionAlgorithms();
-            } else {
-                supportedEncryptionAlgs = Collections.emptyList();
-                supportedEncryptionEncs = Collections.emptyList();
-            }
+        supportedEncryptionEncs = dataEncryptionAlgorithmsLookupStrategy.apply(profileRequestContext);
+        if (supportedEncryptionEncs.isEmpty()) {
+            log.warn("{} No supported data encryption algorithms resolved", getLogPrefix());
         }
         return true;
     }

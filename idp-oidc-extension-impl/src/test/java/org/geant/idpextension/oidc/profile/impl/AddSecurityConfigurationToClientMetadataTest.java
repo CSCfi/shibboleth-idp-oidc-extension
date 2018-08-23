@@ -36,6 +36,7 @@ import org.geant.idpextension.oidc.crypto.support.KeyTransportConstants;
 import org.geant.idpextension.oidc.crypto.support.SignatureConstants;
 import org.mockito.Mockito;
 import org.opensaml.profile.action.EventIds;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.xmlsec.EncryptionConfiguration;
 import org.opensaml.xmlsec.SignatureSigningConfiguration;
 import org.testng.Assert;
@@ -71,9 +72,8 @@ public class AddSecurityConfigurationToClientMetadataTest extends BaseOIDCClient
         return new AddSecurityConfigurationToClientMetadata();
     }
 
-    protected void setUpContext(final OIDCClientMetadata input, final OIDCClientMetadata output,
-            final List<String> signingAlgs, final List<String> encyrptionAlgs, final List<String> encryptionEncs) throws ComponentInitializationException {
-        super.setUpContext(input, output);
+    protected static void initializeRpCtx(final ProfileRequestContext profileRequestCtx, final List<String> signingAlgs,
+            final List<String> encyrptionAlgs, final List<String> encryptionEncs) {
         final RelyingPartyContext rpCtx = profileRequestCtx.getSubcontext(RelyingPartyContext.class);
         final ProfileConfiguration profileConfig = Mockito.mock(ProfileConfiguration.class);
         final SecurityConfiguration secConfig = Mockito.mock(SecurityConfiguration.class);
@@ -86,6 +86,13 @@ public class AddSecurityConfigurationToClientMetadataTest extends BaseOIDCClient
         Mockito.when(secConfig.getEncryptionConfiguration()).thenReturn(encryptionConfig);
         Mockito.when(profileConfig.getSecurityConfiguration()).thenReturn(secConfig);
         rpCtx.setProfileConfig(profileConfig);
+    }
+
+    protected void setUpContext(final OIDCClientMetadata input, final OIDCClientMetadata output,
+            final List<String> signingAlgs, final List<String> encryptionAlgs, final List<String> encryptionEncs)
+            throws ComponentInitializationException {
+        super.setUpContext(input, output);
+        initializeRpCtx(profileRequestCtx, signingAlgs, encryptionAlgs, encryptionEncs);
     }
 
     @Test
@@ -102,29 +109,39 @@ public class AddSecurityConfigurationToClientMetadataTest extends BaseOIDCClient
         OIDCClientMetadata output = new OIDCClientMetadata();
         setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), null, null);
         Assert.assertNull(action.execute(requestCtx));
+        Assert.assertEquals(output.getIDTokenJWSAlg(), JWSAlgorithm.RS256);
+        Assert.assertNull(output.getIDTokenJWEEnc());
+        Assert.assertNull(output.getIDTokenJWEAlg());
     }
 
     @Test
-    public void testSignatureAlgorithmsListWithRS256Request() throws ComponentInitializationException {
+    public void testIDTokenSignatureAlgorithmsListWithRS256Request() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
         input.setIDTokenJWSAlg(JWSAlgorithm.RS256);
         OIDCClientMetadata output = new OIDCClientMetadata();
         setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), null, null);
         Assert.assertNull(action.execute(requestCtx));
+        Assert.assertEquals(output.getIDTokenJWSAlg(), JWSAlgorithm.RS256);
+        Assert.assertNull(output.getIDTokenJWEEnc());
+        Assert.assertNull(output.getIDTokenJWEAlg());
     }
 
     @Test
-    public void testSignatureAlgorithmsListWithES512Request() throws ComponentInitializationException {
+    public void testIDTokenSignatureAlgorithmsListWithES512Request() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
         input.setIDTokenJWSAlg(JWSAlgorithm.ES512);
         OIDCClientMetadata output = new OIDCClientMetadata();
-        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256,
-                SignatureConstants.ALGO_ID_SIGNATURE_ES_512), null, null);
+        setUpContext(input, output,
+                Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256, SignatureConstants.ALGO_ID_SIGNATURE_ES_512),
+                null, null);
         Assert.assertNull(action.execute(requestCtx));
+        Assert.assertEquals(output.getIDTokenJWSAlg(), JWSAlgorithm.ES512);
+        Assert.assertNull(output.getIDTokenJWEEnc());
+        Assert.assertNull(output.getIDTokenJWEAlg());
     }
-    
+
     @Test
-    public void testInvalidEncryptionConfig() throws ComponentInitializationException {
+    public void testIDTokenInvalidEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
         input.setIDTokenJWEAlg(null);
         input.setIDTokenJWEEnc(EncryptionMethod.A128CBC_HS256);
@@ -134,33 +151,119 @@ public class AddSecurityConfigurationToClientMetadataTest extends BaseOIDCClient
     }
 
     @Test
-    public void testUnsupportedKeyTransportEncryptionConfig() throws ComponentInitializationException {
+    public void testIDTokenUnsupportedKeyTransportEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
         input.setIDTokenJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
         input.setIDTokenJWEEnc(EncryptionMethod.A256CBC_HS512);
         OIDCClientMetadata output = new OIDCClientMetadata();
-        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5), Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
+        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
+                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.INVALID_MESSAGE);
     }
 
     @Test
-    public void testUnsupportedEncryptionConfig() throws ComponentInitializationException {
+    public void testIDTokenUnsupportedEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
         input.setIDTokenJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_AES_128_GCM_KW));
         input.setIDTokenJWEEnc(EncryptionMethod.A128CBC_HS256);
         OIDCClientMetadata output = new OIDCClientMetadata();
-        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5), Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
+        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
+                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.INVALID_MESSAGE);
     }
 
     @Test
-    public void testValidEncryptionConfig() throws ComponentInitializationException {
+    public void testIDTokenValidEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
         input.setIDTokenJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
         input.setIDTokenJWEEnc(EncryptionMethod.A128CBC_HS256);
         OIDCClientMetadata output = new OIDCClientMetadata();
-        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5), Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
+        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
+                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         Assert.assertNull(action.execute(requestCtx));
+        Assert.assertEquals(output.getIDTokenJWSAlg(), JWSAlgorithm.RS256);
+        Assert.assertEquals(output.getIDTokenJWEAlg(),
+                new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+        Assert.assertEquals(output.getIDTokenJWEEnc(), EncryptionMethod.A128CBC_HS256);
+
     }
 
+    @Test
+    public void testUserInfoSignatureAlgorithmsListWithRS256Request() throws ComponentInitializationException {
+        OIDCClientMetadata input = new OIDCClientMetadata();
+        input.setUserInfoJWSAlg(JWSAlgorithm.RS256);
+        OIDCClientMetadata output = new OIDCClientMetadata();
+        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), null, null);
+        Assert.assertNull(action.execute(requestCtx));
+        Assert.assertEquals(output.getUserInfoJWSAlg(), JWSAlgorithm.RS256);
+        Assert.assertNull(output.getUserInfoJWEEnc());
+        Assert.assertNull(output.getUserInfoJWEAlg());
+    }
+
+    @Test
+    public void testUserInfoSignatureAlgorithmsListWithES512Request() throws ComponentInitializationException {
+        OIDCClientMetadata input = new OIDCClientMetadata();
+        input.setUserInfoJWSAlg(JWSAlgorithm.ES512);
+        OIDCClientMetadata output = new OIDCClientMetadata();
+        setUpContext(input, output,
+                Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256, SignatureConstants.ALGO_ID_SIGNATURE_ES_512),
+                null, null);
+        Assert.assertNull(action.execute(requestCtx));
+        Assert.assertEquals(output.getUserInfoJWSAlg(), JWSAlgorithm.ES512);
+        Assert.assertNull(output.getUserInfoJWEEnc());
+        Assert.assertNull(output.getUserInfoJWEAlg());
+    }
+
+    @Test
+    public void testUserInfoInvalidEncryptionConfig() throws ComponentInitializationException {
+        OIDCClientMetadata input = new OIDCClientMetadata();
+        input.setUserInfoJWEAlg(null);
+        input.setUserInfoJWEEnc(EncryptionMethod.A128CBC_HS256);
+        OIDCClientMetadata output = new OIDCClientMetadata();
+        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), null, null);
+        ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.INVALID_MESSAGE);
+    }
+
+    @Test
+    public void testUserInfoUnsupportedKeyTransportEncryptionConfig() throws ComponentInitializationException {
+        OIDCClientMetadata input = new OIDCClientMetadata();
+        input.setUserInfoJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+        input.setUserInfoJWEEnc(EncryptionMethod.A256CBC_HS512);
+        OIDCClientMetadata output = new OIDCClientMetadata();
+        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
+                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
+        ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.INVALID_MESSAGE);
+    }
+
+    @Test
+    public void testUserInfoUnsupportedEncryptionConfig() throws ComponentInitializationException {
+        OIDCClientMetadata input = new OIDCClientMetadata();
+        input.setUserInfoJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_AES_128_GCM_KW));
+        input.setUserInfoJWEEnc(EncryptionMethod.A128CBC_HS256);
+        OIDCClientMetadata output = new OIDCClientMetadata();
+        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
+                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
+        ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.INVALID_MESSAGE);
+    }
+
+    @Test
+    public void testUserInfoValidEncryptionConfig() throws ComponentInitializationException {
+        OIDCClientMetadata input = new OIDCClientMetadata();
+        input.setUserInfoJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+        input.setUserInfoJWEEnc(EncryptionMethod.A128CBC_HS256);
+        OIDCClientMetadata output = new OIDCClientMetadata();
+        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
+                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
+        Assert.assertNull(action.execute(requestCtx));
+        Assert.assertEquals(output.getUserInfoJWEAlg(),
+                new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+        Assert.assertEquals(output.getUserInfoJWEEnc(), EncryptionMethod.A128CBC_HS256);
+
+    }
 }
