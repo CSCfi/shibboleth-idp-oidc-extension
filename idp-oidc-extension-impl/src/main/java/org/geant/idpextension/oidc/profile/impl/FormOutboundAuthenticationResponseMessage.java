@@ -67,7 +67,6 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
                 getOidcResponseContext().getAccessToken(),
                 new DefaultRequestStateLookupFunction().apply(profileRequestContext), null,
                 new DefaultRequestResponseModeLookupFunction().apply(profileRequestContext));
-        log.debug("constructed response:" + ((AuthenticationSuccessResponse) resp).toURI());
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
     }
 }
