@@ -319,6 +319,8 @@
             <map value-type="com.nimbusds.oauth2.sdk.ErrorObject">
                 <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_RESPONSE_TYPE}"
                     value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).UNSUPPORTED_RESPONSE_TYPE}" />
+                 <entry key="#{T(net.shibboleth.idp.authn. AuthnEventIds).NO_PASSIVE}"
+                    value="#{T(com.nimbusds.openid.connect.sdk.OIDCError).LOGIN_REQUIRED}" />
             </map>
         </property>
     </bean>
