@@ -85,6 +85,11 @@
       "phone",
       "offline_access"
    ],
+   "response_modes_supported"[
+      "query",
+      "fragment",
+      "form_post"
+   ],
    "claims_supported":[
       "aud",
       "iss",
