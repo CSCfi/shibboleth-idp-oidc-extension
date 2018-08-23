@@ -302,7 +302,8 @@
         p:messageEncoder-ref="oidc.nimbusEncoder" scope="prototype" />
 
     <bean id="oidc.nimbusEncoder" class="org.geant.idpextension.oidc.encoding.impl.NimbusResponseEncoder"
-        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" init-method="" />
+        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" init-method=""
+        p:velocityEngine-ref="shibboleth.VelocityEngine" />
 
     <bean id="EncodeMessage" class="org.opensaml.profile.action.impl.EncodeMessage" scope="prototype"
         p:messageEncoderFactory-ref="oidc.messageEncoderFactory"
