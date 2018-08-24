@@ -31,6 +31,7 @@ package org.geant.idpextension.oidc.profile.impl;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.geant.idpextension.oidc.profile.OidcEventIds;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestResponseTypeLookupFunction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class ValidateResponseType extends AbstractOIDCAuthenticationResponseActi
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         final Set<ResponseType> registeredTypes =
                 getMetadataContext().getClientInformation().getMetadata().getResponseTypes();
-        final ResponseType requestedType = getAuthenticationRequest().getResponseType();
+        final ResponseType requestedType = new DefaultRequestResponseTypeLookupFunction().apply(profileRequestContext);
         if (registeredTypes == null || registeredTypes.isEmpty() || !registeredTypes.contains(requestedType)) {
             log.warn("{} The response type {} is not registered for this RP", getLogPrefix(), requestedType);
             ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_RESPONSE_TYPE);
