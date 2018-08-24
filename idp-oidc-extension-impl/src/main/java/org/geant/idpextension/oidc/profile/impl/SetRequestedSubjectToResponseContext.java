@@ -41,8 +41,9 @@ import com.nimbusds.openid.connect.sdk.ClaimsRequest.Entry;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 
 /**
- * Action that sets requested sub value to response context. Value may be in id token hint or in claims parameter. If
- * value is in both, claims value will be used. Multiple values for subject in claims parameter will be ignored.
+ * Action that sets requested sub value to response context. Value may be in id token hint or in claims parameter (that
+ * may be in request object also). If value is in both, claims value will be used. Multiple values for subject in claims
+ * parameter will be ignored.
  */
 @SuppressWarnings("rawtypes")
 public class SetRequestedSubjectToResponseContext extends AbstractOIDCAuthenticationResponseAction {
@@ -69,8 +70,6 @@ public class SetRequestedSubjectToResponseContext extends AbstractOIDCAuthentica
         if (getOidcResponseContext().getRequestedClaims() != null) {
             idTokenClaims = getOidcResponseContext().getRequestedClaims().getIDTokenClaims();
         }
-        // TODO: As id token hint validation is implemented update to use validated hint instead of request message
-        // plain hint.
         idTokenHint = getAuthenticationRequest().getIDTokenHint();
         if (idTokenClaims == null && idTokenHint == null) {
             log.debug("{} No requested claims nor id token hint, nothing to do", getLogPrefix());
@@ -82,23 +81,25 @@ public class SetRequestedSubjectToResponseContext extends AbstractOIDCAuthentica
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+        if (idTokenClaims != null && !idTokenClaims.isEmpty()) {
+            for (Entry entry : idTokenClaims) {
+                if (IDTokenClaimsSet.SUB_CLAIM_NAME.equals(entry.getClaimName())) {
+                    log.debug("{} Setting requested sub claim value {}", getLogPrefix(), entry.getValue());
+                    getOidcResponseContext().setRequestedSubject(entry.getValue());
+                    return;
+                }
+            }
+        }
         try {
             if (idTokenHint != null && idTokenHint.getJWTClaimsSet() != null) {
-                log.debug("{} Using requested sub claim value", getLogPrefix());
+                log.debug("{} Setting requested sub claim value {}", getLogPrefix(),
+                        idTokenHint.getJWTClaimsSet().getSubject());
                 getOidcResponseContext().setRequestedSubject(idTokenHint.getJWTClaimsSet().getSubject());
             }
         } catch (ParseException e) {
             log.error("{} error parsing id token hint", getLogPrefix(), e);
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return;
-        }
-        if (idTokenClaims != null && !idTokenClaims.isEmpty()) {
-            for (Entry entry : idTokenClaims) {
-                if (IDTokenClaimsSet.SUB_CLAIM_NAME.equals(entry.getClaimName())) {
-                    log.debug("{} Setting requested sub claim value {} ", getLogPrefix(), entry.getValue());
-                    getOidcResponseContext().setRequestedSubject(entry.getValue());
-                }
-            }
         }
     }
 }
