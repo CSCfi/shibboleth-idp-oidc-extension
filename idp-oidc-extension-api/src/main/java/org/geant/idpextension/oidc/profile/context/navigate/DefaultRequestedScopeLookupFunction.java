@@ -53,15 +53,10 @@ public class DefaultRequestedScopeLookupFunction extends AbstractAuthenticationR
     /** {@inheritDoc} */
     @Override
     Scope doLookup(@Nonnull AuthenticationRequest req) {
-        JWT requestObject = req.getRequestObject();
         try {
+            JWT requestObject = req.getRequestObject();
             if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("scope") != null) {
-                Scope reqObjectScope = new Scope();
-                String[] scopes = ((String) requestObject.getJWTClaimsSet().getClaim("scope")).split(" ");
-                for (String scope : scopes) {
-                    reqObjectScope.add(scope);
-                }
-                return reqObjectScope;
+                return Scope.parse((String) requestObject.getJWTClaimsSet().getClaim("scope"));
             }
         } catch (ParseException e) {
             log.error("Unable to parse scope from request object scope value");
