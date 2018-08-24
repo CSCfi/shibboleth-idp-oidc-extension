@@ -32,7 +32,6 @@ import java.util.Date;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
@@ -40,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
-
 import net.minidev.json.JSONArray;
 import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.IdPEventIds;
@@ -48,17 +46,14 @@ import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
 import net.shibboleth.idp.session.context.SessionContext;
-
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseConsentContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseTokenClaimsContext;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestNonceLookupFunction;
-import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestedScopeLookupFunction;
 import org.geant.idpextension.oidc.profile.context.navigate.OIDCAuthenticationResponseContextLookupFunction;
 import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
-
 import net.shibboleth.utilities.java.support.annotation.ParameterName;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
@@ -290,8 +285,8 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
                 subjectCtx.getPrincipalName(), getOidcResponseContext().getSubject(), getOidcResponseContext().getAcr(),
                 new Date(), dateExp, new DefaultRequestNonceLookupFunction().apply(profileRequestContext),
                 getOidcResponseContext().getAuthTime(), getOidcResponseContext().getRedirectURI(),
-                new DefaultRequestedScopeLookupFunction().apply(profileRequestContext), sessiondId,
-                getOidcResponseContext().getRequestedClaims(), claims, claimsID, claimsUI, consentable, consented);
+                getOidcResponseContext().getScope(), sessiondId, getOidcResponseContext().getRequestedClaims(), claims,
+                claimsID, claimsUI, consentable, consented);
         // We set token claims set to response context for possible access token generation.
         getOidcResponseContext().setTokenClaimsSet(claimsSet);
         try {

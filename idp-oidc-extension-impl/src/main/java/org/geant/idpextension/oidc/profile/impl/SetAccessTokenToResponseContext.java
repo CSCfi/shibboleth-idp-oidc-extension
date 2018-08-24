@@ -328,7 +328,7 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
                     issuerLookupStrategy.apply(profileRequestContext), subjectCtx.getPrincipalName(),
                     getOidcResponseContext().getSubject(), getOidcResponseContext().getAcr(), new Date(), dateExp,
                     authenticationRequest.getNonce(), getOidcResponseContext().getAuthTime(),
-                    getOidcResponseContext().getRedirectURI(), authenticationRequest.getScope(), sessiondId,
+                    getOidcResponseContext().getRedirectURI(), getOidcResponseContext().getScope(), sessiondId,
                     authenticationRequest.getClaims(), claims, claimsUI, consentable, consented);
         }
         try {
