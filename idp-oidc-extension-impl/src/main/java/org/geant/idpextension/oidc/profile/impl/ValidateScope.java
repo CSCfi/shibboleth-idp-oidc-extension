@@ -31,19 +31,23 @@ package org.geant.idpextension.oidc.profile.impl;
 import java.util.Iterator;
 import javax.annotation.Nonnull;
 
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestResponseTypeLookupFunction;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestedScopeLookupFunction;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
 
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
  * Action that validates requested scopes are registered ones. Validated scopes are stored to response context.
+ * Offline_access scope is ignored in authentication endpoint validation unless response type contains code.
  */
 @SuppressWarnings("rawtypes")
 public class ValidateScope extends AbstractOIDCAuthenticationResponseAction {
@@ -89,6 +93,14 @@ public class ValidateScope extends AbstractOIDCAuthenticationResponseAction {
                 log.warn("{} removing requested scope {} for rp {} as it is not a registered one", getLogPrefix(),
                         scope.getValue(), getMetadataContext().getClientInformation().getID());
                 i.remove();
+            }
+        }
+        if (requestedScopes.contains(OIDCScopeValue.OFFLINE_ACCESS)) {
+            // DefaultRequestResponseTypeLookupFunction returns response type only in authentication end point. It is enough to
+            // remove offline_scope in this first validation turn.
+            ResponseType responseType = new DefaultRequestResponseTypeLookupFunction().apply(profileRequestContext);
+            if (responseType != null && !responseType.contains(ResponseType.Value.CODE)) {
+                requestedScopes.remove(OIDCScopeValue.OFFLINE_ACCESS);
             }
         }
         getOidcResponseContext().setScope(requestedScopes);
