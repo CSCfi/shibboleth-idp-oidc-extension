@@ -182,7 +182,7 @@
          idp.signing.oidc.es.key= %{idp.home}/credentials/idp-signing-es.jwk
 
 
-- name: Add FilterActiveAuthenticationResultsByMaxAge and OIDCSelectAuthenticationFlow beans to authn-beans.xml. SYSTEM FILE CHANGE!!
+- name: Add FilterActiveAuthenticationResultsByMaxAge to authn-beans.xml. SYSTEM FILE CHANGE!!
   blockinfile:
     dest: "{{ idp_home }}/system/flows/authn/authn-beans.xml"
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
@@ -191,10 +191,6 @@
         <bean id="FilterActiveAuthenticationResultsByMaxAge"
             class="org.geant.idpextension.oidc.authn.impl.FilterActiveAuthenticationResultsByMaxAge"
             scope="prototype" />
-            
-        <bean id="OIDCSelectAuthenticationFlow"
-            class="org.geant.idpextension.oidc.authn.impl.SelectAuthenticationFlow" scope="prototype"
-            p:favorSSO="%{idp.authn.favorSSO:false}" />
 
 - name: Copy authn-flow.xml to authn-oidc-flow.xml. SYSTEM DIRECTORY CHANGE!!
   copy:
@@ -209,12 +205,6 @@
     insertafter: "ExtractActiveAuthenticationResults"
     content: |
         <evaluate expression="FilterActiveAuthenticationResultsByMaxAge" />
-
-- name: Replace SelectAuthenticationFlow with OIDCSelectAuthenticationFlow in authn-oidc-flow.xml. SYSTEM DIRECTORY CHANGE!!        
-  replace:
-    dest: "{{ idp_home }}/system/flows/authn/authn-oidc-flow.xml"
-    regexp: "expression=\"SelectAuthenticationFlow\""
-    replace: "expression=\"OIDCSelectAuthenticationFlow\""
 
 - name: Activate the new authn-oidc flow. SYSTEM FILE CHANGE!!
   blockinfile:

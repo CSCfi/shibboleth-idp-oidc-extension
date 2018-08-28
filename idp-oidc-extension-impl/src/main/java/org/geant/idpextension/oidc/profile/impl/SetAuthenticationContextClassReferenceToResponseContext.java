@@ -28,9 +28,12 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
+import java.security.Principal;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
+import net.shibboleth.idp.authn.context.PreferredPrincipalContext;
 import net.shibboleth.idp.authn.context.RequestedPrincipalContext;
 import net.shibboleth.idp.authn.principal.DefaultPrincipalDeterminationStrategy;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
@@ -57,9 +60,16 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
     @Nonnull
     private Logger log = LoggerFactory.getLogger(SetAuthenticationContextClassReferenceToResponseContext.class);
 
+    /** Authentication context. */
+    private AuthenticationContext authCtx;
+
     /** requested principal context. */
     @Nullable
     private RequestedPrincipalContext requestedPrincipalContext;
+
+    /** preferred principal context. */
+    @Nullable
+    private PreferredPrincipalContext preferredPrincipalContext;
 
     /** Strategy used to determine the AuthnContextClassRef. */
     @NonnullAfterInit
@@ -95,13 +105,14 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        AuthenticationContext authCtx = profileRequestContext.getSubcontext(AuthenticationContext.class, false);
+        authCtx = profileRequestContext.getSubcontext(AuthenticationContext.class, false);
         if (authCtx == null) {
             log.error("{} No authentication context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return false;
         }
         requestedPrincipalContext = authCtx.getSubcontext(RequestedPrincipalContext.class);
+        preferredPrincipalContext = authCtx.getSubcontext(PreferredPrincipalContext.class);
         return super.doPreExecute(profileRequestContext);
     }
 
@@ -115,7 +126,17 @@ public class SetAuthenticationContextClassReferenceToResponseContext extends Abs
                         .getMatchingPrincipal() instanceof AuthenticationContextClassReferencePrincipal) {
             name = requestedPrincipalContext.getMatchingPrincipal().getName();
             log.debug("{} Setting acr based on requested ctx", getLogPrefix());
-        } else {
+        } else if (preferredPrincipalContext != null && authCtx.getAuthenticationResult() != null) {
+            for (Principal acr : preferredPrincipalContext.getPreferredPrincipals()) {
+                if (authCtx.getAuthenticationResult()
+                        .getSupportedPrincipals(AuthenticationContextClassReferencePrincipal.class).contains(acr)) {
+                    name = acr.getName();
+                    log.debug("{} Setting acr based on preferred ctx", getLogPrefix());
+                    break;
+                }
+            }
+        }
+        if (name == null) {
             name = classRefLookupStrategy.apply(profileRequestContext).getName();
             log.debug("{} Setting acr based on performed flow", getLogPrefix());
         }

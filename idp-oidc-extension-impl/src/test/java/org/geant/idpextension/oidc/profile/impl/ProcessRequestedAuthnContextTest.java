@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import net.shibboleth.idp.authn.context.AuthenticationContext;
+import net.shibboleth.idp.authn.context.PreferredPrincipalContext;
 import net.shibboleth.idp.authn.context.RequestedPrincipalContext;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
@@ -36,7 +37,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal;
-import org.geant.idpextension.oidc.messaging.context.OIDCRequestedPrincipalContext;
 import org.opensaml.profile.action.EventIds;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
@@ -111,14 +111,11 @@ public class ProcessRequestedAuthnContextTest extends BaseOIDCResponseActionTest
         AuthenticationContext ctx =
                 (AuthenticationContext) profileRequestCtx.addSubcontext(new AuthenticationContext());
         final Event event = action.execute(requestCtx);
-        RequestedPrincipalContext rpCtx = ctx.getSubcontext(RequestedPrincipalContext.class, false);
-        OIDCRequestedPrincipalContext oidcRPCtx = ctx.getSubcontext(OIDCRequestedPrincipalContext.class, false);
+        PreferredPrincipalContext rpCtx = ctx.getSubcontext(PreferredPrincipalContext.class, false);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertNotNull(rpCtx);
-        Assert.assertNotNull(oidcRPCtx);
-        Assert.assertTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("1")));
-        Assert.assertTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("2")));
-        Assert.assertTrue(!oidcRPCtx.isEssential());
+        Assert.assertTrue(rpCtx.getPreferredPrincipals().contains(new AuthenticationContextClassReferencePrincipal("1")));
+        Assert.assertTrue(rpCtx.getPreferredPrincipals().contains(new AuthenticationContextClassReferencePrincipal("2")));
     }
 
     /**
@@ -140,13 +137,10 @@ public class ProcessRequestedAuthnContextTest extends BaseOIDCResponseActionTest
         AuthenticationContext ctx =
                 (AuthenticationContext) profileRequestCtx.addSubcontext(new AuthenticationContext());
         final Event event = action.execute(requestCtx);
-        RequestedPrincipalContext rpCtx = ctx.getSubcontext(RequestedPrincipalContext.class, false);
-        OIDCRequestedPrincipalContext oidcRPCtx = ctx.getSubcontext(OIDCRequestedPrincipalContext.class, false);
+        PreferredPrincipalContext ppCtx = ctx.getSubcontext(PreferredPrincipalContext.class, false);
         ActionTestingSupport.assertProceedEvent(event);
-        Assert.assertNotNull(rpCtx);
-        Assert.assertNotNull(oidcRPCtx);
-        Assert.assertTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("1")));
-        Assert.assertTrue(!oidcRPCtx.isEssential());
+        Assert.assertNotNull(ppCtx);
+        Assert.assertTrue(ppCtx.getPreferredPrincipals().contains(new AuthenticationContextClassReferencePrincipal("1")));
     }
 
     /**
@@ -172,13 +166,10 @@ public class ProcessRequestedAuthnContextTest extends BaseOIDCResponseActionTest
                 (AuthenticationContext) profileRequestCtx.addSubcontext(new AuthenticationContext());
         final Event event = action.execute(requestCtx);
         RequestedPrincipalContext rpCtx = ctx.getSubcontext(RequestedPrincipalContext.class, false);
-        OIDCRequestedPrincipalContext oidcRPCtx = ctx.getSubcontext(OIDCRequestedPrincipalContext.class, false);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertNotNull(rpCtx);
-        Assert.assertNotNull(oidcRPCtx);
         Assert.assertTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("1")));
         Assert.assertTrue(rpCtx.getRequestedPrincipals().contains(new AuthenticationContextClassReferencePrincipal("2")));
-        Assert.assertTrue(oidcRPCtx.isEssential());
     }
 
     /**
@@ -199,10 +190,8 @@ public class ProcessRequestedAuthnContextTest extends BaseOIDCResponseActionTest
                 (AuthenticationContext) profileRequestCtx.addSubcontext(new AuthenticationContext());
         final Event event = action.execute(requestCtx);
         RequestedPrincipalContext rpCtx = ctx.getSubcontext(RequestedPrincipalContext.class, false);
-        OIDCRequestedPrincipalContext oidcRPCtx = ctx.getSubcontext(OIDCRequestedPrincipalContext.class, false);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertNull(rpCtx);
-        Assert.assertNull(oidcRPCtx);
     }
 
 }

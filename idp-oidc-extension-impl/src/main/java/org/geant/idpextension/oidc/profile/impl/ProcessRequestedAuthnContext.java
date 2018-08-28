@@ -31,12 +31,12 @@ package org.geant.idpextension.oidc.profile.impl;
 import javax.annotation.Nonnull;
 
 import net.shibboleth.idp.authn.context.AuthenticationContext;
+import net.shibboleth.idp.authn.context.PreferredPrincipalContext;
 import net.shibboleth.idp.authn.context.RequestedPrincipalContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 import org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal;
-import org.geant.idpextension.oidc.messaging.context.OIDCRequestedPrincipalContext;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestedACRLookupFunction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -56,17 +56,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An action that creates an {@link RequestedPrincipalContext} and attaches it to the current
- * {@link AuthenticationContext}.
+ * An action that creates an {@link RequestedPrincipalContext} or {@link PreferredPrincipalContext} and attaches it to
+ * the current {@link AuthenticationContext}.
  * 
  * <p>
- * If the incoming message contains acr values we create requested principal context populated with matching
+ * If the incoming message contains acr values we create principal context populated with matching
  * {@link AuthenticationContextClassReferencePrincipal}.
  * 
  * Acr values may be be given as authentication request parameter/request object (acr_values) or as requested id token
  * claim (acr) in requested claims parameter. If they are given in both, the outcome is unspecified.
  * 
- * The information of essentiality of requested acr is stored to {@link OIDCRequestedPrincipalContext}.
+ * Essential acrs are set to {@link RequestedPrincipalContext} and non-essential ones to
+ * {@link PreferredPrincipalContext}.
  * </p>
  */
 @SuppressWarnings("rawtypes")
@@ -169,15 +170,18 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationResp
             log.debug("{} request did not contain any acr values, nothing to do", getLogPrefix());
             return;
         }
-        final RequestedPrincipalContext rpCtx = new RequestedPrincipalContext();
-        rpCtx.setOperator(AuthnContextComparisonTypeEnumeration.EXACT.toString());
-        rpCtx.setRequestedPrincipals(principals);
-        // we need oidc context for storing essential flag
-        final OIDCRequestedPrincipalContext oidcRPCtx =
-                authenticationContext.getSubcontext(OIDCRequestedPrincipalContext.class, true);
-        oidcRPCtx.setEssential(isEssential);
-        authenticationContext.addSubcontext(rpCtx, true);
-        log.debug("{} Created requested principal context", getLogPrefix());
+        if (isEssential) {
+            final RequestedPrincipalContext rpCtx = new RequestedPrincipalContext();
+            rpCtx.setOperator(AuthnContextComparisonTypeEnumeration.EXACT.toString());
+            rpCtx.setRequestedPrincipals(principals);
+            authenticationContext.addSubcontext(rpCtx, true);
+            log.debug("{} Created requested principal context", getLogPrefix());
+            return;
+        }
+        final PreferredPrincipalContext ppCtx = new PreferredPrincipalContext();
+        ppCtx.setPreferredPrincipals(principals);
+        authenticationContext.addSubcontext(ppCtx, true);
+        log.debug("{} Created preferred principal context", getLogPrefix());
     }
     // Checkstyle: CyclomaticComplexity ON
 
