@@ -96,7 +96,7 @@
     <!-- Example rules for requesting and splitting claims. -->
     <AttributeFilterPolicy id="REQUESTED_CLAIMS">
         <PolicyRequirementRule xsi:type="ANY" />
-        <!-- Release picture if asked in any way to be released -->
+        <!-- Release picture if asked to be released -->
         <AttributeRule attributeID="picture">
             <PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" />
         </AttributeRule>
@@ -108,9 +108,9 @@
         <AttributeRule attributeID="email">
             <PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" matchOnlyUserInfo="true" />
         </AttributeRule>
-        <!-- Release name in userinfo if specifically asked to be released for userinfo -->
+        <!-- Release name if specifically asked to be released for userinfo and flagged as essential -->
         <AttributeRule attributeID="name">
-            <PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" matchOnlyUserInfo="true" />
+            <PermitValueRule xsi:type="oidcext:AttributeInOIDCRequestedClaims" matchOnlyUserInfo="true" onlyIfEssential="true" />
         </AttributeRule>
     </AttributeFilterPolicy>
 

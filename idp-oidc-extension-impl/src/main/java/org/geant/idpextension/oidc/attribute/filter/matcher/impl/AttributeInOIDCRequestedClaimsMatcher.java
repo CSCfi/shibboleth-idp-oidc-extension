@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.attribute.filter.matcher.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +45,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableSet;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
+import com.nimbusds.openid.connect.sdk.ClaimsRequest.Entry;
+import com.nimbusds.openid.connect.sdk.claims.ClaimRequirement;
+
 import net.shibboleth.idp.attribute.AttributeEncoder;
 import net.shibboleth.idp.attribute.IdPAttribute;
 import net.shibboleth.idp.attribute.IdPAttributeValue;
@@ -87,8 +91,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
     /**
      * Sets whether to drop non essential claims.
      * 
-     * @param flag
-     *            whether to drop non essential claims
+     * @param flag whether to drop non essential claims
      */
     public void setOnlyIfEssential(boolean flag) {
         onlyIfEssential = flag;
@@ -106,8 +109,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
     /**
      * Sets whether to match only id token part of the requested claims.
      * 
-     * @param flag
-     *            whether to match only id token part of the requested claims
+     * @param flag whether to match only id token part of the requested claims
      */
     public void setMatchOnlyIDToken(boolean flag) {
         this.matchOnlyIDToken = flag;
@@ -125,8 +127,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
     /**
      * Sets whether to match only user info part of the requested claims.
      * 
-     * @param flag
-     *            whether to match only user info part of the requested claims
+     * @param flag whether to match only user info part of the requested claims
      */
     public void setMatchOnlyUserInfo(boolean flag) {
         this.matchOnlyUserInfo = flag;
@@ -144,8 +145,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
     /**
      * Sets whether to match if the request contains no requested claims.
      * 
-     * @param flag
-     *            whether to match if the request contains no requested claims
+     * @param flag whether to match if the request contains no requested claims
      */
     public void setMatchIfRequestedClaimsSilent(final boolean flag) {
         matchIfRequestedClaimsSilent = flag;
@@ -154,8 +154,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
     /**
      * Resolve oidc encoder names for the attribute.
      * 
-     * @param set
-     *            attached to attribute
+     * @param set attached to attribute
      * @return list of names
      */
     private List<String> resolveClaimNames(Set<AttributeEncoder<?>> set) {
@@ -171,6 +170,25 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
 
     }
 
+    /**
+     * If any of the names have a matching claims request essentiality is verified.
+     * 
+     * @param claims claims request claims
+     * @param names names of the claims to be encoded
+     * @return false if any of the names of claims to be encoded match a claims request claim and essentiality check is
+     *         not passed.
+     */
+    private boolean verifyEssentiality(Collection<Entry> claims, List<String> names) {
+        boolean bEssentialityCheckFailed = false;
+        for (Entry entry : claims) {
+            if (names.contains(entry.getClaimName())) {
+                bEssentialityCheckFailed =
+                        onlyIfEssential && !ClaimRequirement.ESSENTIAL.equals(entry.getClaimRequirement());
+            }
+        }
+        return !bEssentialityCheckFailed;
+    }
+
     // Checkstyle: CyclomaticComplexity OFF
     @Override
     public Set<IdPAttributeValue<?>> getMatchingValues(@Nonnull IdPAttribute attribute,
@@ -182,8 +200,8 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
             log.debug("{} No oidc encoders attached to attribute", getLogPrefix());
             return null;
         }
-        OIDCAuthenticationResponseContext respCtx = getOIDCAuthenticationResponseContext(
-                getOutboundMessageContext(filtercontext));
+        OIDCAuthenticationResponseContext respCtx =
+                getOIDCAuthenticationResponseContext(getOutboundMessageContext(filtercontext));
         if (respCtx == null) {
             // This is always a failure.
             log.debug("{} No oidc response ctx for this comparison", getLogPrefix());
@@ -200,22 +218,24 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
                 return null;
             }
         }
+        // Are we able to release the values based on claim being requested for id token?
         if (request.getIDTokenClaimNames(false) != null && !getMatchOnlyUserInfo()) {
             if (!Collections.disjoint(request.getIDTokenClaimNames(false), names)) {
-                log.debug("{} all values matched as {} is requested id token claims", getLogPrefix(),
-                        attribute.getId());
-                log.warn("{} Essential checking not implemented yet", getLogPrefix());
-                // TODO: value based filtering with option onlyEssential
-                return ImmutableSet.copyOf(attribute.getValues());
+                if (verifyEssentiality(request.getIDTokenClaims(), names)) {
+                    log.debug("{} all values matched as {} is requested id token claims", getLogPrefix(),
+                            attribute.getId());
+                    return ImmutableSet.copyOf(attribute.getValues());
+                }
             }
         }
+        // Are we able to release the values based on claim being requested for user info response?
         if (request.getUserInfoClaimNames(false) != null && !getMatchOnlyIDToken()) {
             if (!Collections.disjoint(request.getUserInfoClaimNames(false), names)) {
-                log.debug("{} all values matched as {} is requested user info claims", getLogPrefix(),
-                        attribute.getId());
-                log.warn("{} Essential checking not implemented yet", getLogPrefix());
-                // TODO: value based filtering with option onlyEssential
-                return ImmutableSet.copyOf(attribute.getValues());
+                if (verifyEssentiality(request.getUserInfoClaims(), names)) {
+                    log.debug("{} all values matched as {} is requested user info claims", getLogPrefix(),
+                            attribute.getId());
+                    return ImmutableSet.copyOf(attribute.getValues());
+                }
             }
         }
         log.debug("{} attribute {} was not a requested claim, none of the values matched", getLogPrefix(),
@@ -242,13 +262,12 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
         return prefix;
     }
 
-    // TODO: move these 2 following helpers to some common code.
+    // TODO: replace getOIDCAuthenticationResponseContext && getOutboundMessageContext with lookup strategy!
 
     /**
      * Helper method to locate outbound message context.
      * 
-     * @param ctx
-     *            any context child of profile request context,
+     * @param ctx any context child of profile request context,
      * @return Outbound message context or null if not found.
      */
     @SuppressWarnings("rawtypes")
@@ -269,8 +288,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
     /**
      * Returns oidc response context.
      * 
-     * @param msgCtx
-     *            Outbound message context.
+     * @param msgCtx Outbound message context.
      * @return requested claims or null if not found.
      */
     @SuppressWarnings("rawtypes")
