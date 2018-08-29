@@ -51,7 +51,7 @@ public class AttributeOIDCScopePolicyRule extends AbstractStringPolicyRule {
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(AttributeOIDCScopePolicyRule.class);
 
-    // TODO: consider moving helper methods elsewhere!
+    // TODO: replace getAuthenticationResponseContext with lookup strategy!
 
     /**
      * Helper method to locate authentication response context.
@@ -87,7 +87,7 @@ public class AttributeOIDCScopePolicyRule extends AbstractStringPolicyRule {
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
         OIDCAuthenticationResponseContext ctx = getAuthenticationResponseContext(filterContext);
         if (ctx == null || ctx.getScope() == null) {
-            log.warn("{} No verified requested scopes for oidc found", getLogPrefix());
+            log.trace("{} No verified requested scopes for oidc found", getLogPrefix());
             return Tristate.FALSE;
         }
         List<String> scopes = ctx.getScope().toStringList();
