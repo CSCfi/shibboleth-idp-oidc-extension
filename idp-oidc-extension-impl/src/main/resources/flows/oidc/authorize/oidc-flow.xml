@@ -10,10 +10,12 @@
 
     <action-state id="DecodeMessage">
         <evaluate expression="DecodeMessage" />
+        <evaluate expression="PostDecodePopulateAuditContext" />
         <evaluate expression="OIDCMetadataLookup" />
         <evaluate expression="InitializeRelyingPartyContext" />
         <evaluate expression="SelectRelyingPartyConfiguration" />
         <evaluate expression="SelectProfileConfiguration" />
+        <evaluate expression="PostLookupPopulateAuditContext" />
         <evaluate expression="PopulateUserAgentContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="OutboundContextsAndSecurityParameters" />
@@ -196,6 +198,8 @@
     <end-state id="CommitResponse">
         <on-entry>
             <evaluate expression="EncodeMessage" />
+            <evaluate expression="PostResponsePopulateAuditContext" />
+            <evaluate expression="WriteAuditLog" />
             <evaluate expression="RecordResponseComplete" />
         </on-entry>
     </end-state>
