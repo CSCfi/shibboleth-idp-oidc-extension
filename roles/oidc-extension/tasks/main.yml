@@ -181,39 +181,6 @@
          idp.signing.oidc.rs.key= %{idp.home}/credentials/idp-signing-rs.jwk
          idp.signing.oidc.es.key= %{idp.home}/credentials/idp-signing-es.jwk
 
-
-- name: Add FilterActiveAuthenticationResultsByMaxAge to authn-beans.xml. SYSTEM FILE CHANGE!!
-  blockinfile:
-    dest: "{{ idp_home }}/system/flows/authn/authn-beans.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertafter: "net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor"
-    content: |
-        <bean id="FilterActiveAuthenticationResultsByMaxAge"
-            class="org.geant.idpextension.oidc.authn.impl.FilterActiveAuthenticationResultsByMaxAge"
-            scope="prototype" />
-
-- name: Copy authn-flow.xml to authn-oidc-flow.xml. SYSTEM DIRECTORY CHANGE!!
-  copy:
-    src: "{{ idp_home }}/system/flows/authn/authn-flow.xml"
-    dest: "{{ idp_home }}/system/flows/authn/authn-oidc-flow.xml"
-    remote_src: yes
-
-- name: Add FilterActiveAuthenticationResultsByMaxAge expression to authn-oidc-flow.xml. SYSTEM DIRECTORY CHANGE!!
-  blockinfile:
-    dest: "{{ idp_home }}/system/flows/authn/authn-oidc-flow.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertafter: "ExtractActiveAuthenticationResults"
-    content: |
-        <evaluate expression="FilterActiveAuthenticationResultsByMaxAge" />
-
-- name: Activate the new authn-oidc flow. SYSTEM FILE CHANGE!!
-  blockinfile:
-    dest: "{{ idp_home }}/system/conf/webflow-config.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertafter: "../system/flows/authn/authn-flow.xml"
-    content: |
-         <entry key="authn-oidc" value="../system/flows/authn/authn-oidc-flow.xml" />
-
 - name: Add OIDC client information resolver service to services-system.xml
   blockinfile:
     dest: "{{ idp_home }}/system/conf/services-system.xml"

@@ -68,7 +68,6 @@ public class DefaultRequestStateLookupFunction extends AbstractAuthenticationReq
         if (req.getState() == null) {
             return null;
         }
-        State clientID = new State(req.getState().getValue());
-        return clientID;
+        return new State(req.getState().getValue());
     }
 }

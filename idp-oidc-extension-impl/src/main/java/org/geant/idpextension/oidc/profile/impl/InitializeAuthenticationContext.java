@@ -35,6 +35,7 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestLoginHintLookupFunction;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestMaxAgeLookupFunction;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestedPromptLookupFunction;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
@@ -68,12 +69,17 @@ public class InitializeAuthenticationContext extends AbstractOIDCAuthenticationR
     @Nonnull
     private Function<ProfileRequestContext, String> loginHintLookupStrategy;
 
+    /** Strategy used to obtain the request max_age value. */
+    @Nonnull
+    private Function<ProfileRequestContext, Long> maxAgeLookupStrategy;
+
     /**
      * Constructor.
      */
     public InitializeAuthenticationContext() {
         promptLookupStrategy = new DefaultRequestedPromptLookupFunction();
         loginHintLookupStrategy = new DefaultRequestLoginHintLookupFunction();
+        maxAgeLookupStrategy = new DefaultRequestMaxAgeLookupFunction();
     }
 
     /**
@@ -97,13 +103,26 @@ public class InitializeAuthenticationContext extends AbstractOIDCAuthenticationR
                 Constraint.isNotNull(strategy, "LoginHintLookupStrategy lookup strategy cannot be null");
     }
 
+    /**
+     * Set the strategy used to locate the request max age.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setMaxAgeLookupStrategy(@Nonnull final Function<ProfileRequestContext, Long> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        maxAgeLookupStrategy = Constraint.isNotNull(strategy, "MaxAgeLookupStrategy lookup strategy cannot be null");
+    }
+
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         log.debug("{} Initializing authentication context", getLogPrefix());
         final AuthenticationContext authnCtx = new AuthenticationContext();
-
+        Long maxAge = maxAgeLookupStrategy.apply(profileRequestContext);
+        if (maxAge != null) {
+            authnCtx.setMaxAge(maxAge);
+        }
         Prompt prompt = promptLookupStrategy.apply(profileRequestContext);
         if (prompt != null) {
             authnCtx.setIsPassive(prompt.contains(Prompt.Type.NONE));

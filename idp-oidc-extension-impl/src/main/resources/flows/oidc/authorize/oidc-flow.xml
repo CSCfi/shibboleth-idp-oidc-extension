@@ -40,7 +40,7 @@
         <transition on="proceed" to="DoAuthenticationSubflow" />
     </action-state>
 
-    <subflow-state id="DoAuthenticationSubflow" subflow="authn-oidc">
+    <subflow-state id="DoAuthenticationSubflow" subflow="authn">
         <input name="calledAsSubflow" value="true" />
         <transition on="proceed" to="SetAuthenticationInformationToResponseContext" />
         <transition on="RestartAuthentication" to="PostInitialSetup" />
