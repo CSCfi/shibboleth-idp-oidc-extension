@@ -121,7 +121,7 @@ public class InitializeAuthenticationContext extends AbstractOIDCAuthenticationR
         final AuthenticationContext authnCtx = new AuthenticationContext();
         Long maxAge = maxAgeLookupStrategy.apply(profileRequestContext);
         if (maxAge != null) {
-            authnCtx.setMaxAge(maxAge);
+            authnCtx.setMaxAge(maxAge*1000);
         }
         Prompt prompt = promptLookupStrategy.apply(profileRequestContext);
         if (prompt != null) {
