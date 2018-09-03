@@ -82,6 +82,9 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
 
     /** Subject generated for response. Value is set to sub claim. */
     private String subject;
+    
+    /** Subject type, public or pairwise. */
+    private String subjectType;
 
     /** Authorization code. */
     @Nullable
@@ -233,6 +236,24 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      */
     public void setSubject(String generatedSubject) {
         subject = generatedSubject;
+    }
+
+    /**
+     * Gets subject type.
+     * 
+     * @return generated subject type.
+     */
+    public String getSubjectType() {
+        return subjectType;
+    }
+
+    /**
+     * Sets subject type.
+     * 
+     * @param generated subject type.
+     */
+    public void setSubjectType(String type) {
+        subjectType = type;;
     }
 
     /**
