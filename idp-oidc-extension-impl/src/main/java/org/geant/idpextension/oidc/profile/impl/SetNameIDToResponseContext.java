@@ -153,6 +153,7 @@ public class SetNameIDToResponseContext extends AbstractOIDCAuthenticationRespon
             return;
         }
         getOidcResponseContext().setSubject(nameId.getValue());
+        getOidcResponseContext().setSubjectType(nameId.getFormat());
         log.debug("{} Subject of type {} set to {}", getLogPrefix(), nameId.getFormat(), nameId.getValue());
 
     }
