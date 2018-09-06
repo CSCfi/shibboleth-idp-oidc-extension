@@ -58,7 +58,7 @@
     <action-state id="AttributeResolution">
         <evaluate expression="ResolveAttributes" />
         <evaluate expression="FilterAttributes" />
-        <evaluate expression="RevokeConsentForOfflineAccess" />
+        <evaluate expression="RevokeConsent" />
         <evaluate expression="PopulatePostAuthnInterceptContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="CheckPostAuthnInterceptContext" />
