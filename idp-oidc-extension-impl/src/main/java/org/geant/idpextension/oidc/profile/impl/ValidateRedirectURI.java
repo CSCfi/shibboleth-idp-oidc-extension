@@ -93,14 +93,27 @@ public class ValidateRedirectURI extends AbstractOIDCAuthenticationResponseActio
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        final Set<URI> redirectionURIs = validRedirectURIsLookupStrategy.apply(profileRequestContext);
         URI requestRedirectURI = redirectURILookupStrategy.apply(profileRequestContext);
-        if (requestRedirectURI != null && redirectionURIs != null && redirectionURIs.contains(requestRedirectURI)) {
+        if (requestRedirectURI == null) {
+            log.error("{} Redirection URI of the request not located for verification", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REDIRECT_URI);
+        }
+        final Set<URI> redirectionURIs = validRedirectURIsLookupStrategy.apply(profileRequestContext);
+        if (redirectionURIs == null || redirectionURIs.isEmpty()) {
+            log.error("{} Client has not registered Redirection URIs. Redirection URI cannot be validated.", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REDIRECT_URI);
+        }
+        if (redirectionURIs.contains(requestRedirectURI)) {
             getOidcResponseContext().setRedirectURI(requestRedirectURI);
-            log.debug("{} redirect uri validated {}", getLogPrefix(), requestRedirectURI);
+            log.debug("{} Redirection URI validated {}", getLogPrefix(), requestRedirectURI);
             return;
         }
-        log.error("{} redirect uri must be validated to form response", getLogPrefix());
+        String registered = "";
+        for (URI uri : redirectionURIs) {
+            registered += registered.isEmpty() ? uri.toString() : ", " + uri.toString();
+        }
+        log.error("{} Redirection URI {} not matching any of the registered Redirection URIs [{}] ", getLogPrefix(),
+                requestRedirectURI.toString(), registered);
         ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REDIRECT_URI);
         return;
     }
