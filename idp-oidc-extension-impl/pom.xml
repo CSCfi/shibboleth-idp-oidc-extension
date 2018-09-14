@@ -67,6 +67,10 @@
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-profile-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-attribute-filter-api</artifactId>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
