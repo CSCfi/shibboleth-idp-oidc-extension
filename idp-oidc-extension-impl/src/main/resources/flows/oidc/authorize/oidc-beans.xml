@@ -165,19 +165,21 @@
     <bean id="acBase64Codec" class="org.apache.commons.codec.binary.Base64" c:lineLength="0"
         c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
 
-    <bean id="SetNameIDToResponseContext"
-        class="org.geant.idpextension.oidc.profile.impl.SetNameIDToResponseContext" scope="prototype">
+    <bean id="SetSubjectToResponseContext"
+        class="org.geant.idpextension.oidc.profile.impl.SetSubjectToResponseContext" scope="prototype" >
+        <property name="subjectLookupStrategy">
+            <bean class="org.geant.idpextension.oidc.profile.logic.AttributeResolutionSubjectLookupFunction" />
+        </property>
         <property name="subjectTypeLookupStrategy">
             <bean class="org.geant.idpextension.oidc.profile.logic.DefaultSubjectTypeStrategy" />
         </property>
-        <property name="nameIDGenerator">
-            <bean class="net.shibboleth.idp.saml.nameid.impl.ProxySAML2NameIDGenerator"
-                c:service-ref="shibboleth.oidc.NameIdentifierGenerationService" />
-        </property>
-    </bean>
-
+    </bean> 
+   
     <bean id="SetAuthenticationTimeToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationTimeToResponseContext" scope="prototype"></bean>
+        
+     <bean id="SetSectorIdentifierForAttributeResolution"
+        class="org.geant.idpextension.oidc.profile.impl.SetSectorIdentifierForAttributeResolution" scope="prototype"/>
 
     <bean id="SetAuthenticationContextClassReferenceToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationContextClassReferenceToResponseContext"
