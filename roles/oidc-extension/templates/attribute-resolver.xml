@@ -12,6 +12,33 @@
     <!-- ========================================== -->
 
 
+    <!-- Subject Identifier is a attribute that must always be resolved. 
+    There has to be exactly one resolved and filtered attribute that would be encoded as 'sub'.
+    This example attribute (the data connector actually ) will generate public or pairwise 'sub' depending on client registration data.  -->
+    
+    <AttributeDefinition id="subject" xsi:type="Simple" activationConditionRef="SubjectRequired">
+        <InputDataConnector ref="computedSubjectId" attributeNames="subjectId"/>
+        <AttributeEncoder xsi:type="oidcext:OIDCString" name="sub" />
+    </AttributeDefinition>
+
+    <!--
+    Subject Identifier is a attribute that must always be resolved. 
+    There has to be exactly one resolved and filtered attribute that would be encoded as 'sub'.
+    
+    Use activation conditions and filters to ensure the requirement is met if you have need for several different kind of formats for 'sub'.
+    
+    <AttributeDefinition id="subject-public" xsi:type="Simple" sourceAttributeID="uid" activationConditionRef="PublicRequired">
+        <Dependency ref="uid" />
+        <AttributeEncoder xsi:type="oidcext:OIDCString" name="sub" />
+    </AttributeDefinition>
+
+    <AttributeDefinition id="subject-pairwise" xsi:type="Simple" activationConditionRef="PairwiseRequired">
+        <InputDataConnector ref="computedSubjectId" attributeNames="subjectId"/>
+        <AttributeEncoder xsi:type="oidcext:OIDCString" name="sub" />
+    </AttributeDefinition>
+    -->
+
+
     <!-- The EPPN is the "standard" federated username in higher ed. For guidelines on the implementation of this attribute, 
         refer to the Shibboleth and eduPerson documentation. Above all, do not expose a value for this attribute without considering 
         the long term implications. This demonstrates use of OIDCScopedString encoder. -->
@@ -190,6 +217,18 @@
     <!-- ========================================== -->
     <!-- Data Connectors -->
     <!-- ========================================== -->
+    
+    <!-- Data Connector for generating 'sub' claim. 
+         The connector may be used to generate both public and pairwise subject values -->
+    <DataConnector id="computedSubjectId" xsi:type="ComputedId"
+            generatedAttributeID="subjectId"
+            sourceAttributeID="%{idp.oidc.subject.sourceAttribute}"
+            salt="%{idp.oidc.subject.salt}"
+            algorithm="%{idp.oidc.subject.algorithm:SHA}"
+            encoding="%{idp.oidc.subject.encoding:BASE32}">
+            <Dependency ref="%{idp.oidc.subject.sourceAttribute}"/>
+    </DataConnector>
+    
     <DataConnector id="staticAttributes" xsi:type="Static">
         <Attribute id="affiliation">
             <Value>member</Value>

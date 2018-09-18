@@ -7,6 +7,13 @@
     xsi:schemaLocation="urn:mace:shibboleth:2.0:afp http://shibboleth.net/schema/idp/shibboleth-afp.xsd org.geant.idpextension.oidc.attribute.filter classpath:/schema/idp-oidc-extension-afp.xsd">
 
 
+    <AttributeFilterPolicy id="OPENID_SCOPE">
+        <PolicyRequirementRule xsi:type="oidcext:OIDCScope" value="openid" />
+        <AttributeRule attributeID="subject">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
     <!-- This demonstrates a rule that releases email claims in response to all oidc authentication requests having scope 
         email. The requester needs to have scope email as a registered scope. -->
 
