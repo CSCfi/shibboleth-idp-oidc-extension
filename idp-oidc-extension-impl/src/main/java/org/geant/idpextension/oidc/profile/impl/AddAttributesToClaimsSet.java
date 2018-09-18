@@ -28,6 +28,7 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -62,7 +63,8 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
 /**
  * Action that adds claims to a {@link ClaimsSet}. Claims are formed of resolved attributes having OIDC encoder. Action
- * also verifies user has consented to release attribute, if consent information is available.
+ * verifies user has consented to release attribute, if consent information is available. Actions will not add claims
+ * listed as reserved.
  */
 @SuppressWarnings("rawtypes")
 public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
@@ -103,6 +105,10 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
     @Nonnull
     private Function<ProfileRequestContext, OIDCAuthenticationResponseConsentContext> consentContextLookupStrategy;
 
+    /** List of claim names that will not be added. */
+    @Nullable
+    private List<String> reservedClaimNames;
+
     /** Constructor. */
     AddAttributesToClaimsSet() {
         attributeContextLookupStrategy = Functions.compose(new ChildContextLookup<>(AttributeContext.class),
@@ -112,7 +118,16 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
                 Functions.compose(new ChildContextLookup<>(OIDCAuthenticationResponseConsentContext.class),
                         new OIDCAuthenticationResponseContextLookupFunction());
     }
-    
+
+    /**
+     * Set list of claim names that will not be added.
+     * 
+     * @param claimNames list of claim names that will not be added.
+     */
+    public void setReservedClaimNames(List<String> claimNames) {
+        reservedClaimNames = claimNames;
+    }
+
     /**
      * Set whether target is id token claims set. If this flag is set addToIDTokenByDefault flag is active.
      * 
@@ -226,17 +241,20 @@ public class AddAttributesToClaimsSet extends AbstractOIDCResponseAction {
                         }
                         JSONObject obj = (JSONObject) encoder.encode(attribute);
                         for (String name : obj.keySet()) {
+                            if (reservedClaimNames != null && reservedClaimNames.contains(name)) {
+                                log.debug("{} claim has a reserved name {}. Not added to claims set", getLogPrefix(),
+                                        name);
+                                continue;
+                            }
                             if (consentCtx != null && consentCtx.getConsentableAttributes().contains(name)
                                     && !consentCtx.getConsentedAttributes().contains(name)) {
-                                log.debug("{} Consentable attribute {} has no consent", getLogPrefix(), name,
-                                        obj.get(name));
-                            } else {
-                                log.debug("{} Adding claim {} with value {}", getLogPrefix(), name, obj.get(name));
-                                claimsSet.setClaim(name, obj.get(name));
+                                log.debug("{} Consentable attribute {} has no consent. Not added to claims set",
+                                        getLogPrefix(), name);
+                                continue;
                             }
-
+                            log.debug("{} Adding claim {} with value {}", getLogPrefix(), name, obj.get(name));
+                            claimsSet.setClaim(name, obj.get(name));
                         }
-
                     }
                 } catch (AttributeEncodingException e) {
                     log.warn("{} Unable to encode attribute {} as OIDC attribute", getLogPrefix(), attribute.getId(),

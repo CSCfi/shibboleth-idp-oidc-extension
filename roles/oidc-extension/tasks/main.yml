@@ -213,9 +213,11 @@
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK for oidc extension additions to global.xml -->"
     insertafter: "Use this file to define any custom beans needed globally"
     content: |
+        <!-- Returns true unless subject is already populated in oidc response context. -->
         <bean id="SubjectRequired"
             class="org.geant.idpextension.oidc.profile.logic.SubjectActivationCondition"/>
 
+        <!-- Returns true if client has registered public subject and subject is not already populated in oidc response context --> 
         <bean id="PublicRequired" parent="shibboleth.Conditions.AND">
             <constructor-arg>
                 <list>
@@ -224,7 +226,8 @@
                 </list>
             </constructor-arg>
         </bean>
-
+        
+        <!-- Returns true if client has registered pairwise subject and subject is not already populated in oidc response context --> 
         <bean id="PairwiseRequired" parent="shibboleth.Conditions.AND">
             <constructor-arg>
                 <list>
@@ -233,12 +236,33 @@
                 </list>
             </constructor-arg>
         </bean>
+        
+        <!-- List of reserved claims that will no be populated to id token using standard user claim population mechanims -->
+        <util:list id="shibboleth.oidc.IDTokenReservedClaimNames">
+            <value>aud</value>
+            <value>iss</value>
+            <value>sub</value>
+            <value>iat</value>
+            <value>exp</value>
+            <value>acr</value>
+            <value>aud</value>
+            <value>auth_time</value>
+            <value>at_hash</value>
+            <value>c_hash</value>
+            <value>nonce</value>
+        </util:list>
+        
+        <!-- List of reserved claims that will no be populated to user info response using standard user claim population mechanims -->
+        <util:list id="shibboleth.oidc.UserInfoReservedClaimNames">
+            <value>aud</value>
+            <value>iss</value>
+            <value>sub</value>
+        </util:list>
        
      
 - name: Copy relying-party.xml, oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
-#   - "oidc-subject.xml"
     - "oidc-subject.properties"
     - "oidc-relying-party.xml"
     - "relying-party.xml"
@@ -249,11 +273,6 @@
     regexp: '(idp.additionalProperties.*)'
     line: '\1, /conf/oidc-subject.properties'
     backrefs: yes
-
-#- name: Copy oidc-subject-system.xml - SYSTEM DIRECTORY CHANGE!!
-#  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/system/conf/{{item}}
-#  with_items:
-#    - "oidc-subject-system.xml"
     
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:

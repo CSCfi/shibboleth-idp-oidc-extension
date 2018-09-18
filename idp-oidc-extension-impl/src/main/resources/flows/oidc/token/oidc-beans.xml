@@ -187,7 +187,7 @@
 
     <bean id="AddAttributeClaimsToIDToken"
         class="org.geant.idpextension.oidc.profile.impl.AddAttributesToClaimsSet" scope="prototype"
-        p:targetIDToken="true" />
+        p:targetIDToken="true" p:reservedClaimNames-ref="shibboleth.oidc.IDTokenReservedClaimNames" />
 
     <bean id="AddTokenDeliveryAttributesToIDToken"
         class="org.geant.idpextension.oidc.profile.impl.AddTokenDeliveryAttributesToClaimsSet" scope="prototype"

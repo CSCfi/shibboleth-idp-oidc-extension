@@ -135,7 +135,8 @@
 
     <bean id="AddAttributeClaimsToUserInfo"
         class="org.geant.idpextension.oidc.profile.impl.AddAttributesToClaimsSet" scope="prototype"
-        p:responseClaimsSetLookupStrategy-ref="shibboleth.UserInfoResponseClaimsSetLookupStrategy" />
+        p:responseClaimsSetLookupStrategy-ref="shibboleth.UserInfoResponseClaimsSetLookupStrategy" 
+        p:reservedClaimNames-ref="shibboleth.oidc.UserInfoReservedClaimNames"/>
 
     <bean id="AddTokenDeliveryAttributesToUserinfo"
         class="org.geant.idpextension.oidc.profile.impl.AddTokenDeliveryAttributesToClaimsSet"
