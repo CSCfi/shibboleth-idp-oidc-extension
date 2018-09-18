@@ -31,13 +31,11 @@ package org.geant.idpextension.oidc.attribute.filter.spring.policyrule.filtercon
 import java.util.List;
 
 import javax.annotation.Nonnull;
-
 import net.shibboleth.idp.attribute.filter.context.AttributeFilterContext;
 import net.shibboleth.idp.attribute.filter.policyrule.impl.AbstractStringPolicyRule;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
-
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
-import org.opensaml.messaging.context.BaseContext;
+import org.opensaml.messaging.context.navigate.RecursiveTypedParentContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,41 +49,25 @@ public class AttributeOIDCScopePolicyRule extends AbstractStringPolicyRule {
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(AttributeOIDCScopePolicyRule.class);
 
-    // TODO: replace getAuthenticationResponseContext with lookup strategy!
-
-    /**
-     * Helper method to locate authentication response context.
-     * 
-     * @param ctx any context child of profile request context,
-     * @return Inbound message context or null if not found.
-     */
-    @SuppressWarnings("rawtypes")
-    private OIDCAuthenticationResponseContext getAuthenticationResponseContext(BaseContext ctx) {
-        if (ctx == null) {
-            return null;
-        }
-        BaseContext ctxRunner = ctx;
-        while (ctxRunner.getParent() != null) {
-            ctxRunner = ctxRunner.getParent();
-        }
-        if (ctxRunner instanceof ProfileRequestContext) {
-            return ((ProfileRequestContext) ctxRunner).getOutboundMessageContext()
-                    .getSubcontext(OIDCAuthenticationResponseContext.class, false);
-        }
-        return null;
-    }
-
     /**
      * Compare the authentication request scopes with the provided string.
      * 
      * @param filterContext the context
      * @return whether it matches
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public Tristate matches(@Nonnull final AttributeFilterContext filterContext) {
-
         ComponentSupport.ifNotInitializedThrowUninitializedComponentException(this);
-        OIDCAuthenticationResponseContext ctx = getAuthenticationResponseContext(filterContext);
+        ProfileRequestContext profileRequestContext =
+                new RecursiveTypedParentContextLookup<AttributeFilterContext, ProfileRequestContext>(
+                        ProfileRequestContext.class).apply(filterContext);
+        if (profileRequestContext == null || profileRequestContext.getOutboundMessageContext() == null) {
+            log.trace("{} No outbound message context", getLogPrefix());
+            return Tristate.FALSE;
+        }
+        OIDCAuthenticationResponseContext ctx = profileRequestContext.getOutboundMessageContext()
+                .getSubcontext(OIDCAuthenticationResponseContext.class, false);
         if (ctx == null || ctx.getScope() == null) {
             log.trace("{} No verified requested scopes for oidc found", getLogPrefix());
             return Tristate.FALSE;

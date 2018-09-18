@@ -40,6 +40,7 @@ import org.geant.idpextension.oidc.attribute.encoding.impl.AbstractOIDCAttribute
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.BaseContext;
 import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.messaging.context.navigate.RecursiveTypedParentContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ import net.shibboleth.idp.attribute.AttributeEncoder;
 import net.shibboleth.idp.attribute.IdPAttribute;
 import net.shibboleth.idp.attribute.IdPAttributeValue;
 import net.shibboleth.idp.attribute.filter.Matcher;
+import net.shibboleth.idp.attribute.filter.PolicyRequirementRule.Tristate;
 import net.shibboleth.idp.attribute.filter.context.AttributeFilterContext;
 import net.shibboleth.utilities.java.support.component.AbstractIdentifiableInitializableComponent;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
@@ -190,6 +192,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
     }
 
     // Checkstyle: CyclomaticComplexity OFF
+    @SuppressWarnings("rawtypes")
     @Override
     public Set<IdPAttributeValue<?>> getMatchingValues(@Nonnull IdPAttribute attribute,
             @Nonnull AttributeFilterContext filtercontext) {
@@ -200,8 +203,15 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
             log.debug("{} No oidc encoders attached to attribute", getLogPrefix());
             return null;
         }
-        OIDCAuthenticationResponseContext respCtx =
-                getOIDCAuthenticationResponseContext(getOutboundMessageContext(filtercontext));
+        ProfileRequestContext profileRequestContext =
+                new RecursiveTypedParentContextLookup<AttributeFilterContext, ProfileRequestContext>(
+                        ProfileRequestContext.class).apply(filtercontext);
+        if (profileRequestContext == null || profileRequestContext.getOutboundMessageContext() == null) {
+            log.trace("{} No outbound message context", getLogPrefix());
+            return null;
+        }
+        OIDCAuthenticationResponseContext respCtx = profileRequestContext.getOutboundMessageContext()
+                .getSubcontext(OIDCAuthenticationResponseContext.class, false);
         if (respCtx == null) {
             // This is always a failure.
             log.debug("{} No oidc response ctx for this comparison", getLogPrefix());
@@ -260,44 +270,6 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
             }
         }
         return prefix;
-    }
-
-    // TODO: replace getOIDCAuthenticationResponseContext && getOutboundMessageContext with lookup strategy!
-
-    /**
-     * Helper method to locate outbound message context.
-     * 
-     * @param ctx any context child of profile request context,
-     * @return Outbound message context or null if not found.
-     */
-    @SuppressWarnings("rawtypes")
-    private MessageContext getOutboundMessageContext(BaseContext ctx) {
-        if (ctx == null) {
-            return null;
-        }
-        BaseContext ctxRunner = ctx;
-        while (ctxRunner.getParent() != null) {
-            ctxRunner = ctxRunner.getParent();
-        }
-        if (ctxRunner instanceof ProfileRequestContext) {
-            return ((ProfileRequestContext) ctxRunner).getOutboundMessageContext();
-        }
-        return null;
-    }
-
-    /**
-     * Returns oidc response context.
-     * 
-     * @param msgCtx Outbound message context.
-     * @return requested claims or null if not found.
-     */
-    @SuppressWarnings("rawtypes")
-    private OIDCAuthenticationResponseContext getOIDCAuthenticationResponseContext(MessageContext msgCtx) {
-        if (msgCtx == null) {
-            return null;
-        }
-        return msgCtx.getSubcontext(OIDCAuthenticationResponseContext.class, false);
-
     }
 
 }
