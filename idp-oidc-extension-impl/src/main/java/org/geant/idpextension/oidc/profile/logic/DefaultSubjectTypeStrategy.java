@@ -31,14 +31,10 @@ package org.geant.idpextension.oidc.profile.logic;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
-import org.geant.idpextension.oidc.config.OIDCUserInfoConfiguration;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultOIDCMetadataContextLookupFunction;
-import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +43,7 @@ import com.google.common.base.Function;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 
 /**
- * Function to select subject type derived from an entity's oidc metadata or configuration preferences if not in
- * metadata.
- * 
+ * Function to decide on subject type. Subject type is located from client's registration data.
  */
 @SuppressWarnings("rawtypes")
 public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContext, SubjectType> {
@@ -62,16 +56,11 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
     @Nonnull
     private Function<ProfileRequestContext, OIDCMetadataContext> oidcMetadataContextLookupStrategy;
 
-    /** Strategy function to lookup RelyingPartyContext. */
-    @Nonnull
-    private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
-
     /**
      * Constructor.
      */
     public DefaultSubjectTypeStrategy() {
         oidcMetadataContextLookupStrategy = new DefaultOIDCMetadataContextLookupFunction();
-        relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
     }
 
     /**
@@ -81,9 +70,6 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
      */
     public void setRelyingPartyContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, RelyingPartyContext> strategy) {
-
-        relyingPartyContextLookupStrategy =
-                Constraint.isNotNull(strategy, "RelyingPartyContext lookup strategy cannot be null");
     }
 
     /**
@@ -100,7 +86,6 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
     /** {@inheritDoc} */
     @Override
     @Nullable
-    // Checkstyle: CyclomaticComplexity OFF
     public SubjectType apply(@Nullable final ProfileRequestContext input) {
 
         SubjectType type = null;
@@ -108,23 +93,8 @@ public class DefaultSubjectTypeStrategy implements Function<ProfileRequestContex
         if (ctx != null && ctx.getClientInformation() != null && ctx.getClientInformation().getOIDCMetadata() != null) {
             type = ctx.getClientInformation().getOIDCMetadata().getSubjectType();
         }
-        if (type == null) {
-            boolean pairwise = false;
-            final RelyingPartyContext rpc = relyingPartyContextLookupStrategy.apply(input);
-            if (rpc != null) {
-                final ProfileConfiguration pc = rpc.getProfileConfig();
-                if (pc != null && pc instanceof OIDCCoreProtocolConfiguration) {
-                    pairwise = ((OIDCCoreProtocolConfiguration) pc).getPairwiseSubject().apply(input);
-                }
-                // TODO: fix this inheritance awkwardness
-                if (pc != null && pc instanceof OIDCUserInfoConfiguration) {
-                    pairwise = ((OIDCUserInfoConfiguration) pc).getPairwiseSubject().apply(input);
-                }
-            }
-            type = pairwise ? SubjectType.PAIRWISE : SubjectType.PUBLIC;
-        }
-        return type;
+        return type == null ? SubjectType.PUBLIC : type;
+
     }
-    // Checkstyle: CyclomaticComplexity ON
 
 }
