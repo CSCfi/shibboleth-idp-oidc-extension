@@ -41,6 +41,7 @@ import javax.annotation.Nullable;
 
 import org.opensaml.profile.context.ProfileRequestContext;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
@@ -57,8 +58,6 @@ import net.shibboleth.utilities.java.support.component.InitializableComponent;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 
 /**
  * Profile configuration for the OpenID Connect core protocol.
@@ -86,10 +85,6 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
     
     /** Enables post-authentication interceptor flows. */
     @Nonnull @NonnullElements private List<String> postAuthenticationFlows;
-    
-    /** Predicate used to determine if the default subject is pairwise. Default returns false. */
-    @SuppressWarnings("rawtypes")
-    @Nonnull private Predicate<ProfileRequestContext> pairwiseSubject;
     
     /** Lookup function to supply {@link #idTokenLifetime} property. */
     @SuppressWarnings("rawtypes")
@@ -139,7 +134,6 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
         postAuthenticationFlows = Collections.emptyList();
         defaultAuthenticationContexts = Collections.emptyList();
         nameIDFormatPrecedence = Collections.emptyList();
-        pairwiseSubject = Predicates.alwaysFalse();
         idTokenLifetime = 60 * 60 * 1000;
         authorizeCodeLifetime = 5 * 60 * 1000;
         accessTokenLifetime = 10 * 60 * 1000;
@@ -147,30 +141,7 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
         additionalAudiences = Collections.emptySet();
     }
     
-    /**
-     * Get the predicate used to determine if default subject should be pairwise.
-     * 
-     * @return predicate to determine if subject should be pairwise.
-     */
-    @SuppressWarnings("rawtypes")
-    @Nonnull
-    public Predicate<ProfileRequestContext> getPairwiseSubject() {
-        return pairwiseSubject;
-    }
-
-    /**
-     * Set the predicate used to determine if default subject should be pairwise.
-     * 
-     * @param predicate
-     *            predicate used to determine if subject should be pairwise
-     */
-    @SuppressWarnings("rawtypes")
-    public void setPairwiseSubject(@Nonnull final Predicate<ProfileRequestContext> predicate) {
-        pairwiseSubject = Constraint.isNotNull(predicate,
-                "Predicate to determine if if subject should be pairwise cannot be null");
-    }
-
-
+    
     /**
      * Checks whether the attributes are set to be resolved with this profile.
      *  
