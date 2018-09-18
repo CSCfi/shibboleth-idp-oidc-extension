@@ -85,7 +85,9 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        super.doPreExecute(profileRequestContext);
+        if (!super.doPreExecute(profileRequestContext)) {
+            return false;
+        }
         requestObject = getAuthenticationRequest().getRequestObject();
         if (requestObject == null) {
             log.debug("{} No request object, nothing to do", getLogPrefix());
