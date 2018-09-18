@@ -207,37 +207,38 @@
             <value>/opt/shibboleth-idp/conf/oidc-metadata-providers.xml</value>
         </util:list>
 
-
-- name: Add OIDC name identifier generation to services-system.xml  - SYSTEM DIRECTORY CHANGE!!
+- name: Set additions to global.xml 
   blockinfile:
-    dest: "{{ idp_home }}/system/conf/services-system.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK  for OIDC NameIdentifierGenerationService and OIDC relying party -->"
-    insertbefore: "<bean id=\"shibboleth.NameIdentifierGenerationService"
+    dest: "{{ idp_home }}/conf/global.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK for oidc extension additions to global.xml -->"
+    insertafter: "Use this file to define any custom beans needed globally"
     content: |
-        <bean id="shibboleth.oidc.NameIdentifierGenerationService" class="net.shibboleth.ext.spring.service.ReloadableSpringService"
-            c:claz="net.shibboleth.idp.saml.nameid.NameIdentifierGenerationService"
-            p:serviceConfigurations-ref="#{'%{idp.service.oidc.nameidGeneration.resources:shibboleth.oidc.NameIdentifierGenerationResources}'.trim()}"
-            p:failFast="%{idp.service.oidc.nameidGeneration.failFast:%{idp.service.failFast:false}}"
-            p:reloadCheckDelay="%{idp.service.oidc.nameidGeneration.checkInterval:PT0S}"
-            p:beanPostProcessors-ref="shibboleth.IdentifiableBeanPostProcessor"
-            p:beanFactoryPostProcessors-ref="shibboleth.PropertySourcesPlaceholderConfigurer" />
+        <bean id="SubjectRequired"
+            class="org.geant.idpextension.oidc.profile.logic.SubjectActivationCondition"/>
 
+        <bean id="PublicRequired" parent="shibboleth.Conditions.AND">
+            <constructor-arg>
+                <list>
+                    <bean class="org.geant.idpextension.oidc.profile.logic.SubjectActivationCondition" />
+                    <bean class="org.geant.idpextension.oidc.profile.logic.PublicSubjectActivationCondition" />
+                </list>
+            </constructor-arg>
+        </bean>
+
+        <bean id="PairwiseRequired" parent="shibboleth.Conditions.AND">
+            <constructor-arg>
+                <list>
+                    <bean class="org.geant.idpextension.oidc.profile.logic.SubjectActivationCondition" />
+                    <bean class="org.geant.idpextension.oidc.profile.logic.PairwiseSubjectActivationCondition" />
+                </list>
+            </constructor-arg>
+        </bean>
        
-- name: Add OIDC name identifier generation to services.xml
-  blockinfile:
-    dest: "{{ idp_home }}/conf/services.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK  for OIDC NameIdentifierGenerationResources -->"
-    insertbefore: "list id =\"shibboleth.NameIdentifierGenerationResources"
-    content: |
-        <util:list id ="shibboleth.oidc.NameIdentifierGenerationResources">
-            <value>%{idp.home}/conf/oidc-subject.xml</value>
-            <value>%{idp.home}/system/conf/oidc-subject-system.xml</value>
-        </util:list>
      
 - name: Copy relying-party.xml, oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
-    - "oidc-subject.xml"
+#   - "oidc-subject.xml"
     - "oidc-subject.properties"
     - "oidc-relying-party.xml"
     - "relying-party.xml"
@@ -249,10 +250,10 @@
     line: '\1, /conf/oidc-subject.properties'
     backrefs: yes
 
-- name: Copy oidc-subject-system.xml - SYSTEM DIRECTORY CHANGE!!
-  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/system/conf/{{item}}
-  with_items:
-    - "oidc-subject-system.xml"
+#- name: Copy oidc-subject-system.xml - SYSTEM DIRECTORY CHANGE!!
+#  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/system/conf/{{item}}
+#  with_items:
+#    - "oidc-subject-system.xml"
     
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
@@ -369,7 +370,7 @@
 - name: Ensure /var/www/html/protected dir exists
   file: path="/var/www/html/protected" state=directory
 
-- name: Copy relying-party.xml, oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
+- name: Copy index.php for presenting logged in user information
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/var/www/html/protected/{{item}}
   with_items:
     - "index.php"
