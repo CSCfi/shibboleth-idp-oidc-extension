@@ -29,6 +29,8 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
+
+import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import org.geant.idpextension.oidc.profile.context.navigate.TokenRequestSubjectLookupFunction;
@@ -38,6 +40,7 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
+import com.nimbusds.openid.connect.sdk.SubjectType;
 
 /**
  * Action that locates subject using strategy. Located subject is set to {@link OIDCAuthenticationResponseContext}.
@@ -52,6 +55,25 @@ public class SetSubjectToResponseContext extends AbstractOIDCResponseAction {
     /** Strategy used to obtain the subject. */
     @Nonnull
     private Function<ProfileRequestContext, String> subjectLookupStrategy;
+
+    /** Strategy used to determine the subject type to try. */
+    @Nonnull
+    private Function<ProfileRequestContext, SubjectType> subjectTypeStrategy;
+
+    /** Subject type. */
+    @Nonnull
+    @NonnullElements
+    private SubjectType subjectType;
+
+    /**
+     * Set the strategy function to use to obtain the subject type.
+     * 
+     * @param strategy subject type lookup strategy
+     */
+    public void setSubjectTypeLookupStrategy(@Nonnull final Function<ProfileRequestContext, SubjectType> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        subjectTypeStrategy = Constraint.isNotNull(strategy, "Subject type lookup strategy cannot be null");
+    }
 
     /**
      * Constructor.
@@ -80,6 +102,11 @@ public class SetSubjectToResponseContext extends AbstractOIDCResponseAction {
             return;
         }
         getOidcResponseContext().setSubject(subject);
+        if (subjectTypeStrategy != null) {
+            getOidcResponseContext()
+                    .setSubjectType(SubjectType.PUBLIC.equals(subjectTypeStrategy.apply(profileRequestContext))
+                            ? "public" : "pairwise");
+        }
     }
 
 }
