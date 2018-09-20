@@ -380,7 +380,7 @@
          OIDCCryptoPassphrase secret
          OIDCMetadataDir /var/cache/httpd/mod_auth_openidc/metadata
          OIDCResponseType "code"
-         OIDCScope "openid email"
+         OIDCScope "openid profile email address phone"
          <Location /protected/>
              authtype openid-connect
              require valid-user
