@@ -181,11 +181,11 @@
          idp.signing.oidc.rs.key= %{idp.home}/credentials/idp-signing-rs.jwk
          idp.signing.oidc.es.key= %{idp.home}/credentials/idp-signing-es.jwk
 
-- name: Add OIDC client information resolver service to services-system.xml
+- name: Add OIDC client information resolver service to services.xml
   blockinfile:
-    dest: "{{ idp_home }}/system/conf/services-system.xml"
+    dest: "{{ idp_home }}/conf/services.xml"
     marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertbefore: "<bean id=\"shibboleth.LoggingService"
+    insertbefore: "<util:list id=\"shibboleth.RelyingPartyResolverResources"
     content: |
         <bean id="shibboleth.ClientInformationResolverService" class="net.shibboleth.ext.spring.service.ReloadableSpringService"
                 depends-on="shibboleth.AttributeResolverService"
