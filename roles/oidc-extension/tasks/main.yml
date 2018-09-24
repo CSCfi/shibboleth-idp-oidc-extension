@@ -44,6 +44,7 @@
   with_items:
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/authorize/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/authorize/oidc-flow.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/authorize/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/authorize/oidc-beans.xml" }
+    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/authorize/oidc-core-common-beans.xml", dest: "{{ idp_home }}/flows/oidc/authorize/oidc-core-common-beans.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/token/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/token/oidc-flow.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/token/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/token/oidc-beans.xml" }
     - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/userinfo/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/userinfo/oidc-flow.xml" }

@@ -9,6 +9,9 @@
 
     <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
     <import resource="../../../system/conf/audit-system.xml" />
+    
+    <!--  Import core common beans. -->
+    <import resource="../authorize/oidc-core-common-beans.xml" />
 
     <!-- The profile and logging id used as arguments are for development phase only -->
     <bean id="InitializeProfileRequestContext"
@@ -144,7 +147,6 @@
     <bean id="shibboleth.oidc.EncryptionParametersResolver"
         class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver" />
 
-
     <bean id="shibboleth.TokenRequestScopeLookupStrategy"
         class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestScopeLookupFunction" scope="prototype" />
 
@@ -157,12 +159,6 @@
         class="org.geant.idpextension.oidc.profile.impl.SetRefreshTokenToResponseContext" scope="prototype"
         c:sealer-ref="tokenSealer">
     </bean>
-
-    <bean id="tokenSealer" lazy-init="true" class="net.shibboleth.utilities.java.support.security.DataSealer"
-        p:keyStrategy-ref="shibboleth.DataSealerKeyStrategy" p:encoder-ref="acBase64Codec" p:decoder-ref="acBase64Codec" />
-
-    <bean id="acBase64Codec" class="org.apache.commons.codec.binary.Base64" c:lineLength="0"
-        c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
 
     <bean id="InitializeSubjectContext" class="org.geant.idpextension.oidc.profile.impl.InitializeSubjectContext"
         scope="prototype" />
@@ -235,7 +231,6 @@
     <bean id="EncodeMessage" class="org.opensaml.profile.action.impl.EncodeMessage" scope="prototype"
         p:messageEncoderFactory-ref="oidc.messageEncoderFactory"
         p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
-
 
     <bean id="BuildErrorResponseFromEvent"
         class="org.geant.idpextension.oidc.profile.impl.BuildTokenErrorResponseFromEvent" scope="prototype"

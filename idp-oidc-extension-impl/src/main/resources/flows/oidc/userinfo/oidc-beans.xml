@@ -8,6 +8,9 @@
     default-init-method="initialize" default-destroy-method="destroy">
 
 
+    <!--  Import core common beans. -->
+    <import resource="../authorize/oidc-core-common-beans.xml" />
+    
     <!-- The profile and logging id used as arguments are for development phase only -->
     <bean id="InitializeProfileRequestContext"
         class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" scope="prototype"
@@ -25,13 +28,7 @@
         scope="prototype" />
 
     <bean id="ValidateAccessToken" class="org.geant.idpextension.oidc.profile.impl.ValidateAccessToken"
-        scope="prototype" c:sealer-ref="accessTokenSealer" p:revocationCache-ref="shibboleth.RevocationCache" />
-
-    <bean id="accessTokenSealer" lazy-init="true" class="net.shibboleth.utilities.java.support.security.DataSealer"
-        p:keyStrategy-ref="shibboleth.DataSealerKeyStrategy" p:encoder-ref="atBase64Codec" p:decoder-ref="atBase64Codec" />
-
-    <bean id="atBase64Codec" class="org.apache.commons.codec.binary.Base64" c:lineLength="0"
-        c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
+        scope="prototype" c:sealer-ref="tokenSealer" p:revocationCache-ref="shibboleth.RevocationCache" />
 
     <bean id="OIDCMetadataLookup" class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor"
         scope="prototype" c:executionDirection="INBOUND">
@@ -170,7 +167,6 @@
     <bean id="EncodeMessage" class="org.opensaml.profile.action.impl.EncodeMessage" scope="prototype"
         p:messageEncoderFactory-ref="oidc.messageEncoderFactory"
         p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
-
 
     <bean id="BuildErrorResponseFromEvent"
         class="org.geant.idpextension.oidc.profile.impl.BuildUserInfoErrorResponseFromEvent" scope="prototype"

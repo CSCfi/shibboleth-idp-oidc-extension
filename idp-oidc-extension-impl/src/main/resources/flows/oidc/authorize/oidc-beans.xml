@@ -9,6 +9,9 @@
 
     <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
     <import resource="../../../system/conf/audit-system.xml" />
+    
+    <!--  Import core common beans. -->
+    <import resource="oidc-core-common-beans.xml" />
 
     <bean id="InitializeProfileRequestContext"
         class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" scope="prototype"
@@ -140,7 +143,7 @@
 
     <bean id="SetAuthorizationCodeToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetAuthorizationCodeToResponseContext" scope="prototype"
-        c:sealer-ref="authorizeCodeSealer">
+        c:sealer-ref="tokenSealer">
         <property name="identifierGeneratorLookupStrategy">
             <bean class="net.shibboleth.idp.profile.config.navigate.IdentifierGenerationStrategyLookupFunction"
                 p:defaultIdentifierGenerationStrategy-ref="shibboleth.DefaultIdentifierGenerationStrategy" />
@@ -152,18 +155,11 @@
 
     <bean id="SetAccessTokenToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetAccessTokenToResponseContext" scope="prototype"
-        c:sealer-ref="authorizeCodeSealer">
+        c:sealer-ref="tokenSealer">
         <property name="activationCondition">
             <ref bean="AccessTokenRequested" />
         </property>
     </bean>
-
-    <bean id="authorizeCodeSealer" lazy-init="true"
-        class="net.shibboleth.utilities.java.support.security.DataSealer"
-        p:keyStrategy-ref="shibboleth.DataSealerKeyStrategy" p:encoder-ref="acBase64Codec" p:decoder-ref="acBase64Codec" />
-
-    <bean id="acBase64Codec" class="org.apache.commons.codec.binary.Base64" c:lineLength="0"
-        c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
 
     <bean id="SetSubjectToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetSubjectToResponseContext" scope="prototype" >
