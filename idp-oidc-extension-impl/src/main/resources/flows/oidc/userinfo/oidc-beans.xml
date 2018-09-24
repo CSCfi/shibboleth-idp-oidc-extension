@@ -52,13 +52,6 @@
         class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext" scope="prototype"
         p:clientIDLookupStrategy-ref="shibboleth.UserInfoRequestClientIDLookupStrategy" />
 
-    <bean id="SelectRelyingPartyConfiguration"
-        class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration" scope="prototype"
-        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
-
-    <bean id="SelectProfileConfiguration" class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
-        scope="prototype" />
-
     <bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope" scope="prototype"
         p:scopeLookupStrategy-ref="shibboleth.TokenRequestScopeLookupStrategy" />
 
@@ -84,7 +77,7 @@
     <bean id="PopulateUserInfoResponseSignatureSigningParameters"
         class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCSignatureSigningParameters " scope="prototype"
         p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
-        p:signatureSigningParametersResolver-ref="shibboleth.oidc.u.SignatureSigningParametersResolver">
+        p:signatureSigningParametersResolver-ref="shibboleth.oidc.SignatureSigningParametersResolver">
         <property name="securityParametersContextLookupStrategy">
             <bean class="com.google.common.base.Functions" factory-method="compose"
                 c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters"
@@ -95,11 +88,7 @@
                 c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
         </property>
     </bean>
-
-    <bean id="shibboleth.oidc.u.SignatureSigningParametersResolver"
-        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver"
-        p:userInfoSigningResolver="true" />
-
+    
     <bean id="PopulateUserInfoResponseEncryptionParameters"
         class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCEncryptionParameters" scope="prototype"
         p:configurationLookupStrategy-ref="shibboleth.EncryptionConfigurationLookup"

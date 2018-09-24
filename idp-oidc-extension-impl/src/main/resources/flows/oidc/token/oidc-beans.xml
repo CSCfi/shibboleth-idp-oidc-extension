@@ -47,13 +47,6 @@
         class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext" scope="prototype"
         p:clientIDLookupStrategy-ref="shibboleth.TokenRequestClientIDLookupStrategy" />
 
-    <bean id="SelectRelyingPartyConfiguration"
-        class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration" scope="prototype"
-        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
-
-    <bean id="SelectProfileConfiguration" class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
-        scope="prototype" />
-
     <bean id="InitializeOutboundMessageContext"
         class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundTokenResponseMessageContext" scope="prototype" />
 
@@ -124,7 +117,7 @@
     <bean id="PopulateIDTokenSignatureSigningParameters"
         class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCSignatureSigningParameters " scope="prototype"
         p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
-        p:signatureSigningParametersResolver-ref="shibboleth.oidc.t.SignatureSigningParametersResolver">
+        p:signatureSigningParametersResolver-ref="shibboleth.oidc.SignatureSigningParametersResolver">
         <property name="securityParametersContextLookupStrategy">
             <bean class="com.google.common.base.Functions" factory-method="compose"
                 c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters"
@@ -135,9 +128,6 @@
                 c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
         </property>
     </bean>
-
-    <bean id="shibboleth.oidc.t.SignatureSigningParametersResolver"
-        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver" />
 
     <bean id="PopulateIDTokenEncryptionParameters"
         class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCEncryptionParameters" scope="prototype"

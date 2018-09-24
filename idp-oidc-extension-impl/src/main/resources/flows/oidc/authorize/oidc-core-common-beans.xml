@@ -13,5 +13,17 @@
 
     <bean id="base64Codec" class="org.apache.commons.codec.binary.Base64" c:lineLength="0"
         c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
+        
+    <bean id="shibboleth.oidc.SignatureSigningParametersResolver"
+        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver" />
+    
+    <!-- Action beans common to all core endpoints -->
+    
+    <bean id="SelectRelyingPartyConfiguration"
+        class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration" scope="prototype"
+        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+
+    <bean id="SelectProfileConfiguration" class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
+        scope="prototype" />
 
 </beans>

@@ -34,13 +34,6 @@
     <bean id="InitializeRelyingPartyContext"
         class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext" scope="prototype" />
 
-    <bean id="SelectRelyingPartyConfiguration"
-        class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration" scope="prototype"
-        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
-
-    <bean id="SelectProfileConfiguration" class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
-        scope="prototype" />
-
     <bean id="PopulateUserAgentContext" class="net.shibboleth.idp.profile.impl.PopulateUserAgentContext"
         scope="prototype" p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
 
@@ -90,7 +83,7 @@
     <bean id="PopulateIDTokenSignatureSigningParameters"
         class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCSignatureSigningParameters " scope="prototype"
         p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
-        p:signatureSigningParametersResolver-ref="shibboleth.oidc.a.SignatureSigningParametersResolver">
+        p:signatureSigningParametersResolver-ref="shibboleth.oidc.SignatureSigningParametersResolver">
         <property name="activationCondition">
             <ref bean="IDTokenRequested" />
         </property>
@@ -105,9 +98,6 @@
         </property>
     </bean>
 
-    <bean id="shibboleth.oidc.a.SignatureSigningParametersResolver"
-        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver" />
-
     <bean id="PopulateIDTokenEncryptionParameters"
         class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCEncryptionParameters" scope="prototype"
         p:configurationLookupStrategy-ref="shibboleth.EncryptionConfigurationLookup"
@@ -119,7 +109,6 @@
 
     <bean id="shibboleth.oidc.EncryptionParametersResolver"
         class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver" />
-
 
     <bean id="SetTokenDeliveryAttributesToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetTokenDeliveryAttributesToResponseContext" scope="prototype">
