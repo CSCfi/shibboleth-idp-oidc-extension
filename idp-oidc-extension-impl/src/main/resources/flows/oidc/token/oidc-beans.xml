@@ -212,34 +212,4 @@
         </constructor-arg>
     </bean>
 
-    <bean id="PostDecodePopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext"
-        p:fieldExtractors="#{getObject('shibboleth.oidc.PostDecodeAuditExtractors') ?: getObject('shibboleth.oidc.DefaultPostDecodeAuditExtractors')}" />
-
-    <bean id="PostLookupPopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext"
-        p:fieldExtractors="#{getObject('shibboleth.oidc.PostLookupAuditExtractors') ?: getObject('shibboleth.DefaultPostLookupAuditExtractors')}" />
-
-    <bean id="PostResponsePopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext"
-        p:fieldExtractors="#{getObject('shibboleth.PostResponseAuditExtractors') ?: getObject('shibboleth.DefaultPostResponseAuditExtractors')}" />
-
-    <bean id="WriteAuditLog" class="net.shibboleth.idp.profile.audit.impl.WriteAuditLog" scope="prototype"
-        p:formattingMap-ref="shibboleth.AuditFormattingMap"
-        p:dateTimeFormat="#{getObject('shibboleth.AuditDateTimeFormat')}"
-        p:useDefaultTimeZone="#{getObject('shibboleth.AuditDefaultTimeZone') ?: false}"
-        p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
-
-    <bean id="shibboleth.oidc.DefaultPostDecodeAuditExtractors"
-        class="org.springframework.beans.factory.config.MapFactoryBean">
-        <property name="sourceMap">
-            <map>
-                <entry>
-                    <key>
-                        <util:constant
-                            static-field="org.geant.idpextension.oidc.audit.AuditFields.INBOUND_MESSAGE_CLASS" />
-                    </key>
-                    <bean class="org.geant.idpextension.oidc.audit.impl.InboundMessageClassLookupFunction" />
-                </entry>
-            </map>
-        </property>
-    </bean>
-
 </beans>
