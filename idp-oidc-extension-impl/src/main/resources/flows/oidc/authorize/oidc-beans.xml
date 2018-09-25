@@ -9,8 +9,8 @@
 
     <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
     <import resource="../../../system/conf/audit-system.xml" />
-    
-    <!--  Import core common beans. -->
+
+    <!-- Import core common beans. -->
     <import resource="oidc-core-common-beans.xml" />
 
     <bean id="InitializeProfileRequestContext"
@@ -127,8 +127,7 @@
     <bean id="SetConsentToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetConsentToResponseContext" scope="prototype" />
 
-    <bean id="RevokeConsent"
-        class="org.geant.idpextension.oidc.profile.impl.RevokeConsent" scope="prototype" />
+    <bean id="RevokeConsent" class="org.geant.idpextension.oidc.profile.impl.RevokeConsent" scope="prototype" />
 
     <bean id="SetAuthorizationCodeToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetAuthorizationCodeToResponseContext" scope="prototype"
@@ -151,20 +150,20 @@
     </bean>
 
     <bean id="SetSubjectToResponseContext"
-        class="org.geant.idpextension.oidc.profile.impl.SetSubjectToResponseContext" scope="prototype" >
+        class="org.geant.idpextension.oidc.profile.impl.SetSubjectToResponseContext" scope="prototype">
         <property name="subjectLookupStrategy">
             <bean class="org.geant.idpextension.oidc.profile.logic.AttributeResolutionSubjectLookupFunction" />
         </property>
         <property name="subjectTypeLookupStrategy">
             <bean class="org.geant.idpextension.oidc.profile.logic.DefaultSubjectTypeStrategy" />
         </property>
-    </bean> 
-   
+    </bean>
+
     <bean id="SetAuthenticationTimeToResponseContext"
-        class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationTimeToResponseContext" scope="prototype"></bean>
-        
-     <bean id="SetSectorIdentifierForAttributeResolution"
-        class="org.geant.idpextension.oidc.profile.impl.SetSectorIdentifierForAttributeResolution" scope="prototype"/>
+        class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationTimeToResponseContext" scope="prototype" />
+
+    <bean id="SetSectorIdentifierForAttributeResolution"
+        class="org.geant.idpextension.oidc.profile.impl.SetSectorIdentifierForAttributeResolution" scope="prototype" />
 
     <bean id="SetAuthenticationContextClassReferenceToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetAuthenticationContextClassReferenceToResponseContext"
@@ -276,52 +275,6 @@
     <bean id="FormOutboundMessage"
         class="org.geant.idpextension.oidc.profile.impl.FormOutboundAuthenticationResponseMessage" scope="prototype" />
 
-    <bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes" scope="prototype"
-        c:resolverService-ref="shibboleth.AttributeResolverService"
-        p:maskFailures="%{idp.service.attribute.resolver.maskFailures:true}" />
-
-    <bean id="FilterAttributes" class="net.shibboleth.idp.profile.impl.FilterAttributes" scope="prototype"
-        c:filterService-ref="shibboleth.AttributeFilterService"
-        p:maskFailures="%{idp.service.attribute.filter.maskFailures:true}" />
-
-    <bean id="oidc.messageEncoderFactory"
-        class="org.geant.idpextension.oidc.encoding.impl.OIDCResponseEncoderFactory"
-        p:messageEncoder-ref="oidc.nimbusEncoder" scope="prototype" />
-
-    <bean id="oidc.nimbusEncoder" class="org.geant.idpextension.oidc.encoding.impl.NimbusResponseEncoder"
-        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" init-method=""
-        p:velocityEngine-ref="shibboleth.VelocityEngine" />
-
-    <bean id="EncodeMessage" class="org.opensaml.profile.action.impl.EncodeMessage" scope="prototype"
-        p:messageEncoderFactory-ref="oidc.messageEncoderFactory"
-        p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
-
-    <bean id="BuildErrorResponseFromEvent"
-        class="org.geant.idpextension.oidc.profile.impl.BuildAuthenticationErrorResponseFromEvent" scope="prototype"
-        p:httpServletResponse-ref="shibboleth.HttpServletResponse">
-        <property name="eventContextLookupStrategy">
-            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
-        </property>
-        <property name="mappedErrors">
-            <map value-type="com.nimbusds.oauth2.sdk.ErrorObject">
-                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_RESPONSE_TYPE}"
-                    value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).UNSUPPORTED_RESPONSE_TYPE}" />
-                 <entry key="#{T(net.shibboleth.idp.authn. AuthnEventIds).NO_PASSIVE}"
-                    value="#{T(com.nimbusds.openid.connect.sdk.OIDCError).LOGIN_REQUIRED}" />
-            </map>
-        </property>
-    </bean>
-
-    <bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
-        scope="prototype" />
-
-    <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
-        p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
-        <property name="eventContextLookupStrategy">
-            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
-        </property>
-    </bean>
-
     <bean id="ErrorViewPopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext"
         p:fieldExtractors="#{getObject('shibboleth.ErrorViewAuditExtractors') ?: getObject('shibboleth.DefaultErrorViewAuditExtractors')}" />
 
@@ -357,7 +310,7 @@
 
     <bean id="PostLookupPopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext"
         p:fieldExtractors="#{getObject('shibboleth.oidc.PostLookupAuditExtractors') ?: getObject('shibboleth.DefaultPostLookupAuditExtractors')}" />
-        
+
     <bean id="PostResponsePopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext"
         p:fieldExtractors="#{getObject('shibboleth.oidc.PostResponseAuditExtractors') ?: getObject('shibboleth.DefaultPostResponseAuditExtractors')}" />
 
@@ -366,14 +319,15 @@
         p:dateTimeFormat="#{getObject('shibboleth.AuditDateTimeFormat')}"
         p:useDefaultTimeZone="#{getObject('shibboleth.AuditDefaultTimeZone') ?: false}"
         p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
-        
+
     <bean id="shibboleth.oidc.DefaultPostDecodeAuditExtractors"
-            class="org.springframework.beans.factory.config.MapFactoryBean">
+        class="org.springframework.beans.factory.config.MapFactoryBean">
         <property name="sourceMap">
             <map>
                 <entry>
                     <key>
-                        <util:constant static-field="org.geant.idpextension.oidc.audit.AuditFields.INBOUND_MESSAGE_CLASS"/>
+                        <util:constant
+                            static-field="org.geant.idpextension.oidc.audit.AuditFields.INBOUND_MESSAGE_CLASS" />
                     </key>
                     <bean class="org.geant.idpextension.oidc.audit.impl.InboundMessageClassLookupFunction" />
                 </entry>

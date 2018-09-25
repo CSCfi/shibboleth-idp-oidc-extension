@@ -13,17 +13,72 @@
 
     <bean id="base64Codec" class="org.apache.commons.codec.binary.Base64" c:lineLength="0"
         c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
-        
+
     <bean id="shibboleth.oidc.SignatureSigningParametersResolver"
         class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver" />
-    
-    <!-- Action beans common to all core endpoints -->
-    
+
+    <bean id="shibboleth.RevocationCache" class="org.geant.idpextension.oidc.storage.RevocationCache"
+        depends-on="shibboleth.LoggingService"
+        p:entryExpiration="#{'%{idp.oidc.revocationCache.authorizeCode.lifetime:PT6H}'}"
+        p:storage-ref="#{'%{idp.oidc.revocationCache.StorageService:shibboleth.StorageService}'.trim()}" p:strict="true" />
+
     <bean id="SelectRelyingPartyConfiguration"
         class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration" scope="prototype"
         p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
 
     <bean id="SelectProfileConfiguration" class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
         scope="prototype" />
+
+    <bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes" scope="prototype"
+        c:resolverService-ref="shibboleth.AttributeResolverService"
+        p:maskFailures="%{idp.service.attribute.resolver.maskFailures:true}" />
+
+    <bean id="FilterAttributes" class="net.shibboleth.idp.profile.impl.FilterAttributes" scope="prototype"
+        c:filterService-ref="shibboleth.AttributeFilterService"
+        p:maskFailures="%{idp.service.attribute.filter.maskFailures:true}" />
+
+    <bean id="oidc.messageEncoderFactory"
+        class="org.geant.idpextension.oidc.encoding.impl.OIDCResponseEncoderFactory"
+        p:messageEncoder-ref="oidc.nimbusEncoder" scope="prototype" />
+
+    <bean id="oidc.nimbusEncoder" class="org.geant.idpextension.oidc.encoding.impl.NimbusResponseEncoder"
+        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse" init-method=""
+        p:velocityEngine-ref="shibboleth.VelocityEngine" />
+
+    <bean id="EncodeMessage" class="org.opensaml.profile.action.impl.EncodeMessage" scope="prototype"
+        p:messageEncoderFactory-ref="oidc.messageEncoderFactory"
+        p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
+
+    <bean id="BuildErrorResponseFromEvent"
+        class="org.geant.idpextension.oidc.profile.impl.BuildTokenErrorResponseFromEvent" scope="prototype"
+        p:httpServletResponse-ref="shibboleth.HttpServletResponse">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>
+        <property name="mappedErrors">
+            <map value-type="com.nimbusds.oauth2.sdk.ErrorObject">
+                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_GRANT}"
+                    value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_GRANT}" />
+                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_REDIRECT_URI}"
+                    value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_REQUEST}" />
+                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_RESPONSE_TYPE}"
+                    value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).UNSUPPORTED_RESPONSE_TYPE}" />
+                <entry key="#{T(net.shibboleth.idp.authn. AuthnEventIds).NO_PASSIVE}"
+                    value="#{T(com.nimbusds.openid.connect.sdk.OIDCError).LOGIN_REQUIRED}" />
+                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_GRANT}"
+                    value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_GRANT}" />
+            </map>
+        </property>
+    </bean>
+
+    <bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
+        scope="prototype" />
+
+    <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
+        p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>
+    </bean>
 
 </beans>
