@@ -227,4 +227,23 @@
         class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
         scope="prototype" />
 
+    <bean id="PostResponsePopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext"
+        p:fieldExtractors="#{getObject('shibboleth.oidc.RegistrationPostResponseAuditExtractors') ?: getObject('shibboleth.oidc.DefaultRegistrationPostResponseAuditExtractors')}" />
+                
+    <bean id="shibboleth.oidc.DefaultRegistrationPostResponseAuditExtractors"
+            class="org.springframework.beans.factory.config.MapFactoryBean">
+        <property name="sourceMap">
+            <map>
+                <entry>
+                    <key>
+                        <util:constant static-field="org.geant.idpextension.oidc.audit.AuditFields.CLIENT_ID"/>
+                    </key>
+                    <bean class="org.geant.idpextension.oidc.audit.impl.ClientIdRegistrationAuditExtractor">
+                    </bean>
+                </entry>
+            </map>
+        </property>
+    </bean>    
+
+
 </beans>
