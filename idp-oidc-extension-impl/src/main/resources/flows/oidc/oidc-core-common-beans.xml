@@ -6,6 +6,9 @@
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
     default-init-method="initialize" default-destroy-method="destroy">
+    
+    <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
+    <import resource="../../system/conf/audit-system.xml" />    
 
     <!-- Sealer used to protect confidentiality and integrity of authorize code, access token and refresh token. -->
     <bean id="tokenSealer" lazy-init="true" class="net.shibboleth.utilities.java.support.security.DataSealer"
