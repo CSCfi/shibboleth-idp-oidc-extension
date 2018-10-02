@@ -32,7 +32,7 @@ import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 
-class RequestUtil {
+public class RequestUtil {
 
     /**
      * Helper method to print request to string for logging.
@@ -40,7 +40,7 @@ class RequestUtil {
      * @param httpReq request to be printed
      * @return request as formatted string.
      */
-    protected static String toString(HTTPRequest httpReq) {
+    public static String toString(HTTPRequest httpReq) {
         if (httpReq == null) {
             return null;
         }
