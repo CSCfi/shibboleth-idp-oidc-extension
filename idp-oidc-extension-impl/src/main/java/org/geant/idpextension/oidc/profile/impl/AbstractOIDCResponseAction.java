@@ -45,7 +45,7 @@ import net.shibboleth.idp.profile.AbstractProfileAction;
  * {@link ProfileRequestContext#getOutboundMessageContext()}.
  */
 @SuppressWarnings("rawtypes")
-abstract class AbstractOIDCResponseAction extends AbstractProfileAction {
+public abstract class AbstractOIDCResponseAction extends AbstractProfileAction {
 
     /** Class logger. */
     @Nonnull
