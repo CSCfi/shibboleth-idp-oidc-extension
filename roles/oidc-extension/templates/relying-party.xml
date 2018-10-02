@@ -48,6 +48,7 @@
                 <ref bean="Liberty.SSOS" />
        	       	<bean parent="OIDC.SSO" p:postAuthenticationFlows="attribute-release" />
        	       	<bean parent="OIDC.UserInfo"/>
+       	       	<bean parent="OAUTH2.Revocation"/>
             </list>
         </property>
     </bean>
