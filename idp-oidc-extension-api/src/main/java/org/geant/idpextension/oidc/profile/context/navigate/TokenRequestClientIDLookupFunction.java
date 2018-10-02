@@ -32,14 +32,14 @@ import javax.annotation.Nullable;
 
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
-import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.AbstractOptionallyIdentifiedRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 /**
- * For Token end point.
+ * For Token and Revocation end points.
  * 
  * A function that returns client id of the request via a lookup function. This lookup locates client id from oidc token
- * request if available. If information is not available, null is returned.
+ * requests and oauth2 token revocation requests if available. If information is not available, null is returned.
  */
 @SuppressWarnings("rawtypes")
 public class TokenRequestClientIDLookupFunction implements ContextDataLookupFunction<MessageContext, ClientID> {
@@ -51,10 +51,10 @@ public class TokenRequestClientIDLookupFunction implements ContextDataLookupFunc
             return null;
         }
         Object message = input.getMessage();
-        if (message == null || !(message instanceof TokenRequest)) {
+        if (message == null || !(message instanceof AbstractOptionallyIdentifiedRequest)) {
             return null;
         }
-        TokenRequest req = (TokenRequest) message;
+        AbstractOptionallyIdentifiedRequest req = (AbstractOptionallyIdentifiedRequest) message;
         ClientID id = req.getClientID();
         if (id == null && req.getClientAuthentication() != null) {
             id = req.getClientAuthentication().getClientID();
