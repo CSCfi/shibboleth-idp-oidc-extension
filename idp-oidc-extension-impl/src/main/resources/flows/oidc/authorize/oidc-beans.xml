@@ -280,16 +280,14 @@
         </property>
         <property name="mappedErrors">
             <map value-type="com.nimbusds.oauth2.sdk.ErrorObject">
-                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_GRANT}"
-                    value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_GRANT}" />
                 <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_REDIRECT_URI}"
                     value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_REQUEST}" />
+                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_REQUEST_OBJECT}"
+                    value="#{T(com.nimbusds.openid.connect.sdk.OIDCError).INVALID_REQUEST_OBJECT}" />
                 <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_RESPONSE_TYPE}"
                     value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).UNSUPPORTED_RESPONSE_TYPE}" />
                 <entry key="#{T(net.shibboleth.idp.authn.AuthnEventIds).NO_PASSIVE}"
                     value="#{T(com.nimbusds.openid.connect.sdk.OIDCError).LOGIN_REQUIRED}" />
-                <entry key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).INVALID_GRANT}"
-                    value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_GRANT}" />
             </map>
         </property>
     </bean>
