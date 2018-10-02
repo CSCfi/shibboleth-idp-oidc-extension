@@ -60,6 +60,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+import com.nimbusds.oauth2.sdk.AbstractOptionallyAuthenticatedRequest;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
@@ -72,6 +73,7 @@ import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
+import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
@@ -80,7 +82,7 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 /**
  * Validates the endpoint authentication with the token_endpoint_auth_method stored to the client's metadata.
  */
-public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestAction {
+public class ValidateEndpointAuthentication extends AbstractOIDCRequestAction<AbstractOptionallyAuthenticatedRequest> {
 
     /** Class logger. */
     @Nonnull
@@ -171,7 +173,7 @@ public class ValidateEndpointAuthentication extends AbstractOIDCTokenRequestActi
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        final TokenRequest request = getTokenRequest();
+        final AbstractOptionallyAuthenticatedRequest request = getRequest();
         final OIDCClientInformation clientInformation = oidcMetadataContext.getClientInformation();
         final OIDCClientMetadata clientMetadata = clientInformation.getOIDCMetadata();
         final ClientAuthenticationMethod clientAuthMethod = clientMetadata.getTokenEndpointAuthMethod() != null ? 
