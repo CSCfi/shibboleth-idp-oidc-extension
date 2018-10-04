@@ -28,30 +28,22 @@
 
 package org.geant.idpextension.oidc.config;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import javax.annotation.Nonnull;
 
 import org.opensaml.profile.context.ProfileRequestContext;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 
-import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
-import net.shibboleth.utilities.java.support.annotation.constraint.NotLive;
-import net.shibboleth.utilities.java.support.annotation.constraint.Unmodifiable;
 import net.shibboleth.utilities.java.support.logic.Constraint;
-import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
 /**
  * Base class for OIDC protocol configuration, containing configuration bits shared by all flow aware OIDC protocol
  * configurations.
  */
 @SuppressWarnings("rawtypes")
-public abstract class AbstractOIDCFlowAwareProfileConfiguration extends AbstractOIDCProfileConfiguration {
+public abstract class AbstractOIDCFlowAwareProfileConfiguration
+        extends AbstractOIDCClientAuthenticableProfileConfiguration {
 
     /** Predicate used to indicate whether authorization code flow is supported by this profile. Default true. */
     @Nonnull
@@ -68,9 +60,6 @@ public abstract class AbstractOIDCFlowAwareProfileConfiguration extends Abstract
     /** Predicate used to indicate whether refresh tokens are supported by this profile. Default true. */
     @Nonnull
     private Predicate<ProfileRequestContext> refreshTokensPredicate;
-    
-    /** Enabled token endpoint authentication methods. */
-    @Nonnull @NonnullElements private List<String> tokenEndpointAuthMethods;
 
     /**
      * Constructor.
@@ -83,11 +72,6 @@ public abstract class AbstractOIDCFlowAwareProfileConfiguration extends Abstract
         implicitFlowPredicate = Predicates.alwaysTrue();
         hybridFlowPredicate = Predicates.alwaysTrue();
         refreshTokensPredicate = Predicates.alwaysTrue();
-        tokenEndpointAuthMethods = new ArrayList<>();
-        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.toString());
-        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_POST.toString());
-        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        tokenEndpointAuthMethods.add(ClientAuthenticationMethod.PRIVATE_KEY_JWT.toString());
     }
 
     /**
@@ -164,25 +148,5 @@ public abstract class AbstractOIDCFlowAwareProfileConfiguration extends Abstract
     public void setRefreshTokensEnabled(final Predicate<ProfileRequestContext> predicate) {
         refreshTokensPredicate = Constraint.isNotNull(predicate,
                 "Predicate used to indicate whether refresh tokens are supported cannot be null");
-    }
-    
-    /**
-     * Get the enabled token endpoint authentication methods.
-     * 
-     * @return The enabled token endpoint authentication methods.
-     */
-    @Nonnull @NonnullElements @NotLive @Unmodifiable public List<String> getTokenEndpointAuthMethods() {
-        return tokenEndpointAuthMethods;
-    }
-
-    /**
-     * Set the enabled token endpoint authentication methods.
-     * 
-     * @param methods What to set.
-     */
-    public void setTokenEndpointAuthMethods(@Nonnull @NonnullElements final Collection<String> methods) {
-        Constraint.isNotNull(methods, "Collection of methods cannot be null");
-        
-        tokenEndpointAuthMethods = new ArrayList<>(StringSupport.normalizeStringCollection(methods));
     }
 }

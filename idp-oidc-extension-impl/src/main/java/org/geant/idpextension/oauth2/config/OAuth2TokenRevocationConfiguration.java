@@ -30,7 +30,8 @@ package org.geant.idpextension.oauth2.config;
 
 import javax.annotation.Nonnull;
 
-import org.geant.idpextension.oidc.config.AbstractOIDCFlowAwareProfileConfiguration;
+import org.geant.idpextension.oidc.config.AbstractOIDCClientAuthenticableProfileConfiguration;
+
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 
 /**
@@ -38,7 +39,7 @@ import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
  * the common methods of what client has registered as token end point authentication methods and methods
  * tokenEndpointAuthMethods profile configuration list.
  */
-public class OAuth2TokenRevocationConfiguration extends AbstractOIDCFlowAwareProfileConfiguration {
+public class OAuth2TokenRevocationConfiguration extends AbstractOIDCClientAuthenticableProfileConfiguration {
 
     /** OAuth2 Token Revocation URI. */
     public static final String PROTOCOL_URI = "https://tools.ietf.org/html/rfc7009";
