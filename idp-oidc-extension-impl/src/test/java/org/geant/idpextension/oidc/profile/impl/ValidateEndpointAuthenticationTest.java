@@ -93,7 +93,7 @@ public class ValidateEndpointAuthenticationTest {
     @BeforeClass
     public void initKeys() throws NoSuchAlgorithmException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-        keyGen.initialize(1024);
+        keyGen.initialize(2048);
         final KeyPair keyPair = keyGen.genKeyPair();
         rsaPrivateKey = (RSAPrivateKey) keyPair.getPrivate();
         rsaPublicKey = (RSAPublicKey) keyPair.getPublic();

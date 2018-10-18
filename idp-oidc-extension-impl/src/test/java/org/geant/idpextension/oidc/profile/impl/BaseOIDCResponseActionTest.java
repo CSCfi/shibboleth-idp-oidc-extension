@@ -189,6 +189,7 @@ abstract class BaseOIDCResponseActionTest {
             try {
                 if ("RSA".equals(algo)) {
                     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+                    keyGen.initialize(2048);
                     KeyPair pair = keyGen.generateKeyPair();
                     priv = pair.getPrivate();
                     pub = pair.getPublic();
