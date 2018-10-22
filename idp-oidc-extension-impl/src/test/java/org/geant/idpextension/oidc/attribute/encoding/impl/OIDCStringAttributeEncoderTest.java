@@ -151,7 +151,9 @@ public class OIDCStringAttributeEncoderTest {
         attribute.setValues(stringAttributeValues);
         encoder.setAsObject(true);
         JSONObject object = encoder.encode(attribute);
-        Assert.assertEquals(((JSONObject)object.get("attributeName")).toJSONString(), "{\"car\":null,\"name\":\"John\",\"age\":30}");
+        Assert.assertEquals("John", ((JSONObject) object.get("attributeName")).get("name"));
+        Assert.assertEquals(30, ((JSONObject) object.get("attributeName")).get("age"));
+        Assert.assertTrue(((JSONObject) object.get("attributeName")).containsKey("car"));
     }
 
     @Test
