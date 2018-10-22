@@ -2,8 +2,6 @@
 - src: cmprescott.xml
 - src: CSCfi.mariadb
 - src: CSCfi.jetty
-- name: CSCfi.shibboleth-idp
-  src: https://github.com/CSCfi/ansible-role-shibboleth-idp
-  version: origin/Snapshot-support
+- src: CSCfi.shibboleth-idp
 - src: CSCfi.apache
 - src: CSCfi.389-ds

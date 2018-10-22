@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.shibboleth.idp</groupId>
         <artifactId>idp-parent</artifactId>
-        <version>3.4.0-SNAPSHOT</version>
+        <version>3.4.0</version>
     </parent>
     <groupId>org.geant</groupId>
     <artifactId>idp-oidc-extension-parent</artifactId>
@@ -18,8 +18,8 @@
         <maven.compiler.version>3.6.1</maven.compiler.version>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-        <shib.idp.version>3.4.0-SNAPSHOT</shib.idp.version>
-        <opensaml.version>3.4.0-SNAPSHOT</opensaml.version>
+        <shib.idp.version>3.4.0</shib.idp.version>
+        <opensaml.version>3.4.0</opensaml.version>
         <checkstyle.version>2.17</checkstyle.version>
         <checkstyle.configLocation>
             ../conf/checkstyle.xml
