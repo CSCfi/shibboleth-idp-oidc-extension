@@ -51,6 +51,7 @@
     <modules>
         <module>../idp-oidc-extension-api</module>
         <module>../idp-oidc-extension-impl</module>
+        <module>../idp-oidc-extension-distribution</module>
     </modules>
     <dependencyManagement>
         <dependencies>

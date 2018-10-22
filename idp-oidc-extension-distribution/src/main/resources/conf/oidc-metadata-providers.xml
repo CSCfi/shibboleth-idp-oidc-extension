@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+                           
+       default-init-method="initialize"
+       default-destroy-method="destroy">
+
+    <!-- Generic beans for configuring the OIDC metadata system, in most cases don't need any modifications. -->
+
+    <bean id="shibboleth.oidc.RelyingPartyClientInformationProvider"
+        class="org.geant.idpextension.oidc.metadata.resolver.RelyingPartyClientInformationProvider"
+        p:embeddedResolver-ref="shibboleth.oidc.ChainingClientInformationResolver">
+    </bean>
+
+    <bean id="shibboleth.oidc.RemoteJwkSetCache"
+        class="org.geant.idpextension.oidc.metadata.resolver.RemoteJwkSetCache"
+        p:storage-ref="shibboleth.JPAStorageService"
+        p:httpClientBuilder-ref="shibboleth.oidc.HttpClientBuilder" />
+
+    <bean id="shibboleth.oidc.HttpClientBuilder"
+        class="net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder" />
+
+    <bean id="shibboleth.oidc.ChainingClientInformationResolver"
+        class="org.geant.idpextension.oidc.metadata.impl.ChainingClientInformationResolver"
+        p:id="InternalEmbeddedChainResolver" 
+        p:resolvers-ref="shibboleth.oidc.ClientInformationResolvers"/>
+
+    <!-- Generic beans end, in most cases only edit after this line. -->
+
+    <!-- The following example contains two OIDC client information resolvers: first one reading a single client information from a JSON file, and the
+         second one fetchs the OIDC client informations from the configured StorageService. -->
+
+    <util:list id="shibboleth.oidc.ClientInformationResolvers"
+        value-type="org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver">
+        <ref bean="ExampleFileResolver" />
+        <ref bean="ExampleStorageClientInformationResolver" />
+    </util:list>
+
+    <bean id="ExampleFileResolver"
+        class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" 
+        p:id="ExampleFileResolver1"
+        p:remoteJwkSetCache-ref="shibboleth.oidc.RemoteJwkSetCache">
+        <constructor-arg>
+            <bean class="java.io.File" id="ExampleFile">
+                <constructor-arg type="String" value="/opt/shibboleth-idp/metadata/oidc-client.json" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ExampleStorageClientInformationResolver"
+        class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationResolver"
+        p:id="ExampleStorageResolver1"
+        p:storageService-ref="shibboleth.JPAStorageService"
+        p:remoteJwkSetCache-ref="shibboleth.oidc.RemoteJwkSetCache"/>
+    
+</beans>
+

@@ -1,32 +1,5 @@
 ---
 
-- name: Ensure "{{ idp_home }}/views/oidc" dir exists
-  file: path="{{ idp_home }}/views/oidc" state=directory
-
-- name: Ensure "{{ idp_home }}/flows/oidc" dir exists
-  file: path="{{ idp_home }}/flows/oidc" state=directory
-
-- name: Ensure "{{ idp_home }}/flows/oidc/authorize" dir exists
-  file: path="{{ idp_home }}/flows/oidc/authorize" state=directory
-  
-- name: Ensure "{{ idp_home }}/flows/oidc/token" dir exists
-  file: path="{{ idp_home }}/flows/oidc/token" state=directory
-
-- name: Ensure "{{ idp_home }}/flows/oidc/userinfo" dir exists
-  file: path="{{ idp_home }}/flows/oidc/userinfo" state=directory
-
-- name: Ensure "{{ idp_home }}/flows/oidc/register" dir exists
-  file: path="{{ idp_home }}/flows/oidc/register" state=directory
-
-- name: Ensure "{{ idp_home }}/flows/oidc/webfinger" dir exists
-  file: path="{{ idp_home }}/flows/oidc/webfinger" state=directory
-
-- name: Ensure "{{ idp_home }}/flows/oidc/discovery" dir exists
-  file: path="{{ idp_home }}/flows/oidc/discovery" state=directory
-  
-- name: Ensure "{{ idp_home }}/flows/oauth2/revocation" dir exists
-  file: path="{{ idp_home }}/flows/oauth2/revocation" state=directory
-
 - name: Ensure "{{ idp_home }}/static" dir exists
   file: path="{{ idp_home }}/static/" state=directory
 
@@ -36,51 +9,13 @@
 - name: Ensure "{{ idp_home }}/static/.well-known/" dir exists
   file: path="{{ idp_home }}/static/.well-known/" state=directory
 
-- name: Copy oidc flow, views and beans
-  copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+- name: Unarchive idp-oidc-extension-distribution-0.8.0-SNAPSHOT-bin.tar.gz
+  unarchive:
+    src: ../../../idp-oidc-extension-distribution/target/idp-oidc-extension-distribution-0.8.0-SNAPSHOT-bin.tar.gz
+    dest: "{{ idp_home }}"
     owner: root
-    group: root
-    mode: 0644
-    remote_src: no
-  with_items:
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/authorize/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/authorize/oidc-flow.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/authorize/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/authorize/oidc-beans.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/oidc-core-common-beans.xml", dest: "{{ idp_home }}/flows/oidc/oidc-core-common-beans.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/token/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/token/oidc-flow.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/token/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/token/oidc-beans.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/userinfo/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/userinfo/oidc-flow.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/userinfo/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/userinfo/oidc-beans.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/register/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/register/oidc-flow.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/register/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/register/oidc-beans.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/webfinger/oidc-flow.xml", dest: "{{ idp_home }}/flows/oidc/webfinger/oidc-flow.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/webfinger/oidc-beans.xml", dest: "{{ idp_home }}/flows/oidc/webfinger/oidc-beans.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/discovery/discovery-flow.xml", dest: "{{ idp_home }}/flows/oidc/discovery/discovery-flow.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oidc/discovery/discovery-beans.xml", dest: "{{ idp_home }}/flows/oidc/discovery/discovery-beans.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oauth2/revocation/revocation-flow.xml", dest: "{{ idp_home }}/flows/oauth2/revocation/revocation-flow.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/flows/oauth2/revocation/revocation-beans.xml", dest: "{{ idp_home }}/flows/oauth2/revocation/revocation-beans.xml" }
-    - { src: "{{ playbook_dir }}/idp-oidc-extension-impl/src/main/resources/views/oidc-error.vm", dest: "{{ idp_home }}/views/oidc/authorize-error.vm" }
-
-- name: Copy selected JARs for building new idp.war
-  copy:
-    src: "{{ item }}"
-    dest: "{{ idp_home }}/edit-webapp/WEB-INF/lib/"
-    owner: root
-    group: root
-    mode: 0644
-  with_fileglob:
-    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/nimbus-jose-jwt*.jar"
-    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/oauth2-oidc-sdk*.jar"
-    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/json-smart-*.jar"
-    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/accessors-smart-*.jar"
-    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/lang-tag-*.jar"
-    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-lang3-*.jar"
-    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/commons-collections4-*.jar"
-    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/gson-*.jar"
-    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/idp-oidc-extension-api-*.jar"
-    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/dependency/oidcfederatedmetadatastatement-*.jar"
-    - "{{ playbook_dir }}/idp-oidc-extension-impl/target/idp-oidc-extension-impl-*.jar"
+    group: jetty
+    extra_opts: [--strip-components=1]
 
 - name: Build new idp.war
   shell: source {{ environment_file }} && "{{ idp_home }}/bin/build.sh"
@@ -243,7 +178,7 @@
             </constructor-arg>
         </bean>
         
-        <!-- List of reserved claims that will no be populated to id token using standard user claim population mechanims -->
+        <!-- List of reserved claims that will not be populated to id token using standard user claim population mechanims -->
         <util:list id="shibboleth.oidc.IDTokenReservedClaimNames">
             <value>aud</value>
             <value>iss</value>
@@ -258,7 +193,7 @@
             <value>nonce</value>
         </util:list>
         
-        <!-- List of reserved claims that will no be populated to user info response using standard user claim population mechanims -->
+        <!-- List of reserved claims that will not be populated to user info response using standard user claim population mechanims -->
         <util:list id="shibboleth.oidc.UserInfoReservedClaimNames">
             <value>aud</value>
             <value>iss</value>
@@ -266,11 +201,9 @@
         </util:list>
        
      
-- name: Copy relying-party.xml, oidc-relying-party.xml, oidc-subject.xml and oidc-subject.properties
+- name: Copy relying-party.xml
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
-    - "oidc-subject.properties"
-    - "oidc-relying-party.xml"
     - "relying-party.xml"
 
 - name: Add oidc-subject.properties to included confs in idp.properties
@@ -283,7 +216,6 @@
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "logback.xml"
-    - "oidc-metadata-providers.xml"
 
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/metadata/{{item}}
   with_items:
@@ -315,15 +247,17 @@
     src: jetty-rewrite.xml
     dest: "{{ idp_home }}/jetty-base/etc/jetty-rewrite.xml"
 
-- name: Setting modified attribute-resolver.xml
-  template:
-    src: attribute-resolver.xml
+- name: Apply attribute-resolver-oidc.xml
+  copy:
+    src: "{{ idp_home }}/conf/attribute-resolver-oidc.xml"
     dest: "{{ idp_home }}/conf/attribute-resolver.xml"
+    remote_src: yes
 
-- name: Setting modified attribute-filter.xml
-  template:
-    src: attribute-filter.xml
+- name: Apply oidc attribute-filter-oidc.xml
+  copy:
+    src: "{{ idp_home }}/conf/attribute-filter-oidc.xml"
     dest: "{{ idp_home }}/conf/attribute-filter.xml"
+    remote_src: yes
 
 - name: Setting modified general-authn.xml
   template:
