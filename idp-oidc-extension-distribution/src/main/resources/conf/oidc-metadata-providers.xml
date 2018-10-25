@@ -21,7 +21,7 @@
 
     <bean id="shibboleth.oidc.RemoteJwkSetCache"
         class="org.geant.idpextension.oidc.metadata.resolver.RemoteJwkSetCache"
-        p:storage-ref="shibboleth.JPAStorageService"
+        p:storage-ref="#{'%{idp.oidc.jwk.StorageService:shibboleth.StorageService}'.trim()}"
         p:httpClientBuilder-ref="shibboleth.oidc.HttpClientBuilder" />
 
     <bean id="shibboleth.oidc.HttpClientBuilder"
@@ -57,7 +57,7 @@
     <bean id="ExampleStorageClientInformationResolver"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationResolver"
         p:id="ExampleStorageResolver1"
-        p:storageService-ref="shibboleth.JPAStorageService"
+        p:storageService-ref="#{'%{idp.oidc.dynreg.StorageService:shibboleth.StorageService}'.trim()}"
         p:remoteJwkSetCache-ref="shibboleth.oidc.RemoteJwkSetCache"/>
     
 </beans>
