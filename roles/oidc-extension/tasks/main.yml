@@ -21,6 +21,11 @@
   shell: source {{ environment_file }} && "{{ idp_home }}/bin/build.sh"
   become_user: root
 
+- name: Set issuer id to idp-oidc.properties
+  lineinfile: dest={{ idp_home }}/conf/idp-oidc.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
+  with_items:
+    - { option: 'idp.oidc.issuer', value: 'https://{{ service_name }}'}
+    
 - name: configure shibboleth-idp ldap.properties
   lineinfile: dest={{ idp_home }}/conf/ldap.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
   with_items:
@@ -37,52 +42,6 @@
   with_items:
     - { option: 'idp.session.StorageService', value: 'shibboleth.JPAStorageService' }
     - { option: 'idp.entityID', value: 'https://{{ service_name }}' }
-
-- name: Set oidc issuer to idp.properties
-  blockinfile:
-    dest: "{{ idp_home }}/conf/idp.properties"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK for oidc issuer"
-    insertafter: "idp.entityID"
-    content: |
-         # Open ID Connect Issuer value 
-         idp.oidc.issuer= https://{{ service_name }}
-
-- name: Set oidc registration properties to idp.properties
-  blockinfile:
-    dest: "{{ idp_home }}/conf/idp.properties"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK for oidc dyn. registration"
-    insertafter: "idp.oidc.issuer"
-    content: |
-         idp.oidc.dynreg.StorageService = shibboleth.JPAStorageService
-         idp.oidc.dynreg.defaultRegistrationValidity = PT24H
-         idp.oidc.dynreg.defaultSecretExpiration = P12M
-         idp.oidc.dynreg.defaultScope = openid profile email address phone offline_access
-         idp.oidc.dynreg.defaultSubjectType = public
-         idp.oidc.dynreg.tokenEndpointAuthMethods = client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt
-         idp.oidc.tokenEndpointAuthMethods = client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt
-
-- name: Set default lifetime of oidc tokens to idp.properties
-  blockinfile:
-    dest: "{{ idp_home }}/conf/idp.properties"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK for token lifetimes"
-    insertafter: "idp.oidc.tokenEndpointAuthMethods"
-    content: |
-         # Default lifetime of oidc tokens
-         #idp.oidc.authorizeCode.defaultLifetime = PT5M
-         #idp.oidc.accessToken.defaultLifetime = PT10M
-         #idp.oidc.refreshToken.defaultLifetime = PT2H
-         #idp.oidc.idToken.defaultLifetime = PT1H
-
-- name: Set properties for revocation cache to idp.properties
-  blockinfile:
-    dest: "{{ idp_home }}/conf/idp.properties"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK for revocation cache"
-    insertafter: "idp.oidc.idToken.defaultLifetime"
-    content: |
-         # Lifetime of entries in revocation cache for authorize code
-         #idp.oidc.revocationCache.authorizeCode.lifetime = PT6H
-         # Storage for revocation cache. Requires server-side storage
-         #idp.oidc.revocationCache.StorageService = shibboleth.StorageService
          
 - name: Add one trusted test SP
   blockinfile:
@@ -111,16 +70,6 @@
          <bean id="shibboleth.oidc.DefaultESSigningCredential"
              class="org.geant.idpextension.oidc.profile.spring.factory.BasicJWKCredentialFactoryBean"
              p:jWKResource="%{idp.signing.oidc.es.key}" />
-
-- name: Set oidc credential to idp.properties       
-  blockinfile:
-    dest: "{{ idp_home }}/conf/idp.properties"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
-    insertafter: "idp.signing.key"
-    content: |
-         # Signing keys for oidc id tokens
-         idp.signing.oidc.rs.key= %{idp.home}/credentials/idp-signing-rs.jwk
-         idp.signing.oidc.es.key= %{idp.home}/credentials/idp-signing-es.jwk
 
 - name: Add OIDC client information resolver service to services.xml
   blockinfile:
@@ -199,18 +148,17 @@
             <value>iss</value>
             <value>sub</value>
         </util:list>
-       
      
 - name: Copy relying-party.xml
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "relying-party.xml"
 
-- name: Add oidc-subject.properties to included confs in idp.properties
+- name: Add oidc-subject.properties and idp-oidc.properties to be included confs in idp.properties
   lineinfile:
     dest: /opt/shibboleth-idp/conf/idp.properties
     regexp: '(idp.additionalProperties.*)'
-    line: '\1, /conf/oidc-subject.properties'
+    line: '\1, /conf/oidc-subject.properties, /conf/idp-oidc.properties'
     backrefs: yes
     
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
