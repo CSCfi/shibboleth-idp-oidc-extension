@@ -17,7 +17,7 @@
         </fileSet>
         <fileSet>
             <directory>../idp-oidc-extension-impl/src/main/resources/views</directory>
-            <outputDirectory>flows</outputDirectory>
+            <outputDirectory>views</outputDirectory>
             <includes>
                 <include>**/*</include>
             </includes>
