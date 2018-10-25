@@ -91,7 +91,7 @@
     <bean id="shibboleth.oidc.DefaultScope"
         class="com.nimbusds.oauth2.sdk.Scope" factory-method="parse">
         <constructor-arg type="java.lang.String"
-            value="#{'%{idp.oidc.dynreg.defaultScope:openid}'.trim()}" />
+            value="#{'%{idp.oidc.dynreg.defaultScope:openid profile email address phone offline_access}'.trim()}" />
     </bean>
 
     <bean id="AddContactsToClientMetadata"
@@ -149,7 +149,7 @@
     <bean id="shibboleth.oidc.ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
         scope="prototype" p:id="OIDCClientInformationManager"
-        p:storageService-ref="#{'%{idp.oidc.dynreg.StorageService:shibboleth.JPAStorageService}'.trim()}" />
+        p:storageService-ref="#{'%{idp.oidc.dynreg.StorageService:shibboleth.StorageService}'.trim()}" />
 
     <bean id="StoreClientInformation"
         class="org.geant.idpextension.oidc.profile.impl.StoreClientInformation"
