@@ -40,7 +40,7 @@
 - name: configure shibboleth-idp idp.properties
   lineinfile: dest={{ idp_home }}/conf/idp.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
   with_items:
-    - { option: 'idp.session.StorageService', value: 'shibboleth.JPAStorageService' }
+    - { option: 'idp.session.StorageService', value: 'shibboleth.StorageService' }
     - { option: 'idp.entityID', value: 'https://{{ service_name }}' }
          
 - name: Add one trusted test SP
@@ -97,57 +97,14 @@
             <value>/opt/shibboleth-idp/conf/oidc-metadata-providers.xml</value>
         </util:list>
 
-- name: Set additions to global.xml 
+- name: Add global-oidc.xml import to global.xml
   blockinfile:
     dest: "{{ idp_home }}/conf/global.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK for oidc extension additions to global.xml -->"
-    insertafter: "Use this file to define any custom beans needed globally"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK for OIDC GLOBAL -->"
+    insertafter: "define any custom beans needed globally"
     content: |
-        <!-- Returns true unless subject is already populated in oidc response context. -->
-        <bean id="SubjectRequired"
-            class="org.geant.idpextension.oidc.profile.logic.SubjectActivationCondition"/>
-
-        <!-- Returns true if client has registered public subject and subject is not already populated in oidc response context --> 
-        <bean id="PublicRequired" parent="shibboleth.Conditions.AND">
-            <constructor-arg>
-                <list>
-                    <bean class="org.geant.idpextension.oidc.profile.logic.SubjectActivationCondition" />
-                    <bean class="org.geant.idpextension.oidc.profile.logic.PublicSubjectActivationCondition" />
-                </list>
-            </constructor-arg>
-        </bean>
-        
-        <!-- Returns true if client has registered pairwise subject and subject is not already populated in oidc response context --> 
-        <bean id="PairwiseRequired" parent="shibboleth.Conditions.AND">
-            <constructor-arg>
-                <list>
-                    <bean class="org.geant.idpextension.oidc.profile.logic.SubjectActivationCondition" />
-                    <bean class="org.geant.idpextension.oidc.profile.logic.PairwiseSubjectActivationCondition" />
-                </list>
-            </constructor-arg>
-        </bean>
-        
-        <!-- List of reserved claims that will not be populated to id token using standard user claim population mechanims -->
-        <util:list id="shibboleth.oidc.IDTokenReservedClaimNames">
-            <value>aud</value>
-            <value>iss</value>
-            <value>sub</value>
-            <value>iat</value>
-            <value>exp</value>
-            <value>acr</value>
-            <value>aud</value>
-            <value>auth_time</value>
-            <value>at_hash</value>
-            <value>c_hash</value>
-            <value>nonce</value>
-        </util:list>
-        
-        <!-- List of reserved claims that will not be populated to user info response using standard user claim population mechanims -->
-        <util:list id="shibboleth.oidc.UserInfoReservedClaimNames">
-            <value>aud</value>
-            <value>iss</value>
-            <value>sub</value>
-        </util:list>
+        <!-- oidc extension global bean definitions -->
+        <import resource="global-oidc.xml" />
      
 - name: Copy relying-party.xml
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
