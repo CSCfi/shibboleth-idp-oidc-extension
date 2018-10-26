@@ -9,8 +9,10 @@
 
     default-init-method="initialize" default-destroy-method="destroy">
 
-    <!-- This file contains global oidc bean definitions. This file should be imported to global.xml if oidc extension is 
-        used. -->
+    <!-- 
+         This file contains global oidc bean definitions.
+         This file should be imported to global.xml
+    -->
 
     <!-- Returns true unless subject is already populated in oidc response context. -->
     <bean id="SubjectRequired" class="org.geant.idpextension.oidc.profile.logic.SubjectActivationCondition" />
