@@ -58,19 +58,6 @@
               </MetadataFilter>
           </MetadataProvider>
 
-- name: Add default oidc credentials to credentials.xml
-  blockinfile:
-    dest: "{{ idp_home }}/conf/credentials.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertafter: "default signing key"
-    content: |
-         <bean id="shibboleth.oidc.DefaultRSSigningCredential"
-             class="org.geant.idpextension.oidc.profile.spring.factory.BasicJWKCredentialFactoryBean"
-             p:jWKResource="%{idp.signing.oidc.rs.key}" />
-         <bean id="shibboleth.oidc.DefaultESSigningCredential"
-             class="org.geant.idpextension.oidc.profile.spring.factory.BasicJWKCredentialFactoryBean"
-             p:jWKResource="%{idp.signing.oidc.es.key}" />
-
 - name: Add OIDC client information resolver service to services.xml
   blockinfile:
     dest: "{{ idp_home }}/conf/services.xml"
@@ -105,6 +92,15 @@
     content: |
         <!-- oidc extension global bean definitions -->
         <import resource="global-oidc.xml" />
+
+- name: Add credentials-oidc.xml import to credentials.xml
+  blockinfile:
+    dest: "{{ idp_home }}/conf/credentials.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK for OIDC GLOBAL -->"
+    insertafter: "default-destroy-method"
+    content: |
+        <!-- oidc extension default credential definitions -->
+        <import resource="credentials-oidc.xml" />
      
 - name: Copy relying-party.xml
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
