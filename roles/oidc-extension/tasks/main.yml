@@ -1,14 +1,5 @@
 ---
 
-- name: Ensure "{{ idp_home }}/static" dir exists
-  file: path="{{ idp_home }}/static/" state=directory
-
-- name: Ensure "{{ idp_home }}/static/oidc/" dir exists
-  file: path="{{ idp_home }}/static/oidc/" state=directory
-
-- name: Ensure "{{ idp_home }}/static/.well-known/" dir exists
-  file: path="{{ idp_home }}/static/.well-known/" state=directory
-
 - name: Unarchive idp-oidc-extension-distribution-0.8.0-SNAPSHOT-bin.tar.gz
   unarchive:
     src: ../../../idp-oidc-extension-distribution/target/idp-oidc-extension-distribution-0.8.0-SNAPSHOT-bin.tar.gz
@@ -20,28 +11,6 @@
 - name: Build new idp.war
   shell: source {{ environment_file }} && "{{ idp_home }}/bin/build.sh"
   become_user: root
-
-- name: Set issuer id to idp-oidc.properties
-  lineinfile: dest={{ idp_home }}/conf/idp-oidc.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
-  with_items:
-    - { option: 'idp.oidc.issuer', value: 'https://{{ service_name }}'}
-    
-- name: configure shibboleth-idp ldap.properties
-  lineinfile: dest={{ idp_home }}/conf/ldap.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
-  with_items:
-    - { option: 'idp.authn.LDAP.authenticator', value: 'bindSearchAuthenticator'}
-    - { option: 'idp.authn.LDAP.ldapURL', value: 'ldap://{{ hostvars[inventory_hostname].service_name }}:389' }
-    - { option: 'idp.authn.LDAP.useStartTLS', value: 'false' }
-    - { option: 'idp.authn.LDAP.useSSL', value: 'false' }
-    - { option: 'idp.authn.LDAP.baseDN', value: 'ou=People,{{ dirsrv_suffix }}' }
-    - { option: 'idp.authn.LDAP.bindDN', value: 'cn=Directory Manager' }
-    - { option: 'idp.authn.LDAP.bindDNCredential', value: '{{ dirsrv_password }}' }
-
-- name: configure shibboleth-idp idp.properties
-  lineinfile: dest={{ idp_home }}/conf/idp.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
-  with_items:
-    - { option: 'idp.session.StorageService', value: 'shibboleth.StorageService' }
-    - { option: 'idp.entityID', value: 'https://{{ service_name }}' }
 
 - name: Add global-oidc.xml import to global.xml
   blockinfile:
@@ -89,6 +58,20 @@
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/metadata/{{item}}
   with_items:
     - "oidc-client.json"
+
+- name: Set issuer id to idp-oidc.properties
+  lineinfile: dest={{ idp_home }}/conf/idp-oidc.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
+  with_items:
+    - { option: 'idp.oidc.issuer', value: 'https://{{ service_name }}'}
+
+- name: Ensure "{{ idp_home }}/static" dir exists
+  file: path="{{ idp_home }}/static/" state=directory
+
+- name: Ensure "{{ idp_home }}/static/oidc/" dir exists
+  file: path="{{ idp_home }}/static/oidc/" state=directory
+
+- name: Ensure "{{ idp_home }}/static/.well-known/" dir exists
+  file: path="{{ idp_home }}/static/.well-known/" state=directory
 
 - name: copying key to be published
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/static/oidc/{{item}}
@@ -151,55 +134,3 @@
   service:
     name: shibboleth-idp
     state: restarted
-
-- template: src={{ playbook_dir }}/roles/oidc-extension/ldif/{{item}} dest=/tmp/{{item}}
-  with_items:
-    - "aci-{{ aci | regex_replace('(^.*)@(.*)$','\\1') }}.ldif"
-
-- set_fact:
-    acifile: "/tmp/aci-{{ aci | regex_replace('(^.*)@(.*)$','\\1') }}.ldif"
-  when: aci is defined
-
-- name: ACI | Add
-  shell: ldapmodify -x -D "{{ dirsrv_rootdn }}" -H ldap://localhost:389 -w {{ dirsrv_password }} -f {{ acifile }}
-  ignore_errors: yes
-  when: aci is defined
-
-- name: Apache | mod_auth_openidc
-  package: name=mod_auth_openidc state=present
-
-- name: Apache | mod_php
-  package: name=mod_php state=present
-
-- name: Set mod_auth_openidc properties
-  blockinfile:
-    dest: "/etc/httpd/conf.d/auth_openidc.conf"
-    marker: "# {mark} ANSIBLE MANAGER BLOCK"
-    insertafter: "#OIDCUserInfoRefreshInterval <seconds>"
-    content: |
-         OIDCOAuthSSLValidateServer Off
-         OIDCSSLValidateServer Off
-         OIDCRedirectURI https://192.168.0.150:8443/protected/redirect_uri
-         OIDCCryptoPassphrase secret
-         OIDCMetadataDir /var/cache/httpd/mod_auth_openidc/metadata
-         OIDCResponseType "code"
-         OIDCScope "openid profile email address phone"
-         <Location /protected/>
-             authtype openid-connect
-             require valid-user
-         </Location>
-
-- name: Ensure /var/www/html/protected dir exists
-  file: path="/var/www/html/protected" state=directory
-
-- name: Copy index.php for presenting logged in user information
-  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/var/www/html/protected/{{item}}
-  with_items:
-    - "index.php"
-
-- name: Set httpd enabled and restart
-  service:
-    name: httpd
-    state: restarted
-    enabled: yes
-
