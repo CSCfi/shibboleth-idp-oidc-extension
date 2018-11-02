@@ -47,6 +47,7 @@
             <outputDirectory></outputDirectory>
             <includes>
                 <include>conf/*</include>
+                <include>credentials/*</include>
             </includes>
         </fileSet>
     </fileSets>

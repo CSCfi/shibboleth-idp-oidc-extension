@@ -42,47 +42,6 @@
   with_items:
     - { option: 'idp.session.StorageService', value: 'shibboleth.StorageService' }
     - { option: 'idp.entityID', value: 'https://{{ service_name }}' }
-         
-- name: Add one trusted test SP
-  blockinfile:
-    dest: "{{ idp_home }}/conf/metadata-providers.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertbefore: "</MetadataProvider>"
-    content: |
-          <MetadataProvider id="HTTPMetadata"
-                            xsi:type="FileBackedHTTPMetadataProvider"
-                            backingFile="/tmp/metadatacopy.xml"
-                            metadataURL="https://mpass-proxy-test.csc.fi/attributetest/Shibboleth.sso/Metadata"> 
-              <MetadataFilter xsi:type="EntityRoleWhiteList">
-                  <RetainedRole>md:SPSSODescriptor</RetainedRole>
-              </MetadataFilter>
-          </MetadataProvider>
-
-- name: Add OIDC client information resolver service to services.xml
-  blockinfile:
-    dest: "{{ idp_home }}/conf/services.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-    insertbefore: "<util:list id=\"shibboleth.RelyingPartyResolverResources"
-    content: |
-        <bean id="shibboleth.ClientInformationResolverService" class="net.shibboleth.ext.spring.service.ReloadableSpringService"
-                depends-on="shibboleth.AttributeResolverService"
-                p:serviceConfigurations-ref="shibboleth.ClientInformationResolverResources"
-                p:failFast="%{idp.service.metadata.failFast:%{idp.service.failFast:false}}"
-                p:reloadCheckDelay="%{idp.service.metadata.checkInterval:PT0S}"
-                p:beanFactoryPostProcessors-ref="shibboleth.PropertySourcesPlaceholderConfigurer">
-            <constructor-arg name="claz" value="org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver" />
-            <constructor-arg name="strategy">
-                <bean class="org.geant.idpextension.oidc.profile.spring.relyingparty.metadata.impl.ClientInformationResolverServiceStrategy" />
-            </constructor-arg>
-        </bean>
-
-        <bean id="shibboleth.ClientInformationResolver"
-            class="org.geant.idpextension.oidc.metadata.impl.ReloadingRelyingPartyClientInformationProvider"
-            c:resolverService-ref="shibboleth.ClientInformationResolverService" />
-
-        <util:list id="shibboleth.ClientInformationResolverResources">
-            <value>/opt/shibboleth-idp/conf/oidc-metadata-providers.xml</value>
-        </util:list>
 
 - name: Add global-oidc.xml import to global.xml
   blockinfile:
@@ -96,11 +55,20 @@
 - name: Add credentials-oidc.xml import to credentials.xml
   blockinfile:
     dest: "{{ idp_home }}/conf/credentials.xml"
-    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK for OIDC GLOBAL -->"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK for OIDC CREDENTIALS -->"
     insertafter: "default-destroy-method"
     content: |
         <!-- oidc extension default credential definitions -->
         <import resource="credentials-oidc.xml" />
+        
+- name: Add services-oidc.xml import to services.xml
+  blockinfile:
+    dest: "{{ idp_home }}/conf/services.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK for OIDC SERVICES -->"
+    insertafter: "default-destroy-method"
+    content: |
+        <!-- oidc extension services definitions -->
+        <import resource="services-oidc.xml" />
      
 - name: Copy relying-party.xml
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
@@ -121,12 +89,6 @@
 - template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/metadata/{{item}}
   with_items:
     - "oidc-client.json"
-
-- name: copying jwk for signing id tokens
-  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/credentials/{{item}}
-  with_items:
-    - "idp-signing-rs.jwk"
-    - "idp-signing-es.jwk"
 
 - name: copying key to be published
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/static/oidc/{{item}}
