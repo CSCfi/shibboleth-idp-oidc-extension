@@ -115,11 +115,12 @@
     src: authn-comparison.xml
     dest: "{{ idp_home }}/conf/authn/authn-comparison.xml"
 
-- name: Setting modified login.vm
-  template:
-    src: login.vm
+- name: Applying modified login.vm
+  copy:
+    src: "{{ idp_home }}/views/login-oidc-example.vm"
     dest: "{{ idp_home }}/views/login.vm"
-
+    remote_src: yes
+    
 - name: Setting index.html containing authentication links
   template:
     src: index.html

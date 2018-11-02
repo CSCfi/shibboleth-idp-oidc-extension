@@ -16,13 +16,6 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>../idp-oidc-extension-impl/src/main/resources/views</directory>
-            <outputDirectory>views</outputDirectory>
-            <includes>
-                <include>**/*</include>
-            </includes>
-        </fileSet>
-        <fileSet>
             <directory>../idp-oidc-extension-impl/target/dependency</directory>
             <outputDirectory>edit-webapp/WEB-INF/lib</outputDirectory>
             <includes>
@@ -48,6 +41,8 @@
             <includes>
                 <include>conf/*</include>
                 <include>credentials/*</include>
+                <include>views/*</include>
+                <include>views/oidc/*</include>
             </includes>
         </fileSet>
     </fileSets>
