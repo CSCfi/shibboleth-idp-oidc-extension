@@ -38,11 +38,6 @@
     content: |
         <!-- oidc extension services definitions -->
         <import resource="services-oidc.xml" />
-     
-- name: Copy relying-party.xml
-  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
-  with_items:
-    - "relying-party.xml"
 
 - name: Add oidc-subject.properties and idp-oidc.properties to be included confs in idp.properties
   lineinfile:
@@ -50,22 +45,55 @@
     regexp: '(idp.additionalProperties.*)'
     line: '\1, /conf/oidc-subject.properties, /conf/idp-oidc.properties'
     backrefs: yes
-    
-- template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
+
+- name: Applying provided attribute-resolver-oidc.xml
+  copy:
+    src: "{{ idp_home }}/conf/attribute-resolver-oidc.xml"
+    dest: "{{ idp_home }}/conf/attribute-resolver.xml"
+    remote_src: yes
+
+- name: Applying provided oidc attribute-filter-oidc.xml
+  copy:
+    src: "{{ idp_home }}/conf/attribute-filter-oidc.xml"
+    dest: "{{ idp_home }}/conf/attribute-filter.xml"
+    remote_src: yes
+
+- name: Applying provided authn-comparison.xml
+  copy:
+    src: "{{ idp_home }}/conf/authn/authn-comparison-oidc.xml"
+    dest: "{{ idp_home }}/conf/authn/authn-comparison.xml"
+    remote_src: yes
+
+- name: Applying provided login.vm
+  copy:
+    src: "{{ idp_home }}/views/login-oidc-example.vm"
+    dest: "{{ idp_home }}/views/login.vm"
+    remote_src: yes
+
+- name: Setting general-authn.xml
+  template:
+    src: general-authn.xml
+    dest: "{{ idp_home }}/conf/authn/general-authn.xml"
+
+- name: Setting relying-party.xml
+  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
+  with_items:
+    - "relying-party.xml"
+
+- name: Setting logback.xml
+  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}
   with_items:
     - "logback.xml"
 
-- template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/metadata/{{item}}
+- name: Setting demo rp metadata
+  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/metadata/{{item}}
   with_items:
     - "oidc-client.json"
 
-- name: Set issuer id to idp-oidc.properties
+- name: Configurin issuer id to idp-oidc.properties
   lineinfile: dest={{ idp_home }}/conf/idp-oidc.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
   with_items:
     - { option: 'idp.oidc.issuer', value: 'https://{{ service_name }}'}
-
-- name: Ensure "{{ idp_home }}/static" dir exists
-  file: path="{{ idp_home }}/static/" state=directory
 
 - name: Ensure "{{ idp_home }}/static/oidc/" dir exists
   file: path="{{ idp_home }}/static/oidc/" state=directory
@@ -73,16 +101,22 @@
 - name: Ensure "{{ idp_home }}/static/.well-known/" dir exists
   file: path="{{ idp_home }}/static/.well-known/" state=directory
 
-- name: copying key to be published
+- name: Setting default signing keys.
+  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/credentials/{{item}}
+  with_items:
+    - "idp-signing-es.jwk"
+    - "idp-signing-rs.jwk" 
+    
+- name: Publish keyset.
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/static/oidc/{{item}}
   with_items:
     - "keyset.jwk"
 
-- name: Setting static.xml for jetty to serve static content
-  template: 
-    src: static.xml 
-    dest: "{{ idp_home }}/jetty-base/webapps/static.xml"
-
+- name: Setting openid-configuration
+  template:
+    src: openid-configuration
+    dest: "{{ idp_home }}/static/.well-known/openid-configuration"
+    
 - name: Enable rewrite module in Jetty
   template:
     src: rewrite.ini
@@ -92,44 +126,6 @@
   template:
     src: jetty-rewrite.xml
     dest: "{{ idp_home }}/jetty-base/etc/jetty-rewrite.xml"
-
-- name: Apply attribute-resolver-oidc.xml
-  copy:
-    src: "{{ idp_home }}/conf/attribute-resolver-oidc.xml"
-    dest: "{{ idp_home }}/conf/attribute-resolver.xml"
-    remote_src: yes
-
-- name: Apply oidc attribute-filter-oidc.xml
-  copy:
-    src: "{{ idp_home }}/conf/attribute-filter-oidc.xml"
-    dest: "{{ idp_home }}/conf/attribute-filter.xml"
-    remote_src: yes
-
-- name: Setting modified general-authn.xml
-  template:
-    src: general-authn.xml
-    dest: "{{ idp_home }}/conf/authn/general-authn.xml"
-
-- name: Setting modified authn-comparison.xml
-  template:
-    src: authn-comparison.xml
-    dest: "{{ idp_home }}/conf/authn/authn-comparison.xml"
-
-- name: Applying modified login.vm
-  copy:
-    src: "{{ idp_home }}/views/login-oidc-example.vm"
-    dest: "{{ idp_home }}/views/login.vm"
-    remote_src: yes
-    
-- name: Setting index.html containing authentication links
-  template:
-    src: index.html
-    dest: "{{ idp_home }}/static/index.html"
-
-- name: Setting op metadata file
-  template:
-    src: openid-configuration
-    dest: "{{ idp_home }}/static/.well-known/openid-configuration"
 
 - name: Restart shibboleth idp
   service:

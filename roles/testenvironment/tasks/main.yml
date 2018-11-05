@@ -1,6 +1,6 @@
 ---
 
-- name: configure shibboleth-idp ldap.properties
+- name: Configure shibboleth-idp ldap.properties
   lineinfile: dest={{ idp_home }}/conf/ldap.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
   with_items:
     - { option: 'idp.authn.LDAP.authenticator', value: 'bindSearchAuthenticator'}
@@ -11,7 +11,7 @@
     - { option: 'idp.authn.LDAP.bindDN', value: 'cn=Directory Manager' }
     - { option: 'idp.authn.LDAP.bindDNCredential', value: '{{ dirsrv_password }}' }
 
-- name: configure shibboleth-idp idp.properties
+- name: Configure shibboleth-idp idp.properties
   lineinfile: dest={{ idp_home }}/conf/idp.properties regexp="^#?\s*({{ item.option }}\s*=)" backrefs=yes  line="\\1 {{ item.value }}"
   with_items:
     - { option: 'idp.session.StorageService', value: 'shibboleth.StorageService' }
@@ -61,6 +61,19 @@
   template: src={{ playbook_dir }}/roles/testenvironment/templates/{{item}} dest=/var/www/html/protected/{{item}}
   with_items:
     - "index.php"
+
+- name: Ensure "{{ idp_home }}/static" dir exists
+  file: path="{{ idp_home }}/static/" state=directory
+
+- name: Setting static.xml for jetty to serve static content
+  template: 
+    src: static.xml 
+    dest: "{{ idp_home }}/jetty-base/webapps/static.xml"
+          
+- name: Copy index.php for presenting authentication links
+  template:
+    src: index.html
+    dest: "{{ idp_home }}/static/index.html"
 
 - name: Restart shibboleth idp
   service:

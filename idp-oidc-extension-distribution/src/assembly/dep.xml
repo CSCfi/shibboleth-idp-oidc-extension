@@ -40,9 +40,11 @@
             <outputDirectory></outputDirectory>
             <includes>
                 <include>conf/*</include>
-                <include>credentials/*</include>
+                <include>conf/authn/*</include>
+                <include>bin/*</include>
                 <include>views/*</include>
                 <include>views/oidc/*</include>
+                <include>static/.well-known/*</include>
             </includes>
         </fileSet>
     </fileSets>
