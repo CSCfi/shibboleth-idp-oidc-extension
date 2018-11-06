@@ -34,6 +34,9 @@
             <includes>
                 <include>idp-oidc-extension-impl-*.jar</include>
             </includes>
+            <excludes>
+                <exclude>*test*.jar</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>src/main/resources/</directory>
