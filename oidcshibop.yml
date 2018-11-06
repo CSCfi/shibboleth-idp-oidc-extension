@@ -9,7 +9,7 @@
     - { role: CSCfi.389-ds, dirsrv_password: testpword, replpwd: testpword, administration_domain: csc.fi, root: "dc=csc,dc=fi", supplier: "{{ service_name }}", mode: single, service_name: "{{ service_name }}", aci: "teppo@{{ service_name }}"}
     - { role: CSCfi.mariadb, mariadb_root_password: testpass }
     - { role: CSCfi.jetty }
-    - { role: CSCfi.shibboleth-idp, shibbolethidp_version: 3.4.0,  configurables: ['consent','nameid'], scope: csc.fi, port: 8443, bport: 8444, keystore_password: testpword }
+    - { role: shibboleth-idp, shibbolethidp_version: 3.4.0,  configurables: ['consent','nameid'], scope: csc.fi, port: 8443, bport: 8444, keystore_password: testpword }
     - { role: keystore, idp: true, keystore_password: testpword }
     - { role: testenvironment, idp_home: /opt/shibboleth-idp, dirsrv_rootdn: "cn=Directory Manager", dirsrv_password: testpword, replpwd: testpword, administration_domain: csc.fi, root: "dc=csc,dc=fi", supplier: "{{ service_name }}", mode: single, service_name: "{{ service_name }}", aci: "teppo@{{ service_name }}"}
     - { role: oidc-extension, build_user: vagrant, idp_home: /opt/shibboleth-idp, service_name: "{{ service_name }}"}
