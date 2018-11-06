@@ -1,12 +1,14 @@
 ---
 
-- name: Unarchive idp-oidc-extension-distribution-0.8.0-SNAPSHOT-bin.tar.gz
+- name: Unarchive idp-oidc-extension-distribution-*.tar.gz
   unarchive:
-    src: ../../../idp-oidc-extension-distribution/target/idp-oidc-extension-distribution-0.8.0-SNAPSHOT-bin.tar.gz
+    src: "{{item}}"
     dest: "{{ idp_home }}"
     owner: root
     group: jetty
     extra_opts: [--strip-components=1]
+  with_fileglob: 
+    - "../../../idp-oidc-extension-distribution/target/idp-oidc-extension-distribution*.tar.gz"
 
 - name: Build new idp.war
   shell: source {{ environment_file }} && "{{ idp_home }}/bin/build.sh"
