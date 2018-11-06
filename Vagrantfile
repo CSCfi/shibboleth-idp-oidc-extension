@@ -22,7 +22,26 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             ansible.extra_vars = {
 #              service_name: "gn43-oidcshibop-devel.local",
               service_name: "192.168.0.150",
-              host_name: "gn43-oidcshibop-devel"
+              host_name: "gn43-oidcshibop-devel",
+              # Allow override copying extra jars completely by defining empty arrays
+              jetty_jars: [
+              ],
+              # Allow overriding location of jars
+              shibbolethidp_jars: [
+                { name: "mariadb-java-client",
+                  url: "http://central.maven.org/maven2/org/mariadb/jdbc/mariadb-java-client/1.5.9/mariadb-java-client-1.5.9.jar",
+                  dst: "/opt/shibboleth-idp/edit-webapp/WEB-INF/lib/"
+                },
+                { name: "commons-dbcp2",
+                  url: "http://central.maven.org/maven2/org/apache/commons/commons-dbcp2/2.1.1/commons-dbcp2-2.1.1.jar",
+                  dst: "/opt/shibboleth-idp/edit-webapp/WEB-INF/lib/"
+                },
+                {
+                  name: "commons-pool2",
+                  url: "http://central.maven.org/maven2/org/apache/commons/commons-pool2/2.4.2/commons-pool2-2.4.2.jar",
+                  dst: "/opt/shibboleth-idp/edit-webapp/WEB-INF/lib/"
+                }
+              ]
             }
         end
         app.vm.provision :shell, inline: "sudo /sbin/ifdown eth1 && sudo /sbin/ifup eth1"
