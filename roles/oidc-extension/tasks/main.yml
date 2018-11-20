@@ -76,6 +76,11 @@
   template:
     src: general-authn.xml
     dest: "{{ idp_home }}/conf/authn/general-authn.xml"
+    
+- name: Setting oidc-metadata-providers.xml
+  template:
+    src: oidc-metadata-providers.xml
+    dest: "{{ idp_home }}/conf/oidc-metadata-providers.xml"
 
 - name: Setting relying-party.xml
   template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/conf/{{item}}

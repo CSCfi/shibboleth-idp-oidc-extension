@@ -39,13 +39,10 @@
 
     <util:list id="shibboleth.oidc.ClientInformationResolvers"
         value-type="org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver">
-<!--          
         <ref bean="ExampleFileResolver" />
--->
         <ref bean="ExampleStorageClientInformationResolver" />
     </util:list>
 
-<!--
     <bean id="ExampleFileResolver"
         class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" 
         p:id="ExampleFileResolver1"
@@ -56,7 +53,6 @@
             </bean>
         </constructor-arg>
     </bean>
--->
 
     <bean id="ExampleStorageClientInformationResolver"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationResolver"
