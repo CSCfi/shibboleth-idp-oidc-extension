@@ -30,8 +30,12 @@ package org.geant.idpextension.oidc.profile.context.navigate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
 import org.opensaml.profile.context.ProfileRequestContext;
+
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
@@ -43,6 +47,8 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 public abstract class AbstractAuthenticationRequestLookupFunction<T>
         implements ContextDataLookupFunction<ProfileRequestContext, T> {
 
+	protected JWT requestObject;
+	
     /**
      * Implemented to perform the actual lookup.
      * 
@@ -62,6 +68,12 @@ public abstract class AbstractAuthenticationRequestLookupFunction<T>
         if (message == null || !(message instanceof AuthenticationRequest)) {
             return null;
         }
+        OIDCAuthenticationResponseContext ctx =
+                input.getOutboundMessageContext().getSubcontext(OIDCAuthenticationResponseContext.class, false);
+        if (ctx == null) {
+            return null;
+        }
+        requestObject = ctx.getRequestObject();
         return doLookup((AuthenticationRequest) message);
     }
 }

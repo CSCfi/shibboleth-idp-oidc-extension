@@ -29,15 +29,8 @@
 package org.geant.idpextension.oidc.profile.context.navigate;
 
 import java.net.URI;
-
-import net.shibboleth.idp.profile.RequestContextBuilder;
-import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
-import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.context.ProfileRequestContext;
-import org.springframework.webflow.execution.RequestContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.oauth2.sdk.ResponseType;
@@ -48,23 +41,12 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 import junit.framework.Assert;
 
-public class DefaultRequestMaxAgeFunctionTest {
+public class DefaultRequestMaxAgeFunctionTest extends BaseDefaultRequestLookupFunctionTest {
 
     private  DefaultRequestMaxAgeLookupFunction lookup;
-
-    @SuppressWarnings("rawtypes")
-    private ProfileRequestContext prc;
-
-    private MessageContext<AuthenticationRequest> msgCtx;
-
-    @SuppressWarnings("unchecked")
     @BeforeMethod
     protected void setUp() throws Exception {
         lookup = new  DefaultRequestMaxAgeLookupFunction();
-        final RequestContext requestCtx = new RequestContextBuilder().buildRequestContext();
-        prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        msgCtx = new MessageContext<AuthenticationRequest>();
-        prc.setInboundMessageContext(msgCtx);
     }
 
     @Test
@@ -92,6 +74,7 @@ public class DefaultRequestMaxAgeFunctionTest {
                 new ClientID("000123"), URI.create("https://example.com/callback")).maxAge(300).requestObject(new PlainJWT(ro))
                         .state(new State()).build();
         msgCtx.setMessage(req);
+        oidcCtx.setRequestObject(req.getRequestObject());
         Assert.assertEquals(new Long(600),(Long)lookup.apply(prc));
     }
 

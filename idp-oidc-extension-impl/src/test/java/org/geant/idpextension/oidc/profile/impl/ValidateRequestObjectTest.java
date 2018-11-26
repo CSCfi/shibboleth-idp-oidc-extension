@@ -29,9 +29,9 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import net.shibboleth.idp.profile.ActionTestingSupport;
+import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidAlgorithmParameterException;
@@ -44,14 +44,14 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.idpextension.oidc.profile.OidcEventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
-import org.testng.annotations.BeforeTest;
+import org.springframework.webflow.execution.RequestContext;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -77,38 +77,42 @@ import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
-import junit.framework.Assert;
-
 /** {@link ValidateUserPresence} unit test. */
-public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
+public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
 
+	@SuppressWarnings("rawtypes")
+	private ProfileRequestContext prc;
     private ValidateRequestObject action;
-
+    private RequestContext requestCtx;
     private OIDCMetadataContext oidcCtx;
+    private OIDCAuthenticationResponseContext oidcRespCtx;
+   
 
-    @BeforeTest
-    public void init() throws ComponentInitializationException, URISyntaxException {
-        action = new ValidateRequestObject();
-        action.initialize();
-    }
-
-    @SuppressWarnings("rawtypes")
-    public void initClientMetadata() {
-        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+    @BeforeMethod
+    public void setup() throws ComponentInitializationException {
+    	requestCtx = new RequestContextBuilder().buildRequestContext();
+        prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
         oidcCtx = prc.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, true);
+        oidcRespCtx = new OIDCAuthenticationResponseContext();
+        prc.getOutboundMessageContext().addSubcontext(oidcRespCtx);
         OIDCClientMetadata metaData = new OIDCClientMetadata();
         OIDCClientInformation information = new OIDCClientInformation(new ClientID("test"), null, metaData,
                 new Secret("ultimatetopsecretultimatetopsecret"), null, null);
         oidcCtx.setClientInformation(information);
+    	action = new ValidateRequestObject();
+        action.initialize();
     }
 
     /**
      * Test that success in case of not having request object
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testSuccessNoObject()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
-        initClientMetadata();
+    	 AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
+                 new ClientID("000123"), URI.create("https://example.com/callback")).state(new State()).build();
+        prc.getInboundMessageContext().setMessage(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
     }
@@ -116,15 +120,16 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test success in case of having non signed request object and no registered algorithm
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectNoMatchingClaims()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
-        initClientMetadata();
         JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
         AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
                 new ClientID("000123"), URI.create("https://example.com/callback")).requestObject(new PlainJWT(ro))
                         .state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
     }
@@ -132,16 +137,17 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test failure case of having non signed request object and registered algorithm other than 'none'
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectAlgMismatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
-        initClientMetadata();
         oidcCtx.getClientInformation().getOIDCMetadata().setRequestObjectJWSAlg(JWSAlgorithm.RS256);
         JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
         AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
                 new ClientID("000123"), URI.create("https://example.com/callback")).requestObject(new PlainJWT(ro))
                         .state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
     }
@@ -149,16 +155,17 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test success case of having non signed request object and registered algorithm 'none'
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectAlgMatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
-        initClientMetadata();
         oidcCtx.getClientInformation().getOIDCMetadata().setRequestObjectJWSAlg(new JWSAlgorithm("none"));
         JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
         AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
                 new ClientID("000123"), URI.create("https://example.com/callback")).requestObject(new PlainJWT(ro))
                         .state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
     }
@@ -166,15 +173,16 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test failure case of mismatch in client_id values
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectClientMismatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
-        initClientMetadata();
         JWTClaimsSet ro = new JWTClaimsSet.Builder().claim("client_id", "not_matching").build();
         AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
                 new ClientID("000123"), URI.create("https://example.com/callback")).requestObject(new PlainJWT(ro))
                         .state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
     }
@@ -182,15 +190,16 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test failure in case of mismatch in response_type values
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectRespTypeMismatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
-        initClientMetadata();
         JWTClaimsSet ro = new JWTClaimsSet.Builder().claim("response_type", "id_token").build();
         AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
                 new ClientID("000123"), URI.create("https://example.com/callback")).requestObject(new PlainJWT(ro))
                         .state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
     }
@@ -198,10 +207,10 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test success in case of matching client_id and response_type values
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectClientRespTypeMatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
-        initClientMetadata();
         JWTClaimsSet ro =
                 new JWTClaimsSet.Builder().claim("client_id", "000123").claim("response_type", "code token").build();
         ResponseType rt = new ResponseType();
@@ -210,7 +219,8 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         AuthenticationRequest req = new AuthenticationRequest.Builder(rt, new Scope("openid"), new ClientID("000123"),
                 URI.create("https://example.com/callback")).requestObject(new PlainJWT(ro)).nonce(new Nonce())
                         .state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
     }
@@ -218,10 +228,10 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test success case of RSA signed request object.
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectSignedWithRSA() throws NoSuchAlgorithmException, ComponentInitializationException,
             URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        initClientMetadata();
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
         KeyPair kp = kpg.generateKeyPair();
@@ -235,7 +245,8 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         AuthenticationRequest req =
                 new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
                         URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
     }
@@ -243,10 +254,10 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test success case of EC signed request object.
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectSignedWithEC() throws NoSuchAlgorithmException, ComponentInitializationException,
             URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        initClientMetadata();
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
         KeyPair kp = kpg.generateKeyPair();
         kpg.initialize(Curve.P_256.toECParameterSpec());
@@ -260,7 +271,8 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         AuthenticationRequest req =
                 new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
                         URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
     }
@@ -268,10 +280,10 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test fail case of EC signed request object, no key
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectSignedWithECFailNoKey() throws NoSuchAlgorithmException,
             ComponentInitializationException, URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        initClientMetadata();
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
         KeyPair kp = kpg.generateKeyPair();
         kpg.initialize(Curve.P_256.toECParameterSpec());
@@ -284,7 +296,8 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         AuthenticationRequest req =
                 new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
                         URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
     }
@@ -292,10 +305,10 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test fail case of EC signed request object, no key set
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectSignedWithECFailNoKeySet() throws NoSuchAlgorithmException,
             ComponentInitializationException, URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        initClientMetadata();
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
         KeyPair kp = kpg.generateKeyPair();
         kpg.initialize(Curve.P_256.toECParameterSpec());
@@ -306,7 +319,8 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         AuthenticationRequest req =
                 new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
                         URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
     }
@@ -314,10 +328,10 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test success case of HS signed request object.
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectSignedWithHS() throws NoSuchAlgorithmException, ComponentInitializationException,
             URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        initClientMetadata();
         String secret = oidcCtx.getClientInformation().getSecret().getValue();
         JWSSigner signer = new MACSigner(secret);
         JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
@@ -326,7 +340,8 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         AuthenticationRequest req =
                 new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
                         URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
     }
@@ -334,10 +349,10 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
     /**
      * Test failure in case of HS signed request object.
      */
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testRequestObjectSignedWithHSFail() throws NoSuchAlgorithmException, ComponentInitializationException,
             URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        initClientMetadata();
         String secret = oidcCtx.getClientInformation().getSecret().getValue() + "_not";
         JWSSigner signer = new MACSigner(secret);
         JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
@@ -346,7 +361,8 @@ public class ValidateRequestObjectTest extends BaseOIDCResponseActionTest {
         AuthenticationRequest req =
                 new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
                         URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
-        setAuthenticationRequest(req);
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
     }

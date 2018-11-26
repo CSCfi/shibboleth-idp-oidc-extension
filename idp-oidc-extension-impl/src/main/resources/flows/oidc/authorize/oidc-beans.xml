@@ -66,6 +66,10 @@
         class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundAuthenticationResponseMessageContext"
         scope="prototype" />
 
+    <bean id="SetRequestObjectToResponseContext"
+        class="org.geant.idpextension.oidc.profile.impl.SetRequestObjectToResponseContext"
+        p:httpClient-ref="shibboleth.NonCachingHttpClient" scope="prototype" />
+
     <bean id="ValidateRequestObject" class="org.geant.idpextension.oidc.profile.impl.ValidateRequestObject"
         scope="prototype" />
 
@@ -271,7 +275,7 @@
 
     <bean id="FormOutboundMessage"
         class="org.geant.idpextension.oidc.profile.impl.FormOutboundAuthenticationResponseMessage" scope="prototype" />
-        
+
     <bean id="BuildErrorResponseFromEvent"
         class="org.geant.idpextension.oidc.profile.impl.BuildAuthenticationErrorResponseFromEvent" scope="prototype"
         p:httpServletResponse-ref="shibboleth.HttpServletResponse">

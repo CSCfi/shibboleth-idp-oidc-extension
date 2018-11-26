@@ -29,13 +29,9 @@
 package org.geant.idpextension.oidc.profile.context.navigate;
 
 import java.text.ParseException;
-
 import javax.annotation.Nonnull;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
@@ -54,7 +50,6 @@ public class DefaultRequestedScopeLookupFunction extends AbstractAuthenticationR
     @Override
     Scope doLookup(@Nonnull AuthenticationRequest req) {
         try {
-            JWT requestObject = req.getRequestObject();
             if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("scope") != null) {
                 return Scope.parse((String) requestObject.getJWTClaimsSet().getClaim("scope"));
             }

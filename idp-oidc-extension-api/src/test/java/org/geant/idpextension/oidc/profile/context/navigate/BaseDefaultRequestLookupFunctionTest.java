@@ -28,34 +28,33 @@
 
 package org.geant.idpextension.oidc.profile.context.navigate;
 
-import java.text.ParseException;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.shibboleth.idp.profile.RequestContextBuilder;
+import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
+
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.profile.context.ProfileRequestContext;
+import org.springframework.webflow.execution.RequestContext;
+import org.testng.annotations.BeforeMethod;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
-/**
- * A function that returns authentication max age parameter the request via a lookup function. This default lookup
- * locates max age from oidc authentication request if available. If information is not available, null is returned. If
- * there is max_age parameter in request object it is used instead of max_age request parameter.
- */
-public class DefaultRequestMaxAgeLookupFunction extends AbstractAuthenticationRequestLookupFunction<Long> {
+public class BaseDefaultRequestLookupFunctionTest {
 
-    /** Class logger. */
-    @Nonnull
-    private Logger log = LoggerFactory.getLogger(DefaultRequestMaxAgeLookupFunction.class);
-
-    /** {@inheritDoc} */
-    @Override
-    Long doLookup(@Nonnull AuthenticationRequest req) {
-        try {
-            if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("max_age") != null) {
-                return new Long(requestObject.getJWTClaimsSet().getIntegerClaim("max_age"));
-            }
-        } catch (ParseException e) {
-            log.error("Unable to parse state from request object state value");
-            return null;
-        }
-        return req.getMaxAge() == -1 ? null : new Long(req.getMaxAge());
+    @SuppressWarnings("rawtypes")
+    protected ProfileRequestContext prc;
+    protected MessageContext<AuthenticationRequest> msgCtx;
+    protected OIDCAuthenticationResponseContext oidcCtx;
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @BeforeMethod
+    protected void setUpCtxs() throws Exception {
+        final RequestContext requestCtx = new RequestContextBuilder().buildRequestContext();
+        prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+        msgCtx = new MessageContext<AuthenticationRequest>();
+        prc.setInboundMessageContext(msgCtx);
+        prc.setOutboundMessageContext(new MessageContext());
+        oidcCtx = new OIDCAuthenticationResponseContext();
+        prc.getOutboundMessageContext().addSubcontext(oidcCtx);
     }
+
 }

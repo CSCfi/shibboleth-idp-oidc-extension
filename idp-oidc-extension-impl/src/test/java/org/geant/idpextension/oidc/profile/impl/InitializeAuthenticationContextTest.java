@@ -30,6 +30,9 @@ package org.geant.idpextension.oidc.profile.impl;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
+
+import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
+import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
@@ -41,18 +44,22 @@ import net.shibboleth.idp.profile.RequestContextBuilder;
 /** {@link InitializeAuthenticationContext} unit test. */
 public class InitializeAuthenticationContextTest {
 
-  
+	
     /**
      * Test that the action functions properly if the inbound message is a oidc
      * authentication request.
      */
-    @Test
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
     public void testOIDCAuthnRequestNoFlags() throws Exception {
         AuthenticationRequest req = AuthenticationRequest
                 .parse("response_type=code&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
         final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
-        @SuppressWarnings("rawtypes")
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+        prc.setOutboundMessageContext(new MessageContext());
+        OIDCAuthenticationResponseContext oidcCtx = new OIDCAuthenticationResponseContext();
+        prc.getOutboundMessageContext().addSubcontext(oidcCtx);
+        oidcCtx.setRequestObject(req.getRequestObject());
         final InitializeAuthenticationContext action = new InitializeAuthenticationContext();
         action.initialize();
         final Event event = action.execute(requestCtx);
@@ -75,6 +82,9 @@ public class InitializeAuthenticationContextTest {
         final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
         @SuppressWarnings("rawtypes")
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+        OIDCAuthenticationResponseContext oidcCtx = new OIDCAuthenticationResponseContext();
+        prc.getOutboundMessageContext().addSubcontext(oidcCtx);
+        oidcCtx.setRequestObject(req.getRequestObject());
         final InitializeAuthenticationContext action = new InitializeAuthenticationContext();
         action.initialize();
         final Event event = action.execute(requestCtx);
@@ -94,6 +104,9 @@ public class InitializeAuthenticationContextTest {
         final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
         @SuppressWarnings("rawtypes")
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+        OIDCAuthenticationResponseContext oidcCtx = new OIDCAuthenticationResponseContext();
+        prc.getOutboundMessageContext().addSubcontext(oidcCtx);
+        oidcCtx.setRequestObject(req.getRequestObject());
         final InitializeAuthenticationContext action = new InitializeAuthenticationContext();
         action.initialize();
         final Event event = action.execute(requestCtx);

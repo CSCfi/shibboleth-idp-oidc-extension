@@ -34,7 +34,6 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWT;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
@@ -52,7 +51,6 @@ public class DefaultRequestedACRLookupFunction extends AbstractAuthenticationReq
     /** {@inheritDoc} */
     @Override
     List<ACR> doLookup(@Nonnull AuthenticationRequest req) {
-        JWT requestObject = req.getRequestObject();
         try {
             if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("acr_values") != null) {
                 List<ACR> reqObjectAcr = new ArrayList<ACR>();

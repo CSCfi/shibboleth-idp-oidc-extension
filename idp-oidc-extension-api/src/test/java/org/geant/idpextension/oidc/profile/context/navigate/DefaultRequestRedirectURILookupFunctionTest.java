@@ -29,12 +29,6 @@
 package org.geant.idpextension.oidc.profile.context.navigate;
 
 import java.net.URI;
-
-import net.shibboleth.idp.profile.RequestContextBuilder;
-import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
-import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.context.ProfileRequestContext;
-import org.springframework.webflow.execution.RequestContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -47,23 +41,13 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 import junit.framework.Assert;
 
-public class DefaultRequestRedirectURILookupFunctionTest {
+public class DefaultRequestRedirectURILookupFunctionTest extends BaseDefaultRequestLookupFunctionTest {
 
     private DefaultRequestRedirectURILookupFunction lookup;
 
-    @SuppressWarnings("rawtypes")
-    private ProfileRequestContext prc;
-
-    private MessageContext<AuthenticationRequest> msgCtx;
-
-    @SuppressWarnings("unchecked")
     @BeforeMethod
     protected void setUp() throws Exception {
         lookup = new DefaultRequestRedirectURILookupFunction();
-        final RequestContext requestCtx = new RequestContextBuilder().buildRequestContext();
-        prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        msgCtx = new MessageContext<AuthenticationRequest>();
-        prc.setInboundMessageContext(msgCtx);
     }
 
     @Test
@@ -82,6 +66,7 @@ public class DefaultRequestRedirectURILookupFunctionTest {
                 new ClientID("000123"), URI.create("https://example.com/callback")).state(new State())
                         .requestObject(new PlainJWT(ro)).build();
         msgCtx.setMessage(req);
+        oidcCtx.setRequestObject(req.getRequestObject());
         Assert.assertEquals("https://example.com/callback/reqobj", lookup.apply(prc).toString());
     }
 

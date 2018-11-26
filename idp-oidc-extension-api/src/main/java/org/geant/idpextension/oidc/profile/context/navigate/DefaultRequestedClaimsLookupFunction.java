@@ -32,7 +32,6 @@ import java.text.ParseException;
 import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWT;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 
@@ -50,7 +49,6 @@ public class DefaultRequestedClaimsLookupFunction extends AbstractAuthentication
     /** {@inheritDoc} */
     @Override
     ClaimsRequest doLookup(@Nonnull AuthenticationRequest req) {
-        JWT requestObject = req.getRequestObject();
         try {
             if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("claims") != null) {
                 Object claims = requestObject.getJWTClaimsSet().getClaim("claims");

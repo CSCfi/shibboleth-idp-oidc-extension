@@ -32,7 +32,6 @@ import java.text.ParseException;
 import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWT;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
@@ -50,7 +49,6 @@ public class DefaultRequestLoginHintLookupFunction extends AbstractAuthenticatio
     @Override
     String doLookup(@Nonnull AuthenticationRequest req) {
         try {
-            JWT requestObject = req.getRequestObject();
             if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("login_hint") != null) {
                 Object login_hint = requestObject.getJWTClaimsSet().getClaim("login_hint");
                 if (login_hint instanceof String) {

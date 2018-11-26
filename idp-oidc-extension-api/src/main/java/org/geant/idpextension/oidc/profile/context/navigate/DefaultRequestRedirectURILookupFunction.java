@@ -34,7 +34,6 @@ import java.text.ParseException;
 import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWT;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /**
@@ -52,7 +51,6 @@ public class DefaultRequestRedirectURILookupFunction extends AbstractAuthenticat
     @Override
     URI doLookup(@Nonnull AuthenticationRequest req) {
         try {
-            JWT requestObject = req.getRequestObject();
             if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("redirect_uri") != null) {
                 Object redirect_uri = requestObject.getJWTClaimsSet().getClaim("redirect_uri");
                 if (redirect_uri instanceof String) {

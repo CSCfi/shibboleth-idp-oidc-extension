@@ -32,7 +32,6 @@ import java.text.ParseException;
 import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
@@ -52,7 +51,6 @@ public class DefaultRequestResponseTypeLookupFunction
     @Override
     ResponseType doLookup(@Nonnull AuthenticationRequest req) {
         try {
-            JWT requestObject = req.getRequestObject();
             if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("response_type") != null) {
                 return ResponseType.parse((String) requestObject.getJWTClaimsSet().getClaim("response_type"));
             }

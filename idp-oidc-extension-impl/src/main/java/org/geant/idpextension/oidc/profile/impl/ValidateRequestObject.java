@@ -76,19 +76,13 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
     /** Request Object. */
     JWT requestObject;
 
-    /**
-     * Constructor.
-     */
-    public ValidateRequestObject() {
-    }
-
     /** {@inheritDoc} */
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         if (!super.doPreExecute(profileRequestContext)) {
             return false;
         }
-        requestObject = getAuthenticationRequest().getRequestObject();
+        requestObject = getOidcResponseContext().getRequestObject();
         if (requestObject == null) {
             log.debug("{} No request object, nothing to do", getLogPrefix());
             return false;

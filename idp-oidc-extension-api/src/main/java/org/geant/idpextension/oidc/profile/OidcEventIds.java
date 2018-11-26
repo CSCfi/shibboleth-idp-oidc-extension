@@ -79,9 +79,19 @@ public final class OidcEventIds {
     @Nonnull @NotEmpty public static final String INVALID_SUBJECT = "InvalidSubject";
     
     /**
+     * Both request uri and request object in request.
+     */
+    @Nonnull @NotEmpty public static final String REQUEST_OBJECT_AND_URI = "RequestObjectAndUri";
+    
+    /**
      * The request object cannot be validated.
      */
     @Nonnull @NotEmpty public static final String INVALID_REQUEST_OBJECT = "InvalidRequestObject";
+    
+    /**
+     * The request uri is invalid.
+     */
+    @Nonnull @NotEmpty public static final String INVALID_REQUEST_URI = "InvalidRequestUri";
 
     /**
      * Constructor.

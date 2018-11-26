@@ -53,8 +53,12 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     /** The id token formed. */
     @Nullable
     private IDTokenClaimsSet idToken;
+    
+    /** The request object. */
+    @Nullable
+    private JWT requestObject;
 
-    /** The user info formed. */
+	/** The user info formed. */
     @Nullable
     private UserInfo userInfo;
 
@@ -392,4 +396,23 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     public void setProcessedToken(@Nullable JWT token) {
         processedToken = token;
     }
+    
+    /**
+	 * Get the request object.
+	 * 
+	 * @return the request object
+	 */
+	public JWT getRequestObject() {
+		return requestObject;
+	}
+
+	/**
+	 * Set the request object. Either by value or fetched by reference.
+	 * 
+	 * @param requestObject
+	 *            the request object.
+	 */
+	public void setRequestObject(JWT requestObject) {
+		this.requestObject = requestObject;
+	}
 }

@@ -31,15 +31,8 @@ package org.geant.idpextension.oidc.profile.context.navigate;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
-import net.shibboleth.idp.profile.RequestContextBuilder;
-import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
-import org.opensaml.messaging.context.MessageContext;
-import org.opensaml.profile.context.ProfileRequestContext;
-import org.springframework.webflow.execution.RequestContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.oauth2.sdk.ResponseType;
@@ -51,23 +44,13 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 import junit.framework.Assert;
 
-public class DefaultRequestedACRLookupFunctionTest {
+public class DefaultRequestedACRLookupFunctionTest extends BaseDefaultRequestLookupFunctionTest {
 
     private DefaultRequestedACRLookupFunction lookup;
 
-    @SuppressWarnings("rawtypes")
-    private ProfileRequestContext prc;
-
-    private MessageContext<AuthenticationRequest> msgCtx;
-
-    @SuppressWarnings("unchecked")
     @BeforeMethod
     protected void setUp() throws Exception {
         lookup = new DefaultRequestedACRLookupFunction();
-        final RequestContext requestCtx = new RequestContextBuilder().buildRequestContext();
-        prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        msgCtx = new MessageContext<AuthenticationRequest>();
-        prc.setInboundMessageContext(msgCtx);
     }
 
     @Test
@@ -93,6 +76,7 @@ public class DefaultRequestedACRLookupFunctionTest {
                 new ClientID("000123"), URI.create("https://example.com/callback")).acrValues(acrValues)
                         .state(new State()).requestObject(new PlainJWT(ro)).build();
         msgCtx.setMessage(req);
+        oidcCtx.setRequestObject(req.getRequestObject());
         Assert.assertTrue(lookup.apply(prc).contains(new ACR("1")));
         Assert.assertTrue(lookup.apply(prc).contains(new ACR("2")));
         Assert.assertEquals(2, lookup.apply(prc).size());
