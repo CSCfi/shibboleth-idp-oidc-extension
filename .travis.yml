@@ -4,4 +4,4 @@ jdk:
   - oraclejdk8
 
 script:
-  mvn -f idp-oidc-extension-parent/pom.xml clean package
+  mvn clean package
