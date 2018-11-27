@@ -22,7 +22,7 @@
         <opensaml.version>3.4.0</opensaml.version>
         <checkstyle.version>2.17</checkstyle.version>
         <checkstyle.configLocation>
-            ../conf/checkstyle.xml
+            conf/checkstyle.xml
         </checkstyle.configLocation>
     </properties>
     <repositories>
@@ -49,9 +49,9 @@
         </repository>
     </repositories>
     <modules>
-        <module>../idp-oidc-extension-api</module>
-        <module>../idp-oidc-extension-impl</module>
-        <module>../idp-oidc-extension-distribution</module>
+        <module>idp-oidc-extension-api</module>
+        <module>idp-oidc-extension-impl</module>
+        <module>idp-oidc-extension-distribution</module>
     </modules>
     <dependencyManagement>
         <dependencies>

@@ -17,13 +17,10 @@ The Shibboleth IdP 3.4 installed by this project is extended to act as a [OpenID
 The maven project needs to be built first. The ansible scipts will then perform first installation of Shibboleth Idp V3, after which the extensions are installed. 
 
 ```
-
 git clone https://github.com/CSCfi/shibboleth-idp-oidc-extension
-cd shibboleth-idp-oidc-extension/idp-oidc-extension-parent/
+cd shibboleth-idp-oidc-extension/
 mvn package
-cd ..
 vagrant up
-
 ```
 
 ## Playing around
