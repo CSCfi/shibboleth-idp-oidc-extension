@@ -36,6 +36,7 @@ import javax.annotation.Nullable;
 import org.geant.idpextension.oidc.config.navigate.DataEncryptionAlgorithmsLookupFunction;
 import org.geant.idpextension.oidc.config.navigate.KeyTransportEncryptionAlgorithmsLookupFunction;
 import org.geant.idpextension.oidc.config.navigate.SignatureAlgorithmsLookupFunction;
+import org.geant.idpextension.oidc.crypto.support.SignatureConstants;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -68,6 +69,10 @@ public class AddRequestObjectSecurityConfigurationToClientMetadata extends Abstr
     /** Strategy to obtain list of supported key transport encryption algorithms. */
     @Nullable private Function<ProfileRequestContext,List<String>> keyTransportEncryptionAlgorithmsLookupStrategy;
     
+    /** Whether signature algorithm none is allowed regardless of what list of Signature Validation Algs has. */
+    @Nonnull
+    private boolean allowSignatureNone;
+
     /**
      * List of supported signature validation algorithms obtained from the security configuration.
      */
@@ -92,6 +97,16 @@ public class AddRequestObjectSecurityConfigurationToClientMetadata extends Abstr
         keyTransportEncryptionAlgorithmsLookupStrategy = new KeyTransportEncryptionAlgorithmsLookupFunction();
     }
 
+    /**
+     * Set whether signature algorithm none is allowed regardless of what list of Signature Validation Algs has.
+     * 
+     * @param allow Whether signature algorithm none is allowed regardless of what list of Signature
+     *            Validation Algs has
+     */
+    public void setAllowSignatureNone(boolean allow) {
+        allowSignatureNone = allow;
+    }
+    
     /**
      * Set the strategy used to obtain list of supported signature algorithms.
      * 
@@ -160,15 +175,17 @@ public class AddRequestObjectSecurityConfigurationToClientMetadata extends Abstr
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         final JWSAlgorithm reqRequestObjectSigAlg = getInputMetadata().getRequestObjectJWSAlg();
+        //"none" should be supported by every op. "none" cannot be found from the supported algs list.
         if (reqRequestObjectSigAlg != null) {
-            if (supportedSignatureValidationAlgs.contains(reqRequestObjectSigAlg.getName())) {
+            if ((SignatureConstants.ALGO_ID_SIGNATURE_NONE.equals(reqRequestObjectSigAlg.getName())
+                    && allowSignatureNone)
+                    || supportedSignatureValidationAlgs.contains(reqRequestObjectSigAlg.getName())) {
                 getOutputMetadata().setRequestObjectJWSAlg(reqRequestObjectSigAlg);
             } else {
-                log.warn(
-                        "{} The requested request_object_signing_alg {} is not supported",
-                        getLogPrefix(), reqRequestObjectSigAlg.getName());
+                log.warn("{} The requested request_object_signing_alg {} is not supported", getLogPrefix(),
+                        reqRequestObjectSigAlg.getName());
                 ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
-                return;                
+                return;
             }
         }
         

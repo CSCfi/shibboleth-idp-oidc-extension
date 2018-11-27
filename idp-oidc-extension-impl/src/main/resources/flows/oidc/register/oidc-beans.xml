@@ -144,7 +144,7 @@
 
     <bean id="AddRequestObjectSecurityConfigurationToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddRequestObjectSecurityConfigurationToClientMetadata"
-        scope="prototype" />
+        p:allowSignatureNone="%{idp.oidc.dynreg.allowNoneForRequestSigning:true}" scope="prototype" />
 
     <bean id="shibboleth.oidc.ClientInformationManager"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationManager"
