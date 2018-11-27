@@ -125,7 +125,7 @@ public class SetRequestObjectToResponseContext extends AbstractOIDCAuthenticatio
 			return false;
 		}
 		if (getAuthenticationRequest().getRequestObject() != null
-				&& getAuthenticationRequest().getRedirectionURI() != null) {
+				&& getAuthenticationRequest().getRequestURI() != null) {
 			log.error("{} request_uri and request object cannot be both set", getLogPrefix());
 			ActionSupport.buildEvent(profileRequestContext, OidcEventIds.REQUEST_OBJECT_AND_URI);
 			return false;
