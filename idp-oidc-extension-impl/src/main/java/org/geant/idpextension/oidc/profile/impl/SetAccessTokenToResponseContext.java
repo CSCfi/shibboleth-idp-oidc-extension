@@ -100,9 +100,10 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     /** Strategy used to obtain the response issuer value. */
     @Nonnull
     private Function<ProfileRequestContext, String> issuerLookupStrategy;
-    
+
     /** Lookup function for SessionContext. */
-    @Nonnull private Function<ProfileRequestContext,SessionContext> sessionContextLookupStrategy;
+    @Nonnull
+    private Function<ProfileRequestContext, SessionContext> sessionContextLookupStrategy;
 
     /** Subject context. */
     private SubjectContext subjectCtx;
@@ -110,10 +111,6 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     /** The generator to use. */
     @Nullable
     private IdentifierGenerationStrategy idGenerator;
-    
-    /** Session id stored to access token. */
-    @Nullable
-    private String sessiondId;
 
     /** Strategy used to locate the {@link IdentifierGenerationStrategy} to use. */
     @Nonnull
@@ -152,18 +149,17 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
         };
         sessionContextLookupStrategy = new ChildContextLookup<>(SessionContext.class);
     }
-    
+
     /**
      * Set the lookup strategy for the SessionContext to access.
      * 
-     * @param strategy  lookup strategy
+     * @param strategy lookup strategy
      */
-    public void setSessionContextLookupStrategy(
-            @Nonnull final Function<ProfileRequestContext,SessionContext> strategy) {
+    public void
+            setSessionContextLookupStrategy(@Nonnull final Function<ProfileRequestContext, SessionContext> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        
-        sessionContextLookupStrategy = Constraint.isNotNull(strategy,
-                "SessionContext lookup strategy cannot be null");
+
+        sessionContextLookupStrategy = Constraint.isNotNull(strategy, "SessionContext lookup strategy cannot be null");
     }
 
     /**
@@ -263,14 +259,6 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
              * Alternate path possible only when access token is to be provided by authz endpoint without authorization
              * code This is the case only with "token id_token" response type. Unusually complex initialization.
              */
-            final SessionContext sessionCtx = sessionContextLookupStrategy.apply(profileRequestContext);
-            if (sessionCtx == null) {
-                log.error("{} No session context", getLogPrefix());
-                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-                return false;
-            }
-            sessiondId = sessionCtx.getIdPSession().getId();
-
             subjectCtx = profileRequestContext.getSubcontext(SubjectContext.class, false);
             if (subjectCtx == null) {
                 log.error("{} No subject context", getLogPrefix());
@@ -315,6 +303,11 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
             claimsSet = new AccessTokenClaimsSet(tokenClaimsSet, getOidcResponseContext().getScope(), claims, claimsUI,
                     new Date(), dateExp);
         } else {
+            String sessiondId = null;
+            final SessionContext sessionCtx = sessionContextLookupStrategy.apply(profileRequestContext);
+            if (sessionCtx != null && sessionCtx.getIdPSession() != null) {
+                sessiondId = sessionCtx.getIdPSession().getId();
+            }
             JSONArray consentable = null;
             JSONArray consented = null;
             OIDCAuthenticationResponseConsentContext consentCtx =

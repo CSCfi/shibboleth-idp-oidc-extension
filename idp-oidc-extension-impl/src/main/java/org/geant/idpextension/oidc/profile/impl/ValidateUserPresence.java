@@ -49,7 +49,8 @@ import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
  * Action that checks for "user presence" i.e. authenticated user has IdP Session unless original authentication request
- * had offline_access scope.
+ * had offline_access scope. However, if there is no IdP Session session stored at all to token (access token) the
+ * existence of it is not checked. That happens if SSO is disabled. It is also possible to disable the step altogether.
  */
 @SuppressWarnings("rawtypes")
 public class ValidateUserPresence extends AbstractOIDCAuthenticationResponseAction {
@@ -66,6 +67,13 @@ public class ValidateUserPresence extends AbstractOIDCAuthenticationResponseActi
     @Duration
     @Positive
     private long sessionTimeout;
+
+    /** Whether the check is disabled. */
+    private boolean disabled;
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
 
     /**
      * Constructor.
@@ -91,11 +99,19 @@ public class ValidateUserPresence extends AbstractOIDCAuthenticationResponseActi
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+        if (disabled) {
+            log.debug("{} Check disabled", getLogPrefix());
+            return;
+        }
         if (getOidcResponseContext().getScope().contains(OIDCScopeValue.OFFLINE_ACCESS)) {
             log.debug("{} Authentication request had offline_access scope, user presence not required", getLogPrefix());
             return;
         }
         String id = getOidcResponseContext().getTokenClaimsSet().getSessionId();
+        if (id == null) {
+            log.debug("{} There is no session to validate existence of", getLogPrefix());
+            return;
+        }
         IdPSession session = null;
         try {
             session = sessionResolver.resolveSingle(new CriteriaSet(new SessionIdCriterion(id)));
@@ -107,6 +123,6 @@ public class ValidateUserPresence extends AbstractOIDCAuthenticationResponseActi
             log.error("{} Unable to validate user presence", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.ACCESS_DENIED);
         }
-        
+
     }
 }

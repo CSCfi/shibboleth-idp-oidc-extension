@@ -61,14 +61,14 @@ public class TokenClaimsSet {
 
     /** User principal representing authenticated user. */
     public static final String KEY_USER_PRINCIPAL = "prncpl";
-    
+
     /** Session id of the IdPSession. */
     public static final String KEY_SESSIONID = "sid";
 
     /** Subject of the user. */
     public static final String KEY_SUBJECT = "sub";
 
-    /** Client id of the rp the token is generated for.*/
+    /** Client id of the rp the token is generated for. */
     public static final String KEY_CLIENTID = "clid";
 
     /** Expiration time of the token. */
@@ -148,6 +148,7 @@ public class TokenClaimsSet {
      * @param authTime Authentication time of the user. Must not be NULL.
      * @param redirectURI Validated redirect URI of the authentication request. Must not be NULL.
      * @param scope Scope of the authentication request. Must not be NULL.
+     * @param idpSessionId Session id of the user. May be NULL.
      * @param claims Claims request of the authentication request. May be NULL.
      * @throws RuntimeException if called with nnonallowed ull parameters
      */
@@ -155,24 +156,26 @@ public class TokenClaimsSet {
     protected TokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nullable ACR acr,
             @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
-            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nonnull String idpSessionId, @Nullable ClaimsRequest claims,
-            @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI,
-            @Nullable JSONArray consentableClaims, @Nullable JSONArray consentedClaims) {
-        if (idpSessionId== null || tokenType == null || tokenID == null || clientID == null || issuer == null || userPrincipal == null
+            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nonnull String idpSessionId,
+            @Nullable ClaimsRequest claims, @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID,
+            @Nullable ClaimsSet dlClaimsUI, @Nullable JSONArray consentableClaims,
+            @Nullable JSONArray consentedClaims) {
+        if (tokenType == null || tokenID == null || clientID == null || issuer == null || userPrincipal == null
                 || iat == null || exp == null || authTime == null || redirectURI == null || scope == null
                 || subject == null) {
             throw new RuntimeException("Invalid parameters, programming error");
         }
         tokenClaimsSet = new JWTClaimsSet.Builder().claim(KEY_TYPE, tokenType).jwtID(tokenID)
-                .claim(KEY_CLIENTID, clientID.getValue()).issuer(issuer).subject(subject).claim(KEY_USER_PRINCIPAL, userPrincipal)
-                .claim(KEY_ACR, acr == null ? null : acr.getValue()).issueTime(iat).expirationTime(exp)
-                .claim(KEY_NONCE, nonce == null ? null : nonce.getValue()).claim(KEY_AUTH_TIME, authTime)
-                .claim(KEY_REDIRECT_URI, redirectURI.toString()).claim(KEY_SCOPE, scope.toString())
-                .claim(KEY_CLAIMS, claims == null ? null : claims.toJSONObject())
+                .claim(KEY_CLIENTID, clientID.getValue()).issuer(issuer).subject(subject)
+                .claim(KEY_USER_PRINCIPAL, userPrincipal).claim(KEY_ACR, acr == null ? null : acr.getValue())
+                .issueTime(iat).expirationTime(exp).claim(KEY_NONCE, nonce == null ? null : nonce.getValue())
+                .claim(KEY_AUTH_TIME, authTime).claim(KEY_REDIRECT_URI, redirectURI.toString())
+                .claim(KEY_SCOPE, scope.toString()).claim(KEY_CLAIMS, claims == null ? null : claims.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS, dlClaims == null ? null : dlClaims.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS_IDTOKEN, dlClaimsID == null ? null : dlClaimsID.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS_USERINFO, dlClaimsUI == null ? null : dlClaimsUI.toJSONObject())
-                .claim(KEY_CONSENTABLE_CLAIMS, consentableClaims).claim(KEY_CONSENTED_CLAIMS, consentedClaims).claim(KEY_SESSIONID, idpSessionId).build();
+                .claim(KEY_CONSENTABLE_CLAIMS, consentableClaims).claim(KEY_CONSENTED_CLAIMS, consentedClaims)
+                .claim(KEY_SESSIONID, idpSessionId).build();
     }
 
     // Checkstyle: CyclomaticComplexity ON
@@ -222,10 +225,10 @@ public class TokenClaimsSet {
         if (tokenClaimsSet.getStringClaim(KEY_SCOPE) == null) {
             throw new ParseException("claim scope must exist and not be null", 0);
         }
-        if (tokenClaimsSet.getStringClaim(KEY_SESSIONID) == null) {
-            throw new ParseException("claim sid must exist and not be null", 0);
-        }
         // Voluntary fields
+        if (tokenClaimsSet.getClaims().containsKey(KEY_SESSIONID)) {
+            tokenClaimsSet.getStringClaim(KEY_SESSIONID);
+        }
         if (tokenClaimsSet.getClaims().containsKey(KEY_ACR)) {
             tokenClaimsSet.getStringClaim(KEY_ACR);
         }
@@ -341,7 +344,7 @@ public class TokenClaimsSet {
     public String getPrincipal() {
         return (String) tokenClaimsSet.getClaim(KEY_USER_PRINCIPAL);
     }
-    
+
     /**
      * Get idp session id.
      * 
@@ -523,7 +526,7 @@ public class TokenClaimsSet {
      */
     @Nonnull
     public ClientID getClientID() {
-    	return new ClientID((String) tokenClaimsSet.getClaim(KEY_CLIENTID));
+        return new ClientID((String) tokenClaimsSet.getClaim(KEY_CLIENTID));
     }
 
 }

@@ -97,9 +97,6 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     @Nullable
     private IdentifierGenerationStrategy idGenerator;
 
-    /** Session id stored to authz code. */
-    private String sessiondId;
-
     /** Strategy used to locate the {@link IdentifierGenerationStrategy} to use. */
     @Nonnull
     private Function<ProfileRequestContext, IdentifierGenerationStrategy> idGeneratorLookupStrategy;
@@ -221,14 +218,6 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        final SessionContext sessionCtx = sessionContextLookupStrategy.apply(profileRequestContext);
-        if (sessionCtx == null) {
-            log.error("{} No session context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
-            return false;
-        }
-        sessiondId = sessionCtx.getIdPSession().getId();
-
         subjectCtx = profileRequestContext.getSubcontext(SubjectContext.class, false);
         if (subjectCtx == null) {
             log.error("{} No subject context", getLogPrefix());
@@ -261,6 +250,12 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+
+        String sessiondId = null;
+        final SessionContext sessionCtx = sessionContextLookupStrategy.apply(profileRequestContext);
+        if (sessionCtx != null && sessionCtx.getIdPSession() != null) {
+            sessiondId = sessionCtx.getIdPSession().getId();
+        }
 
         JSONArray consentable = null;
         JSONArray consented = null;
