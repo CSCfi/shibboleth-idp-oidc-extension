@@ -11,7 +11,7 @@
     - "../../../idp-oidc-extension-distribution/target/idp-oidc-extension-distribution*.tar.gz"
 
 - name: Build new idp.war
-  shell: source {{ environment_file }} && "{{ idp_home }}/bin/build.sh"
+  shell: "source {{ environment_file }} && {{ idp_home }}/bin/build.sh -Didp.target.dir={{ idp_home }}"
   become_user: root
 
 - name: Add global-oidc.xml import to global.xml
