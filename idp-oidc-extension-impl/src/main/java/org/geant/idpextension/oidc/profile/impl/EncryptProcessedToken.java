@@ -140,15 +140,15 @@ public class EncryptProcessedToken extends AbstractOIDCResponseAction {
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        JWEAlgorithm alg = JWEAlgorithm.parse(params.getKeyTransportEncryptionAlgorithm());
-        if (JWEAlgorithm.Family.ASYMMETRIC.contains(alg)) {
+        JWEAlgorithm encAlg = JWEAlgorithm.parse(params.getKeyTransportEncryptionAlgorithm());
+        if (JWEAlgorithm.Family.ASYMMETRIC.contains(encAlg)) {
             JWKCredential credential = (JWKCredential) params.getKeyTransportEncryptionCredential();
-            EncryptionMethod enc = EncryptionMethod.parse(params.getDataEncryptionAlgorithm());
+            EncryptionMethod encEnc = EncryptionMethod.parse(params.getDataEncryptionAlgorithm());
             log.debug("{} encrypting with key {} and params alg: {} enc: {}", getLogPrefix(), credential.getKid(),
-                    alg.getName(), enc.getName());
-            JWEObject jweObject = new JWEObject(new JWEHeader.Builder(alg, enc).contentType("JWT").build(), payload);
+                    encAlg.getName(), encEnc.getName());
+            JWEObject jweObject = new JWEObject(new JWEHeader.Builder(encAlg, encEnc).contentType("JWT").build(), payload);
             try {
-                if (JWEAlgorithm.Family.RSA.contains(alg)) {
+                if (JWEAlgorithm.Family.RSA.contains(encAlg)) {
                     jweObject.encrypt(new RSAEncrypter((RSAPublicKey) credential.getPublicKey()));
                 } else {
                     jweObject.encrypt(new ECDHEncrypter((ECPublicKey) credential.getPublicKey()));
