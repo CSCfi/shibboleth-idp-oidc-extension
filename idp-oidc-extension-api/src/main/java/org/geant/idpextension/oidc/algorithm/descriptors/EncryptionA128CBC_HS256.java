@@ -80,6 +80,7 @@ public final class EncryptionA128CBC_HS256 implements BlockEncryptionAlgorithm {
     /** {@inheritDoc} */
     @Nonnull
     public String getPadding() {
+        // TODO: Should be PKCS#7
         return JCAConstants.CIPHER_PADDING_ISO10126;
     }
 
