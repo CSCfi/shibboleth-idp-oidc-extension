@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:c="http://www.springframework.org/schema/c" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
     default-init-method="initialize" default-destroy-method="destroy">
 
@@ -20,14 +21,17 @@
     </util:map>
 
     <!-- Lookup method to select responder id -->
-    <bean id="profileResponderIdLookupFunction" class="org.geant.idpextension.oidc.profile.context.navigate.ProfileResponderIdLookupFunction"
+    <bean id="profileResponderIdLookupFunction"
+        class="org.geant.idpextension.oidc.profile.context.navigate.ProfileResponderIdLookupFunction"
         p:defaultResponder="#{getObject('entityID')}" p:profileResponders-ref="profileResponders" />
 
     <!-- OIDC Profile Configurations. -->
     <bean id="OIDC.SSO" class="org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration"
         p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
-        p:iDTokenLifetime="%{idp.oidc.idToken.defaultLifetime:PT1H}" p:accessTokenLifetime="%{idp.oidc.accessToken.defaultLifetime:PT10M}"
-        p:authorizeCodeLifetime="%{idp.oidc.authorizeCode.defaultLifetime:PT5M}" p:refreshTokenLifetime="%{idp.oidc.refreshToken.defaultLifetime:PT2H}"
+        p:iDTokenLifetime="%{idp.oidc.idToken.defaultLifetime:PT1H}"
+        p:accessTokenLifetime="%{idp.oidc.accessToken.defaultLifetime:PT10M}"
+        p:authorizeCodeLifetime="%{idp.oidc.authorizeCode.defaultLifetime:PT5M}"
+        p:refreshTokenLifetime="%{idp.oidc.refreshToken.defaultLifetime:PT2H}"
         p:servletRequest-ref="shibboleth.HttpServletRequest"
         p:tokenEndpointAuthMethods="%{idp.oidc.tokenEndpointAuthMethods:client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt}" />
     <bean id="OIDC.UserInfo" class="org.geant.idpextension.oidc.config.OIDCUserInfoConfiguration"
@@ -38,14 +42,17 @@
         p:servletRequest-ref="shibboleth.HttpServletRequest"
         p:tokenEndpointAuthMethods="%{idp.oidc.dynreg.tokenEndpointAuthMethods:client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt}" />
     <bean id="OIDC.Configuration" class="org.geant.idpextension.oidc.config.OIDCProviderInformationConfiguration"
-        p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}" p:servletRequest-ref="shibboleth.HttpServletRequest"/>
+        p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
+        p:servletRequest-ref="shibboleth.HttpServletRequest" />
     <bean id="OAUTH2.Revocation" class="org.geant.idpextension.oauth2.config.OAuth2TokenRevocationConfiguration"
-        p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}" p:servletRequest-ref="shibboleth.HttpServletRequest"/>
+        p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
+        p:servletRequest-ref="shibboleth.HttpServletRequest" />
 
     <!-- Security Configuration Defaults These settings establish the default security configurations for signatures and 
         loads the default credentials used. -->
 
-    <bean id="shibboleth.oidc.DefaultSecurityConfiguration" class="net.shibboleth.idp.profile.config.SecurityConfiguration">
+    <bean id="shibboleth.oidc.DefaultSecurityConfiguration"
+        class="net.shibboleth.idp.profile.config.SecurityConfiguration">
         <property name="signatureSigningConfiguration">
             <ref bean="#{'%{idp.oidc.signing.config:shibboleth.oidc.SigningConfiguration}'.trim()}" />
         </property>
@@ -72,13 +79,13 @@
                 <util:constant
                     static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_256" />
 
-<!-- Not supported by the configured EC key
-
-                <util:constant
-                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_384" />
-                <util:constant
-                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_512" />
--->
+                <!-- 
+                                          Not supported by the configured EC key 
+                <util:constant 
+                     static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_384" /> 
+                <util:constant 
+                     static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_512" /> 
+                -->
 
                 <util:constant
                     static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_256" />
@@ -93,14 +100,26 @@
     <bean id="shibboleth.oidc.EncryptionConfiguration" parent="shibboleth.BasicEncryptionConfiguration">
         <property name="keyTransportEncryptionAlgorithms">
             <list>
-                <util:constant static-field="org.geant.idpextension.oidc.crypto.support.KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5" />
             </list>
-         </property>
+        </property>
         <property name="dataEncryptionAlgorithms">
             <list>
-                <util:constant static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A192CBC_HS384" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A256CBC_HS512" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A128GCM" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A192GCM" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A256GCM" />
             </list>
-         </property>
+        </property>
     </bean>
 
 </beans>
