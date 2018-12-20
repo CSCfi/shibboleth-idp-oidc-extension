@@ -102,6 +102,8 @@
             <list>
                 <util:constant
                     static-field="org.geant.idpextension.oidc.crypto.support.KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_OAEP" />
             </list>
         </property>
         <property name="dataEncryptionAlgorithms">
