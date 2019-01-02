@@ -28,9 +28,14 @@
 
 package org.geant.idpextension.oidc.security.impl;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import org.geant.idpextension.oidc.criterion.ClientInformationCriterion;
 import org.geant.security.jwk.BasicJWKCredential;
@@ -49,6 +54,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.KeyType;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
@@ -114,7 +120,6 @@ public class OIDCClientInformationEncryptionParametersResolver extends BasicEncr
         if (encryptionMethod == null) {
             encryptionMethod = EncryptionMethod.A128CBC_HS256;
         }
-        // Verify algorithms are available. TODO: Include check also for secondary algorithms (not only crypto)
         final List<String> keyTransportAlgorithms =
                 getEffectiveKeyTransportAlgorithms(criteria, whitelistBlacklistPredicate);
         log.trace("Resolved effective key transport algorithms: {}", keyTransportAlgorithms);
@@ -132,6 +137,29 @@ public class OIDCClientInformationEncryptionParametersResolver extends BasicEncr
             super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
             return;
         }
+        // AES + client secret based key transports:
+        if (JWEAlgorithm.Family.SYMMETRIC.contains(keyTransportAlgorithm)) {
+            Secret secret = clientInformation.getSecret();
+            if (secret == null) {
+                log.warn("No client secret available");
+                super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
+                return;
+            }
+            BasicJWKCredential jwkCredential = new BasicJWKCredential();
+            jwkCredential.setAlgorithm(keyTransportAlgorithm);
+            try {
+                jwkCredential.setSecretKey(generateSymmetricKey(secret.getValueBytes(), keyTransportAlgorithm));
+            } catch (NoSuchAlgorithmException e) {
+                log.warn("Unable to generate secret key: " + e.getMessage());
+                super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
+                return;
+            }
+            params.setKeyTransportEncryptionCredential(jwkCredential);
+            params.setKeyTransportEncryptionAlgorithm(keyTransportAlgorithm.getName());
+            params.setDataEncryptionAlgorithm(encryptionMethod.getName());
+            return;
+        }
+        // RSA & EC based key transports
         JWKSet keySet = clientInformation.getOIDCMetadata().getJWKSet();
         if (keySet == null) {
             log.warn("No keyset available");
@@ -142,8 +170,6 @@ public class OIDCClientInformationEncryptionParametersResolver extends BasicEncr
             if (KeyUse.SIGNATURE.equals(key.getKeyUse())) {
                 continue;
             }
-            // Verify algorithms are available. TODO: Include check also for secondary algorithms (not only key
-            // transport encryption)
             if ((JWEAlgorithm.Family.RSA.contains(keyTransportAlgorithm) && key.getKeyType().equals(KeyType.RSA))
                     || (JWEAlgorithm.Family.ECDH_ES.contains(keyTransportAlgorithm)
                             && key.getKeyType().equals(KeyType.EC))) {
@@ -171,6 +197,32 @@ public class OIDCClientInformationEncryptionParametersResolver extends BasicEncr
 
         }
         super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
+    }
+
+    /**
+     * Generate symmetric key from client secret.
+     * 
+     * @param clientSecret client secret that is the basis of key
+     * @param keyTransportAlgorithm algorithm the key is generated for
+     * @return key derived from client secret.
+     * @throws NoSuchAlgorithmException if algorithm or digest method is unsupported
+     */
+    private SecretKey generateSymmetricKey(byte[] clientSecret, JWEAlgorithm keyTransportAlgorithm)
+            throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        switch (keyTransportAlgorithm.getName()) {
+            case "A128KW":
+            case "A128GCMKW":
+                return new SecretKeySpec(md.digest(clientSecret), 0, 16, "AES");
+            case "A192KW":
+            case "A192GCMKW":
+                return new SecretKeySpec(md.digest(clientSecret), 0, 24, "AES");
+            case "A256KW":
+            case "A256GCMKW":
+                return new SecretKeySpec(md.digest(clientSecret), 0, 32, "AES");
+        }
+        throw new NoSuchAlgorithmException(
+                "Implementation does not support generating key for " + keyTransportAlgorithm.getName());
     }
 
 }

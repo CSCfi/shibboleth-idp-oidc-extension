@@ -50,6 +50,7 @@ import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.crypto.AESEncrypter;
 import com.nimbusds.jose.crypto.ECDHEncrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jwt.EncryptedJWT;
@@ -65,8 +66,6 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
  * such information is not available action assumes the data to be encrypted is
  * {@link OidcResponseContext#.getUserInfo()} containing bare user info response. If neither of the sources for
  * encryption exists the actions fails.
- * 
- * TODO: Currently supports only RSA & EC families of encryption methods.
  */
 @SuppressWarnings("rawtypes")
 public class EncryptProcessedToken extends AbstractOIDCResponseAction {
@@ -141,27 +140,27 @@ public class EncryptProcessedToken extends AbstractOIDCResponseAction {
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         JWEAlgorithm encAlg = JWEAlgorithm.parse(params.getKeyTransportEncryptionAlgorithm());
-        if (JWEAlgorithm.Family.ASYMMETRIC.contains(encAlg)) {
-            JWKCredential credential = (JWKCredential) params.getKeyTransportEncryptionCredential();
-            EncryptionMethod encEnc = EncryptionMethod.parse(params.getDataEncryptionAlgorithm());
-            log.debug("{} encrypting with key {} and params alg: {} enc: {}", getLogPrefix(), credential.getKid(),
-                    encAlg.getName(), encEnc.getName());
-            JWEObject jweObject = new JWEObject(new JWEHeader.Builder(encAlg, encEnc).contentType("JWT").build(), payload);
-            try {
-                if (JWEAlgorithm.Family.RSA.contains(encAlg)) {
-                    jweObject.encrypt(new RSAEncrypter((RSAPublicKey) credential.getPublicKey()));
-                } else {
-                    jweObject.encrypt(new ECDHEncrypter((ECPublicKey) credential.getPublicKey()));
-                }
-                getOidcResponseContext().setProcessedToken(EncryptedJWT.parse(jweObject.serialize()));
-                return;
-            } catch (JOSEException | ParseException e) {
-                log.error("{} Encryption failed {}", getLogPrefix(), e.getMessage());
+        JWKCredential credential = (JWKCredential) params.getKeyTransportEncryptionCredential();
+        EncryptionMethod encEnc = EncryptionMethod.parse(params.getDataEncryptionAlgorithm());
+        log.debug("{} encrypting with key {} and params alg: {} enc: {}", getLogPrefix(), credential.getKid(),
+                encAlg.getName(), encEnc.getName());
+        JWEObject jweObject = new JWEObject(new JWEHeader.Builder(encAlg, encEnc).contentType("JWT").build(), payload);
+        try {
+            if (JWEAlgorithm.Family.RSA.contains(encAlg)) {
+                jweObject.encrypt(new RSAEncrypter((RSAPublicKey) credential.getPublicKey()));
+            } else if (JWEAlgorithm.Family.ECDH_ES.contains(encAlg)) {
+                jweObject.encrypt(new ECDHEncrypter((ECPublicKey) credential.getPublicKey()));
+            } else if (JWEAlgorithm.Family.SYMMETRIC.contains(encAlg)) {
+                jweObject.encrypt(new AESEncrypter(credential.getSecretKey()));
+            } else {
+                log.error("{} Unsupported algorithm {}", getLogPrefix(), encAlg.getName());
+                ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_ENCRYPT);
             }
+            getOidcResponseContext().setProcessedToken(EncryptedJWT.parse(jweObject.serialize()));
+        } catch (JOSEException | ParseException e) {
+            log.error("{} Encryption failed {}", getLogPrefix(), e.getMessage());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_ENCRYPT);
         }
-        log.error("{} Encryption did not take place propably because of missing implementation support for algorithm",
-                getLogPrefix());
-        ActionSupport.buildEvent(profileRequestContext, EventIds.UNABLE_TO_ENCRYPT);
     }
 
 }
