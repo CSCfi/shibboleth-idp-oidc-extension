@@ -10,9 +10,12 @@ org.geant.idpextension.oidc.algorithm.descriptors.SignatureHS512
 org.geant.idpextension.oidc.algorithm.descriptors.KeyTransportRSA1_5
 org.geant.idpextension.oidc.algorithm.descriptors.KeyTransportRSA_OAEP
 org.geant.idpextension.oidc.algorithm.descriptors.KeyTransportRSA_OAEP_256
-org.geant.idpextension.oidc.algorithm.descriptors.KeyTransportAES128KW
-org.geant.idpextension.oidc.algorithm.descriptors.KeyTransportAES192KW
-org.geant.idpextension.oidc.algorithm.descriptors.KeyTransportAES256KW
+org.geant.idpextension.oidc.algorithm.descriptors.SymmetricKeyWrapA128KW
+org.geant.idpextension.oidc.algorithm.descriptors.SymmetricKeyWrapA192KW
+org.geant.idpextension.oidc.algorithm.descriptors.SymmetricKeyWrapA256KW
+org.geant.idpextension.oidc.algorithm.descriptors.SymmetricKeyWrapA128GCMKW
+org.geant.idpextension.oidc.algorithm.descriptors.SymmetricKeyWrapA192GCMKW
+org.geant.idpextension.oidc.algorithm.descriptors.SymmetricKeyWrapA256GCMKW
 org.geant.idpextension.oidc.algorithm.descriptors.EncryptionA128CBC_HS256
 org.geant.idpextension.oidc.algorithm.descriptors.EncryptionA128GCM
 org.geant.idpextension.oidc.algorithm.descriptors.EncryptionA192CBC_HS384

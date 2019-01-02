@@ -101,17 +101,23 @@
         <property name="keyTransportEncryptionAlgorithms">
             <list>
                 <util:constant
-                    static-field="org.geant.idpextension.oidc.crypto.support.KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5" />
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_RSA_1_5" />
                 <util:constant
-                    static-field="org.geant.idpextension.oidc.crypto.support.KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_OAEP" />
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_RSA_OAEP" />
                 <util:constant
-                    static-field="org.geant.idpextension.oidc.crypto.support.KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_OAEP_256" />
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_RSA_OAEP_256" />
                 <util:constant
-                    static-field="org.geant.idpextension.oidc.crypto.support.KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_AES_128_KW" />
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_128_KW" />
                 <util:constant
-                    static-field="org.geant.idpextension.oidc.crypto.support.KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_AES_192_KW" />
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_192_KW" />
                 <util:constant
-                    static-field="org.geant.idpextension.oidc.crypto.support.KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_AES_256_KW" />
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_256_KW" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_128_GCM_KW" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_192_GCM_KW" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_256_GCM_KW" />
             </list>
         </property>
         <property name="dataEncryptionAlgorithms">
