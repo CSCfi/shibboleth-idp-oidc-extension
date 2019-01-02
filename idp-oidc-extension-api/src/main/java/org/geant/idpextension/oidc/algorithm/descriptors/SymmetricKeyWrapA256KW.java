@@ -30,17 +30,17 @@ package org.geant.idpextension.oidc.algorithm.descriptors;
 
 import javax.annotation.Nonnull;
 
-import org.geant.idpextension.oidc.crypto.support.KeyTransportConstants;
+import org.geant.idpextension.oidc.crypto.support.KeyManagementConstants;
 import org.opensaml.security.crypto.JCAConstants;
-import org.opensaml.xmlsec.algorithm.KeyTransportAlgorithm;
+import org.opensaml.xmlsec.algorithm.SymmetricKeyWrapAlgorithm;
 
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 
 /**
- * Algorithm descriptor for JWE key transport algorithm: AES192KW.
+ * Algorithm descriptor for JWE key management algorithm: AES256KW.
  * 
  */
-public class KeyTransportAES192KW implements KeyTransportAlgorithm {
+public class SymmetricKeyWrapA256KW implements SymmetricKeyWrapAlgorithm {
 
     /** {@inheritDoc} */
     @Nonnull
@@ -53,13 +53,13 @@ public class KeyTransportAES192KW implements KeyTransportAlgorithm {
     @Nonnull
     @NotEmpty
     public String getURI() {
-        return KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_AES_192_KW;
+        return KeyManagementConstants.ALGO_ID_ALG_AES_256_KW;
     }
 
     /** {@inheritDoc} */
     @Nonnull
     public AlgorithmType getType() {
-        return AlgorithmType.KeyTransport;
+        return AlgorithmType.SymmetricKeyWrap;
     }
 
     /** {@inheritDoc} */
@@ -81,6 +81,11 @@ public class KeyTransportAES192KW implements KeyTransportAlgorithm {
     @NotEmpty
     public String getPadding() {
         return JCAConstants.CIPHER_PADDING_NONE;
+    }
+    
+    @Override
+    public Integer getKeyLength() {
+        return 256;
     }
 
 }

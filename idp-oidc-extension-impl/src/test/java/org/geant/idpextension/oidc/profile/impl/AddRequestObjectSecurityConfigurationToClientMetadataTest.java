@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.geant.idpextension.oidc.crypto.support.EncryptionConstants;
-import org.geant.idpextension.oidc.crypto.support.KeyTransportConstants;
+import org.geant.idpextension.oidc.crypto.support.KeyManagementConstants;
 import org.geant.idpextension.oidc.crypto.support.SignatureConstants;
 import org.opensaml.profile.action.EventIds;
 import org.testng.Assert;
@@ -114,32 +114,32 @@ public class AddRequestObjectSecurityConfigurationToClientMetadataTest extends B
     @Test
     public void testUnsupportedKeyTransportEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
-        input.setRequestObjectJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+        input.setRequestObjectJWEAlg(new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5));
         input.setRequestObjectJWEEnc(EncryptionMethod.A256CBC_HS512);
         OIDCClientMetadata output = new OIDCClientMetadata();
-        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5), Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
+        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), Arrays.asList(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5), Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.INVALID_MESSAGE);
     }
 
     @Test
     public void testUnsupportedEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
-        input.setRequestObjectJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_AES_128_GCM_KW));
+        input.setRequestObjectJWEAlg(new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_AES_128_GCM_KW));
         input.setRequestObjectJWEEnc(EncryptionMethod.A128CBC_HS256);
         OIDCClientMetadata output = new OIDCClientMetadata();
-        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5), Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
+        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), Arrays.asList(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5), Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.INVALID_MESSAGE);
     }
 
     @Test
     public void testValidEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
-        input.setRequestObjectJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+        input.setRequestObjectJWEAlg(new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5));
         input.setRequestObjectJWEEnc(EncryptionMethod.A128CBC_HS256);
         OIDCClientMetadata output = new OIDCClientMetadata();
-        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5), Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
+        setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256), Arrays.asList(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5), Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         Assert.assertNull(action.execute(requestCtx));
-        Assert.assertEquals(output.getRequestObjectJWEAlg(), new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+        Assert.assertEquals(output.getRequestObjectJWEAlg(), new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5));
         Assert.assertEquals(output.getRequestObjectJWEEnc(), EncryptionMethod.A128CBC_HS256);
     }
 

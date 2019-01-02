@@ -30,7 +30,7 @@ package org.geant.idpextension.oidc.algorithm.descriptors;
 
 import javax.annotation.Nonnull;
 
-import org.geant.idpextension.oidc.crypto.support.KeyTransportConstants;
+import org.geant.idpextension.oidc.crypto.support.KeyManagementConstants;
 import org.opensaml.security.crypto.JCAConstants;
 import org.opensaml.xmlsec.algorithm.KeyTransportAlgorithm;
 
@@ -53,7 +53,7 @@ public class KeyTransportRSA1_5 implements KeyTransportAlgorithm {
     @Nonnull
     @NotEmpty
     public String getURI() {
-        return KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5;
+        return KeyManagementConstants.ALGO_ID_ALG_RSA_1_5;
     }
 
     /** {@inheritDoc} */

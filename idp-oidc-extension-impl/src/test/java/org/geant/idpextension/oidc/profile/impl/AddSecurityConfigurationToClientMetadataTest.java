@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.geant.idpextension.oidc.crypto.support.EncryptionConstants;
-import org.geant.idpextension.oidc.crypto.support.KeyTransportConstants;
+import org.geant.idpextension.oidc.crypto.support.KeyManagementConstants;
 import org.geant.idpextension.oidc.crypto.support.SignatureConstants;
 import org.mockito.Mockito;
 import org.opensaml.profile.action.EventIds;
@@ -153,11 +153,11 @@ public class AddSecurityConfigurationToClientMetadataTest extends BaseOIDCClient
     @Test
     public void testIDTokenUnsupportedKeyTransportEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
-        input.setIDTokenJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+        input.setIDTokenJWEAlg(new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5));
         input.setIDTokenJWEEnc(EncryptionMethod.A256CBC_HS512);
         OIDCClientMetadata output = new OIDCClientMetadata();
         setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
-                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5),
                 Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.INVALID_MESSAGE);
     }
@@ -165,11 +165,11 @@ public class AddSecurityConfigurationToClientMetadataTest extends BaseOIDCClient
     @Test
     public void testIDTokenUnsupportedEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
-        input.setIDTokenJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_AES_128_GCM_KW));
+        input.setIDTokenJWEAlg(new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_AES_128_GCM_KW));
         input.setIDTokenJWEEnc(EncryptionMethod.A128CBC_HS256);
         OIDCClientMetadata output = new OIDCClientMetadata();
         setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
-                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5),
                 Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.INVALID_MESSAGE);
     }
@@ -177,16 +177,16 @@ public class AddSecurityConfigurationToClientMetadataTest extends BaseOIDCClient
     @Test
     public void testIDTokenValidEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
-        input.setIDTokenJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+        input.setIDTokenJWEAlg(new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5));
         input.setIDTokenJWEEnc(EncryptionMethod.A128CBC_HS256);
         OIDCClientMetadata output = new OIDCClientMetadata();
         setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
-                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5),
                 Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         Assert.assertNull(action.execute(requestCtx));
         Assert.assertEquals(output.getIDTokenJWSAlg(), JWSAlgorithm.RS256);
         Assert.assertEquals(output.getIDTokenJWEAlg(),
-                new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+                new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5));
         Assert.assertEquals(output.getIDTokenJWEEnc(), EncryptionMethod.A128CBC_HS256);
 
     }
@@ -230,11 +230,11 @@ public class AddSecurityConfigurationToClientMetadataTest extends BaseOIDCClient
     @Test
     public void testUserInfoUnsupportedKeyTransportEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
-        input.setUserInfoJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+        input.setUserInfoJWEAlg(new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5));
         input.setUserInfoJWEEnc(EncryptionMethod.A256CBC_HS512);
         OIDCClientMetadata output = new OIDCClientMetadata();
         setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
-                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5),
                 Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.INVALID_MESSAGE);
     }
@@ -242,11 +242,11 @@ public class AddSecurityConfigurationToClientMetadataTest extends BaseOIDCClient
     @Test
     public void testUserInfoUnsupportedEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
-        input.setUserInfoJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_AES_128_GCM_KW));
+        input.setUserInfoJWEAlg(new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_AES_128_GCM_KW));
         input.setUserInfoJWEEnc(EncryptionMethod.A128CBC_HS256);
         OIDCClientMetadata output = new OIDCClientMetadata();
         setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
-                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5),
                 Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         ActionTestingSupport.assertEvent(action.execute(requestCtx), EventIds.INVALID_MESSAGE);
     }
@@ -254,15 +254,15 @@ public class AddSecurityConfigurationToClientMetadataTest extends BaseOIDCClient
     @Test
     public void testUserInfoValidEncryptionConfig() throws ComponentInitializationException {
         OIDCClientMetadata input = new OIDCClientMetadata();
-        input.setUserInfoJWEAlg(new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+        input.setUserInfoJWEAlg(new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5));
         input.setUserInfoJWEEnc(EncryptionMethod.A128CBC_HS256);
         OIDCClientMetadata output = new OIDCClientMetadata();
         setUpContext(input, output, Arrays.asList(SignatureConstants.ALGO_ID_SIGNATURE_RS_256),
-                Arrays.asList(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5),
+                Arrays.asList(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5),
                 Arrays.asList(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256));
         Assert.assertNull(action.execute(requestCtx));
         Assert.assertEquals(output.getUserInfoJWEAlg(),
-                new JWEAlgorithm(KeyTransportConstants.ALGO_ID_KEYTRANSPORT_ALG_RSA_1_5));
+                new JWEAlgorithm(KeyManagementConstants.ALGO_ID_ALG_RSA_1_5));
         Assert.assertEquals(output.getUserInfoJWEEnc(), EncryptionMethod.A128CBC_HS256);
 
     }
