@@ -191,6 +191,13 @@ public class ChainingClientInformationResolver extends AbstractIdentifiableIniti
             log.warn("ChainingClientInformationResolver was not configured with any member " + 
                     "ClientInformationResolvers");
             resolvers = Collections.emptyList();
+        } else {
+            final List<String> resolverDetails = new ArrayList<>();
+            for (final ClientInformationResolver resolver : resolvers) {
+                resolverDetails.add(resolver.getId() + ": " + countClients(resolver) + " clients");
+            }
+            log.info("ChainingClientInformationResolver was configured with the following resolvers: {}",
+                    resolverDetails);
         }
     }
 
@@ -198,6 +205,31 @@ public class ChainingClientInformationResolver extends AbstractIdentifiableIniti
     @Override protected void doDestroy() {
         super.doDestroy();
         resolvers = Collections.emptyList();
+    }
+    
+    /**
+     * Counts the clients found from the given resolver.
+     * 
+     * @param resolver The resolver whose clients are counted.
+     * @return The amount of resolvable clients.
+     */
+    protected int countClients(final ClientInformationResolver resolver) {
+        int count = 0;
+        Iterable<OIDCClientInformation> iterable;
+        try {
+            iterable = resolver.resolve(new CriteriaSet());
+        } catch (ResolverException e) {
+            log.warn("ChainingClientInformationResolver could not count clients for {}", resolver.getId());
+            return 0;
+        }
+        if (iterable != null) {
+            final Iterator<OIDCClientInformation> iterator = iterable.iterator();
+            while (iterator.hasNext()) {
+                iterator.next();
+                count++;
+            }
+        }
+        return count;
     }
 
 }
