@@ -37,7 +37,8 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 import org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal;
-import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestedACRLookupFunction;
+import org.geant.idpextension.oidc.config.navigate.AcrClaimAlwaysEssentialLookupFunction;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestedAcrLookupFunction;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -63,7 +64,7 @@ import java.util.List;
  * If the incoming message contains acr values we create principal context populated with matching
  * {@link AuthenticationContextClassReferencePrincipal}.
  * 
- * Acr values may be be given as authentication request parameter/request object (acr_values) or as requested id token
+ * Acr values may be be given in acr_values request parameter or as requested id token
  * claim (acr) in requested claims parameter. If they are given in both, the outcome is unspecified.
  * 
  * Essential acrs are set to {@link RequestedPrincipalContext} and non-essential ones to
@@ -83,6 +84,10 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationResp
     /** Strategy used to obtain the requested acr values. */
     @Nonnull
     private Function<ProfileRequestContext, List<ACR>> acrLookupStrategy;
+    
+    /** Strategy used to obtain whether all arc claims requests should be treated as Essential. */
+    @Nonnull
+    private Function<ProfileRequestContext, Boolean> acrAlwaysEssentialLookupStrategy;
 
     /** acr values. */
     private List<ACR> acrValues;
@@ -94,7 +99,8 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationResp
      * Constructor.
      */
     public ProcessRequestedAuthnContext() {
-        acrLookupStrategy = new DefaultRequestedACRLookupFunction();
+        acrLookupStrategy = new DefaultRequestedAcrLookupFunction();
+        acrAlwaysEssentialLookupStrategy = new AcrClaimAlwaysEssentialLookupFunction();
     }
 
     /**
@@ -102,9 +108,19 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationResp
      * 
      * @param strategy lookup strategy
      */
-    public void setACRLookupStrategy(@Nonnull final Function<ProfileRequestContext, List<ACR>> strategy) {
+    public void setAcrLookupStrategy(@Nonnull final Function<ProfileRequestContext, List<ACR>> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        acrLookupStrategy = Constraint.isNotNull(strategy, "ACRLookupStrategy lookup strategy cannot be null");
+        acrLookupStrategy = Constraint.isNotNull(strategy, "AcrLookupStrategy lookup strategy cannot be null");
+    }
+    
+    /**
+     * Set the strategy used to obtain whether all arc claims requests should be treated as Essential.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setAcrAlwaysEssentialLookupStrategy(@Nonnull final Function<ProfileRequestContext, Boolean> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        acrAlwaysEssentialLookupStrategy = Constraint.isNotNull(strategy, "AcrAlwaysEssentialLookupStrategy lookup strategy cannot be null");
     }
 
     // Checkstyle: CyclomaticComplexity OFF
@@ -115,7 +131,6 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationResp
             log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
-
         acrValues = acrLookupStrategy.apply(profileRequestContext);
         if (getOidcResponseContext().getRequestedClaims() != null
                 && getOidcResponseContext().getRequestedClaims().getIDTokenClaims() != null) {
@@ -155,13 +170,13 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationResp
             }
         } else if (acrClaim != null && acrClaim.getValue() != null) {
             isEssential = acrClaim.getClaimRequirement().equals(ClaimRequirement.ESSENTIAL);
-            log.debug("{} Located {} acr claim {} in id token of request", getLogPrefix(),
+            log.debug("{} Located {} acr claim {} in id token section of claims request", getLogPrefix(),
                     acrClaim.getClaimRequirement().toString(), acrClaim.getValue());
             principals.add(new AuthenticationContextClassReferencePrincipal(acrClaim.getValue()));
         } else if (acrClaim != null && !(acrClaim.getValues() != null && acrClaim.getValues().isEmpty())) {
             isEssential = acrClaim.getClaimRequirement().equals(ClaimRequirement.ESSENTIAL);
             for (String acr : acrClaim.getValues()) {
-                log.debug("{} Located {} acr claim {} in id token of request", getLogPrefix(),
+                log.debug("{} Located {} acr claim {} in id token section of claims request", getLogPrefix(),
                         acrClaim.getClaimRequirement().toString(), acr);
                 principals.add(new AuthenticationContextClassReferencePrincipal(acr));
             }
@@ -170,7 +185,7 @@ public class ProcessRequestedAuthnContext extends AbstractOIDCAuthenticationResp
             log.debug("{} request did not contain any acr values, nothing to do", getLogPrefix());
             return;
         }
-        if (isEssential) {
+        if (isEssential || acrAlwaysEssentialLookupStrategy.apply(profileRequestContext)) {
             final RequestedPrincipalContext rpCtx = new RequestedPrincipalContext();
             rpCtx.setOperator(AuthnContextComparisonTypeEnumeration.EXACT.toString());
             rpCtx.setRequestedPrincipals(principals);

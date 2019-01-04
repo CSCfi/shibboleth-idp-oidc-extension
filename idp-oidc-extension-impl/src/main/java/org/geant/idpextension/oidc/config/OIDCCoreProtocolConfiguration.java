@@ -60,7 +60,7 @@ import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
 
 /**
- * Profile configuration for the OpenID Connect core protocol.
+ * Profile configuration for the OpenID Connect authorization and token end points.
  */
 public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileConfiguration
     implements InitializableComponent, AuthenticationProfileConfiguration {
@@ -116,6 +116,10 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
  
     /** Audiences to which an ID token may be shared. */
     @Nonnull @NonnullElements @NotLive @Unmodifiable private Set<String> additionalAudiences;
+    
+    /** Whether all acr claim requests should be treated as Essential. */
+    private boolean acrRequestAlwaysEssential;
+
     /**
      * Constructor.
      */
@@ -359,5 +363,23 @@ public class OIDCCoreProtocolConfiguration extends AbstractOIDCFlowAwareProfileC
      */
     @Nonnull @NonnullElements @NotLive @Unmodifiable public Set<String> getAdditionalAudiencesForIdToken() {
         return ImmutableSet.copyOf(additionalAudiences);
+    }
+    
+    /**
+     * Get whether all acr claim requests should be treated as Essential.
+     * 
+     * @return whether all acr claim requests should be treated as Essential
+     */
+    public boolean getAcrRequestAlwaysEssential() {
+        return acrRequestAlwaysEssential;
+    }
+
+    /**
+     * Set whether all acr claim requests should be treated as Essential.
+     * 
+     * @param acrRequestAlwaysEssential whether all acr claim requests should be treated as Essential
+     */
+    public void setAcrRequestAlwaysEssential(boolean acrRequestAlwaysEssential) {
+        this.acrRequestAlwaysEssential = acrRequestAlwaysEssential;
     }
 }
