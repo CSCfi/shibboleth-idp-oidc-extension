@@ -28,7 +28,9 @@
 
 package org.geant.idpextension.oidc.decoding.impl;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 
@@ -46,18 +48,18 @@ public class RequestUtil {
         }
         String nl = System.lineSeparator();
         String ret = httpReq.getMethod().toString() + nl;
-        Map<String, String> headers = httpReq.getHeaders();
+        Map<String, List<String>> headers = httpReq.getHeaderMap();
         if (headers != null) {
             ret += "Headers:" + nl;
-            for (Map.Entry<String, String> entry : headers.entrySet()) {
+            for (Entry<String, List<String>> entry : headers.entrySet()) {
                 ret += "\t" + entry.getKey() + ":" + entry.getValue() + nl;
             }
         }
-        Map<String, String> parameters = httpReq.getQueryParameters();
+        Map<String, List<String>> parameters = httpReq.getQueryParameters();
         if (parameters != null) {
             ret += "Parameters:" + nl;
-            for (Map.Entry<String, String> entry : parameters.entrySet()) {
-                ret += "\t" + entry.getKey() + ":" + entry.getValue() + nl;
+            for (Entry<String, List<String>> entry : parameters.entrySet()) {
+                ret += "\t" + entry.getKey() + ":" + entry.getValue().get(0) + nl;
             }
         }
         return ret;

@@ -31,7 +31,10 @@ package org.geant.idpextension.oidc.encoding.impl;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
@@ -119,8 +122,8 @@ public class NimbusResponseEncoder extends AbstractHttpServletResponseMessageEnc
      */
     private VelocityContext doPostEncode(AuthorizationResponse message) {
         final VelocityContext context = new VelocityContext();
-        for (Map.Entry<String, String> entry : message.toParameters().entrySet()) {
-            context.put(entry.getKey(), entry.getValue());
+        for (Entry<String, List<String>> entry : message.toParameters().entrySet()) {
+            context.put(entry.getKey(), entry.getValue().get(0));
         }
         context.put("action", HTMLEncoder.encodeForHTMLAttribute(message.getRedirectionURI().toString()));
         return context;

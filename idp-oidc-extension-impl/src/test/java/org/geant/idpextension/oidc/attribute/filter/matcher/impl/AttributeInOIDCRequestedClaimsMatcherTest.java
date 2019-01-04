@@ -89,8 +89,9 @@ public class AttributeInOIDCRequestedClaimsMatcherTest {
 
             msgCtx.setMessage(new AuthenticationRequest(new URI("htts://example.org"), ResponseType.getDefault(), null,
                     new Scope("openid"), new ClientID(), new URI("htts://example.org"), new State(), new Nonce(), null,
-                    null, 0, null, null, null, null, null, getClaimsRequest(idtoken, userinfo), null, null, null, null));
+                    null, 0, null, null, null, null, null, getClaimsRequest(idtoken, userinfo), null, null, null, null, null, userinfo, null));
             respCtx.setRequestedClaims(getClaimsRequest(idtoken, userinfo));
+            
         }
         
         // shortcut, may break the test

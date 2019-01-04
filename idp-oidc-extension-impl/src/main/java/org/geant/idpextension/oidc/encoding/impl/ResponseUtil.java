@@ -28,7 +28,10 @@
 
 package org.geant.idpextension.oidc.encoding.impl;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
 class ResponseUtil {
@@ -45,11 +48,11 @@ class ResponseUtil {
         }
         String nl = System.lineSeparator();
         String ret = nl;
-        Map<String, String> headers = httpResponse.getHeaders();
+        Map<String, List<String>> headers = httpResponse.getHeaderMap();
         if (headers != null) {
             ret += "Headers:" + nl;
-            for (Map.Entry<String, String> entry : headers.entrySet()) {
-                ret += "\t" + entry.getKey() + ":" + entry.getValue() + nl;
+            for (Entry<String, List<String>> entry : headers.entrySet()) {
+                ret += "\t" + entry.getKey() + ":" + entry.getValue().get(0) + nl;
             }
         }
         if (httpResponse.getContent() != null) {

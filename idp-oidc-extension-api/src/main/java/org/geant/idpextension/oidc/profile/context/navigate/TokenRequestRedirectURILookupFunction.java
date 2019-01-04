@@ -30,6 +30,7 @@ package org.geant.idpextension.oidc.profile.context.navigate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
@@ -53,8 +54,12 @@ public class TokenRequestRedirectURILookupFunction extends AbstractTokenRequestL
     /** {@inheritDoc} */
     @Override
     URI doLookup(TokenRequest req) {
-        // TODO: constant to replace redirect_uri key
-        String redirectURI = req.getAuthorizationGrant().toParameters().get("redirect_uri");
+        List<String> redirectURIs = req.getAuthorizationGrant().toParameters().get("redirect_uri");
+        if (redirectURIs == null || redirectURIs.isEmpty()) {
+            log.warn("No redirect_uri parameter");
+            return null;
+        }
+        String redirectURI = redirectURIs.get(0);
         if (redirectURI == null) {
             log.warn("No redirect_uri parameter");
             return null;
@@ -66,6 +71,5 @@ public class TokenRequestRedirectURILookupFunction extends AbstractTokenRequestL
             log.error("Unable to parse uri from token request redirect_uri {}", redirectURI);
         }
         return uri;
-
     }
 }
