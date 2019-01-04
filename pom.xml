@@ -55,6 +55,13 @@
     </modules>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>net.shibboleth.idp</groupId>
+                <artifactId>idp-bom</artifactId>
+                <version>${shib.idp.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- Compile Dependencies -->
             <dependency>
                 <groupId>com.nimbusds</groupId>
@@ -62,63 +69,8 @@
                 <version>5.62</version>
             </dependency>
             <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-saml-api</artifactId>
-                <version>${opensaml.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-security-api</artifactId>
-                <version>${opensaml.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-storage-api</artifactId>
-                <version>${opensaml.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-xmlsec-api</artifactId>
-                <version>${opensaml.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.shibboleth.idp</groupId>
-                <version>${shib.idp.version}</version>
-                <artifactId>idp-authn-api</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>net.shibboleth.idp</groupId>
-                <version>${shib.idp.version}</version>
-                <artifactId>idp-profile-api</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>net.shibboleth.idp</groupId>
-                <version>${shib.idp.version}</version>
-                <artifactId>idp-attribute-resolver-spring</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>net.shibboleth.idp</groupId>
-                <version>${shib.idp.version}</version>
-                <artifactId>idp-attribute-filter-spring</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>net.shibboleth.idp</groupId>
-                <version>${shib.idp.version}</version>
-                <artifactId>idp-attribute-filter-impl</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>net.shibboleth.idp</groupId>
-                <version>${shib.idp.version}</version>
-                <artifactId>idp-consent-impl</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>net.shibboleth.idp</groupId>
-                <version>${shib.idp.version}</version>
-                <artifactId>idp-ui</artifactId>
-            </dependency>
-            <dependency>
                 <groupId>org.geant</groupId>
-                <version>0.9.0-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <artifactId>idp-oidc-extension-api</artifactId>
             </dependency>
             <dependency>
@@ -130,16 +82,6 @@
                 <groupId>org.geant.fedoidc</groupId>
                 <artifactId>oidcfederatedmetadatastatement</artifactId>
                 <version>1.1-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <version>${opensaml.version}</version>
-                <artifactId>opensaml-profile-api</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>net.shibboleth.idp</groupId>
-                <version>${shib.idp.version}</version>
-                <artifactId>idp-attribute-filter-api</artifactId>
             </dependency>
             <!-- Test Dependencies -->
             <dependency>
@@ -205,12 +147,6 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-storage-impl</artifactId>
-                <version>${opensaml.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.xmlunit</groupId>
                 <artifactId>xmlunit-legacy</artifactId>
                 <version>2.6.0</version>
@@ -225,6 +161,10 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.compiler.version}</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

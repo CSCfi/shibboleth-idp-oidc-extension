@@ -14,10 +14,11 @@
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.6</version>
         <configuration>
           <tarLongFileMode>posix</tarLongFileMode>
-          <descriptor>src/assembly/dep.xml</descriptor>
+          <descriptors>
+              <descriptor>src/assembly/dep.xml</descriptor>
+          </descriptors>
         </configuration>
         <executions>
           <execution>
