@@ -10,11 +10,12 @@
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
                            
        default-init-method="initialize"
-       default-destroy-method="destroy">
+       default-destroy-method="destroy"
+       default-lazy-init="true">
 
     <!-- Generic beans for configuring the OIDC metadata system, in most cases don't need any modifications. -->
 
-    <bean id="shibboleth.oidc.RelyingPartyClientInformationProvider"
+    <bean id="shibboleth.oidc.RelyingPartyClientInformationProvider" lazy-init="false"
         class="org.geant.idpextension.oidc.metadata.resolver.RelyingPartyClientInformationProvider"
         p:embeddedResolver-ref="shibboleth.oidc.ChainingClientInformationResolver">
     </bean>
