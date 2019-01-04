@@ -44,13 +44,13 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 import junit.framework.Assert;
 
-public class DefaultRequestedACRLookupFunctionTest extends BaseDefaultRequestLookupFunctionTest {
+public class DefaultRequestedAcrLookupFunctionTest extends BaseDefaultRequestLookupFunctionTest {
 
-    private DefaultRequestedACRLookupFunction lookup;
+    private DefaultRequestedAcrLookupFunction lookup;
 
     @BeforeMethod
     protected void setUp() throws Exception {
-        lookup = new DefaultRequestedACRLookupFunction();
+        lookup = new DefaultRequestedAcrLookupFunction();
     }
 
     @Test

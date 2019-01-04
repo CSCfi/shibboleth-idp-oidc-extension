@@ -42,11 +42,11 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
  * from oidc authentication request if available. If information is not available, null is returned. If there are acr
  * values in request object it is used instead of acr_values parameter.
  */
-public class DefaultRequestedACRLookupFunction extends AbstractAuthenticationRequestLookupFunction<List<ACR>> {
+public class DefaultRequestedAcrLookupFunction extends AbstractAuthenticationRequestLookupFunction<List<ACR>> {
 
     /** Class logger. */
     @Nonnull
-    private Logger log = LoggerFactory.getLogger(DefaultRequestedACRLookupFunction.class);
+    private Logger log = LoggerFactory.getLogger(DefaultRequestedAcrLookupFunction.class);
 
     /** {@inheritDoc} */
     @Override
