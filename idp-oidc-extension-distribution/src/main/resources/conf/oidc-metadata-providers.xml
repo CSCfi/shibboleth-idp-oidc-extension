@@ -23,10 +23,8 @@
     <bean id="shibboleth.oidc.RemoteJwkSetCache"
         class="org.geant.idpextension.oidc.metadata.resolver.RemoteJwkSetCache"
         p:storage-ref="#{'%{idp.oidc.jwk.StorageService:shibboleth.StorageService}'.trim()}"
-        p:httpClientBuilder-ref="shibboleth.oidc.HttpClientBuilder" />
-
-    <bean id="shibboleth.oidc.HttpClientBuilder"
-        class="net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder" />
+        p:httpClient="#{getObject('shibboleth.oidc.NonBrowser.HttpClient') ?: getObject('shibboleth.NonCachingHttpClient')}"
+        p:httpClientSecurityParameters="#{getObject('shibboleth.oidc.NonBrowser.HttpClientSecurityParameters')}" />
 
     <bean id="shibboleth.oidc.ChainingClientInformationResolver"
         class="org.geant.idpextension.oidc.metadata.impl.ChainingClientInformationResolver"
