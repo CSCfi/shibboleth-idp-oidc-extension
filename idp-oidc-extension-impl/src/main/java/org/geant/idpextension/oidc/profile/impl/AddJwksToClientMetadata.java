@@ -28,37 +28,27 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.util.EntityUtils;
+import org.geant.idpextension.oidc.metadata.support.RemoteJwkUtils;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.security.httpclient.HttpClientSecurityParameters;
-import org.opensaml.security.httpclient.HttpClientSecuritySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.util.JSONObjectUtils;
 
-import net.minidev.json.JSONObject;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
-import net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
@@ -140,7 +130,8 @@ public class AddJwksToClientMetadata extends AbstractOIDCClientMetadataPopulatio
         }
         
         if (jwkUri != null) {
-            final JWKSet remoteSet = fetchRemoteJwkSet(jwkUri);
+            final JWKSet remoteSet = RemoteJwkUtils.fetchRemoteJwkSet(getLogPrefix(), jwkUri, httpClient, 
+                    httpClientSecurityParameters);
             if (containsKeys(remoteSet)) {
                 log.debug("{} The jwks_uri endpoint available and contains key(s)", getLogPrefix());
                 getOutputMetadata().setJWKSetURI(jwkUri);
@@ -166,53 +157,5 @@ public class AddJwksToClientMetadata extends AbstractOIDCClientMetadataPopulatio
             return false;
         }
         return true;
-    }
-    
-    /**
-     * Fetches the JWK set from the given URI using a client built with the attached {@link HttpClientBuilder}.
-     * @param uri The endpoint for the JWK set.
-     * @return The JWK set fetched from the endpoint, or null if it couldn't be fetched.
-     */
-    protected JWKSet fetchRemoteJwkSet(final URI uri) {
-        final HttpResponse response;
-        try {
-            final HttpUriRequest get = RequestBuilder.get().setUri(uri).build();
-            final HttpClientContext clientContext = HttpClientContext.create();
-            HttpClientSecuritySupport.marshalSecurityParameters(clientContext, httpClientSecurityParameters, true);
-            HttpClientSecuritySupport.addDefaultTLSTrustEngineCriteria(clientContext, get);
-            response = httpClient.execute(get, clientContext);
-            HttpClientSecuritySupport.checkTLSCredentialEvaluated(clientContext, get.getURI().getScheme());
-        } catch (IOException e) {
-            log.error("{} Could not get the JWK contents from {}", getLogPrefix(), uri, e);
-            return null;
-        }
-        if (response == null) {
-            log.error("{} Could not get the JWK contents from {}", getLogPrefix(), uri);
-            return null;
-        }
-        final String output;
-        try {
-            output = EntityUtils.toString(response.getEntity(), "UTF-8");
-        } catch (ParseException | IOException e) {
-            log.error("{} Could not parse the JWK contents from {}", getLogPrefix(), uri);
-            return null;
-        } finally {
-            EntityUtils.consumeQuietly(response.getEntity());
-        }
-        log.trace("{} Fetched the following response body: {}", getLogPrefix(), output);
-        final JWKSet jwkSet;
-        try {
-            final JSONObject json = JSONObjectUtils.parse(output);
-            // The following check is needed to avoid NPE from Nimbus if keys claim not found
-            if (JSONObjectUtils.getJSONArray(json, "keys") == null) {
-                log.error("{} Could not find 'keys' array from the JSON from {}", getLogPrefix(), uri);
-                return null;
-            }
-            jwkSet = JWKSet.parse(json);
-        } catch (java.text.ParseException e) {
-            log.error("{} Could not parse the contents from {}", getLogPrefix(), uri, e);
-            return null;
-        }
-        return jwkSet;
     }
 }
