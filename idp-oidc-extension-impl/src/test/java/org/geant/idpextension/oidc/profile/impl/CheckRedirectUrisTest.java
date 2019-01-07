@@ -37,8 +37,10 @@ import java.util.Set;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.protocol.HttpContext;
 import org.geant.idpextension.oidc.profile.OidcEventIds;
 import org.mockito.Mockito;
 import org.opensaml.profile.action.EventIds;
@@ -51,7 +53,6 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientRegistrationRequest;
 
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder;
 
 /**
  * Unit tests for {@link CheckRedirectURIs}.
@@ -63,8 +64,10 @@ public class CheckRedirectUrisTest extends BaseOIDCRegistrationRequestTest {
     URI redirectUri2;
     
     @BeforeMethod
-    public void setUp() throws ComponentInitializationException, URISyntaxException {
+    public void setUp() throws ComponentInitializationException, URISyntaxException, ClientProtocolException, 
+        IOException {
         action = new CheckRedirectURIs();
+        action.setHttpClient(buildMockHttpClient("mock"));
         action.initialize();
         redirectUri1 = new URI("https://example.org/cb1");
         redirectUri2 = new URI("https://example.org/cb2");
@@ -102,7 +105,7 @@ public class CheckRedirectUrisTest extends BaseOIDCRegistrationRequestTest {
     public void testFailingSectorIdUriContents() throws Exception {
         OIDCClientMetadata metadata = new OIDCClientMetadata();
         metadata.setSectorIDURI(new URI("https://invalid.scheme.org/cb"));
-        initializeActionWithBuilder(initializeMockBuilder(null));
+        initializeActionWithClient(buildMockHttpClient(null));
         assertEvent(OidcEventIds.INVALID_REDIRECT_URIS, metadata, redirectUri1);
     }
 
@@ -111,7 +114,7 @@ public class CheckRedirectUrisTest extends BaseOIDCRegistrationRequestTest {
     public void testEmptySectorIdUriContents() throws Exception {
         OIDCClientMetadata metadata = new OIDCClientMetadata();
         metadata.setSectorIDURI(new URI("https://invalid.scheme.org/cb"));
-        initializeActionWithBuilder(initializeMockBuilder(""));
+        initializeActionWithClient(buildMockHttpClient(""));
         assertEvent(OidcEventIds.INVALID_REDIRECT_URIS, metadata, redirectUri1);
     }
 
@@ -119,7 +122,7 @@ public class CheckRedirectUrisTest extends BaseOIDCRegistrationRequestTest {
     public void testInvalidJsonSectorIdUri() throws Exception {
         OIDCClientMetadata metadata = new OIDCClientMetadata();
         metadata.setSectorIDURI(new URI("https://invalid.scheme.org/cb"));
-        initializeActionWithBuilder(initializeMockBuilder("Not_JSON"));
+        initializeActionWithClient(buildMockHttpClient("Not_JSON"));
         assertEvent(OidcEventIds.INVALID_REDIRECT_URIS, metadata, redirectUri1);
     }
 
@@ -127,7 +130,7 @@ public class CheckRedirectUrisTest extends BaseOIDCRegistrationRequestTest {
     public void testInvalidSectorIdUriContents() throws Exception {
         OIDCClientMetadata metadata = new OIDCClientMetadata();
         metadata.setSectorIDURI(new URI("https://invalid.scheme.org/cb"));
-        initializeActionWithBuilder(initializeMockBuilder("[ \"https://not.existing.uri.org/\" ]"));
+        initializeActionWithClient(buildMockHttpClient("[ \"https://not.existing.uri.org/\" ]"));
         assertEvent(OidcEventIds.INVALID_REDIRECT_URIS, metadata, redirectUri1);
     }
 
@@ -135,30 +138,29 @@ public class CheckRedirectUrisTest extends BaseOIDCRegistrationRequestTest {
     public void testValidSectorIdUriContents() throws Exception {
         OIDCClientMetadata metadata = new OIDCClientMetadata();
         metadata.setSectorIDURI(new URI("https://invalid.scheme.org/cb"));
-        initializeActionWithBuilder(initializeMockBuilder("[ \"" + redirectUri1 + "\", \"" + redirectUri2 + "\" ]"));
+        initializeActionWithClient(buildMockHttpClient("[ \"" + redirectUri1 + "\", \"" + redirectUri2 + "\" ]"));
         assertEvent(null, metadata, redirectUri1);
     }
 
-    protected HttpClientBuilder initializeMockBuilder(String result) throws Exception {
-        HttpClientBuilder httpBuilder = Mockito.mock(HttpClientBuilder.class);
-        HttpClient httpClient = Mockito.mock(HttpClient.class);
-        if (result == null) {
-            Mockito.when(httpClient.execute((HttpUriRequest)Mockito.any())).thenThrow(new IOException("mock"));
+    protected void initializeActionWithClient(HttpClient httpClient) throws ComponentInitializationException {
+        action = new CheckRedirectURIs();
+        action.setHttpClient(httpClient);
+        action.initialize();
+    }
+    
+    protected HttpClient buildMockHttpClient(String contents) throws ClientProtocolException, IOException {
+        HttpClient mockClient = Mockito.mock(HttpClient.class);
+        if (contents == null) {
+            Mockito.when(mockClient.execute((HttpUriRequest)Mockito.any())).thenThrow(new IOException("mock"));
         } else {
             HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
             HttpEntity httpEntity = Mockito.mock(HttpEntity.class);
-            Mockito.when(httpEntity.getContent()).thenReturn(new ByteArrayInputStream(result.getBytes()));
+            Mockito.when(httpEntity.getContent()).thenReturn(new ByteArrayInputStream(contents.getBytes()));
             Mockito.when(httpResponse.getEntity()).thenReturn(httpEntity);
-            Mockito.when(httpClient.execute((HttpUriRequest)Mockito.any())).thenReturn(httpResponse);            
+            Mockito.when(mockClient.execute((HttpUriRequest)Mockito.any(), 
+                    (HttpContext)Mockito.any())).thenReturn(httpResponse);
         }
-        Mockito.when(httpBuilder.buildClient()).thenReturn(httpClient);
-        return httpBuilder;
-    }
-    
-    protected void initializeActionWithBuilder(HttpClientBuilder httpBuilder) throws ComponentInitializationException {
-        action = new CheckRedirectURIs();
-        action.setHttpClientBuilder(httpBuilder);
-        action.initialize();
+        return mockClient;
     }
 
     protected void assertEvent(String expectedEvent, OIDCClientMetadata metadata, URI... redirectUris) 
