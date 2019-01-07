@@ -68,7 +68,9 @@
 
     <bean id="SetRequestObjectToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetRequestObjectToResponseContext"
-        p:httpClient-ref="shibboleth.NonCachingHttpClient" scope="prototype" />
+        scope="prototype"
+        p:httpClient="#{getObject('shibboleth.oidc.NonBrowser.HttpClient') ?: getObject('shibboleth.NonCachingHttpClient')}"
+        p:httpClientSecurityParameters="#{getObject('shibboleth.oidc.NonBrowser.HttpClientSecurityParameters')}" />
 
     <bean id="ValidateRequestObject" class="org.geant.idpextension.oidc.profile.impl.ValidateRequestObject"
         scope="prototype" />
