@@ -33,21 +33,31 @@ import java.net.URI;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.util.EntityUtils;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.opensaml.security.httpclient.HttpClientSecurityParameters;
+import org.opensaml.security.httpclient.HttpClientSecuritySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.util.JSONObjectUtils;
 
+import net.minidev.json.JSONObject;
+import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
@@ -61,25 +71,52 @@ public class AddJwksToClientMetadata extends AbstractOIDCClientMetadataPopulatio
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(AddJwksToClientMetadata.class);
     
-    /** The builder for the {@link HttpClient}s. */
-    private HttpClientBuilder clientBuilder;
+    /** The {@link HttpClient} to use. */
+    @NonnullAfterInit private HttpClient httpClient;
+    
+    /** HTTP client security parameters. */
+    @Nullable private HttpClientSecurityParameters httpClientSecurityParameters;
     
     /**
      * Constructor.
      */
     public AddJwksToClientMetadata() {
         super();
-        clientBuilder = new HttpClientBuilder();
     }
     
     /**
-     * Set the builder for the {@link HttpClient}s.
-     * @param builder The builder for the {@link HttpClient}s.
+     * Set the {@link HttpClient} to use.
+     * 
+     * @param client client to use
      */
-    public void setHttpClientBuilder(final HttpClientBuilder builder) {
-        clientBuilder = Constraint.isNotNull(builder, "The HttpClientBuilder cannot be null");
+    public void setHttpClient(@Nonnull final HttpClient client) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
+
+        httpClient = Constraint.isNotNull(client, "HttpClient cannot be null");
     }
-    
+
+    /**
+     * Set the optional client security parameters.
+     * 
+     * @param params the new client security parameters
+     */
+    public void setHttpClientSecurityParameters(@Nullable final HttpClientSecurityParameters params) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
+
+        httpClientSecurityParameters = params;
+    }
+
+    /** {@inheritDoc} */
+    public void doInitialize() throws ComponentInitializationException {
+        super.doInitialize();
+        
+        if (httpClient == null) {
+            throw new ComponentInitializationException(getLogPrefix() + " HttpClient cannot be null");
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -140,8 +177,12 @@ public class AddJwksToClientMetadata extends AbstractOIDCClientMetadataPopulatio
         final HttpResponse response;
         try {
             final HttpUriRequest get = RequestBuilder.get().setUri(uri).build();
-            response = clientBuilder.buildClient().execute(get);
-        } catch (Exception e) {
+            final HttpClientContext clientContext = HttpClientContext.create();
+            HttpClientSecuritySupport.marshalSecurityParameters(clientContext, httpClientSecurityParameters, true);
+            HttpClientSecuritySupport.addDefaultTLSTrustEngineCriteria(clientContext, get);
+            response = httpClient.execute(get, clientContext);
+            HttpClientSecuritySupport.checkTLSCredentialEvaluated(clientContext, get.getURI().getScheme());
+        } catch (IOException e) {
             log.error("{} Could not get the JWK contents from {}", getLogPrefix(), uri, e);
             return null;
         }
@@ -161,7 +202,13 @@ public class AddJwksToClientMetadata extends AbstractOIDCClientMetadataPopulatio
         log.trace("{} Fetched the following response body: {}", getLogPrefix(), output);
         final JWKSet jwkSet;
         try {
-            jwkSet = JWKSet.parse(output);
+            final JSONObject json = JSONObjectUtils.parse(output);
+            // The following check is needed to avoid NPE from Nimbus if keys claim not found
+            if (JSONObjectUtils.getJSONArray(json, "keys") == null) {
+                log.error("{} Could not find 'keys' array from the JSON from {}", getLogPrefix(), uri);
+                return null;
+            }
+            jwkSet = JWKSet.parse(json);
         } catch (java.text.ParseException e) {
             log.error("{} Could not parse the contents from {}", getLogPrefix(), uri, e);
             return null;

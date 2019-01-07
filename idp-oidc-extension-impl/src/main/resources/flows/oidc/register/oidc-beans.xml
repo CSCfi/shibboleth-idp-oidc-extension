@@ -120,7 +120,9 @@
 
     <bean id="AddJwksToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddJwksToClientMetadata"
-        scope="prototype" />
+        scope="prototype"
+        p:httpClient="#{getObject('shibboleth.oidc.NonBrowser.HttpClient') ?: getObject('shibboleth.NonCachingHttpClient')}"
+        p:httpClientSecurityParameters="#{getObject('shibboleth.oidc.NonBrowser.HttpClientSecurityParameters')}" />
 
     <bean id="AddLogoUrisToClientMetadata"
         class="org.geant.idpextension.oidc.profile.impl.AddLogoUrisToClientMetadata"
