@@ -28,12 +28,14 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
@@ -41,7 +43,6 @@ import org.apache.http.protocol.HttpContext;
 import org.mockito.Mockito;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.security.httpclient.HttpClientSecurityParameters;
-import org.opensaml.security.httpclient.impl.SecurityEnhancedHttpClientSupport;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -50,7 +51,6 @@ import org.testng.annotations.Test;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 import net.shibboleth.idp.profile.ActionTestingSupport;
-import net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder;
 
 /**
  * Unit tests for {@link AddJwksToClientMetadata}.
@@ -62,11 +62,9 @@ public class AddJwksToClientMetadataTest extends BaseOIDCClientMetadataPopulatio
     @Override
     protected AbstractOIDCClientMetadataPopulationAction constructAction() {
         AddJwksToClientMetadata action = new AddJwksToClientMetadata();
-        final HttpClientBuilder builder = new HttpClientBuilder();
-        builder.setTLSSocketFactory(SecurityEnhancedHttpClientSupport.buildTLSSocketFactory(false, false));
         try {
-            ((AddJwksToClientMetadata) action).setHttpClient(builder.buildClient());
-        } catch (Exception e) {
+            ((AddJwksToClientMetadata) action).setHttpClient(buildMockHttpClient("mock"));
+        } catch (IOException e) {
             return null;
         }
         return action;
@@ -78,16 +76,18 @@ public class AddJwksToClientMetadataTest extends BaseOIDCClientMetadataPopulatio
         action.initialize();
     }
     
-    protected AddJwksToClientMetadata constructWithProperties(String contents) throws Exception {
-        AddJwksToClientMetadata action = new AddJwksToClientMetadata();
-        final HttpClientBuilder builder = new HttpClientBuilder();
+    protected HttpClient buildMockHttpClient(String contents) throws ClientProtocolException, IOException {
         HttpResponse mockResponse = Mockito.mock(HttpResponse.class);
         Mockito.when(mockResponse.getEntity()).thenReturn(new StringEntity(contents));
         HttpClient mockClient = Mockito.mock(HttpClient.class);
         Mockito.when(mockClient.execute((HttpUriRequest) Mockito.any(),
                 (HttpContext) Mockito.any())).thenReturn(mockResponse);
-        builder.setTLSSocketFactory(SecurityEnhancedHttpClientSupport.buildTLSSocketFactory(false, false));
-        action.setHttpClient(mockClient);
+        return mockClient;
+    }
+    
+    protected AddJwksToClientMetadata constructWithProperties(String contents) throws Exception {
+        AddJwksToClientMetadata action = new AddJwksToClientMetadata();
+        action.setHttpClient(buildMockHttpClient(contents));
         final HttpClientSecurityParameters params = new HttpClientSecurityParameters();
         params.setTLSProtocols(Collections.singleton("TLSv1"));
         action.setHttpClientSecurityParameters(params);
