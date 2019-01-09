@@ -73,7 +73,7 @@
         
     <bean id="shibboleth.oidc.EncryptionParametersResolverForRequestObjectDecryption"
         class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver"
-        p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver).REQUEST_OBJECT_DECRYPTION}" />
+        p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver.ParameterType).REQUEST_OBJECT_DECRYPTION}" />
 
     <bean id="shibboleth.oidc.DecryptionConfigurationLookup"
         class="org.geant.idpextension.oidc.config.navigate.RequestObjectDecryptionConfigurationLookupFunction"
