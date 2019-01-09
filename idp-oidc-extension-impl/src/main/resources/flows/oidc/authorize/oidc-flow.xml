@@ -24,6 +24,8 @@
     <action-state id="OutboundContextsAndSecurityParameters">
         <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="SetRequestObjectToResponseContext" />
+        <evaluate expression="PopulateRequestObjectDecryptionParameters" />
+        <evaluate expression="DecryptRequestObject" />
         <evaluate expression="ValidateRequestObject" />
         <evaluate expression="ValidateRedirectURI" />
         <evaluate expression="ValidateResponseType" />

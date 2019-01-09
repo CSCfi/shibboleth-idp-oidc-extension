@@ -30,16 +30,25 @@ package org.geant.idpextension.oidc.security.impl;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+
 import org.geant.idpextension.oidc.criterion.ClientInformationCriterion;
 import org.geant.security.jwk.BasicJWKCredential;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.xmlsec.EncryptionConfiguration;
 import org.opensaml.xmlsec.EncryptionParameters;
+import org.opensaml.xmlsec.criterion.EncryptionConfigurationCriterion;
 import org.opensaml.xmlsec.criterion.EncryptionOptionalCriterion;
 import org.opensaml.xmlsec.impl.BasicEncryptionParametersResolver;
 import org.slf4j.Logger;
@@ -59,8 +68,9 @@ import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 /**
- * A specialization of {@link BasicEncryptionParametersResolver} which resolves credentials and algorithm preferences
- * against client registration data.
+ * A specialization of {@link BasicEncryptionParametersResolver} which resolves both encryption and decryption
+ * credentials and algorithm preferences using client registration data of OIDC client. The credentials and algorithm
+ * preferences are resolved for request object decryption, id token encryption and userinfo response encryption.
  * 
  * <p>
  * In addition to the {@link net.shibboleth.utilities.java.support.resolver.Criterion} inputs documented in
@@ -74,16 +84,66 @@ public class OIDCClientInformationEncryptionParametersResolver extends BasicEncr
     /** Logger. */
     private Logger log = LoggerFactory.getLogger(OIDCClientInformationEncryptionParametersResolver.class);
 
-    /** Whether we resolve parameters for id token or user info response encryption. */
-    private boolean userInfoSigningResolver;
+    /**
+     * Whether to create parameters for request object decryption, id token encryption or userinfo response encryption.
+     */
+    public enum ParameterType {
+        REQUEST_OBJECT_DECRYPTION, IDTOKEN_ENCRYPTION, USERINFO_ENCRYPTION
+    }
 
     /**
-     * Whether we resolve parameters for id token or user info response encryption.
-     * 
-     * @param userInfoSigningResolver true if resolving done for user info response and not for id token encryption.
+     * Whether to create parameters for request object decryption, id token encryption or userinfo response encryption.
      */
-    public void setUserInfoSigningResolver(boolean value) {
-        userInfoSigningResolver = value;
+    private ParameterType target = ParameterType.IDTOKEN_ENCRYPTION;
+
+    /**
+     * Whether to create parameters for request object decryption, id token encryption or userinfo response encryption.
+     * 
+     * @param target Whether to create parameters for request object decryption, id token encryption or userinfo
+     *            response encryption.
+     */
+    public void setParameterType(ParameterType value) {
+        target = value;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Nullable
+    public EncryptionParameters resolveSingle(@Nonnull final CriteriaSet criteria) throws ResolverException {
+        Constraint.isNotNull(criteria, "CriteriaSet was null");
+        Constraint.isNotNull(criteria.get(EncryptionConfigurationCriterion.class),
+                "Resolver requires an instance of EncryptionConfigurationCriterion");
+
+        final Predicate<String> whitelistBlacklistPredicate = getWhitelistBlacklistPredicate(criteria);
+
+        // For decryption we need to list all the located keys and need the extended EncryptionParameters
+        final EncryptionParameters params = (target == ParameterType.REQUEST_OBJECT_DECRYPTION)
+                ? new OIDCDecryptionParameters() : new EncryptionParameters();
+
+        resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
+
+        if (params.getDataEncryptionCredential() != null) {
+            params.setDataKeyInfoGenerator(resolveDataKeyInfoGenerator(criteria, params.getDataEncryptionCredential()));
+        }
+
+        if (params.getKeyTransportEncryptionCredential() != null) {
+            params.setKeyTransportKeyInfoGenerator(
+                    resolveKeyTransportKeyInfoGenerator(criteria, params.getKeyTransportEncryptionCredential()));
+        }
+
+        boolean encryptionOptional = false;
+        final EncryptionOptionalCriterion encryptionOptionalCrit = criteria.get(EncryptionOptionalCriterion.class);
+        if (encryptionOptionalCrit != null) {
+            encryptionOptional = encryptionOptionalCrit.isEncryptionOptional();
+        }
+
+        if (validate(params, encryptionOptional)) {
+            logResult(params);
+            return params;
+        } else {
+            return null;
+        }
+
     }
 
     /** {@inheritDoc} */
@@ -103,20 +163,43 @@ public class OIDCClientInformationEncryptionParametersResolver extends BasicEncr
             super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
             return;
         }
-        // Check the requirements from metadatata, algorithm, need for algorithm
-        JWEAlgorithm keyTransportAlgorithm =
-                userInfoSigningResolver == true ? clientInformation.getOIDCMetadata().getUserInfoJWEAlg()
-                        : clientInformation.getOIDCMetadata().getIDTokenJWEAlg();
-        EncryptionMethod encryptionMethod =
-                userInfoSigningResolver == true ? clientInformation.getOIDCMetadata().getUserInfoJWEEnc()
-                        : clientInformation.getOIDCMetadata().getIDTokenJWEEnc();
+        if (!criteria.contains(EncryptionConfigurationCriterion.class)) {
+            log.debug("No encryption configuration criterion, nothing to do");
+            super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
+            return;
+        }
+        List<EncryptionConfiguration> encryptionConfigurations =
+                criteria.get(EncryptionConfigurationCriterion.class).getConfigurations();
+        if (encryptionConfigurations == null || encryptionConfigurations.isEmpty()) {
+            log.debug("No encrypt configuration nothing to do");
+            super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
+            return;
+        }
+        // We populate the parameters only for the algorithm the client has registered
+        JWEAlgorithm keyTransportAlgorithm = null;
+        EncryptionMethod encryptionMethod = null;
+        switch (target) {
+            case REQUEST_OBJECT_DECRYPTION:
+                keyTransportAlgorithm = clientInformation.getOIDCMetadata().getRequestObjectJWEAlg();
+                encryptionMethod = clientInformation.getOIDCMetadata().getRequestObjectJWEEnc();
+                break;
+
+            case USERINFO_ENCRYPTION:
+                keyTransportAlgorithm = clientInformation.getOIDCMetadata().getUserInfoJWEAlg();
+                encryptionMethod = clientInformation.getOIDCMetadata().getUserInfoJWEEnc();
+                break;
+
+            default:
+                keyTransportAlgorithm = clientInformation.getOIDCMetadata().getIDTokenJWEAlg();
+                encryptionMethod = clientInformation.getOIDCMetadata().getIDTokenJWEEnc();
+        }
         if (keyTransportAlgorithm == null) {
-            log.debug("No {} in client information, nothing to do", userInfoSigningResolver == true
-                    ? "userinfo_encrypted_response_alg" : "id_token_encrypted_response_alg");
+            log.debug("No {} algorithm information in client information, nothing to do");
             criteria.add(new EncryptionOptionalCriterion(true));
             super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
             return;
         }
+        // Default encEnc value
         if (encryptionMethod == null) {
             encryptionMethod = EncryptionMethod.A128CBC_HS256;
         }
@@ -137,7 +220,7 @@ public class OIDCClientInformationEncryptionParametersResolver extends BasicEncr
             super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
             return;
         }
-        // AES + client secret based key transports:
+        // for AES + client secret based key transports we generate secret key from client_secret
         if (JWEAlgorithm.Family.SYMMETRIC.contains(keyTransportAlgorithm)) {
             Secret secret = clientInformation.getSecret();
             if (secret == null) {
@@ -154,49 +237,76 @@ public class OIDCClientInformationEncryptionParametersResolver extends BasicEncr
                 super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
                 return;
             }
+            if (params instanceof OIDCDecryptionParameters) {
+                ((OIDCDecryptionParameters) params).getKeyTransportDecryptionCredentials().add(jwkCredential);
+            }
             params.setKeyTransportEncryptionCredential(jwkCredential);
             params.setKeyTransportEncryptionAlgorithm(keyTransportAlgorithm.getName());
             params.setDataEncryptionAlgorithm(encryptionMethod.getName());
             return;
         }
-        // RSA & EC based key transports
-        JWKSet keySet = clientInformation.getOIDCMetadata().getJWKSet();
-        if (keySet == null) {
-            log.warn("No keyset available");
-            super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
-            return;
-        }
-        for (JWK key : keySet.getKeys()) {
-            if (KeyUse.SIGNATURE.equals(key.getKeyUse())) {
-                continue;
-            }
-            if ((JWEAlgorithm.Family.RSA.contains(keyTransportAlgorithm) && key.getKeyType().equals(KeyType.RSA))
-                    || (JWEAlgorithm.Family.ECDH_ES.contains(keyTransportAlgorithm)
-                            && key.getKeyType().equals(KeyType.EC))) {
-                BasicJWKCredential jwkCredential = new BasicJWKCredential();
-                jwkCredential.setAlgorithm(keyTransportAlgorithm);
-                jwkCredential.setKid(key.getKeyID());
-                try {
-                    if (key.getKeyType().equals(KeyType.RSA)) {
-                        jwkCredential.setPublicKey(((RSAKey) key).toPublicKey());
-                    } else {
-                        jwkCredential.setPublicKey(((ECKey) key).toPublicKey());
-                    }
-                } catch (JOSEException e) {
-                    log.warn("Unable to parse keyset");
-                    super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
-                    return;
-                }
-                log.debug("Selected key {} for alg {} and enc {}", key.getKeyID(), keyTransportAlgorithm.getName(),
-                        encryptionMethod.getName());
-                params.setKeyTransportEncryptionCredential(jwkCredential);
-                params.setKeyTransportEncryptionAlgorithm(keyTransportAlgorithm.getName());
-                params.setDataEncryptionAlgorithm(encryptionMethod.getName());
+        // For RSA & EC based encryption we pick one encryption key from client's registration data
+        if (target != ParameterType.REQUEST_OBJECT_DECRYPTION) {
+            JWKSet keySet = clientInformation.getOIDCMetadata().getJWKSet();
+            if (keySet == null) {
+                log.warn("No keyset available");
+                super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
                 return;
             }
+            for (JWK key : keySet.getKeys()) {
+                if (KeyUse.SIGNATURE.equals(key.getKeyUse())) {
+                    continue;
+                }
+                if ((JWEAlgorithm.Family.RSA.contains(keyTransportAlgorithm) && key.getKeyType().equals(KeyType.RSA))
+                        || (JWEAlgorithm.Family.ECDH_ES.contains(keyTransportAlgorithm)
+                                && key.getKeyType().equals(KeyType.EC))) {
+                    BasicJWKCredential jwkCredential = new BasicJWKCredential();
+                    jwkCredential.setAlgorithm(keyTransportAlgorithm);
+                    jwkCredential.setKid(key.getKeyID());
+                    try {
+                        if (key.getKeyType().equals(KeyType.RSA)) {
+                            jwkCredential.setPublicKey(((RSAKey) key).toPublicKey());
+                        } else {
+                            jwkCredential.setPublicKey(((ECKey) key).toPublicKey());
+                        }
+                    } catch (JOSEException e) {
+                        log.warn("Unable to parse keyset");
+                        super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
+                        return;
+                    }
+                    log.debug("Selected key {} for alg {} and enc {}", key.getKeyID(), keyTransportAlgorithm.getName(),
+                            encryptionMethod.getName());
+                    params.setKeyTransportEncryptionCredential(jwkCredential);
+                    params.setKeyTransportEncryptionAlgorithm(keyTransportAlgorithm.getName());
+                    params.setDataEncryptionAlgorithm(encryptionMethod.getName());
+                    return;
+                }
+            }
+        } else {// For RSA & EC based decryption we pick all the possible decryption keys from security configuration
+            for (EncryptionConfiguration encryptionConfiguration : encryptionConfigurations) {
+                for (Credential credential : encryptionConfiguration.getKeyTransportEncryptionCredentials()) {
+                    if ((JWEAlgorithm.Family.RSA.contains(keyTransportAlgorithm)
+                            && credential.getPrivateKey() instanceof RSAPrivateKey)
+                            || (JWEAlgorithm.Family.ECDH_ES.contains(keyTransportAlgorithm)
+                                    && credential.getPrivateKey() instanceof ECPrivateKey)) {
+                        log.debug("Picked key for alg {} and enc {}", keyTransportAlgorithm.getName(),
+                                encryptionMethod.getName());
+                        params.setKeyTransportEncryptionCredential(credential);
+                        params.setKeyTransportEncryptionAlgorithm(keyTransportAlgorithm.getName());
+                        params.setDataEncryptionAlgorithm(encryptionMethod.getName());
+                        if (params instanceof OIDCDecryptionParameters) {
+                            ((OIDCDecryptionParameters) params).getKeyTransportDecryptionCredentials().add(credential);
+                            continue;
+                        }
+                        return;
+                    }
 
+                }
+            }
         }
-        super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
+        if (params.getKeyTransportEncryptionCredential() == null) {
+            super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
+        }
     }
 
     /**

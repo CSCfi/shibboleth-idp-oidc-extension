@@ -52,12 +52,15 @@
         loads the default credentials used. -->
 
     <bean id="shibboleth.oidc.DefaultSecurityConfiguration"
-        class="net.shibboleth.idp.profile.config.SecurityConfiguration">
+        class="org.geant.idpextension.oidc.profile.api.OIDCSecurityConfiguration">
         <property name="signatureSigningConfiguration">
             <ref bean="#{'%{idp.oidc.signing.config:shibboleth.oidc.SigningConfiguration}'.trim()}" />
         </property>
         <property name="encryptionConfiguration">
             <ref bean="#{'%{idp.oidc.encryption.config:shibboleth.oidc.EncryptionConfiguration}'.trim()}" />
+        </property>
+        <property name="requestObjectDecryptionConfiguration">
+            <ref bean="#{'%{idp.oidc.encryption.config:shibboleth.oidc.requestObjectDecryptionConfiguration}'.trim()}" />
         </property>
     </bean>
 
@@ -98,6 +101,52 @@
     </bean>
 
     <bean id="shibboleth.oidc.EncryptionConfiguration" parent="shibboleth.BasicEncryptionConfiguration">
+        <property name="keyTransportEncryptionAlgorithms">
+            <list>
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_RSA_1_5" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_RSA_OAEP" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_RSA_OAEP_256" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_128_KW" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_192_KW" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_256_KW" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_128_GCM_KW" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_192_GCM_KW" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.KeyManagementConstants.ALGO_ID_ALG_AES_256_GCM_KW" />
+            </list>
+        </property>
+        <property name="dataEncryptionAlgorithms">
+            <list>
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A192CBC_HS384" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A256CBC_HS512" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A128GCM" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A192GCM" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A256GCM" />
+            </list>
+        </property>
+    </bean>
+    
+    <bean id="shibboleth.oidc.requestObjectDecryptionConfiguration" parent="shibboleth.BasicEncryptionConfiguration">
+        <property name="keyTransportEncryptionCredentials">
+            <list>
+                <ref bean="shibboleth.oidc.DefaultRSAEncryptionCredential" />
+            </list>
+        </property>
         <property name="keyTransportEncryptionAlgorithms">
             <list>
                 <util:constant

@@ -95,7 +95,7 @@
 
     <bean id="shibboleth.oidc.EncryptionParametersResolver"
         class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver"
-        p:userInfoSigningResolver="true" />
+        p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver.ParameterType).USERINFO_ENCRYPTION}" />
 
     <bean id="shibboleth.TokenRequestRequestedClaimsLookupFunction"
         class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestRequestedClaimsLookupFunction"

@@ -66,10 +66,26 @@
         class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundAuthenticationResponseMessageContext"
         scope="prototype" />
 
+    <bean id="PopulateRequestObjectDecryptionParameters"
+        class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCEncryptionParameters" scope="prototype"
+        p:configurationLookupStrategy-ref="shibboleth.oidc.DecryptionConfigurationLookup"
+        p:encryptionParametersResolver-ref="shibboleth.oidc.EncryptionParametersResolverForRequestObjectDecryption" p:forDecryption="true" />
+        
+    <bean id="shibboleth.oidc.EncryptionParametersResolverForRequestObjectDecryption"
+        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver"
+        p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver).REQUEST_OBJECT_DECRYPTION}" />
+
+    <bean id="shibboleth.oidc.DecryptionConfigurationLookup"
+        class="org.geant.idpextension.oidc.config.navigate.RequestObjectDecryptionConfigurationLookupFunction"
+        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+        
     <bean id="SetRequestObjectToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetRequestObjectToResponseContext"
         p:httpClient-ref="shibboleth.NonCachingHttpClient" scope="prototype" />
 
+    <bean id="DecryptRequestObject" class="org.geant.idpextension.oidc.profile.impl.DecryptRequestObject"
+        scope="prototype" />
+        
     <bean id="ValidateRequestObject" class="org.geant.idpextension.oidc.profile.impl.ValidateRequestObject"
         scope="prototype" />
 

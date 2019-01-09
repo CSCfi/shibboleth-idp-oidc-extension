@@ -69,10 +69,11 @@ import com.google.common.base.Functions;
  * Action that resolves and populates {@link EncryptionParameters} on an {@link EncryptionContext} created/accessed via
  * a lookup function, by default on a {@link RelyingPartyContext} child of the profile request context.
  * 
- * <p>
- * The resolution process is contingent on the active profile configuration requesting encryption of some kind, and an
- * {@link EncryptionContext} is also created to capture these requirements.
- * </p>
+ * The parameters are used either to encrypt id token / userinfo response or to decrypt request object. For the first
+ * case the parameters are set with {@link EncryptionContext#setAssertionEncryptionParameters}, for request object
+ * decryption the parameters are set with {@link EncryptionContext#setAttributeEncryptionParameters}. Yes, we are
+ * stealing and bit misusing existing Shib context for our own almost similar purposes.
+ * 
  * 
  * <p>
  * The OpenSAML default, per-RelyingParty, and default per-profile {@link EncryptionConfiguration} objects are input to
@@ -87,6 +88,9 @@ public class PopulateOIDCEncryptionParameters extends AbstractProfileAction {
     /** Class logger. */
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(PopulateOIDCEncryptionParameters.class);
+
+    /** Whether we resolve encryption or decryption parameters. */
+    private boolean forDecryption;
 
     /** Strategy used to look up the {@link EncryptionContext} to store parameters in. */
     @Nonnull
@@ -115,6 +119,15 @@ public class PopulateOIDCEncryptionParameters extends AbstractProfileAction {
         oidcMetadataContextLookupStrategy = new DefaultOIDCMetadataContextLookupFunction();
         encryptionContextLookupStrategy = Functions.compose(new ChildContextLookup<>(EncryptionContext.class, true),
                 new ChildContextLookup<ProfileRequestContext, RelyingPartyContext>(RelyingPartyContext.class));
+    }
+
+    /**
+     * Whether we resolve encryption or decryption parameters.
+     * 
+     * @param forDecryption true if we should resolve decryption parameters.
+     */
+    public void setForDecryption(boolean value) {
+        forDecryption = value;
     }
 
     /**
@@ -188,7 +201,8 @@ public class PopulateOIDCEncryptionParameters extends AbstractProfileAction {
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        log.debug("{} Resolving EncryptionParameters for request", getLogPrefix());
+        log.debug("{} Resolving EncryptionParameters for request, purpose {}", getLogPrefix(),
+                forDecryption ? "request object decryption" : "response encryption");
         final EncryptionContext encryptCtx = encryptionContextLookupStrategy.apply(profileRequestContext);
         if (encryptCtx == null) {
             log.debug("{} No EncryptionContext returned by lookup strategy", getLogPrefix());
@@ -204,7 +218,13 @@ public class PopulateOIDCEncryptionParameters extends AbstractProfileAction {
             final EncryptionParameters params = encParamsresolver.resolveSingle(criteria);
             log.debug("{} {} EncryptionParameters", getLogPrefix(), params != null ? "Resolved" : "Failed to resolve");
             if (params != null) {
-                encryptCtx.setAssertionEncryptionParameters(params);
+                if (forDecryption) {
+                    // Decryption parameters for request object decryption
+                    encryptCtx.setAttributeEncryptionParameters(params);
+                } else {
+                    // Indicates that id token or userinfo response should be encrypted
+                    encryptCtx.setAssertionEncryptionParameters(params);
+                }
                 return;
             }
             final EncryptionOptionalCriterion encryptionOptionalCrit = criteria.get(EncryptionOptionalCriterion.class);
@@ -231,18 +251,14 @@ public class PopulateOIDCEncryptionParameters extends AbstractProfileAction {
     private CriteriaSet buildCriteriaSet(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         final CriteriaSet criteria = new CriteriaSet(new EncryptionConfigurationCriterion(encryptionConfigurations));
-        if (oidcMetadataContextLookupStrategy != null) {
-            final OIDCMetadataContext oidcMetadataCtx = oidcMetadataContextLookupStrategy.apply(profileRequestContext);
-            if (oidcMetadataCtx != null && oidcMetadataCtx.getClientInformation() != null) {
-                log.debug(
-                        "{} Adding oidc client information to resolution criteria for key transport / encryption algorithms",
-                        getLogPrefix());
-                criteria.add(new ClientInformationCriterion(oidcMetadataCtx.getClientInformation()));
-            } else {
-                log.debug("{} oidcMetadataCtx is null", getLogPrefix());
-            }
+        final OIDCMetadataContext oidcMetadataCtx = oidcMetadataContextLookupStrategy.apply(profileRequestContext);
+        if (oidcMetadataCtx != null && oidcMetadataCtx.getClientInformation() != null) {
+            log.debug(
+                    "{} Adding oidc client information to resolution criteria for key transport / encryption algorithms",
+                    getLogPrefix());
+            criteria.add(new ClientInformationCriterion(oidcMetadataCtx.getClientInformation()));
         } else {
-            log.debug("{} oidcMetadataContextLookupStrategy is null", getLogPrefix());
+            log.debug("{} oidcMetadataCtx is null", getLogPrefix());
         }
         return criteria;
     }

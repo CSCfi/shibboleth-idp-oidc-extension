@@ -72,6 +72,22 @@
       "HS512",
       "ES256"
    ],
+   "request_object_encryption_alg_values_supported":[
+      "RSA1_5",
+      "RSA-OAEP",
+      "RSA-OAEP-256",
+      "A128KW",
+      "A192KW",
+      "A256KW"
+   ],
+   "request_object_encryption_enc_values_supported":[
+      "A128CBC-HS256",
+      "A192CBC-HS384",
+      "A256CBC-HS512",
+      "A128GCM",
+      "A192GCM",
+      "A256GCM"
+   ],
    "request_object_signing_alg_values_supported":[
       "none",
       "RS256",
