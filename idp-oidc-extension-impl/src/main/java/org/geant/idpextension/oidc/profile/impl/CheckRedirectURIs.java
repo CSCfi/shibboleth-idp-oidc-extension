@@ -40,13 +40,17 @@ import javax.annotation.Nullable;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.util.EntityUtils;
 import org.geant.idpextension.oidc.profile.OidcEventIds;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.opensaml.security.httpclient.HttpClientSecurityParameters;
+import org.opensaml.security.httpclient.HttpClientSecuritySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +63,9 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientRegistrationRequest;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder;
+import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
@@ -86,21 +92,48 @@ public class CheckRedirectURIs extends AbstractProfileAction {
     /** The OIDCClientRegistrationRequest to check redirect URIs from. */
     @Nullable private OIDCClientRegistrationRequest request;
 
-    /** The builder for the {@link HttpClient}s. */
-    private HttpClientBuilder clientBuilder;
+    /** The {@link HttpClient} to use. */
+    @NonnullAfterInit private HttpClient httpClient;
+    
+    /** HTTP client security parameters. */
+    @Nullable private HttpClientSecurityParameters httpClientSecurityParameters;
 
     /** Constructor. */
     public CheckRedirectURIs() {
         super();
-        clientBuilder = new HttpClientBuilder();
     }
     
     /**
-     * Set the builder for the {@link HttpClient}s.
-     * @param builder The builder for the {@link HttpClient}s.
+     * Set the {@link HttpClient} to use.
+     * 
+     * @param client client to use
      */
-    public void setHttpClientBuilder(final HttpClientBuilder builder) {
-        clientBuilder = Constraint.isNotNull(builder, "The HttpClientBuilder cannot be null");
+    public void setHttpClient(@Nonnull final HttpClient client) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
+
+        httpClient = Constraint.isNotNull(client, "HttpClient cannot be null");
+    }
+
+    /**
+     * Set the optional client security parameters.
+     * 
+     * @param params the new client security parameters
+     */
+    public void setHttpClientSecurityParameters(@Nullable final HttpClientSecurityParameters params) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
+
+        httpClientSecurityParameters = params;
+    }
+
+    /** {@inheritDoc} */
+    public void doInitialize() throws ComponentInitializationException {
+        super.doInitialize();
+        
+        if (httpClient == null) {
+            throw new ComponentInitializationException(getLogPrefix() + " HttpClient cannot be null");
+        }
     }
     
     /** {@inheritDoc} */
@@ -203,7 +236,11 @@ public class CheckRedirectURIs extends AbstractProfileAction {
         final HttpResponse response;
         try {
             final HttpUriRequest get = RequestBuilder.get().setUri(sectorIdUri).build();
-            response = clientBuilder.buildClient().execute(get);
+            final HttpClientContext clientContext = HttpClientContext.create();
+            HttpClientSecuritySupport.marshalSecurityParameters(clientContext, httpClientSecurityParameters, true);
+            HttpClientSecuritySupport.addDefaultTLSTrustEngineCriteria(clientContext, get);
+            response = httpClient.execute(get, clientContext);
+            HttpClientSecuritySupport.checkTLSCredentialEvaluated(clientContext, get.getURI().getScheme());
         } catch (Exception e) {
             log.error("{} Could not get the sector_identifier_uri contents from {}", getLogPrefix(), sectorIdUri, e);
             return false;
