@@ -181,6 +181,7 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
                         if (it.hasNext()) {
                             log.debug("{} Unable to validate request object with credential, picking next key",
                                     getLogPrefix());
+                            continue;
                         } else {
                             log.error("{} Unable to validate request object with any of the credentials",
                                     getLogPrefix());
