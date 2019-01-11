@@ -82,7 +82,7 @@ public class DecryptRequestObject extends AbstractOIDCAuthenticationResponseActi
     private OIDCDecryptionParameters params;
 
     /** Request Object. */
-    JWT requestObject;
+    private JWT requestObject;
 
     /**
      * Constructor.
@@ -143,12 +143,12 @@ public class DecryptRequestObject extends AbstractOIDCAuthenticationResponseActi
      */
     private JWT decryptRequestObject(EncryptedJWT requestObject) {
         if (!requestObject.getHeader().getAlgorithm().getName().equals(params.getKeyTransportEncryptionAlgorithm())) {
-            log.error("Request object alg {} not matching expected {}",
+            log.error("{} Request object alg {} not matching expected {}", getLogPrefix(),
                     requestObject.getHeader().getAlgorithm().getName(), params.getKeyTransportEncryptionAlgorithm());
             return null;
         }
         if (!requestObject.getHeader().getEncryptionMethod().getName().equals(params.getDataEncryptionAlgorithm())) {
-            log.error("Request object enc {} not matching expected {}",
+            log.error("{} Request object enc {} not matching expected {}", getLogPrefix(),
                     requestObject.getHeader().getEncryptionMethod().getName(), params.getDataEncryptionAlgorithm());
             return null;
         }
@@ -168,7 +168,7 @@ public class DecryptRequestObject extends AbstractOIDCAuthenticationResponseActi
                     decrypter = new AESDecrypter((SecretKey) credential.getSecretKey());
                 }
                 if (decrypter == null) {
-                    log.error("No decrypter for request object for encAlg {}",
+                    log.error("{} No decrypter for request object for encAlg {}", getLogPrefix(),
                             requestObject.getHeader().getEncryptionMethod().getName());
                     return null;
                 }
@@ -176,9 +176,11 @@ public class DecryptRequestObject extends AbstractOIDCAuthenticationResponseActi
                 return JWTParser.parse(requestObject.getPayload().toString());
             } catch (JOSEException | ParseException e) {
                 if (it.hasNext()) {
-                    log.debug("Unable to decrypt request object with credential, {}, picking next key", e.getMessage());
+                    log.debug("{} Unable to decrypt request object with credential, {}, picking next key",
+                            getLogPrefix(), e.getMessage());
                 } else {
-                    log.error("Unable to decrypt request object with credential, {}", e.getMessage());
+                    log.error("{} Unable to decrypt request object with credential, {}", getLogPrefix(),
+                            e.getMessage());
                     return null;
                 }
             }
