@@ -33,24 +33,36 @@ import java.security.interfaces.RSAPrivateKey;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.crypto.spec.SecretKeySpec;
+
+import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 import org.geant.idpextension.oidc.criterion.ClientInformationCriterion;
 import org.geant.security.jwk.BasicJWKCredential;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.SignatureSigningParameters;
+import org.opensaml.xmlsec.criterion.SignatureSigningConfigurationCriterion;
 import org.opensaml.xmlsec.impl.BasicSignatureSigningParametersResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Predicate;
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.KeyType;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 /**
- * A specialization of {@link BasicSignatureSigningParametersResolver} which supports selecting credential based on
- * client registration data and instantiating HS credentials when needed. If the resolver fails to credentials it leaves
- * the job to the hands of the super class method.
+ * A specialization of {@link BasicSignatureSigningParametersResolver} which supports selecting signing and signature
+ * validation credentials based on client registration data and instantiating HS credentials when needed. If the
+ * resolver fails to resolve credentials it leaves the job to the hands of the super class method.
  * 
  * <p>
  * In addition to the {@link net.shibboleth.utilities.java.support.resolver.Criterion} inputs documented in
@@ -66,16 +78,61 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
     @Nonnull
     private Logger log = LoggerFactory.getLogger(OIDCClientInformationSignatureSigningParametersResolver.class);
 
-    /** Whether we resolve credential for id token or user info response signing. */
-    private boolean userInfoSigningResolver;
+    /**
+     * Whether to create parameters for request object signature validation, id token signing or userinfo response
+     * signing.
+     */
+    public enum ParameterType {
+        REQUEST_OBJECT_VALIDATION, IDTOKEN_SIGNING, USERINFO_SIGNING
+    }
+
+    private ParameterType target = ParameterType.IDTOKEN_SIGNING;
 
     /**
-     * Whether we resolve credential for id token or user info response signing.
+     * Whether to create parameters for request object signature validation, id token signing or userinfo response
+     * signing.
      * 
-     * @param userInfoSigningResolver true if resolving done for user info response and not for id token signature.
+     * @param target Whether to create parameters for request object signature validation, id token signing or userinfo
+     *            response signing.
+     * 
      */
-    public void setUserInfoSigningResolver(boolean value) {
-        userInfoSigningResolver = value;
+    public void setParameterType(ParameterType value) {
+        target = value;
+    }
+
+    /** {@inheritDoc} */
+    @Nullable
+    public SignatureSigningParameters resolveSingle(@Nonnull final CriteriaSet criteria) throws ResolverException {
+        Constraint.isNotNull(criteria, "CriteriaSet was null");
+        Constraint.isNotNull(criteria.get(SignatureSigningConfigurationCriterion.class),
+                "Resolver requires an instance of SignatureSigningConfigurationCriterion");
+
+        final Predicate<String> whitelistBlacklistPredicate = getWhitelistBlacklistPredicate(criteria);
+
+        // For signature validation we need to list all the located keys and need the extended
+        // SignatureSigningParameters
+        final SignatureSigningParameters params = (target == ParameterType.REQUEST_OBJECT_VALIDATION)
+                ? new OIDCSignatureValidationParameters() : new SignatureSigningParameters();
+
+        resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
+
+        params.setSignatureReferenceDigestMethod(resolveReferenceDigestMethod(criteria, whitelistBlacklistPredicate));
+        params.setSignatureReferenceCanonicalizationAlgorithm(resolveReferenceCanonicalizationAlgorithm(criteria));
+
+        params.setSignatureCanonicalizationAlgorithm(resolveCanonicalizationAlgorithm(criteria));
+
+        if (params.getSigningCredential() != null) {
+            params.setKeyInfoGenerator(resolveKeyInfoGenerator(criteria, params.getSigningCredential()));
+            params.setSignatureHMACOutputLength(
+                    resolveHMACOutputLength(criteria, params.getSigningCredential(), params.getSignatureAlgorithm()));
+        }
+
+        if (validate(params)) {
+            logResult(params);
+            return params;
+        } else {
+            return null;
+        }
     }
 
     // Checkstyle: CyclomaticComplexity|ReturnCount OFF
@@ -99,11 +156,22 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
         final List<Credential> credentials = getEffectiveSigningCredentials(criteria);
         final List<String> algorithms = getEffectiveSignatureAlgorithms(criteria, whitelistBlacklistPredicate);
         log.trace("Resolved effective signature algorithms: {}", algorithms);
-        JWSAlgorithm algorithm = userInfoSigningResolver ? clientInformation.getOIDCMetadata().getUserInfoJWSAlg()
-                : clientInformation.getOIDCMetadata().getIDTokenJWSAlg();
+        JWSAlgorithm algorithm = null;
+        switch (target) {
+            case REQUEST_OBJECT_VALIDATION:
+                algorithm = clientInformation.getOIDCMetadata().getRequestObjectJWSAlg();
+                break;
+
+            case USERINFO_SIGNING:
+                algorithm = clientInformation.getOIDCMetadata().getUserInfoJWSAlg();
+                break;
+
+            default:
+                algorithm = clientInformation.getOIDCMetadata().getIDTokenJWSAlg();
+        }
         if (algorithm == null) {
-            if (userInfoSigningResolver) {
-                log.debug("No userinfo_signed_response_alg in client information, nothing to do");
+            if (target != ParameterType.IDTOKEN_SIGNING) {
+                log.debug("No alg defined in client information, nothing to do");
                 super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
                 return;
             }
@@ -129,18 +197,61 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
             params.setSignatureAlgorithm(algorithm.getName());
             return;
         }
-        // For EC&RSA family we locate the first credential of correct type
-        for (Credential credential : credentials) {
-            if ((JWSAlgorithm.Family.RSA.contains(algorithm) && (credential.getPrivateKey() instanceof RSAPrivateKey))
-                    || (JWSAlgorithm.Family.EC.contains(algorithm)
-                            && (credential.getPrivateKey() instanceof ECPrivateKey))) {
-                log.trace("Credential picked for algorithm {}", algorithm.getName());
-                params.setSigningCredential(credential);
-                params.setSignatureAlgorithm(algorithm.getName());
+        if (target != ParameterType.REQUEST_OBJECT_VALIDATION) {
+            // For EC&RSA family signing we locate the first credential of correct type
+            for (Credential credential : credentials) {
+                if ((JWSAlgorithm.Family.RSA.contains(algorithm)
+                        && (credential.getPrivateKey() instanceof RSAPrivateKey))
+                        || (JWSAlgorithm.Family.EC.contains(algorithm)
+                                && (credential.getPrivateKey() instanceof ECPrivateKey))) {
+                    log.trace("Credential picked for algorithm {}", algorithm.getName());
+                    params.setSigningCredential(credential);
+                    params.setSignatureAlgorithm(algorithm.getName());
+                    return;
+                }
+            }
+        } else {// For EC&RSA family signature validation we pick all suitable keys from client's registration data
+            JWKSet keySet = clientInformation.getOIDCMetadata().getJWKSet();
+            if (keySet == null) {
+                log.warn("No keyset available");
+                super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
                 return;
             }
+            for (JWK key : keySet.getKeys()) {
+                if (KeyUse.ENCRYPTION.equals(key.getKeyUse())) {
+                    continue;
+                }
+                if ((JWSAlgorithm.Family.RSA.contains(algorithm) && key.getKeyType().equals(KeyType.RSA))
+                        || (JWSAlgorithm.Family.EC.contains(algorithm) && key.getKeyType().equals(KeyType.EC))) {
+                    BasicJWKCredential jwkCredential = new BasicJWKCredential();
+                    jwkCredential.setAlgorithm(algorithm);
+                    jwkCredential.setKid(key.getKeyID());
+                    try {
+                        if (key.getKeyType().equals(KeyType.RSA)) {
+                            jwkCredential.setPublicKey(((RSAKey) key).toPublicKey());
+                        } else {
+                            jwkCredential.setPublicKey(((ECKey) key).toPublicKey());
+                        }
+                    } catch (JOSEException e) {
+                        log.warn("Unable to parse keyset");
+                        super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria,
+                                whitelistBlacklistPredicate);
+                        return;
+                    }
+                    log.debug("Selected key {} for alg {}", key.getKeyID(), algorithm.getName());
+                    params.setSigningCredential(jwkCredential);
+                    params.setSignatureAlgorithm(algorithm.getName());
+                    if (params instanceof OIDCSignatureValidationParameters) {
+                        ((OIDCSignatureValidationParameters) params).getValidationCredentials().add(jwkCredential);
+                        continue;
+                    }
+                    return;
+                }
+            }
         }
-        log.debug("Not able to resolve signing credential based on provided client information");
-        super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
+        if (params.getSigningCredential() == null) {
+            log.debug("Not able to resolve signing credential based on provided client information");
+            super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
+        }
     }
 }

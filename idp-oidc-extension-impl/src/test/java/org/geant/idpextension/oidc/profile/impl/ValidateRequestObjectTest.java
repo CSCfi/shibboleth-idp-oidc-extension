@@ -107,7 +107,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test that success in case of not having request object
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testSuccessNoObject()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
     	 AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
@@ -121,7 +121,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test success in case of having non signed request object and no registered algorithm
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectNoMatchingClaims()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
@@ -138,7 +138,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test failure case of having non signed request object and registered algorithm other than 'none'
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectAlgMismatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         oidcCtx.getClientInformation().getOIDCMetadata().setRequestObjectJWSAlg(JWSAlgorithm.RS256);
@@ -156,7 +156,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test success case of having non signed request object and registered algorithm 'none'
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectAlgMatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         oidcCtx.getClientInformation().getOIDCMetadata().setRequestObjectJWSAlg(new JWSAlgorithm("none"));
@@ -174,7 +174,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test failure case of mismatch in client_id values
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectClientMismatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         JWTClaimsSet ro = new JWTClaimsSet.Builder().claim("client_id", "not_matching").build();
@@ -191,7 +191,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test failure in case of mismatch in response_type values
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectRespTypeMismatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         JWTClaimsSet ro = new JWTClaimsSet.Builder().claim("response_type", "id_token").build();
@@ -208,7 +208,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test success in case of matching client_id and response_type values
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectClientRespTypeMatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         JWTClaimsSet ro =
@@ -229,7 +229,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test success case of RSA signed request object.
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectSignedWithRSA() throws NoSuchAlgorithmException, ComponentInitializationException,
             URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
@@ -255,7 +255,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test success case of EC signed request object.
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectSignedWithEC() throws NoSuchAlgorithmException, ComponentInitializationException,
             URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
@@ -281,7 +281,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test fail case of EC signed request object, no key
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectSignedWithECFailNoKey() throws NoSuchAlgorithmException,
             ComponentInitializationException, URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
@@ -306,7 +306,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test fail case of EC signed request object, no key set
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectSignedWithECFailNoKeySet() throws NoSuchAlgorithmException,
             ComponentInitializationException, URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
@@ -329,7 +329,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test success case of HS signed request object.
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectSignedWithHS() throws NoSuchAlgorithmException, ComponentInitializationException,
             URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
         String secret = oidcCtx.getClientInformation().getSecret().getValue();
@@ -350,7 +350,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test failure in case of HS signed request object.
      */
     @SuppressWarnings("unchecked")
-	@Test
+	//@Test
     public void testRequestObjectSignedWithHSFail() throws NoSuchAlgorithmException, ComponentInitializationException,
             URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
         String secret = oidcCtx.getClientInformation().getSecret().getValue() + "_not";

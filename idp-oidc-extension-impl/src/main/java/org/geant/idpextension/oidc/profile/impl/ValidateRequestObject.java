@@ -28,13 +28,26 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
+import java.util.Iterator;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.geant.idpextension.oidc.profile.OidcEventIds;
+import org.geant.idpextension.oidc.security.impl.OIDCSignatureValidationParameters;
+import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
+import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.xmlsec.context.SecurityParametersContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Function;
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -42,30 +55,19 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.KeyType;
-import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+
+import net.shibboleth.utilities.java.support.component.ComponentSupport;
+import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
  * Action that validates request object. Validated request object is stored to response context.
  */
 
-// TODO checks for aud and iss?
-/*
- * The Request Object MAY be signed or unsigned (plaintext). When it is plaintext, this is indicated by use of the none
- * algorithm [JWA] in the JOSE Header. If signed, the Request Object SHOULD contain the Claims iss (issuer) and aud
- * (audience) as members. The iss value SHOULD be the Client ID of the RP, unless it was signed by a different party
- * than the RP. The aud value SHOULD be or include the OP's Issuer Identifier URL.
- */
-// TODO: Decryption
-// TODO: Algorithm whitelist/blacklist verification and runtime checks.
 @SuppressWarnings("rawtypes")
 public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAction {
 
@@ -73,8 +75,36 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
     @Nonnull
     private Logger log = LoggerFactory.getLogger(ValidateRequestObject.class);
 
+    /*** The signature validation parameters. */
+    @Nullable
+    protected OIDCSignatureValidationParameters signatureValidationParameters;
+
+    /**
+     * Strategy used to locate the {@link SecurityParametersContext} to use for signing.
+     */
+    @Nonnull
+    private Function<ProfileRequestContext, SecurityParametersContext> securityParametersLookupStrategy;
+
     /** Request Object. */
-    JWT requestObject;
+    private JWT requestObject;
+
+    /** Constructor. */
+    public ValidateRequestObject() {
+        securityParametersLookupStrategy = new ChildContextLookup<>(SecurityParametersContext.class);
+    }
+
+    /**
+     * Set the strategy used to locate the {@link SecurityParametersContext} to use.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setSecurityParametersLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, SecurityParametersContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        securityParametersLookupStrategy =
+                Constraint.isNotNull(strategy, "SecurityParameterContext lookup strategy cannot be null");
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -90,101 +120,97 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
         return true;
     }
 
-    /**
-     * Verify the request object signature.
-     * 
-     * @param reqObjSignAlgorithm algorithm of the jwt.
-     * @return true if the jwt was verified.
-     */
-    private boolean verify(Algorithm reqObjSignAlgorithm) {
-        if (reqObjSignAlgorithm.equals(Algorithm.NONE)) {
-            return true;
-        }
-        JWSVerifier verifier = null;
-        // RS or HS family?
-        if (JWSAlgorithm.Family.HMAC_SHA.contains(reqObjSignAlgorithm)) {
-            if (getMetadataContext().getClientInformation().getSecret() == null) {
-                log.error("{} request object signed with {} but there is no client secret", getLogPrefix(),
-                        reqObjSignAlgorithm.getName());
-                return false;
-            }
-            try {
-                verifier = new MACVerifier(getMetadataContext().getClientInformation().getSecret().getValue());
-                if (!((SignedJWT) requestObject).verify(verifier)) {
-                    log.error("{} request object signature verification failed", getLogPrefix());
-                    return false;
-                } else {
-                    return true;
-                }
-            } catch (JOSEException e) {
-                log.error("{} unable to verify request object signature {}", getLogPrefix(), e.getMessage());
-                return false;
-            }
-        } else {
-            JWKSet keySet = getMetadataContext().getClientInformation().getOIDCMetadata().getJWKSet();
-            if (keySet == null) {
-                log.error("{} request object signed with {} but there is no keyset ", getLogPrefix(),
-                        reqObjSignAlgorithm.getName());
-                return false;
-            }
-            for (JWK key : keySet.getKeys()) {
-                if (key.getAlgorithm() != null && !reqObjSignAlgorithm.equals(key.getAlgorithm())) {
-                    continue;
-                }
-                if (KeyUse.ENCRYPTION.equals(key.getKeyUse())) {
-                    continue;
-                }
-                if (JWSAlgorithm.Family.RSA.contains(reqObjSignAlgorithm) && key.getKeyType().equals(KeyType.RSA)) {
-                    try {
-                        verifier = new RSASSAVerifier(((RSAKey) key).toRSAPublicKey());
-                    } catch (JOSEException e) {
-                        log.error("{} unable to verify request object signature {}", getLogPrefix(), e.getMessage());
-                        return false;
-                    }
-                } else if (JWSAlgorithm.Family.EC.contains(reqObjSignAlgorithm) && key.getKeyType().equals(KeyType.EC)) {
-                    try {
-                        verifier = new ECDSAVerifier(((ECKey) key).toECPublicKey());
-                    } catch (JOSEException e) {
-                        log.error("{} unable to verify request object signature {}", getLogPrefix(), e.getMessage());
-                        return false;
-                    }
-                }
-                if (verifier == null) {
-                    log.error("{} Unable to obtain verifier for {}", getLogPrefix(), reqObjSignAlgorithm.getName());
-                    return false;
-                }
-                try {
-                    if (((SignedJWT) requestObject).verify(verifier)) {
-                        return true;
-                    }
-                } catch (IllegalStateException | JOSEException e) {
-                    log.error("{} unable to verify request object signature {}", getLogPrefix(), e.getMessage());
-                    return false;
-                }
-            }
-        }
-        return false;
-    }
-
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        // Verify req object is signed with correct algorithm
-        JWSAlgorithm regAlgorithm =
-                getMetadataContext().getClientInformation().getOIDCMetadata().getRequestObjectJWSAlg();
-        Algorithm reqObjSignAlgorithm = requestObject.getHeader().getAlgorithm();
-        if (regAlgorithm != null && !regAlgorithm.equals(reqObjSignAlgorithm)) {
-            log.error("{} request object signed with {} but the registered algorithm is ", getLogPrefix());
+        // We let "none" to be used only if nothing else has been registered.
+        if (requestObject instanceof PlainJWT
+                && getMetadataContext().getClientInformation().getOIDCMetadata().getRequestObjectJWSAlg() != null
+                && !"none".equals(getMetadataContext().getClientInformation().getOIDCMetadata().getRequestObjectJWSAlg()
+                        .getName())) {
+            log.error("{} Request object is not signed evethough registered alg is {}", getLogPrefix(),
+                    getMetadataContext().getClientInformation().getOIDCMetadata().getRequestObjectJWSAlg().getName());
             ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
             return;
         }
-        // Verify signature
-        if (!verify(reqObjSignAlgorithm)) {
-            log.error("{} request object not verified by any of the available keys", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
-            return;
+        // Signature of signed request object must be verified
+        if (!(requestObject instanceof PlainJWT)) {
+            // Verify req object is signed with correct algorithm
+            final SecurityParametersContext secParamCtx = securityParametersLookupStrategy.apply(profileRequestContext);
+            if (secParamCtx == null) {
+                log.error("{} No security parameters context is available", getLogPrefix());
+                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_SEC_CFG);
+                return;
+            }
+            if (secParamCtx.getSignatureSigningParameters() == null
+                    || !(secParamCtx.getSignatureSigningParameters() instanceof OIDCSignatureValidationParameters)) {
+                log.debug("{} No signature validation credentials available", getLogPrefix());
+                return;
+            }
+            signatureValidationParameters =
+                    (OIDCSignatureValidationParameters) secParamCtx.getSignatureSigningParameters();
+            Algorithm reqObjSignAlgorithm = requestObject.getHeader().getAlgorithm();
+            if (!signatureValidationParameters.getSignatureAlgorithm().equals(reqObjSignAlgorithm.getName())) {
+                log.error("{} Request object signed with algorithm {} but the registered algorithm is {}",
+                        getLogPrefix(), reqObjSignAlgorithm.getName(),
+                        signatureValidationParameters.getSignatureAlgorithm());
+                ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
+                return;
+            }
+            Iterator it = signatureValidationParameters.getValidationCredentials().iterator();
+            boolean verified = false;
+            while (it.hasNext()) {
+                Credential credential = (Credential) it.next();
+                JWSVerifier verifier = null;
+                try {
+                    if (JWSAlgorithm.Family.HMAC_SHA.contains(reqObjSignAlgorithm)) {
+                        verifier = new MACVerifier(credential.getSecretKey());
+                    }
+                    if (JWSAlgorithm.Family.RSA.contains(reqObjSignAlgorithm)) {
+                        verifier = new RSASSAVerifier((RSAPublicKey) credential.getPublicKey());
+                    }
+                    if (JWSAlgorithm.Family.EC.contains(reqObjSignAlgorithm)) {
+                        verifier = new ECDSAVerifier((ECPublicKey) credential.getPublicKey());
+                    }
+                    if (verifier == null) {
+                        log.error("{} No verifier for request object for alg {}", getLogPrefix(),
+                                reqObjSignAlgorithm.getName());
+                        ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_SEC_CFG);
+                    }
+                    if (!((SignedJWT) requestObject).verify(verifier)) {
+                        if (it.hasNext()) {
+                            log.debug("{} Unable to validate request object with credential, picking next key",
+                                    getLogPrefix());
+                        } else {
+                            log.error("{} Unable to validate request object with any of the credentials",
+                                    getLogPrefix());
+                            ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
+                            return;
+                        }
+                    }
+                    verified = true;
+                    break;
+                } catch (JOSEException e) {
+                    if (it.hasNext()) {
+                        log.debug("{} Unable to validate request object with credential, {}, picking next key",
+                                getLogPrefix(), e.getMessage());
+                    } else {
+                        log.error("{} Unable to validate request object with any of the credentials, {}",
+                                getLogPrefix(), e.getMessage());
+                        ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
+                        return;
+                    }
+                }
+            }
+            if (!verified) {
+                // This is executed only if there was no credentials (which should not happen).
+                log.error("{} Unable to validate request object signature", getLogPrefix());
+                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_SEC_CFG);
+                return;
+            }
+
         }
-        // Validate client_id and response_type values
+        // Validate still client_id and response_type values
         try {
             if (requestObject.getJWTClaimsSet().getClaims().containsKey("client_id")
                     && !getAuthenticationRequest().getClientID()
@@ -196,7 +222,8 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
             if (requestObject.getJWTClaimsSet().getClaims().containsKey("response_type")
                     && !getAuthenticationRequest().getResponseType().equals(new ResponseType(
                             ((String) requestObject.getJWTClaimsSet().getClaim("response_type")).split(" ")))) {
-                log.error("{} response_type in request object not matching client_id request parameter", getLogPrefix());
+                log.error("{} response_type in request object not matching client_id request parameter",
+                        getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
                 return;
             }

@@ -76,7 +76,7 @@
     <bean id="PopulateUserInfoResponseSignatureSigningParameters"
         class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCSignatureSigningParameters " scope="prototype"
         p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
-        p:signatureSigningParametersResolver-ref="shibboleth.oidc.SignatureSigningParametersResolver">
+        p:signatureSigningParametersResolver-ref="shibboleth.oidc.UserInfoSignatureSigningParametersResolver">
         <property name="securityParametersContextLookupStrategy">
             <bean class="com.google.common.base.Functions" factory-method="compose"
                 c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters"
@@ -87,6 +87,10 @@
                 c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
         </property>
     </bean>
+
+    <bean id="shibboleth.oidc.UserInfoSignatureSigningParametersResolver"
+        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver"
+        p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver.ParameterType).USERINFO_SIGNING}" />
 
     <bean id="PopulateUserInfoResponseEncryptionParameters"
         class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCEncryptionParameters" scope="prototype"
@@ -136,7 +140,7 @@
 
     <bean id="FormOutboundMessage"
         class="org.geant.idpextension.oidc.profile.impl.FormOutboundUserInfoResponseMessage" scope="prototype" />
-        
+
     <bean id="BuildErrorResponseFromEvent"
         class="org.geant.idpextension.oidc.profile.impl.BuildUserInfoErrorResponseFromEvent" scope="prototype"
         p:httpServletResponse-ref="shibboleth.HttpServletResponse">

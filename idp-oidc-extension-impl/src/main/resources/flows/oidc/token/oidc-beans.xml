@@ -114,7 +114,7 @@
     <bean id="PopulateIDTokenSignatureSigningParameters"
         class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCSignatureSigningParameters " scope="prototype"
         p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
-        p:signatureSigningParametersResolver-ref="shibboleth.oidc.SignatureSigningParametersResolver">
+        p:signatureSigningParametersResolver-ref="shibboleth.oidc.IDTokenSignatureSigningParametersResolver">
         <property name="securityParametersContextLookupStrategy">
             <bean class="com.google.common.base.Functions" factory-method="compose"
                 c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters"
@@ -215,7 +215,7 @@
             </map>
         </property>
     </bean>
-    
+
     <bean id="GrantTypeAuthorizationCode" parent="shibboleth.Conditions.Expression">
         <constructor-arg>
             <value>

@@ -25,6 +25,7 @@
         <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="SetRequestObjectToResponseContext" />
         <evaluate expression="PopulateRequestObjectDecryptionParameters" />
+        <evaluate expression="PopulateRequestObjectSignatureValidationParameters" />
         <evaluate expression="DecryptRequestObject" />
         <evaluate expression="ValidateRequestObject" />
         <evaluate expression="ValidateRedirectURI" />

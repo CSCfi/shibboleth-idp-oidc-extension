@@ -30,14 +30,23 @@ package org.geant.idpextension.oidc.profile.api;
 
 import javax.annotation.Nullable;
 import org.opensaml.xmlsec.EncryptionConfiguration;
+import org.opensaml.xmlsec.SignatureSigningConfiguration;
+
 import net.shibboleth.idp.profile.config.SecurityConfiguration;
 
-/** Class extends SecurityConfiguration to have configuration for request object decryption. */
+/**
+ * Class extends SecurityConfiguration to support separate configuration for request object decryption and signature
+ * validation.
+ */
 public class OIDCSecurityConfiguration extends SecurityConfiguration {
 
     /** Configuration used when decrypting request object information. */
     @Nullable
     private EncryptionConfiguration requestObjectDecryptConfig;
+
+    /** Configuration used when validating request object information. */
+    @Nullable
+    private SignatureSigningConfiguration requestObjectSignatureValidationConfig;
 
     /**
      * Get the configuration used when decrypting request object information.
@@ -56,6 +65,25 @@ public class OIDCSecurityConfiguration extends SecurityConfiguration {
      */
     public void setRequestObjectDecryptionConfiguration(@Nullable final EncryptionConfiguration config) {
         requestObjectDecryptConfig = config;
+    }
+
+    /**
+     * Get the configuration used when validating request object information.
+     * 
+     * @return configuration used when validating request object information, or null
+     */
+    @Nullable
+    public SignatureSigningConfiguration getRequestObjectSignatureValidationConfiguration() {
+        return requestObjectSignatureValidationConfig;
+    }
+
+    /**
+     * Set the configuration used when validating request object information.
+     * 
+     * @param configuration used when validating request object information, or null
+     */
+    public void setRequestObjectSignatureValidationConfiguration(@Nullable final SignatureSigningConfiguration config) {
+        requestObjectSignatureValidationConfig = config;
     }
 
 }

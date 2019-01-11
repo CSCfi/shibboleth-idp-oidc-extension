@@ -69,8 +69,9 @@
     <bean id="PopulateRequestObjectDecryptionParameters"
         class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCEncryptionParameters" scope="prototype"
         p:configurationLookupStrategy-ref="shibboleth.oidc.DecryptionConfigurationLookup"
-        p:encryptionParametersResolver-ref="shibboleth.oidc.EncryptionParametersResolverForRequestObjectDecryption" p:forDecryption="true" />
-        
+        p:encryptionParametersResolver-ref="shibboleth.oidc.EncryptionParametersResolverForRequestObjectDecryption"
+        p:forDecryption="true" />
+
     <bean id="shibboleth.oidc.EncryptionParametersResolverForRequestObjectDecryption"
         class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver"
         p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver.ParameterType).REQUEST_OBJECT_DECRYPTION}" />
@@ -78,18 +79,45 @@
     <bean id="shibboleth.oidc.DecryptionConfigurationLookup"
         class="org.geant.idpextension.oidc.config.navigate.RequestObjectDecryptionConfigurationLookupFunction"
         p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
-        
+
+    <bean id="PopulateRequestObjectSignatureValidationParameters"
+        class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCSignatureSigningParameters " scope="prototype"
+        p:configurationLookupStrategy-ref="shibboleth.oidc.SignatureValidationConfigurationLookup"
+        p:signatureSigningParametersResolver-ref="shibboleth.oidc.RequestObjectSignatureValidationParametersResolver">
+        <property name="securityParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters"
+                c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+        <property name="existingParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
+        </property>
+    </bean>
+
+    <bean id="shibboleth.oidc.SignatureValidationConfigurationLookup"
+        class="org.geant.idpextension.oidc.config.navigate.RequestObjectSignatureValidationConfigurationLookupFunction"
+        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+
+    <bean id="shibboleth.oidc.RequestObjectSignatureValidationParametersResolver"
+        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver"
+        p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver.ParameterType).REQUEST_OBJECT_VALIDATION}" />
+
     <bean id="SetRequestObjectToResponseContext"
-        class="org.geant.idpextension.oidc.profile.impl.SetRequestObjectToResponseContext"
-        scope="prototype"
+        class="org.geant.idpextension.oidc.profile.impl.SetRequestObjectToResponseContext" scope="prototype"
         p:httpClient="#{getObject('shibboleth.oidc.NonBrowser.HttpClient') ?: getObject('shibboleth.NonCachingHttpClient')}"
         p:httpClientSecurityParameters="#{getObject('shibboleth.oidc.NonBrowser.HttpClientSecurityParameters')}" />
 
     <bean id="DecryptRequestObject" class="org.geant.idpextension.oidc.profile.impl.DecryptRequestObject"
         scope="prototype" />
-        
+
     <bean id="ValidateRequestObject" class="org.geant.idpextension.oidc.profile.impl.ValidateRequestObject"
-        scope="prototype" />
+        scope="prototype">
+        <property name="securityParametersLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+    </bean>
 
     <bean id="ValidateRedirectURI" class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
         scope="prototype" />
@@ -102,7 +130,7 @@
     <bean id="PopulateIDTokenSignatureSigningParameters"
         class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCSignatureSigningParameters " scope="prototype"
         p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
-        p:signatureSigningParametersResolver-ref="shibboleth.oidc.SignatureSigningParametersResolver">
+        p:signatureSigningParametersResolver-ref="shibboleth.oidc.IDTokenSignatureSigningParametersResolver">
         <property name="activationCondition">
             <ref bean="IDTokenRequested" />
         </property>

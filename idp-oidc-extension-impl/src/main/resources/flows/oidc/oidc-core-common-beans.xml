@@ -17,7 +17,7 @@
     <bean id="base64Codec" class="org.apache.commons.codec.binary.Base64" c:lineLength="0"
         c:lineSeparator="#{new byte[] {10} }" c:urlSafe="true" />
 
-    <bean id="shibboleth.oidc.SignatureSigningParametersResolver"
+    <bean id="shibboleth.oidc.IDTokenSignatureSigningParametersResolver"
         class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver" />
 
     <bean id="shibboleth.RevocationCache" class="org.geant.idpextension.oidc.storage.RevocationCache"

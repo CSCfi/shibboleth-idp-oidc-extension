@@ -48,7 +48,7 @@
         p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
         p:servletRequest-ref="shibboleth.HttpServletRequest" />
 
-    <!-- Security Configuration Defaults These settings establish the default security configurations for signatures and 
+    <!-- Security Configuration Defaults. These settings establish the default security configurations for signatures and 
         loads the default credentials used. -->
 
     <bean id="shibboleth.oidc.DefaultSecurityConfiguration"
@@ -60,10 +60,14 @@
             <ref bean="#{'%{idp.oidc.encryption.config:shibboleth.oidc.EncryptionConfiguration}'.trim()}" />
         </property>
         <property name="requestObjectDecryptionConfiguration">
-            <ref bean="#{'%{idp.oidc.encryption.config:shibboleth.oidc.requestObjectDecryptionConfiguration}'.trim()}" />
+            <ref bean="#{'%{idp.oidc.rodecrypt.config:shibboleth.oidc.requestObjectDecryptionConfiguration}'.trim()}" />
+        </property>
+        <property name="requestObjectSignatureValidationConfiguration">
+            <ref bean="#{'%{idp.oidc.rovalid.config:shibboleth.oidc.requestObjectSignatureValidationConfiguration}'.trim()}" />
         </property>
     </bean>
-
+        
+    <!-- Configuration for credentials and supported algorithms for ID Token and UserInfo response signing. -->    
     <bean id="shibboleth.oidc.SigningConfiguration" parent="shibboleth.BasicSignatureSigningConfiguration">
         <property name="signingCredentials">
             <list>
@@ -83,7 +87,7 @@
                     static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_256" />
 
                 <!-- 
-                                          Not supported by the configured EC key 
+                                          Not supported by the default P-256 EC key. 
                 <util:constant 
                      static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_384" /> 
                 <util:constant 
@@ -100,6 +104,7 @@
         </property>
     </bean>
 
+    <!-- Configuration for supported algorithms for ID Token and UserInfo response encryption. -->
     <bean id="shibboleth.oidc.EncryptionConfiguration" parent="shibboleth.BasicEncryptionConfiguration">
         <property name="keyTransportEncryptionAlgorithms">
             <list>
@@ -141,6 +146,7 @@
         </property>
     </bean>
     
+    <!-- Configuration for credentials and supported algorithms for request object decryption. -->
     <bean id="shibboleth.oidc.requestObjectDecryptionConfiguration" parent="shibboleth.BasicEncryptionConfiguration">
         <property name="keyTransportEncryptionCredentials">
             <list>
@@ -183,6 +189,32 @@
                     static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A192GCM" />
                 <util:constant
                     static-field="org.geant.idpextension.oidc.crypto.support.EncryptionConstants.ALGO_ID_ENC_ALG_A256GCM" />
+            </list>
+        </property>
+    </bean>
+    
+    <!-- Configuration for supported algorithms for request object signature validation. -->
+    <bean id="shibboleth.oidc.requestObjectSignatureValidationConfiguration" parent="shibboleth.BasicSignatureSigningConfiguration">
+        <property name="signatureAlgorithms">
+            <list>
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_256" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_384" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_512" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_256" />
+                <util:constant 
+                     static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_384" /> 
+                <util:constant 
+                     static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_512" /> 
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_256" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_384" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_512" />
             </list>
         </property>
     </bean>
