@@ -65,7 +65,7 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
  * @event {@link EventIds#INVALID_MSG_CTX}
  * @event {@link EventIds#INVALID_SEC_CFG}
  * 
- *        * Based purely on {@link PopulateSignatureSigningParameters}.
+ *        Based purely on {@link PopulateSignatureSigningParameters}.
  */
 @SuppressWarnings("rawtypes")
 public class PopulateOIDCSignatureSigningParameters
@@ -76,7 +76,6 @@ public class PopulateOIDCSignatureSigningParameters
     private final Logger log = LoggerFactory.getLogger(PopulateOIDCSignatureSigningParameters.class);
 
     /** Strategy used to look up the {@link SecurityParametersContext} to set the parameters for. */
-
     @Nonnull
     private Function<ProfileRequestContext, SecurityParametersContext> securityParametersContextLookupStrategy;
 
