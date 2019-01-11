@@ -305,6 +305,7 @@ public class OIDCClientInformationEncryptionParametersResolver extends BasicEncr
             }
         }
         if (params.getKeyTransportEncryptionCredential() == null) {
+            log.debug("Not able to credentials based on provided client information");
             super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
         }
     }
