@@ -67,6 +67,7 @@ public class OIDCSecurityConfigurationTest {
         config.setRequestObjectDecryptionConfiguration(confEnc);
         Assert.assertEquals(confEnc, config.getRequestObjectDecryptionConfiguration());
         SignatureSigningConfiguration confDec = new mockSignatureSigningConfiguration();
+        config.setRequestObjectSignatureValidationConfiguration(confDec);
         Assert.assertEquals(confDec, config.getRequestObjectSignatureValidationConfiguration());
     }
 
