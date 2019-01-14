@@ -40,46 +40,46 @@ import org.opensaml.xmlsec.algorithm.BlockEncryptionAlgorithm;
  */
 public final class EncryptionA128CBC_HS256 implements BlockEncryptionAlgorithm {
 
-	/** {@inheritDoc} */
-	@Nonnull
-	public String getKey() {
-		return JCAConstants.KEY_ALGO_AES;
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    public String getKey() {
+        return JCAConstants.KEY_ALGO_AES;
+    }
 
-	/** {@inheritDoc} */
-	@Nonnull
-	public String getURI() {
-		return EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256;
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    public String getURI() {
+        return EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256;
+    }
 
-	/** {@inheritDoc} */
-	@Nonnull
-	public AlgorithmType getType() {
-		return AlgorithmType.BlockEncryption;
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    public AlgorithmType getType() {
+        return AlgorithmType.BlockEncryption;
+    }
 
-	/** {@inheritDoc} */
-	@Nonnull
-	public String getJCAAlgorithmID() {
-		return String.format("%s/%s/%s", getKey(), getCipherMode(), getPadding());
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    public String getJCAAlgorithmID() {
+        return String.format("%s/%s/%s", getKey(), getCipherMode(), getPadding());
+    }
 
-	/** {@inheritDoc} */
-	@Nonnull
-	public Integer getKeyLength() {
-		return 128;
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    public Integer getKeyLength() {
+        return 128;
+    }
 
-	/** {@inheritDoc} */
-	@Nonnull
-	public String getCipherMode() {
-		return JCAConstants.CIPHER_MODE_CBC;
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    public String getCipherMode() {
+        return JCAConstants.CIPHER_MODE_CBC;
+    }
 
-	/** {@inheritDoc} */
-	@Nonnull
-	public String getPadding() {
-		return JCAConstantExtension.CIPHER_PADDING_PKCS5;
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    public String getPadding() {
+        return JCAConstantExtension.CIPHER_PADDING_PKCS5;
+    }
 
 }

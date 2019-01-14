@@ -43,45 +43,45 @@ import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
  */
 public class KeyTransportRSA_OAEP implements KeyTransportAlgorithm {
 
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getKey() {
-		return JCAConstants.KEY_ALGO_RSA;
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    @NotEmpty
+    public String getKey() {
+        return JCAConstants.KEY_ALGO_RSA;
+    }
 
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getURI() {
-		return KeyManagementConstants.ALGO_ID_ALG_RSA_OAEP;
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    @NotEmpty
+    public String getURI() {
+        return KeyManagementConstants.ALGO_ID_ALG_RSA_OAEP;
+    }
 
-	/** {@inheritDoc} */
-	@Nonnull
-	public AlgorithmType getType() {
-		return AlgorithmType.KeyTransport;
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    public AlgorithmType getType() {
+        return AlgorithmType.KeyTransport;
+    }
 
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getJCAAlgorithmID() {
-		return String.format("%s/%s/%s", getKey(), getCipherMode(), getPadding());
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    @NotEmpty
+    public String getJCAAlgorithmID() {
+        return String.format("%s/%s/%s", getKey(), getCipherMode(), getPadding());
+    }
 
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getCipherMode() {
-		return JCAConstants.CIPHER_MODE_ECB;
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    @NotEmpty
+    public String getCipherMode() {
+        return JCAConstants.CIPHER_MODE_ECB;
+    }
 
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getPadding() {
-		return JCAConstantExtension.CIPHER_PADDING_OAEP;
-	}
+    /** {@inheritDoc} */
+    @Nonnull
+    @NotEmpty
+    public String getPadding() {
+        return JCAConstantExtension.CIPHER_PADDING_OAEP;
+    }
 
 }
