@@ -45,7 +45,7 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 /**
- * Subcontext carrying information to form authentication/token/userinfo response for relying party. This context
+ * Subcontext carrying information to form authentication, token and userinfo responses for relying party. This context
  * appears as a subcontext of the {@link org.opensaml.messaging.context.MessageContext}.
  */
 public class OIDCAuthenticationResponseContext extends BaseContext {
@@ -53,12 +53,12 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     /** The id token formed. */
     @Nullable
     private IDTokenClaimsSet idToken;
-    
+
     /** The request object. */
     @Nullable
     private JWT requestObject;
 
-	/** The user info formed. */
+    /** The user info formed. */
     @Nullable
     private UserInfo userInfo;
 
@@ -75,9 +75,11 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     private URI redirectURI;
 
     /** Authentication time of the end user. */
+    @Nullable
     private Date authTime;
 
     /** Validated scope values. */
+    @Nullable
     private Scope requestedScope;
 
     /** Requested sub value. */
@@ -85,9 +87,11 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     private String requestedSubject;
 
     /** Subject generated for response. Value is set to sub claim. */
+    @Nullable
     private String subject;
-    
+
     /** Subject type, public or pairwise. */
+    @Nullable
     private String subjectType;
 
     /** Authorization code. */
@@ -134,6 +138,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * 
      * @return token claims
      */
+    @Nullable
     public TokenClaimsSet getTokenClaimsSet() {
         return tokenClaims;
     }
@@ -143,7 +148,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * 
      * @param claims token claims
      */
-    public void setTokenClaimsSet(TokenClaimsSet claims) {
+    public void setTokenClaimsSet(@Nullable TokenClaimsSet claims) {
         tokenClaims = claims;
     }
 
@@ -229,6 +234,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * 
      * @return Name ID generated for response
      */
+    @Nullable
     public String getSubject() {
         return subject;
     }
@@ -238,7 +244,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * 
      * @param generated subject for the response
      */
-    public void setSubject(String generatedSubject) {
+    public void setSubject(@Nullable String generatedSubject) {
         subject = generatedSubject;
     }
 
@@ -247,6 +253,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * 
      * @return generated subject type.
      */
+    @Nullable
     public String getSubjectType() {
         return subjectType;
     }
@@ -256,7 +263,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * 
      * @param generated subject type.
      */
-    public void setSubjectType(String type) {
+    public void setSubjectType(@Nullable String type) {
         subjectType = type;;
     }
 
@@ -265,6 +272,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * 
      * @return validated scope values
      */
+    @Nullable
     public Scope getScope() {
         return requestedScope;
     }
@@ -274,7 +282,7 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
      * 
      * @param scope scope values
      */
-    public void setScope(Scope scope) {
+    public void setScope(@Nullable Scope scope) {
         requestedScope = scope;
     }
 
@@ -396,23 +404,23 @@ public class OIDCAuthenticationResponseContext extends BaseContext {
     public void setProcessedToken(@Nullable JWT token) {
         processedToken = token;
     }
-    
-    /**
-	 * Get the request object.
-	 * 
-	 * @return the request object
-	 */
-	public JWT getRequestObject() {
-		return requestObject;
-	}
 
-	/**
-	 * Set the request object. Either by value or fetched by reference.
-	 * 
-	 * @param requestObject
-	 *            the request object.
-	 */
-	public void setRequestObject(JWT requestObject) {
-		this.requestObject = requestObject;
-	}
+    /**
+     * Get the request object.
+     * 
+     * @return the request object
+     */
+    @Nullable
+    public JWT getRequestObject() {
+        return requestObject;
+    }
+
+    /**
+     * Set the request object. Either by value or fetched by reference.
+     * 
+     * @param obj the request object.
+     */
+    public void setRequestObject(@Nullable JWT obj) {
+        requestObject = obj;
+    }
 }
