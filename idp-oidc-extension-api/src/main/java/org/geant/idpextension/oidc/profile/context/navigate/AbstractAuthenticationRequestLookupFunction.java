@@ -47,8 +47,8 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 public abstract class AbstractAuthenticationRequestLookupFunction<T>
         implements ContextDataLookupFunction<ProfileRequestContext, T> {
 
-	protected JWT requestObject;
-	
+    protected JWT requestObject;
+
     /**
      * Implemented to perform the actual lookup.
      * 
@@ -61,7 +61,7 @@ public abstract class AbstractAuthenticationRequestLookupFunction<T>
     @Override
     @Nullable
     public T apply(@Nullable final ProfileRequestContext input) {
-        if (input == null || input.getInboundMessageContext() == null) {
+        if (input == null || input.getInboundMessageContext() == null || input.getOutboundMessageContext() == null) {
             return null;
         }
         Object message = input.getInboundMessageContext().getMessage();
