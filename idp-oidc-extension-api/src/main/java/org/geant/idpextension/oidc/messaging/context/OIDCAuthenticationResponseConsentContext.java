@@ -28,51 +28,52 @@
 
 package org.geant.idpextension.oidc.messaging.context;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opensaml.messaging.context.BaseContext;
 import net.minidev.json.JSONArray;
 
 /**
- * Subcontext carrying information to form token/userinfo response for relying
- * party. This context appears as a subcontext of the
+ * Subcontext carrying user consent information in a form suitable for OIDC processing. The information is carried in
+ * tokens (code, refresh token, access token) to back channel endpoints. This context appears as a subcontext of the
  * {@link OIDCAuthenticationResponseContext}.
- * 
- * This context is populated with consent information.
  */
 public class OIDCAuthenticationResponseConsentContext extends BaseContext {
 
-	/** Attributes having consent. */
-	@Nullable
-	private JSONArray consentedAttributes;
+    /** Attributes having consent. */
+    @Nullable
+    private JSONArray consentedAttributes;
 
-	/** Attributes requiring consent. */
-	@Nullable
-	private JSONArray consentableAttributes;
+    /** Attributes requiring consent. */
+    @Nullable
+    private JSONArray consentableAttributes;
 
-	/**
-	 * Constructor.
-	 */
-	public OIDCAuthenticationResponseConsentContext() {
-		consentedAttributes = new JSONArray();
-		consentableAttributes = new JSONArray();
-	}
+    /**
+     * Constructor.
+     */
+    public OIDCAuthenticationResponseConsentContext() {
+        consentedAttributes = new JSONArray();
+        consentableAttributes = new JSONArray();
+    }
 
-	/**
-	 * Get consented attributes.
-	 * 
-	 * @return consented attributes.
-	 */
-	public JSONArray getConsentedAttributes() {
-		return consentedAttributes;
-	}
+    /**
+     * Get consented attributes.
+     * 
+     * @return consented attributes.
+     */
+    @Nonnull
+    public JSONArray getConsentedAttributes() {
+        return consentedAttributes;
+    }
 
-	/**
-	 * Get consentable attributes.
-	 * 
-	 * @return consentable attributes.
-	 */
-	public JSONArray getConsentableAttributes() {
-		return consentableAttributes;
-	}
+    /**
+     * Get consentable attributes.
+     * 
+     * @return consentable attributes.
+     */
+    @Nonnull
+    public JSONArray getConsentableAttributes() {
+        return consentableAttributes;
+    }
 
 }
