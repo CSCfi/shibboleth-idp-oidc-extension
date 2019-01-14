@@ -29,17 +29,17 @@
 package org.geant.idpextension.oidc.messaging.context;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.geant.idpextension.oidc.token.support.TokenDeliveryClaimsClaimsSet;
 import org.opensaml.messaging.context.BaseContext;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
 /**
- * Subcontext carrying information to form token/userinfo response for relying party. This context appears as a
+ * Subcontext carrying information to form token and userinfo responses for relying party. This context appears as a
  * subcontext of the {@link OIDCAuthenticationResponseContext}.
  * 
- * This context is populated if there are attributes that need to be delivered via token.
+ * This context is populated by authentication endpoint if there are unresolvable attributes that need to be carried in
+ * token.
  */
 public class OIDCAuthenticationResponseTokenClaimsContext extends BaseContext {
 
