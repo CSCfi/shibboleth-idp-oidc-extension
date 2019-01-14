@@ -28,60 +28,30 @@
 
 package org.geant.idpextension.oidc.algorithm.descriptors;
 
-import javax.annotation.Nonnull;
+import junit.framework.Assert;
 
+import org.geant.idpextension.oidc.crypto.support.EncryptionConstants;
 import org.geant.idpextension.oidc.crypto.support.JCAConstantExtension;
-import org.geant.idpextension.oidc.crypto.support.KeyManagementConstants;
 import org.opensaml.security.crypto.JCAConstants;
-import org.opensaml.xmlsec.algorithm.KeyTransportAlgorithm;
-
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+import org.opensaml.xmlsec.algorithm.AlgorithmDescriptor.AlgorithmType;
+import org.testng.annotations.Test;
 
 /**
- * Algorithm descriptor for JWE key transport algorithm: RSA-OAEP.
- * 
+ * Unit tests for {@link EncryptionA128CBC_HS256}
  */
-public class KeyTransportRSA_OAEP implements KeyTransportAlgorithm {
+public class EncryptionA128CBC_HS256Test {
 
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getKey() {
-		return JCAConstants.KEY_ALGO_RSA;
-	}
+	private EncryptionA128CBC_HS256 algorithm = new EncryptionA128CBC_HS256();
 
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getURI() {
-		return KeyManagementConstants.ALGO_ID_ALG_RSA_OAEP;
-	}
-
-	/** {@inheritDoc} */
-	@Nonnull
-	public AlgorithmType getType() {
-		return AlgorithmType.KeyTransport;
-	}
-
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getJCAAlgorithmID() {
-		return String.format("%s/%s/%s", getKey(), getCipherMode(), getPadding());
-	}
-
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getCipherMode() {
-		return JCAConstants.CIPHER_MODE_ECB;
-	}
-
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getPadding() {
-		return JCAConstantExtension.CIPHER_PADDING_OAEP;
+	@Test
+	public void testInitialState() {
+		Assert.assertEquals(JCAConstants.KEY_ALGO_AES, algorithm.getKey());
+		Assert.assertEquals(EncryptionConstants.ALGO_ID_ENC_ALG_A128CBC_HS256, algorithm.getURI());
+		Assert.assertEquals(AlgorithmType.BlockEncryption, algorithm.getType());
+		Assert.assertEquals("AES/CBC/PKCS5Padding", algorithm.getJCAAlgorithmID());
+		Assert.assertEquals(new Integer(128), algorithm.getKeyLength());
+		Assert.assertEquals(JCAConstants.CIPHER_MODE_CBC, algorithm.getCipherMode());
+		Assert.assertEquals(JCAConstantExtension.CIPHER_PADDING_PKCS5, algorithm.getPadding());
 	}
 
 }

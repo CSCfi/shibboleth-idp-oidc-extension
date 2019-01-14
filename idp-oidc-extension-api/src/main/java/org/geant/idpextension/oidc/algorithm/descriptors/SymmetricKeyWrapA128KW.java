@@ -42,50 +42,35 @@ import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
  */
 public class SymmetricKeyWrapA128KW implements SymmetricKeyWrapAlgorithm {
 
-    /** {@inheritDoc} */
-    @Nonnull
-    @NotEmpty
-    public String getKey() {
-        return JCAConstants.KEY_ALGO_AES;
-    }
+	/** {@inheritDoc} */
+	@Nonnull
+	@NotEmpty
+	public String getKey() {
+		return JCAConstants.KEY_ALGO_AES;
+	}
 
-    /** {@inheritDoc} */
-    @Nonnull
-    @NotEmpty
-    public String getURI() {
-        return KeyManagementConstants.ALGO_ID_ALG_AES_128_KW;
-    }
+	/** {@inheritDoc} */
+	@Nonnull
+	@NotEmpty
+	public String getURI() {
+		return KeyManagementConstants.ALGO_ID_ALG_AES_128_KW;
+	}
 
-    /** {@inheritDoc} */
-    @Nonnull
-    public AlgorithmType getType() {
-        return AlgorithmType.SymmetricKeyWrap;
-    }
+	/** {@inheritDoc} */
+	@Nonnull
+	public AlgorithmType getType() {
+		return AlgorithmType.SymmetricKeyWrap;
+	}
 
-    /** {@inheritDoc} */
-    @Nonnull
-    @NotEmpty
-    public String getJCAAlgorithmID() {
-        return String.format("%s/%s/%s", getKey(), getCipherMode(), getPadding());
-    }
+	/** {@inheritDoc} */
+	@Nonnull
+	public String getJCAAlgorithmID() {
+		return JCAConstants.KEYWRAP_ALGO_AES;
+	}
 
-    /** {@inheritDoc} */
-    @Nonnull
-    @NotEmpty
-    public String getCipherMode() {
-        return JCAConstants.CIPHER_MODE_CBC;
-    }
-
-    /** {@inheritDoc} */
-    @Nonnull
-    @NotEmpty
-    public String getPadding() {
-        return JCAConstants.CIPHER_PADDING_NONE;
-    }
-    
-    @Override
-    public Integer getKeyLength() {
-        return 128;
-    }
+	@Override
+	public Integer getKeyLength() {
+		return 128;
+	}
 
 }

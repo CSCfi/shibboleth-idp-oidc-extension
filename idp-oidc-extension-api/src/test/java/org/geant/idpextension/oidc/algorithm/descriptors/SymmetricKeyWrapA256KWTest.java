@@ -28,60 +28,27 @@
 
 package org.geant.idpextension.oidc.algorithm.descriptors;
 
-import javax.annotation.Nonnull;
+import junit.framework.Assert;
 
-import org.geant.idpextension.oidc.crypto.support.JCAConstantExtension;
 import org.geant.idpextension.oidc.crypto.support.KeyManagementConstants;
 import org.opensaml.security.crypto.JCAConstants;
-import org.opensaml.xmlsec.algorithm.KeyTransportAlgorithm;
-
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+import org.opensaml.xmlsec.algorithm.AlgorithmDescriptor.AlgorithmType;
+import org.testng.annotations.Test;
 
 /**
- * Algorithm descriptor for JWE key transport algorithm: RSA-OAEP.
- * 
+ * Unit tests for {@link SymmetricKeyWrapA256KW}
  */
-public class KeyTransportRSA_OAEP implements KeyTransportAlgorithm {
+public class SymmetricKeyWrapA256KWTest {
 
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getKey() {
-		return JCAConstants.KEY_ALGO_RSA;
-	}
+	private SymmetricKeyWrapA256KW algorithm = new SymmetricKeyWrapA256KW();
 
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getURI() {
-		return KeyManagementConstants.ALGO_ID_ALG_RSA_OAEP;
-	}
-
-	/** {@inheritDoc} */
-	@Nonnull
-	public AlgorithmType getType() {
-		return AlgorithmType.KeyTransport;
-	}
-
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getJCAAlgorithmID() {
-		return String.format("%s/%s/%s", getKey(), getCipherMode(), getPadding());
-	}
-
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getCipherMode() {
-		return JCAConstants.CIPHER_MODE_ECB;
-	}
-
-	/** {@inheritDoc} */
-	@Nonnull
-	@NotEmpty
-	public String getPadding() {
-		return JCAConstantExtension.CIPHER_PADDING_OAEP;
+	@Test
+	public void testInitialState() {
+		Assert.assertEquals(JCAConstants.KEY_ALGO_AES, algorithm.getKey());
+		Assert.assertEquals(KeyManagementConstants.ALGO_ID_ALG_AES_256_KW, algorithm.getURI());
+		Assert.assertEquals(AlgorithmType.SymmetricKeyWrap, algorithm.getType());
+		Assert.assertEquals(JCAConstants.KEYWRAP_ALGO_AES, algorithm.getJCAAlgorithmID());
+		Assert.assertEquals(new Integer(256), algorithm.getKeyLength());
 	}
 
 }
