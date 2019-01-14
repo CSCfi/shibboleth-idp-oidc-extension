@@ -33,23 +33,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-
 import junit.framework.Assert;
-import net.shibboleth.utilities.java.support.collection.LockableClassToInstanceMultiMap;
-
-import org.opensaml.core.xml.Namespace;
-import org.opensaml.core.xml.NamespaceManager;
-import org.opensaml.core.xml.XMLObject;
-import org.opensaml.core.xml.schema.XSBooleanValue;
-import org.opensaml.core.xml.util.IDIndex;
-import org.opensaml.saml.saml2.core.NameID;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.w3c.dom.Element;
-
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.SignedJWT;
@@ -58,8 +44,11 @@ import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
+/** Tests for {@link OIDCAuthenticationResponseContext}.*/
 public class OIDCAuthenticationResponseContextTest {
 
     private OIDCAuthenticationResponseContext ctx;
@@ -79,6 +68,13 @@ public class OIDCAuthenticationResponseContextTest {
         Assert.assertNull(ctx.getRedirectURI());
         Assert.assertNull(ctx.getScope());
         Assert.assertNull(ctx.getProcessedToken());
+        Assert.assertNull(ctx.getRequestedClaims());
+        Assert.assertNull(ctx.getTokenClaimsSet());
+        Assert.assertNull(ctx.getAuthorizationCode());
+        Assert.assertNull(ctx.getAccessToken());
+        Assert.assertNull(ctx.getRefreshToken());
+        Assert.assertNull(ctx.getSubjectType());
+        Assert.assertNull(ctx.getUserInfo());
     }
 
     @Test
@@ -91,8 +87,7 @@ public class OIDCAuthenticationResponseContextTest {
         aud.add(new Audience("aud"));
         IDTokenClaimsSet token = new IDTokenClaimsSet(issuer, sub, aud, new Date(), new Date());
         ctx.setIDToken(token);
-        NameID id = new MockNameID();
-        ctx.setSubject(id.getValue());
+        ctx.setSubject("sub");
         URI uri = new URI("https://example.org");
         ctx.setRedirectURI(uri);
         ctx.setRequestedSubject("sub");
@@ -103,189 +98,21 @@ public class OIDCAuthenticationResponseContextTest {
         ctx.setProcessedToken(sJWT);
         Assert.assertEquals(ctx.getAcr().toString(), "acrValue");
         ctx.setAcr(null);
+        ClaimsRequest claims = new ClaimsRequest();
+        ctx.setRequestedClaims(claims);
+        ctx.setSubjectType("pairwise");
+        UserInfo info = new UserInfo(sub);
+        ctx.setUserInfo(info);
         Assert.assertNull(ctx.getAcr());
         Assert.assertEquals(ctx.getAuthTime(), new Date(1));
         Assert.assertEquals(ctx.getIDToken(), token);
-        Assert.assertEquals(ctx.getSubject(), id.getValue());
+        Assert.assertEquals(ctx.getSubject(), "sub");
         Assert.assertEquals(ctx.getProcessedToken(), sJWT);
         Assert.assertEquals(ctx.getRedirectURI(), uri);
         Assert.assertEquals(ctx.getRequestedSubject(), "sub");
         Assert.assertEquals(ctx.getScope(), scope);
+        Assert.assertEquals(claims, ctx.getRequestedClaims());
+        Assert.assertEquals("pairwise", ctx.getSubjectType());
+        Assert.assertEquals(info, ctx.getUserInfo());
     }
-
-    class MockNameID implements NameID {
-
-        @Override
-        public void detach() {
-
-        }
-
-        @Override
-        public Element getDOM() {
-            return null;
-        }
-
-        @Override
-        public QName getElementQName() {
-            return null;
-        }
-
-        @Override
-        public IDIndex getIDIndex() {
-            return null;
-        }
-
-        @Override
-        public NamespaceManager getNamespaceManager() {
-            return null;
-        }
-
-        @Override
-        public Set<Namespace> getNamespaces() {
-            return null;
-        }
-
-        @Override
-        public String getNoNamespaceSchemaLocation() {
-            return null;
-        }
-
-        @Override
-        public LockableClassToInstanceMultiMap<Object> getObjectMetadata() {
-            return null;
-        }
-
-        @Override
-        public List<XMLObject> getOrderedChildren() {
-            return null;
-        }
-
-        @Override
-        public XMLObject getParent() {
-            return null;
-        }
-
-        @Override
-        public String getSchemaLocation() {
-            return null;
-        }
-
-        @Override
-        public QName getSchemaType() {
-            return null;
-        }
-
-        @Override
-        public boolean hasChildren() {
-            return false;
-        }
-
-        @Override
-        public boolean hasParent() {
-            return false;
-        }
-
-        @Override
-        public Boolean isNil() {
-            return null;
-        }
-
-        @Override
-        public XSBooleanValue isNilXSBoolean() {
-            return null;
-        }
-
-        @Override
-        public void releaseChildrenDOM(boolean arg0) {
-        }
-
-        @Override
-        public void releaseDOM() {
-        }
-
-        @Override
-        public void releaseParentDOM(boolean arg0) {
-        }
-
-        @Override
-        public XMLObject resolveID(String arg0) {
-            return null;
-        }
-
-        @Override
-        public XMLObject resolveIDFromRoot(String arg0) {
-            return null;
-        }
-
-        @Override
-        public void setDOM(Element arg0) {
-        }
-
-        @Override
-        public void setNil(Boolean arg0) {
-        }
-
-        @Override
-        public void setNil(XSBooleanValue arg0) {
-        }
-
-        @Override
-        public void setNoNamespaceSchemaLocation(String arg0) {
-        }
-
-        @Override
-        public void setParent(XMLObject arg0) {
-        }
-
-        @Override
-        public void setSchemaLocation(String arg0) {
-        }
-
-        @Override
-        public String getFormat() {
-            return null;
-        }
-
-        @Override
-        public String getNameQualifier() {
-            return null;
-        }
-
-        @Override
-        public String getSPNameQualifier() {
-            return null;
-        }
-
-        @Override
-        public String getSPProvidedID() {
-            return null;
-        }
-
-        @Override
-        public String getValue() {
-            return null;
-        }
-
-        @Override
-        public void setFormat(String arg0) {
-        }
-
-        @Override
-        public void setNameQualifier(String arg0) {
-        }
-
-        @Override
-        public void setSPNameQualifier(String arg0) {
-        }
-
-        @Override
-        public void setSPProvidedID(String arg0) {
-        }
-
-        @Override
-        public void setValue(String arg0) {
-        }
-
-    }
-
 }
