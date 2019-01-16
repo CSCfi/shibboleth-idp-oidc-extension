@@ -49,7 +49,7 @@ public class DefaultClientIDLookupFunction implements ContextDataLookupFunction<
             return null;
         }
         Object message = input.getMessage();
-        if (message == null || !(message instanceof AuthenticationRequest)) {
+        if (!(message instanceof AuthenticationRequest)) {
             return null;
         }
         return ((AuthenticationRequest) message).getClientID();
