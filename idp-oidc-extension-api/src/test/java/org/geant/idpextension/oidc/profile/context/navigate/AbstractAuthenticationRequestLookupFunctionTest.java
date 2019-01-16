@@ -105,7 +105,7 @@ public class AbstractAuthenticationRequestLookupFunctionTest {
 
         @Override
         Object doLookup(AuthenticationRequest req) {
-            return new String("OK");
+            return req != null ? new String("OK") : new String("NOK");
         }
 
     }
