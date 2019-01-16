@@ -59,7 +59,7 @@ public abstract class AbstractTokenRequestLookupFunction<T>
             return null;
         }
         Object message = input.getInboundMessageContext().getMessage();
-        if (message == null || !(message instanceof TokenRequest)) {
+        if (!(message instanceof TokenRequest)) {
             return null;
         }
         return doLookup((TokenRequest) message);
