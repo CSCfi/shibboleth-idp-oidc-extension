@@ -51,7 +51,7 @@ public class TokenRequestClientIDLookupFunction implements ContextDataLookupFunc
             return null;
         }
         Object message = input.getMessage();
-        if (message == null || !(message instanceof AbstractOptionallyIdentifiedRequest)) {
+        if (!(message instanceof AbstractOptionallyIdentifiedRequest)) {
             return null;
         }
         AbstractOptionallyIdentifiedRequest req = (AbstractOptionallyIdentifiedRequest) message;
