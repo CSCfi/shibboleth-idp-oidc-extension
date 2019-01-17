@@ -156,7 +156,7 @@ public class TokenClaimsSet {
     protected TokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nullable ACR acr,
             @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
-            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nonnull String idpSessionId,
+            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nullable String idpSessionId,
             @Nullable ClaimsRequest claims, @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID,
             @Nullable ClaimsSet dlClaimsUI, @Nullable JSONArray consentableClaims,
             @Nullable JSONArray consentedClaims) {
