@@ -51,16 +51,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Based on {@link ReplayCache}.
- * 
  * Stores and checks for revocation entries.
  * 
- * TODO: This class may not be thread-safe as we have two (synchronized) methods accessing underlying store. Verify and
- * fix.
- * 
  * <p>
- * This class is(TODO ?) thread-safe and uses a synchronized method to prevent race conditions within the underlying
- * store (lacking an atomic "check and insert" operation).
+ * This class is thread-safe and uses a synchronized method to prevent race conditions within the underlying store
+ * (lacking an atomic "check and insert" operation).
  * </p>
  */
 @ThreadSafeAfterInit
@@ -90,7 +85,7 @@ public class RevocationCache extends AbstractIdentifiableInitializableComponent 
     /**
      * Set the revocation entry expiration.
      * 
-     * @param entryExpiration lifetime of an refresh token in milliseconds
+     * @param entryExpiration lifetime of an revocation entry in milliseconds
      */
     @Duration
     public void setEntryExpiration(@Positive @Duration final long entryExpiration) {
