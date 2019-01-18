@@ -97,6 +97,10 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
      * @param redirectURI Validated redirect URI of the authentication request. Must not be NULL.
      * @param scope Scope of the authentication request. Must not be NULL.
      * @param claims Claims request of the authentication request. May be NULL.
+     * @param dlClaims token delivery claims delivered both for id token and userinfo response. May be NULL.
+     * @param dlClaimsUI token delivery claims delivered for userinfo response. May be NULL.
+     * @param consentableClaims consentable claims. May be NULL.
+     * @param consentedClaims consented claims. May be NULL.
      * @throws RuntimeException if called with nonallowed null parameters
      */
     public AccessTokenClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,

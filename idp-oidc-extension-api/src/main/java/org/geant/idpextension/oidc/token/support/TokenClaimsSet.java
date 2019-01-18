@@ -150,7 +150,12 @@ public class TokenClaimsSet {
      * @param scope Scope of the authentication request. Must not be NULL.
      * @param idpSessionId Session id of the user. May be NULL.
      * @param claims Claims request of the authentication request. May be NULL.
-     * @throws RuntimeException if called with nnonallowed ull parameters
+     * @param dlClaims token delivery claims delivered both for id token and userinfo response. May be NULL.
+     * @param dlClaimsID token delivery claims delivered for id token. May be NULL.
+     * @param dlClaimsUI token delivery claims delivered for userinfo response. May be NULL.
+     * @param consentableClaims consentable claims. May be NULL.
+     * @param consentedClaims consented claims. May be NULL.
+     * @throws RuntimeException if called with not allowed null parameters
      */
     // Checkstyle: CyclomaticComplexity OFF
     protected TokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,

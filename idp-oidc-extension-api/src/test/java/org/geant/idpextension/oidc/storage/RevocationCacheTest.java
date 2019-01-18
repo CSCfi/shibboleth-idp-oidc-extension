@@ -20,7 +20,6 @@ package org.geant.idpextension.oidc.storage;
 import java.nio.charset.Charset;
 import java.util.Random;
 
-import org.opensaml.storage.ReplayCache;
 import org.opensaml.storage.impl.client.ClientStorageService;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
@@ -33,7 +32,7 @@ import org.testng.Assert;
 import org.opensaml.storage.impl.MemoryStorageService;;
 
 /**
- * Tests for {@link ReplayCache}
+ * Tests for {@link RevocationCache}
  */
 public class RevocationCacheTest {
 
