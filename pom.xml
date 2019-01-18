@@ -152,6 +152,12 @@
                 <version>2.6.0</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <version>${opensaml.version}</version>
+                <artifactId>opensaml-storage-impl</artifactId>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
