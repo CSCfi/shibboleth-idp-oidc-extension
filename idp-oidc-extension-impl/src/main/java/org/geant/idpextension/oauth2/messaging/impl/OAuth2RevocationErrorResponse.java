@@ -28,9 +28,13 @@
 
 package org.geant.idpextension.oauth2.messaging.impl;
 
+import javax.annotation.Nonnull;
+
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ErrorResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+
+import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /** OAuth2 Token Revocation Error message class. */
 public class OAuth2RevocationErrorResponse implements ErrorResponse {
@@ -43,7 +47,8 @@ public class OAuth2RevocationErrorResponse implements ErrorResponse {
      * 
      * @param error Error object the response is based on.
      */
-    public OAuth2RevocationErrorResponse(ErrorObject error) {
+    public OAuth2RevocationErrorResponse(@Nonnull ErrorObject error) {
+        Constraint.isNotNull(error, "Error object must not be null");
         errorObject = error;
     }
 
