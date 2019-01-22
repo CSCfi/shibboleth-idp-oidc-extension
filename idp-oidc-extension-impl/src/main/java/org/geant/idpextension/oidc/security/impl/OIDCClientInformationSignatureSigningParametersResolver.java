@@ -116,17 +116,6 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
 
         resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
 
-        params.setSignatureReferenceDigestMethod(resolveReferenceDigestMethod(criteria, whitelistBlacklistPredicate));
-        params.setSignatureReferenceCanonicalizationAlgorithm(resolveReferenceCanonicalizationAlgorithm(criteria));
-
-        params.setSignatureCanonicalizationAlgorithm(resolveCanonicalizationAlgorithm(criteria));
-
-        if (params.getSigningCredential() != null) {
-            params.setKeyInfoGenerator(resolveKeyInfoGenerator(criteria, params.getSigningCredential()));
-            params.setSignatureHMACOutputLength(
-                    resolveHMACOutputLength(criteria, params.getSigningCredential(), params.getSignatureAlgorithm()));
-        }
-
         if (validate(params)) {
             logResult(params);
             return params;
@@ -253,5 +242,19 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
             log.debug("Not able to resolve signing credential based on provided client information");
             super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
         }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected boolean validate(@Nonnull final SignatureSigningParameters params) {
+        if (params.getSigningCredential() == null) {
+            log.warn("Validation failure: Unable to resolve signing credential");
+            return false;
+        }
+        if (params.getSignatureAlgorithm() == null) {
+            log.warn("Validation failure: Unable to resolve signing algorithm URI");
+            return false;
+        }
+        return true;
     }
 }
