@@ -23,41 +23,26 @@ import java.text.ParseException;
 import org.testng.Assert;
 
 /**
- * Tests for {@link AccessTokenClaimsSetTest}
+ * Tests for {@link RefreshTokenClaimsSetTest}
  */
-public class AccessTokenClaimsSetTest extends BaseTokenClaimsSetTest {
+public class RefreshTokenClaimsSetTest extends BaseTokenClaimsSetTest {
 
-    private AccessTokenClaimsSet atClaimsSet;
+    private RefreshTokenClaimsSet rfClaimsSet;
 
     protected void init() {
-        atClaimsSet = new AccessTokenClaimsSet(new MockIdStrategy(), clientID, issuer, userPrincipal, subject, acr, iat,
-                exp, nonce, authTime, redirectURI, scope, idpSessionId, claims, dlClaims, dlClaimsUI, consentableClaims,
-                consentedClaims);
-    }
-
-    protected void init2() {
         AuthorizeCodeClaimsSet acClaimsSet = new AuthorizeCodeClaimsSet(new MockIdStrategy(), clientID, issuer,
                 userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, idpSessionId, claims,
                 dlClaims, dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
-        atClaimsSet = new AccessTokenClaimsSet(acClaimsSet, scope, dlClaims, dlClaimsUI, iat, exp);
-    }
-
-    @Test
-    public void testConstructorSimple() throws ParseException, DataSealerException {
-        init();
-        Assert.assertEquals(atClaimsSet.getACR(), acr.getValue());
-        // start with second constructor
-        init2();
-        Assert.assertEquals(atClaimsSet.getACR(), acr.getValue());
+        rfClaimsSet = new RefreshTokenClaimsSet(acClaimsSet, iat, exp);
     }
 
     @Test
     public void testSerialization() throws ParseException, DataSealerException {
         init();
-        AccessTokenClaimsSet acClaimsSet2 = AccessTokenClaimsSet.parse(atClaimsSet.serialize());
-        Assert.assertEquals(acClaimsSet2.getACR(), acr.getValue());
-        AccessTokenClaimsSet acClaimsSet3 = AccessTokenClaimsSet.parse(acClaimsSet2.serialize(sealer), sealer);
-        Assert.assertEquals(acClaimsSet3.getACR(), acr.getValue());
+        RefreshTokenClaimsSet rfClaimsSet2 = RefreshTokenClaimsSet.parse(rfClaimsSet.serialize());
+        Assert.assertEquals(rfClaimsSet2.getACR(), acr.getValue());
+        RefreshTokenClaimsSet rfClaimsSet3 = RefreshTokenClaimsSet.parse(rfClaimsSet2.serialize(sealer), sealer);
+        Assert.assertEquals(rfClaimsSet3.getACR(), acr.getValue());
     }
 
     @Test(expectedExceptions = ParseException.class)
@@ -65,7 +50,7 @@ public class AccessTokenClaimsSetTest extends BaseTokenClaimsSetTest {
         AuthorizeCodeClaimsSet accessnClaimsSet = new AuthorizeCodeClaimsSet(new MockIdStrategy(), clientID, issuer,
                 userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, idpSessionId, claims,
                 dlClaims, null, dlClaimsUI, consentableClaims, consentedClaims);
-        atClaimsSet = AccessTokenClaimsSet.parse(accessnClaimsSet.serialize());
+        rfClaimsSet = RefreshTokenClaimsSet.parse(accessnClaimsSet.serialize());
     }
 
 }

@@ -28,6 +28,8 @@ import net.shibboleth.ext.spring.resource.ResourceHelper;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.security.BasicKeystoreKeyStrategy;
 import net.shibboleth.utilities.java.support.security.DataSealer;
+import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
+
 import org.testng.annotations.BeforeMethod;
 
 import java.net.URI;
@@ -64,7 +66,7 @@ public class BaseTokenClaimsSetTest {
 
     protected URI redirectURI;
 
-    protected Date exp = new Date(System.currentTimeMillis() + 1000);
+    protected Date exp = new Date(System.currentTimeMillis() + 30000);
 
     protected ClaimsSet dlClaims = new TokenDeliveryClaimsClaimsSet();
 
@@ -105,6 +107,21 @@ public class BaseTokenClaimsSetTest {
         dlClaimsUI.setClaim("tokenToUserInfotokenDeliveryClaim", "value");
         consentableClaims.add("consentableClaim");
         consentedClaims.add("consentedClaim");
+    }
+    
+    public class MockIdStrategy implements IdentifierGenerationStrategy {
+
+        @Override
+        public String generateIdentifier() {
+            return "x";
+        }
+
+        @Override
+        public String generateIdentifier(boolean xmlSafe) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
     }
 
 }
