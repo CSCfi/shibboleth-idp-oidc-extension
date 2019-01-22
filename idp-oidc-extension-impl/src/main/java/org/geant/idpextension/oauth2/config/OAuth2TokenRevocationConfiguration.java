@@ -35,9 +35,8 @@ import org.geant.idpextension.oidc.config.AbstractOIDCClientAuthenticableProfile
 import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 
 /**
- * Profile configuration for the OAuth2 Token Revocation. Token Revocation end point client authentication methods is
- * the common methods of what client has registered as token end point authentication methods and methods
- * tokenEndpointAuthMethods profile configuration list.
+ * Profile configuration for the OAuth2 Token Revocation. The profile is required to define client authentication
+ * methods.
  */
 public class OAuth2TokenRevocationConfiguration extends AbstractOIDCClientAuthenticableProfileConfiguration {
 
