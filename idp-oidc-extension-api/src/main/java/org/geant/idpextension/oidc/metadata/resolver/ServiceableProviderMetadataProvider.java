@@ -41,6 +41,7 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import net.shibboleth.ext.spring.service.AbstractServiceableComponent;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
+import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
@@ -79,7 +80,7 @@ public class ServiceableProviderMetadataProvider extends AbstractServiceableComp
      */
     public void setSortKey(final int key) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        sortKey = new Integer(key);
+        sortKey = Integer.valueOf(key);
     }
 
     /**
@@ -124,7 +125,6 @@ public class ServiceableProviderMetadataProvider extends AbstractServiceableComp
     /** {@inheritDoc} */
     @Override
     protected void doInitialize() throws ComponentInitializationException {
-        setId(resolver.getId());
         super.doInitialize();
         if (null == resolver) {
             throw new ComponentInitializationException("ProviderMetadataResolver cannot be null");
@@ -133,11 +133,21 @@ public class ServiceableProviderMetadataProvider extends AbstractServiceableComp
         if (null == sortKey) {
             synchronized (this) {
                 sortKeyValue++;
-                sortKey = new Integer(sortKeyValue);
+                setSortKey(sortKeyValue);
             }
             log.info("Top level ProviderMetadata Provider '{}' did not have a sort key; giving it value '{}'", getId(),
                     sortKey);
         }
+    }
+    
+    /**
+     * Sets the ID of this component. The component must not yet be initialized.
+     * 
+     * @param componentId ID of the component
+     */
+    @Override
+    public void setId(@Nonnull @NotEmpty final String componentId) {
+        super.setId(componentId);
     }
 
     /** {@inheritDoc} */
