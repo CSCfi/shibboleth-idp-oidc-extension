@@ -121,16 +121,7 @@ public class OIDCClientInformationEncryptionParametersResolver extends BasicEncr
                 ? new OIDCDecryptionParameters() : new EncryptionParameters();
 
         resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
-
-        if (params.getDataEncryptionCredential() != null) {
-            params.setDataKeyInfoGenerator(resolveDataKeyInfoGenerator(criteria, params.getDataEncryptionCredential()));
-        }
-
-        if (params.getKeyTransportEncryptionCredential() != null) {
-            params.setKeyTransportKeyInfoGenerator(
-                    resolveKeyTransportKeyInfoGenerator(criteria, params.getKeyTransportEncryptionCredential()));
-        }
-
+        
         boolean encryptionOptional = false;
         final EncryptionOptionalCriterion encryptionOptionalCrit = criteria.get(EncryptionOptionalCriterion.class);
         if (encryptionOptionalCrit != null) {
