@@ -39,12 +39,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
+import javax.annotation.Nonnull;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
+import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.security.BasicKeystoreKeyStrategy;
 import net.shibboleth.utilities.java.support.security.DataSealer;
@@ -53,6 +56,7 @@ import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrate
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
+import org.geant.idpextension.oidc.storage.RevocationCache;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.security.credential.Credential;
@@ -93,6 +97,8 @@ abstract class BaseOIDCResponseActionTest {
     final protected String subject = "generatedSubject";
 
     final protected String clientId = "s6BhdRkqt3";
+
+    private DataSealer dataSealer;
 
     @SuppressWarnings("rawtypes")
     protected ProfileRequestContext profileRequestCtx;
@@ -163,6 +169,9 @@ abstract class BaseOIDCResponseActionTest {
     }
 
     protected DataSealer getDataSealer() throws ComponentInitializationException, NoSuchAlgorithmException {
+        if (dataSealer != null) {
+            return dataSealer;
+        }
         final BasicKeystoreKeyStrategy strategy = new BasicKeystoreKeyStrategy();
         strategy.setKeystoreResource(ResourceHelper.of(new ClassPathResource("credentials/sealer.jks")));
         strategy.setKeyVersionResource(ResourceHelper.of(new ClassPathResource("credentials/sealer.kver")));
@@ -170,11 +179,11 @@ abstract class BaseOIDCResponseActionTest {
         strategy.setKeyAlias("secret");
         strategy.setKeyPassword("password");
         strategy.initialize();
-        final DataSealer sealer = new DataSealer();
-        sealer.setKeyStrategy(strategy);
-        sealer.setRandom(SecureRandom.getInstance("SHA1PRNG"));
-        sealer.initialize();
-        return sealer;
+        dataSealer = new DataSealer();
+        dataSealer.setKeyStrategy(strategy);
+        dataSealer.setRandom(SecureRandom.getInstance("SHA1PRNG"));
+        dataSealer.initialize();
+        return dataSealer;
     }
 
     public class mockCredential implements Credential {
@@ -268,12 +277,41 @@ abstract class BaseOIDCResponseActionTest {
 
         @Override
         public String generateIdentifier() {
-            return "identifier";
+            return new Long(new Random().nextLong()).toString();
         }
 
         @Override
         public String generateIdentifier(boolean xmlSafe) {
-            return "identifier";
+            return new Long(new Random().nextLong()).toString();
+        }
+
+    }
+
+    public class MockRevocationCache extends RevocationCache {
+
+        boolean revoke;
+
+        boolean isRevoked;
+
+        MockRevocationCache(boolean revocationQueryOutcome, boolean revokeActionStatus) {
+            revoke = revokeActionStatus;
+            isRevoked = revocationQueryOutcome;
+        }
+
+        @Override
+        public void doInitialize() throws ComponentInitializationException {
+
+        }
+
+        @Override
+        public synchronized boolean revoke(@Nonnull @NotEmpty final String context, @Nonnull @NotEmpty final String s) {
+            return revoke;
+        }
+
+        @Override
+        public synchronized boolean isRevoked(@Nonnull @NotEmpty final String context,
+                @Nonnull @NotEmpty final String s) {
+            return isRevoked;
         }
 
     }

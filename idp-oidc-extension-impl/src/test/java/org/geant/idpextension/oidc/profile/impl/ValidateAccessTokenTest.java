@@ -29,7 +29,6 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import net.shibboleth.idp.profile.ActionTestingSupport;
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
@@ -37,9 +36,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import javax.annotation.Nonnull;
 import org.geant.idpextension.oidc.profile.OidcEventIds;
-import org.geant.idpextension.oidc.storage.RevocationCache;
 import org.geant.idpextension.oidc.token.support.AccessTokenClaimsSet;
 import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
 import org.geant.idpextension.oidc.token.support.TokenClaimsSet;
@@ -164,35 +161,6 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
         setUserInfoRequest(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_GRANT);
-    }
-
-    class MockRevocationCache extends RevocationCache {
-
-        boolean revoke;
-
-        boolean isRevoked;
-
-        MockRevocationCache(boolean revocationQueryOutcome, boolean revokeActionStatus) {
-            revoke = revokeActionStatus;
-            isRevoked = revocationQueryOutcome;
-        }
-
-        @Override
-        public void doInitialize() throws ComponentInitializationException {
-
-        }
-
-        @Override
-        public synchronized boolean revoke(@Nonnull @NotEmpty final String context, @Nonnull @NotEmpty final String s) {
-            return revoke;
-        }
-
-        @Override
-        public synchronized boolean isRevoked(@Nonnull @NotEmpty final String context,
-                @Nonnull @NotEmpty final String s) {
-            return isRevoked;
-        }
-
     }
 
 }
