@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <logger name="org.geant" level="TRACE"/>
+    <logger name="net.shibboleth" level="DEBUG"/>
+    <logger name="org.springframework" level="DEBUG"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%level [%logger:%line] - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <root>
+        <level value="WARN" />
+        <appender-ref ref="STDOUT" />
+    </root>
+    
+</configuration>
