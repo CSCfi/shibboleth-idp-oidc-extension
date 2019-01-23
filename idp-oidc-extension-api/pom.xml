@@ -41,6 +41,11 @@
             <artifactId>oauth2-oidc-sdk</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-profile-api</artifactId>
             <type>test-jar</type>
