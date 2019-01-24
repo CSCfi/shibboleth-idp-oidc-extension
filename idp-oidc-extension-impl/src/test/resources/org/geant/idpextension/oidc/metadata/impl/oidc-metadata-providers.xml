@@ -26,7 +26,8 @@
         
     <bean id="shibboleth.oidc.ServiceableProviderMetadataProvider"
         class="org.geant.idpextension.oidc.metadata.resolver.ServiceableProviderMetadataProvider"
-        p:embeddedResolver-ref="shibboleth.oidc.OwnProviderMetadataResolver">
+        p:embeddedResolver-ref="shibboleth.oidc.OwnProviderMetadataResolver"
+        p:id="ServiceableProviderMetadataProvider">
     </bean>
 
     <bean id="shibboleth.oidc.OwnProviderMetadataResolver"
