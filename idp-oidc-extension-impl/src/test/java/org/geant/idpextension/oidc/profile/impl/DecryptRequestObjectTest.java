@@ -74,6 +74,8 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
+import junit.framework.Assert;
+
 /** {@link DecryptRequestObject} unit test. */
 public class DecryptRequestObjectTest {
 
@@ -137,18 +139,21 @@ public class DecryptRequestObjectTest {
 
     /**
      * Test success in case of not having to decrypt.
+     * @throws ParseException 
      */
     @SuppressWarnings("unchecked")
     @Test
     public void testSuccessNotJWE()
-            throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
+            throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, ParseException {
         JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
         AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
                 new ClientID("000123"), URI.create("https://example.com/callback")).requestObject(new PlainJWT(ro))
                         .state(new State()).build();
         prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertEquals("alice",oidcRespCtx.getRequestObject().getJWTClaimsSet().getSubject());
     }
 
     @SuppressWarnings("unchecked")
@@ -173,7 +178,7 @@ public class DecryptRequestObjectTest {
         setObject(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128CBC_HS256);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        oidcRespCtx.getRequestObject().getJWTClaimsSet().getSubject().equals("alice");
+        Assert.assertEquals("alice",oidcRespCtx.getRequestObject().getJWTClaimsSet().getSubject());
     }
 
     /**
