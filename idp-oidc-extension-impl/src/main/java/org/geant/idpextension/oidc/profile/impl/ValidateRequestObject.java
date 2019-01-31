@@ -65,7 +65,7 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Action that validates request object. Validated request object is stored to response context.
+ * Action validates request object in response context.
  */
 
 @SuppressWarnings("rawtypes")
@@ -144,7 +144,8 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
             }
             if (secParamCtx.getSignatureSigningParameters() == null
                     || !(secParamCtx.getSignatureSigningParameters() instanceof OIDCSignatureValidationParameters)) {
-                log.debug("{} No signature validation credentials available", getLogPrefix());
+                log.error("{} No signature validation credentials available", getLogPrefix());
+                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_SEC_CFG);
                 return;
             }
             signatureValidationParameters =
@@ -223,7 +224,7 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
             if (requestObject.getJWTClaimsSet().getClaims().containsKey("response_type")
                     && !getAuthenticationRequest().getResponseType().equals(new ResponseType(
                             ((String) requestObject.getJWTClaimsSet().getClaim("response_type")).split(" ")))) {
-                log.error("{} response_type in request object not matching client_id request parameter",
+                log.error("{} response_type in request object not matching response_type request parameter",
                         getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
                 return;
