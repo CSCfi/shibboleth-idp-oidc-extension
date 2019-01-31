@@ -39,31 +39,26 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.ArrayList;
-import java.util.List;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.idpextension.oidc.profile.OidcEventIds;
+import org.geant.idpextension.oidc.security.impl.OIDCSignatureValidationParameters;
+import org.geant.security.jwk.BasicJWKCredential;
+import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.opensaml.xmlsec.context.SecurityParametersContext;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
@@ -78,19 +73,24 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 /** {@link ValidateUserPresence} unit test. */
-public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
+public class ValidateRequestObjectTest /* extends BaseOIDCResponseActionTest */ {
 
-	@SuppressWarnings("rawtypes")
-	private ProfileRequestContext prc;
+    @SuppressWarnings("rawtypes")
+    private ProfileRequestContext prc;
+
     private ValidateRequestObject action;
+
     private RequestContext requestCtx;
+
     private OIDCMetadataContext oidcCtx;
+
     private OIDCAuthenticationResponseContext oidcRespCtx;
-   
+
+    private KeyPair kp;
 
     @BeforeMethod
-    public void setup() throws ComponentInitializationException {
-    	requestCtx = new RequestContextBuilder().buildRequestContext();
+    public void setup() throws ComponentInitializationException, NoSuchAlgorithmException {
+        requestCtx = new RequestContextBuilder().buildRequestContext();
         prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
         oidcCtx = prc.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, true);
         oidcRespCtx = new OIDCAuthenticationResponseContext();
@@ -99,7 +99,22 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
         OIDCClientInformation information = new OIDCClientInformation(new ClientID("test"), null, metaData,
                 new Secret("ultimatetopsecretultimatetopsecret"), null, null);
         oidcCtx.setClientInformation(information);
-    	action = new ValidateRequestObject();
+        SecurityParametersContext secCtx =
+                (SecurityParametersContext) prc.addSubcontext(new SecurityParametersContext());
+        OIDCSignatureValidationParameters params = new OIDCSignatureValidationParameters();
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(2048);
+        kp = kpg.generateKeyPair();
+        BasicJWKCredential credentialRSA = new BasicJWKCredential();
+        credentialRSA.setPublicKey(kp.getPublic());
+        params.getValidationCredentials().add(credentialRSA);
+        kp = kpg.generateKeyPair();
+        BasicJWKCredential credentialRSA2 = new BasicJWKCredential();
+        credentialRSA2.setPublicKey(kp.getPublic());
+        params.getValidationCredentials().add(credentialRSA2);
+        params.setSignatureAlgorithm("RS256");
+        secCtx.setSignatureSigningParameters(params);
+        action = new ValidateRequestObject();
         action.initialize();
     }
 
@@ -107,11 +122,11 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test that success in case of not having request object
      */
     @SuppressWarnings("unchecked")
-	//@Test
+    @Test
     public void testSuccessNoObject()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
-    	 AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
-                 new ClientID("000123"), URI.create("https://example.com/callback")).state(new State()).build();
+        AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
+                new ClientID("000123"), URI.create("https://example.com/callback")).state(new State()).build();
         prc.getInboundMessageContext().setMessage(req);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
@@ -121,7 +136,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test success in case of having non signed request object and no registered algorithm
      */
     @SuppressWarnings("unchecked")
-	//@Test
+    @Test
     public void testRequestObjectNoMatchingClaims()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
@@ -138,7 +153,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test failure case of having non signed request object and registered algorithm other than 'none'
      */
     @SuppressWarnings("unchecked")
-	//@Test
+    @Test
     public void testRequestObjectAlgMismatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         oidcCtx.getClientInformation().getOIDCMetadata().setRequestObjectJWSAlg(JWSAlgorithm.RS256);
@@ -156,7 +171,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test success case of having non signed request object and registered algorithm 'none'
      */
     @SuppressWarnings("unchecked")
-	//@Test
+    @Test
     public void testRequestObjectAlgMatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         oidcCtx.getClientInformation().getOIDCMetadata().setRequestObjectJWSAlg(new JWSAlgorithm("none"));
@@ -174,7 +189,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test failure case of mismatch in client_id values
      */
     @SuppressWarnings("unchecked")
-	//@Test
+    @Test
     public void testRequestObjectClientMismatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         JWTClaimsSet ro = new JWTClaimsSet.Builder().claim("client_id", "not_matching").build();
@@ -191,7 +206,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test failure in case of mismatch in response_type values
      */
     @SuppressWarnings("unchecked")
-	//@Test
+    @Test
     public void testRequestObjectRespTypeMismatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         JWTClaimsSet ro = new JWTClaimsSet.Builder().claim("response_type", "id_token").build();
@@ -208,7 +223,7 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
      * Test success in case of matching client_id and response_type values
      */
     @SuppressWarnings("unchecked")
-	//@Test
+    @Test
     public void testRequestObjectClientRespTypeMatch()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         JWTClaimsSet ro =
@@ -226,18 +241,12 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
     }
 
     /**
-     * Test success case of RSA signed request object.
+     * Test success case of RS256 signed request object.
      */
     @SuppressWarnings("unchecked")
-	//@Test
-    public void testRequestObjectSignedWithRSA() throws NoSuchAlgorithmException, ComponentInitializationException,
+    @Test
+    public void testRequestObjectSignedWithRS256() throws NoSuchAlgorithmException, ComponentInitializationException,
             URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-        kpg.initialize(2048);
-        KeyPair kp = kpg.generateKeyPair();
-        JWKSet jwkSet = generateKeySet(new RSAKey((RSAPublicKey) kp.getPublic(), (RSAPrivateKey) kp.getPrivate(), null,
-                null, JWSAlgorithm.RS256, "kid", null, null, null, null, null));
-        oidcCtx.getClientInformation().getOIDCMetadata().setJWKSet(jwkSet);
         JWSSigner signer = new RSASSASigner(kp.getPrivate());
         JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
         SignedJWT signed = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), ro);
@@ -252,154 +261,113 @@ public class ValidateRequestObjectTest /*extends BaseOIDCResponseActionTest*/ {
     }
 
     /**
-     * Test success case of EC signed request object.
+     * Test case of signature not matching any key.
      */
     @SuppressWarnings("unchecked")
-	//@Test
-    public void testRequestObjectSignedWithEC() throws NoSuchAlgorithmException, ComponentInitializationException,
+    @Test
+    public void testRequestObjectSignedNotVerified() throws NoSuchAlgorithmException, ComponentInitializationException,
             URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-        KeyPair kp = kpg.generateKeyPair();
-        kpg.initialize(Curve.P_256.toECParameterSpec());
-        JWKSet jwkSet = generateKeySet(new ECKey(Curve.P_256, (ECPublicKey) kp.getPublic(),
-                (ECPrivateKey) kp.getPrivate(), null, null, JWSAlgorithm.ES256, null, null, null, null, null, null));
-        oidcCtx.getClientInformation().getOIDCMetadata().setJWKSet(jwkSet);
-        JWSSigner signer = new ECDSASigner((ECPrivateKey) kp.getPrivate());
-        JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
-        SignedJWT signed = new SignedJWT(new JWSHeader(JWSAlgorithm.ES256), ro);
-        signed.sign(signer);
-        AuthenticationRequest req =
-                new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
-                        URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
-        prc.getInboundMessageContext().setMessage(req);
-        oidcRespCtx.setRequestObject(req.getRequestObject());
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertProceedEvent(event);
-    }
-
-    /**
-     * Test fail case of EC signed request object, no key
-     */
-    @SuppressWarnings("unchecked")
-	//@Test
-    public void testRequestObjectSignedWithECFailNoKey() throws NoSuchAlgorithmException,
-            ComponentInitializationException, URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-        KeyPair kp = kpg.generateKeyPair();
-        kpg.initialize(Curve.P_256.toECParameterSpec());
-        JWKSet jwkSet = generateKeySet(null);
-        oidcCtx.getClientInformation().getOIDCMetadata().setJWKSet(jwkSet);
-        JWSSigner signer = new ECDSASigner((ECPrivateKey) kp.getPrivate());
-        JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
-        SignedJWT signed = new SignedJWT(new JWSHeader(JWSAlgorithm.ES256), ro);
-        signed.sign(signer);
-        AuthenticationRequest req =
-                new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
-                        URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
-        prc.getInboundMessageContext().setMessage(req);
-        oidcRespCtx.setRequestObject(req.getRequestObject());
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
-    }
-
-    /**
-     * Test fail case of EC signed request object, no key set
-     */
-    @SuppressWarnings("unchecked")
-	//@Test
-    public void testRequestObjectSignedWithECFailNoKeySet() throws NoSuchAlgorithmException,
-            ComponentInitializationException, URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-        KeyPair kp = kpg.generateKeyPair();
-        kpg.initialize(Curve.P_256.toECParameterSpec());
-        JWSSigner signer = new ECDSASigner((ECPrivateKey) kp.getPrivate());
-        JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
-        SignedJWT signed = new SignedJWT(new JWSHeader(JWSAlgorithm.ES256), ro);
-        signed.sign(signer);
-        AuthenticationRequest req =
-                new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
-                        URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
-        prc.getInboundMessageContext().setMessage(req);
-        oidcRespCtx.setRequestObject(req.getRequestObject());
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
-    }
-
-    /**
-     * Test success case of HS signed request object.
-     */
-    @SuppressWarnings("unchecked")
-	//@Test
-    public void testRequestObjectSignedWithHS() throws NoSuchAlgorithmException, ComponentInitializationException,
-            URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        String secret = oidcCtx.getClientInformation().getSecret().getValue();
-        JWSSigner signer = new MACSigner(secret);
-        JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
-        SignedJWT signed = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), ro);
-        signed.sign(signer);
-        AuthenticationRequest req =
-                new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
-                        URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
-        prc.getInboundMessageContext().setMessage(req);
-        oidcRespCtx.setRequestObject(req.getRequestObject());
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertProceedEvent(event);
-    }
-
-    /**
-     * Test failure in case of HS signed request object.
-     */
-    @SuppressWarnings("unchecked")
-	//@Test
-    public void testRequestObjectSignedWithHSFail() throws NoSuchAlgorithmException, ComponentInitializationException,
-            URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
-        String secret = oidcCtx.getClientInformation().getSecret().getValue() + "_not";
-        JWSSigner signer = new MACSigner(secret);
-        JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
-        SignedJWT signed = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), ro);
-        signed.sign(signer);
-        AuthenticationRequest req =
-                new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
-                        URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
-        prc.getInboundMessageContext().setMessage(req);
-        oidcRespCtx.setRequestObject(req.getRequestObject());
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
-    }
-
-    /**
-     * Helper generating keyset with prefilled keys + the input key
-     * 
-     * @throws InvalidAlgorithmParameterException
-     */
-    private JWKSet generateKeySet(JWK key) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-        List<JWK> keys = new ArrayList<JWK>();
-        if (key != null) {
-            keys.add(key);
-        }
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
-        KeyPair kp = kpg.generateKeyPair();
-        keys.add(new RSAKey((RSAPublicKey) kp.getPublic(), (RSAPrivateKey) kp.getPrivate(), null, null,
-                JWSAlgorithm.RS256, null, null, null, null, null, null));
-        keys.add(new RSAKey((RSAPublicKey) kp.getPublic(), (RSAPrivateKey) kp.getPrivate(), null, null,
-                JWSAlgorithm.RS256, null, null, null, null, null, null));
-        keys.add(new RSAKey((RSAPublicKey) kp.getPublic(), (RSAPrivateKey) kp.getPrivate(), null, null,
-                JWSAlgorithm.RS384, null, null, null, null, null, null));
-        keys.add(new RSAKey((RSAPublicKey) kp.getPublic(), (RSAPrivateKey) kp.getPrivate(), null, null,
-                JWSAlgorithm.RS512, null, null, null, null, null, null));
-        kpg = KeyPairGenerator.getInstance("EC");
-        kpg.initialize(Curve.P_256.toECParameterSpec());
         kp = kpg.generateKeyPair();
-        keys.add(new ECKey(Curve.P_256, (ECPublicKey) kp.getPublic(), (ECPrivateKey) kp.getPrivate(), null, null,
-                JWSAlgorithm.ES256, null, null, null, null, null, null));
-        keys.add(new ECKey(Curve.P_256, (ECPublicKey) kp.getPublic(), (ECPrivateKey) kp.getPrivate(), null, null,
-                JWSAlgorithm.ES256, null, null, null, null, null, null));
-        keys.add(new ECKey(Curve.P_256, (ECPublicKey) kp.getPublic(), (ECPrivateKey) kp.getPrivate(), null, null,
-                JWSAlgorithm.ES256, null, null, null, null, null, null));
-        keys.add(new ECKey(Curve.P_256, (ECPublicKey) kp.getPublic(), (ECPrivateKey) kp.getPrivate(), null, null,
-                JWSAlgorithm.ES256, null, null, null, null, null, null));
-        return new JWKSet(keys);
+        JWSSigner signer = new RSASSASigner(kp.getPrivate());
+        JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
+        SignedJWT signed = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), ro);
+        signed.sign(signer);
+        AuthenticationRequest req =
+                new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
+                        URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
+    }
+
+    /**
+     * Test case of request object signed with wrong type of algorithm.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testRequestObjectSignedWithUnexpectedAlgorithm() throws NoSuchAlgorithmException,
+            ComponentInitializationException, URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        KeyPair kp = kpg.generateKeyPair();
+        kpg.initialize(Curve.P_256.toECParameterSpec());
+        JWSSigner signer = new ECDSASigner((ECPrivateKey) kp.getPrivate());
+        JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
+        SignedJWT signed = new SignedJWT(new JWSHeader(JWSAlgorithm.ES256), ro);
+        signed.sign(signer);
+        AuthenticationRequest req =
+                new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
+                        URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REQUEST_OBJECT);
+    }
+
+    /**
+     * Test signed request object but no sec params context.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testRequestObjectSignedWithRS256NoSecParamsCtxt() throws NoSuchAlgorithmException,
+            ComponentInitializationException, URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
+        prc.removeSubcontext(SecurityParametersContext.class);
+        JWSSigner signer = new RSASSASigner(kp.getPrivate());
+        JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
+        SignedJWT signed = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), ro);
+        signed.sign(signer);
+        AuthenticationRequest req =
+                new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
+                        URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, EventIds.INVALID_SEC_CFG);
+    }
+
+    /**
+     * Test signed request object but no sec params.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testRequestObjectSignedWithRS256NoSecParams() throws NoSuchAlgorithmException,
+            ComponentInitializationException, URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
+        prc.getSubcontext(SecurityParametersContext.class).setSignatureSigningParameters(null);
+        JWSSigner signer = new RSASSASigner(kp.getPrivate());
+        JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
+        SignedJWT signed = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), ro);
+        signed.sign(signer);
+        AuthenticationRequest req =
+                new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
+                        URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, EventIds.INVALID_SEC_CFG);
+    }
+
+    /**
+     * Test signed request object but no credentials is sec params.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testRequestObjectSignedWithRS256NoCredsInSecParams() throws NoSuchAlgorithmException,
+            ComponentInitializationException, URISyntaxException, JOSEException, InvalidAlgorithmParameterException {
+        ((OIDCSignatureValidationParameters) (prc.getSubcontext(SecurityParametersContext.class)
+                .getSignatureSigningParameters())).getValidationCredentials().clear();
+        JWSSigner signer = new RSASSASigner(kp.getPrivate());
+        JWTClaimsSet ro = new JWTClaimsSet.Builder().subject("alice").build();
+        SignedJWT signed = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), ro);
+        signed.sign(signer);
+        AuthenticationRequest req =
+                new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), new ClientID("000123"),
+                        URI.create("https://example.com/callback")).requestObject(signed).state(new State()).build();
+        prc.getInboundMessageContext().setMessage(req);
+        oidcRespCtx.setRequestObject(req.getRequestObject());
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, EventIds.INVALID_SEC_CFG);
     }
 
 }
