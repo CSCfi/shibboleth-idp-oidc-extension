@@ -72,8 +72,8 @@ import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
-/** {@link ValidateUserPresence} unit test. */
-public class ValidateRequestObjectTest /* extends BaseOIDCResponseActionTest */ {
+/** {@link ValidateRequestObject} unit test. */
+public class ValidateRequestObjectTest {
 
     @SuppressWarnings("rawtypes")
     private ProfileRequestContext prc;
