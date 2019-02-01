@@ -44,8 +44,8 @@ public class TokenClaimsSetTest extends BaseTokenClaimsSetTest {
 
     protected void init() {
         tokenClaimsSet = new TokenClaimsSet(tokenType, tokenID, clientID, issuer, userPrincipal, subject, acr, iat, exp,
-                nonce, authTime, redirectURI, scope, idpSessionId, claims, dlClaims, dlClaimsID, dlClaimsUI,
-                consentableClaims, consentedClaims);
+                nonce, authTime, redirectURI, scope, claims, dlClaims, dlClaimsID, dlClaimsUI, consentableClaims,
+                consentedClaims);
     }
 
     @Test
@@ -54,7 +54,6 @@ public class TokenClaimsSetTest extends BaseTokenClaimsSetTest {
         Assert.assertEquals(tokenClaimsSet.getACR(), acr.getValue());
         Assert.assertEquals(tokenClaimsSet.getID(), tokenID);
         Assert.assertEquals(tokenClaimsSet.getPrincipal(), userPrincipal);
-        Assert.assertEquals(tokenClaimsSet.getSessionId(), idpSessionId);
         Assert.assertEquals(tokenClaimsSet.isExpired(), false);
         Assert.assertEquals(tokenClaimsSet.getAuthenticationTime().getTime(), authTime.getTime());
         Assert.assertTrue(tokenClaimsSet.getClaimsRequest().getIDTokenClaimNames(false).contains("email"));
@@ -74,9 +73,8 @@ public class TokenClaimsSetTest extends BaseTokenClaimsSetTest {
     @Test
     public void testNullGetters() {
         tokenClaimsSet = new TokenClaimsSet(tokenType, tokenID, clientID, issuer, userPrincipal, subject, null, iat,
-                exp, null, authTime, redirectURI, scope, null, null, null, null, null, null, null);
+                exp, null, authTime, redirectURI, scope, null, null, null, null, null, null);
         Assert.assertNull(tokenClaimsSet.getACR());
-        Assert.assertNull(tokenClaimsSet.getSessionId());
         Assert.assertNull(tokenClaimsSet.getClaimsRequest());
         Assert.assertNull(tokenClaimsSet.getDeliveryClaims());
         Assert.assertNull(tokenClaimsSet.getIDTokenDeliveryClaims());

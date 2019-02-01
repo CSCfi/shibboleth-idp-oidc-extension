@@ -123,7 +123,7 @@ public class BaseTokenRequestLookupFunctionTest {
         oidcCtx = new OIDCAuthenticationResponseContext();
         prc.getOutboundMessageContext().addSubcontext(oidcCtx);
         oidcCtx.setTokenClaimsSet(new AuthorizeCodeClaimsSet(new idStrat(), cliendID, issuer, userPrin, subject, acr,
-                iat, exp, nonce, authTime, redirectUri, scope, idpSessionId, claimsRequest, tokenDeliveryClaims,
+                iat, exp, nonce, authTime, redirectUri, scope, claimsRequest, tokenDeliveryClaims,
                 tokenToIdTokenDeliveryClaims, tokenToUserInfoTokenDeliveryClaims, consentableClaims, consentedClaims));
     }
 

@@ -103,8 +103,8 @@ public class RevokeTokenTest extends BaseTokenClaimsSetTest {
             throws ComponentInitializationException, NoSuchAlgorithmException, DataSealerException, URISyntaxException {
         // init tokens
         AuthorizeCodeClaimsSet acClaimsSet = new AuthorizeCodeClaimsSet(new MockIdStrategy(), clientID, issuer,
-                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, idpSessionId, claims,
-                dlClaims, dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
+                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
+                dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
         atClaimsSet = new AccessTokenClaimsSet(acClaimsSet, scope, dlClaims, dlClaimsUI, iat, exp);
         rfClaimsSet = new RefreshTokenClaimsSet(acClaimsSet, iat, exp);
         // init action

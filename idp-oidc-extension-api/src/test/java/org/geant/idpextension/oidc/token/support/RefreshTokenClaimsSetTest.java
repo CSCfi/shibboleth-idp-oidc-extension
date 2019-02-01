@@ -42,8 +42,8 @@ public class RefreshTokenClaimsSetTest extends BaseTokenClaimsSetTest {
 
     protected void init() {
         AuthorizeCodeClaimsSet acClaimsSet = new AuthorizeCodeClaimsSet(new MockIdStrategy(), clientID, issuer,
-                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, idpSessionId, claims,
-                dlClaims, dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
+                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
+                dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
         rfClaimsSet = new RefreshTokenClaimsSet(acClaimsSet, iat, exp);
     }
 
@@ -59,8 +59,8 @@ public class RefreshTokenClaimsSetTest extends BaseTokenClaimsSetTest {
     @Test(expectedExceptions = ParseException.class)
     public void testSerializationWrongType() throws ParseException {
         AuthorizeCodeClaimsSet accessnClaimsSet = new AuthorizeCodeClaimsSet(new MockIdStrategy(), clientID, issuer,
-                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, idpSessionId, claims,
-                dlClaims, null, dlClaimsUI, consentableClaims, consentedClaims);
+                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims, null,
+                dlClaimsUI, consentableClaims, consentedClaims);
         rfClaimsSet = RefreshTokenClaimsSet.parse(accessnClaimsSet.serialize());
     }
 

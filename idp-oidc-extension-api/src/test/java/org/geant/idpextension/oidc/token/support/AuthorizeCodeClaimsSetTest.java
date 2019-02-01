@@ -43,7 +43,7 @@ public class AuthorizeCodeClaimsSetTest extends BaseTokenClaimsSetTest {
 
     protected void init() {
         acClaimsSet = new AuthorizeCodeClaimsSet(new MockIdStrategy(), clientID, issuer, userPrincipal, subject, acr,
-                iat, exp, nonce, authTime, redirectURI, scope, idpSessionId, claims, dlClaims, dlClaimsID, dlClaimsUI,
+                iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims, dlClaimsID, dlClaimsUI,
                 consentableClaims, consentedClaims);
     }
 
@@ -59,8 +59,8 @@ public class AuthorizeCodeClaimsSetTest extends BaseTokenClaimsSetTest {
     @Test(expectedExceptions = ParseException.class)
     public void testSerializationWrongType() throws ParseException {
         AccessTokenClaimsSet accessnClaimsSet = new AccessTokenClaimsSet(new MockIdStrategy(), clientID, issuer,
-                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, idpSessionId, claims,
-                dlClaims, dlClaimsUI, consentableClaims, consentedClaims);
+                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
+                dlClaimsUI, consentableClaims, consentedClaims);
         acClaimsSet = AuthorizeCodeClaimsSet.parse(accessnClaimsSet.serialize());
     }
 

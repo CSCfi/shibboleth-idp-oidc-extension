@@ -45,7 +45,6 @@ import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
-import net.shibboleth.idp.session.context.SessionContext;
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseConsentContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseTokenClaimsContext;
@@ -78,10 +77,6 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     /** Strategy used to obtain the response issuer value. */
     @Nonnull
     private Function<ProfileRequestContext, String> issuerLookupStrategy;
-
-    /** Lookup function for SessionContext. */
-    @Nonnull
-    private Function<ProfileRequestContext, SessionContext> sessionContextLookupStrategy;
 
     /** Subject context. */
     private SubjectContext subjectCtx;
@@ -135,19 +130,6 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
                 return new SecureRandomIdentifierGenerationStrategy();
             }
         };
-        sessionContextLookupStrategy = new ChildContextLookup<>(SessionContext.class);
-    }
-
-    /**
-     * Set the lookup strategy for the SessionContext to access.
-     * 
-     * @param strategy lookup strategy
-     */
-    public void
-            setSessionContextLookupStrategy(@Nonnull final Function<ProfileRequestContext, SessionContext> strategy) {
-        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-
-        sessionContextLookupStrategy = Constraint.isNotNull(strategy, "SessionContext lookup strategy cannot be null");
     }
 
     /**
@@ -251,12 +233,6 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
-        String sessiondId = null;
-        final SessionContext sessionCtx = sessionContextLookupStrategy.apply(profileRequestContext);
-        if (sessionCtx != null && sessionCtx.getIdPSession() != null) {
-            sessiondId = sessionCtx.getIdPSession().getId();
-        }
-
         JSONArray consentable = null;
         JSONArray consented = null;
         OIDCAuthenticationResponseConsentContext consentCtx = consentContextLookupStrategy.apply(profileRequestContext);
@@ -280,8 +256,8 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
                 subjectCtx.getPrincipalName(), getOidcResponseContext().getSubject(), getOidcResponseContext().getAcr(),
                 new Date(), dateExp, new DefaultRequestNonceLookupFunction().apply(profileRequestContext),
                 getOidcResponseContext().getAuthTime(), getOidcResponseContext().getRedirectURI(),
-                getOidcResponseContext().getScope(), sessiondId, getOidcResponseContext().getRequestedClaims(), claims,
-                claimsID, claimsUI, consentable, consented);
+                getOidcResponseContext().getScope(), getOidcResponseContext().getRequestedClaims(), claims, claimsID,
+                claimsUI, consentable, consented);
         // We set token claims set to response context for possible access token generation.
         getOidcResponseContext().setTokenClaimsSet(claimsSet);
         try {

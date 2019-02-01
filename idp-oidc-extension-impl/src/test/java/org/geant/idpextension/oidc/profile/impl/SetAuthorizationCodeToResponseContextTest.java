@@ -32,7 +32,6 @@ import net.shibboleth.idp.authn.context.SubjectContext;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
-import net.shibboleth.idp.session.context.SessionContext;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
 import java.net.URI;
@@ -62,19 +61,11 @@ public class SetAuthorizationCodeToResponseContextTest extends BaseOIDCResponseA
         action = new SetAuthorizationCodeToResponseContext(getDataSealer());
         action.initialize();
         SubjectContext subjectCtx = profileRequestCtx.getSubcontext(SubjectContext.class, true);
-        SessionContext sessionCtx = profileRequestCtx.getSubcontext(SessionContext.class, true);
-        sessionCtx.setIdPSession(new SetAccessTokenToResponseContextTest.MockIdPSession());
         subjectCtx.setPrincipalName("userPrin");
     }
 
     /**
      * Basic success case.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * @throws URISyntaxException
-     * @throws DataSealerException
-     * @throws ParseException
      */
     @Test
     public void testSuccess() throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException,
@@ -90,12 +81,6 @@ public class SetAuthorizationCodeToResponseContextTest extends BaseOIDCResponseA
 
     /**
      * Basic success case plus consent.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * @throws URISyntaxException
-     * @throws DataSealerException
-     * @throws ParseException
      */
     @Test
     public void testSuccessConsent() throws ComponentInitializationException, NoSuchAlgorithmException,
@@ -118,12 +103,6 @@ public class SetAuthorizationCodeToResponseContextTest extends BaseOIDCResponseA
 
     /**
      * Basic success case plus delivery claims
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * @throws URISyntaxException
-     * @throws DataSealerException
-     * @throws ParseException
      */
     @Test
     public void testSuccessWithTokenDelivery() throws ComponentInitializationException, NoSuchAlgorithmException,
@@ -147,12 +126,6 @@ public class SetAuthorizationCodeToResponseContextTest extends BaseOIDCResponseA
 
     /**
      * fails as there is no rp ctx.
-     * 
-     * @throws URISyntaxException
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * 
-     * 
      */
     @Test
     public void testFailNoRPCtx()
@@ -165,12 +138,6 @@ public class SetAuthorizationCodeToResponseContextTest extends BaseOIDCResponseA
 
     /**
      * fails as there is no subject ctx.
-     * 
-     * @throws URISyntaxException
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * 
-     * 
      */
     @Test
     public void testFailNoSubjectCtx()
@@ -183,12 +150,6 @@ public class SetAuthorizationCodeToResponseContextTest extends BaseOIDCResponseA
 
     /**
      * fails as there is no profile conf.
-     * 
-     * @throws URISyntaxException
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * 
-     * 
      */
     @Test
     public void testFailNoProfileConf()

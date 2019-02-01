@@ -87,11 +87,11 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
     public AuthorizeCodeClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nonnull ACR acr,
             @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
-            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nonnull String idpSessionId, @Nullable ClaimsRequest claims, @Nullable ClaimsSet dlClaims,
-            @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI, JSONArray consentableClaims,
-            JSONArray consentedClaims) {
+            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nullable ClaimsRequest claims,
+            @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI,
+            JSONArray consentableClaims, JSONArray consentedClaims) {
         super(VALUE_TYPE_AC, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, subject, acr, iat, exp,
-                nonce, authTime, redirectURI, scope, idpSessionId, claims, dlClaims, dlClaimsID, dlClaimsUI, consentableClaims,
+                nonce, authTime, redirectURI, scope, claims, dlClaims, dlClaimsID, dlClaimsUI, consentableClaims,
                 consentedClaims);
     }
 

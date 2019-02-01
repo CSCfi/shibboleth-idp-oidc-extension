@@ -53,11 +53,7 @@
 
     <bean id="ValidateScope" class="org.geant.idpextension.oidc.profile.impl.ValidateScope" scope="prototype"
         p:scopeLookupStrategy-ref="shibboleth.TokenRequestScopeLookupStrategy" />
-
-    <bean id="ValidateUserPresence" class="org.geant.idpextension.oidc.profile.impl.ValidateUserPresence"
-        scope="prototype" c:sessionResolver-ref="shibboleth.SessionManager"
-        p:disabled="%{idp.oidc.userPresenceCheckDisabled:false}" p:sessionTimeout="%{idp.session.timeout:PT60M}" />
-
+    
     <bean id="shibboleth.TokenRequestScopeLookupStrategy"
         class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestScopeLookupFunction" scope="prototype" />
 

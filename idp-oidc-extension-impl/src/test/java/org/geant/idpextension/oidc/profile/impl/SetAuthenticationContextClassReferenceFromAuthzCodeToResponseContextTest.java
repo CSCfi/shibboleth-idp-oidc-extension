@@ -56,7 +56,7 @@ public class SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContex
     private void init() throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException {
         TokenClaimsSet claims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), "id", null, null, null, null, null, null);
+                new Scope(), null, null, null, null, null, null);
         respCtx.setTokenClaimsSet(claims);
         action = new SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContext();
         action.initialize();
@@ -64,12 +64,6 @@ public class SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContex
 
     /**
      * Basic success case.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * @throws URISyntaxException
-     * @throws DataSealerException
-     * @throws ParseException
      */
     @Test
     public void testSuccess() throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException,
@@ -83,12 +77,6 @@ public class SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContex
 
     /**
      * Fails due to missing input.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * @throws URISyntaxException
-     * @throws DataSealerException
-     * @throws ParseException
      */
     @Test
     public void testFailsNoToken() throws ComponentInitializationException, NoSuchAlgorithmException,

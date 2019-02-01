@@ -58,8 +58,6 @@ public class InitializeSubjectContextTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that action copes with no token claims set.
-     * 
-     * @throws ComponentInitializationException
      */
     @Test
     public void testNoClaimsSet() throws ComponentInitializationException {
@@ -71,16 +69,13 @@ public class InitializeSubjectContextTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test success case.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
      */
     @Test
     public void testSuccess() throws ComponentInitializationException, URISyntaxException {
         init();
         TokenClaimsSet claims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), "id", null, null, null, null, null, null);
+                new Scope(), null, null, null, null, null, null);
         respCtx.setTokenClaimsSet(claims);
         final Event event = action.execute(requestCtx);
         SubjectContext ctx = profileRequestCtx.getSubcontext(SubjectContext.class);
@@ -88,6 +83,4 @@ public class InitializeSubjectContextTest extends BaseOIDCResponseActionTest {
         Assert.assertEquals(ctx.getPrincipalName(), "userPrin");
 
     }
-   
-
 }

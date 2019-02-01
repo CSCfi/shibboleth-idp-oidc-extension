@@ -68,7 +68,7 @@ public class AbstractTokenClaimsLookupFunctionTest {
         prc.getOutboundMessageContext().addSubcontext(oidcCtx);
         oidcCtx.setTokenClaimsSet(new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(System.currentTimeMillis() + 1000), new Nonce(),
-                new Date(), new URI("http://example.com"), new Scope(), "id", null, null, null, null, null));
+                new Date(), new URI("http://example.com"), new Scope(), null, null, null, null, null));
     }
 
     @Test

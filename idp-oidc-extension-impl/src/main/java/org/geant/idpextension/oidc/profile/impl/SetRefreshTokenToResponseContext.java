@@ -36,6 +36,8 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
+import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
+
 import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
@@ -54,7 +56,8 @@ import net.shibboleth.utilities.java.support.security.DataSealerException;
 /**
  * Action that creates a Refresh Token, and sets it to work context
  * {@link OIDCAuthenticationResponseContext#geRefreshToken()} located under
- * {@link ProfileRequestContext#getOutboundMessageContext()}.
+ * {@link ProfileRequestContext#getOutboundMessageContext()}. The refresh_token is created only if the request contains
+ * offline_access - scope.
  */
 @SuppressWarnings("rawtypes")
 public class SetRefreshTokenToResponseContext extends AbstractOIDCResponseAction {
@@ -108,7 +111,11 @@ public class SetRefreshTokenToResponseContext extends AbstractOIDCResponseAction
     @Override
     protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         if (!super.doPreExecute(profileRequestContext)) {
-            log.error("{} pre-execute failed", getLogPrefix());
+            log.debug("{} pre-execute failed", getLogPrefix());
+            return false;
+        }
+        if (!getOidcResponseContext().getScope().contains(OIDCScopeValue.OFFLINE_ACCESS)) {
+            log.debug("{} no offline_access scope, nothing to do", getLogPrefix());
             return false;
         }
         RelyingPartyContext rpCtx = relyingPartyContextLookupStrategy.apply(profileRequestContext);

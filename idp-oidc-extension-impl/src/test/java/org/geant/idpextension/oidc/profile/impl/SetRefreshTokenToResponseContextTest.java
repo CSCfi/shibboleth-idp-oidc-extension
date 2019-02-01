@@ -49,18 +49,21 @@ import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
-/** {@link SetAccessTokenToResponseContext} unit test. */
+/** {@link SetRefreshTokenToResponseContext} unit test. */
 public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseActionTest {
 
     private SetRefreshTokenToResponseContext action;
 
     private void init() throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException {
-        respCtx.setScope(new Scope());
+        Scope scope = new Scope();
+        scope.add(OIDCScopeValue.OFFLINE_ACCESS);
+        respCtx.setScope(scope);
         TokenClaimsSet claims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), "id", null, null, null, null, null, null);
+                new Scope(), null, null, null, null, null, null);
         respCtx.setTokenClaimsSet(claims);
         action = new SetRefreshTokenToResponseContext(getDataSealer());
         action.initialize();
@@ -68,12 +71,6 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
 
     /**
      * Basic success case.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * @throws URISyntaxException
-     * @throws DataSealerException
-     * @throws ParseException
      */
     @Test
     public void testSuccess() throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException,
@@ -87,13 +84,20 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
     }
 
     /**
+     * There is no offline_access scope.
+     */
+    @Test
+    public void testNoToken() throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException,
+            ParseException, DataSealerException {
+        init();
+        respCtx.setScope(new Scope());
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertNull(respCtx.getRefreshToken());
+    }
+
+    /**
      * fails as there is no rp ctx.
-     * 
-     * @throws URISyntaxException
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * 
-     * 
      */
     @Test
     public void testFailNoRPCtx()
@@ -106,12 +110,6 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
 
     /**
      * fails as there is no profile conf.
-     * 
-     * @throws URISyntaxException
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * 
-     * 
      */
     @Test
     public void testFailNoProfileConf()
@@ -125,12 +123,6 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
 
     /**
      * fails as the token is of wrong type.
-     * 
-     * @throws URISyntaxException
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * 
-     * 
      */
     @Test
     public void testFailTokenNotCodeOrRefresh()
@@ -138,7 +130,7 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
         init();
         TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), "id", null, null, null, null, null);
+                new Scope(), null, null, null, null, null);
         respCtx.setTokenClaimsSet(claims);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_PROFILE_CTX);
@@ -146,12 +138,6 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
 
     /**
      * fails as there no token to derive refresh token from.
-     * 
-     * @throws URISyntaxException
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * 
-     * 
      */
     @Test
     public void testFailNoToken()

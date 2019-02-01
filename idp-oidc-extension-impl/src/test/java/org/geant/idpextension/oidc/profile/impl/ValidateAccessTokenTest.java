@@ -62,9 +62,6 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that action throws error if revocation cache is not set.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
      */
     @Test(expectedExceptions = ConstraintViolationException.class)
     public void testNoRevocationCache() throws NoSuchAlgorithmException, ComponentInitializationException {
@@ -75,11 +72,6 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Basic success case.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * @throws URISyntaxException
-     * @throws DataSealerException
      */
     @Test
     public void testSuccess()
@@ -87,7 +79,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
         init();
         TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(System.currentTimeMillis() + 1000), new Nonce(), new Date(),
-                new URI("http://example.com"), new Scope(), "id", null, null, null, null, null);
+                new URI("http://example.com"), new Scope(), null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);
@@ -97,11 +89,6 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Fails due to access token being substituted with authorize code.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * @throws URISyntaxException
-     * @throws DataSealerException
      */
     @Test
     public void testFailsNotAccessToken()
@@ -109,7 +96,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
         init();
         TokenClaimsSet claims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), "id", null, null, null, null, null, null);
+                new Scope(), null, null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);
@@ -119,11 +106,6 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Fails due token expiration.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * @throws URISyntaxException
-     * @throws DataSealerException
      */
     @Test
     public void testFailsExpired()
@@ -131,7 +113,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
         init();
         TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(System.currentTimeMillis() - 1), new Nonce(), new Date(),
-                new URI("http://example.com"), new Scope(), "id", null, null, null, null, null);
+                new URI("http://example.com"), new Scope(), null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);
@@ -141,11 +123,6 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Fails due token authz code is revoked. Test not 100% as it really does not test passing id to revocation cache.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
-     * @throws URISyntaxException
-     * @throws DataSealerException
      */
     @Test
     public void testFailsRevoked()
@@ -155,7 +132,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
         action.initialize();
         TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(System.currentTimeMillis() + 1000), new Nonce(), new Date(),
-                new URI("http://example.com"), new Scope(), "id", null, null, null, null, null);
+                new URI("http://example.com"), new Scope(), null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);

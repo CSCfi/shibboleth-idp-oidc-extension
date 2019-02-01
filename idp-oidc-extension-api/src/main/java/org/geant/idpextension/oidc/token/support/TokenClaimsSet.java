@@ -62,9 +62,6 @@ public class TokenClaimsSet {
     /** User principal representing authenticated user. */
     public static final String KEY_USER_PRINCIPAL = "prncpl";
 
-    /** Session id of the IdPSession. */
-    public static final String KEY_SESSIONID = "sid";
-
     /** Subject of the user. */
     public static final String KEY_SUBJECT = "sub";
 
@@ -148,7 +145,6 @@ public class TokenClaimsSet {
      * @param authTime Authentication time of the user. Must not be NULL.
      * @param redirectURI Validated redirect URI of the authentication request. Must not be NULL.
      * @param scope Scope of the authentication request. Must not be NULL.
-     * @param idpSessionId Session id of the user. May be NULL.
      * @param claims Claims request of the authentication request. May be NULL.
      * @param dlClaims token delivery claims delivered both for id token and userinfo response. May be NULL.
      * @param dlClaimsID token delivery claims delivered for id token. May be NULL.
@@ -161,10 +157,9 @@ public class TokenClaimsSet {
     protected TokenClaimsSet(@Nonnull String tokenType, @Nonnull String tokenID, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nullable ACR acr,
             @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
-            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nullable String idpSessionId,
-            @Nullable ClaimsRequest claims, @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID,
-            @Nullable ClaimsSet dlClaimsUI, @Nullable JSONArray consentableClaims,
-            @Nullable JSONArray consentedClaims) {
+            @Nonnull URI redirectURI, @Nonnull Scope scope, @Nullable ClaimsRequest claims,
+            @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI,
+            @Nullable JSONArray consentableClaims, @Nullable JSONArray consentedClaims) {
         if (tokenType == null || tokenID == null || clientID == null || issuer == null || userPrincipal == null
                 || iat == null || exp == null || authTime == null || redirectURI == null || scope == null
                 || subject == null) {
@@ -179,8 +174,8 @@ public class TokenClaimsSet {
                 .claim(KEY_DELIVERY_CLAIMS, dlClaims == null ? null : dlClaims.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS_IDTOKEN, dlClaimsID == null ? null : dlClaimsID.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS_USERINFO, dlClaimsUI == null ? null : dlClaimsUI.toJSONObject())
-                .claim(KEY_CONSENTABLE_CLAIMS, consentableClaims).claim(KEY_CONSENTED_CLAIMS, consentedClaims)
-                .claim(KEY_SESSIONID, idpSessionId).build();
+                .claim(KEY_CONSENTABLE_CLAIMS, consentableClaims).claim(KEY_CONSENTED_CLAIMS, consentedClaims).build();
+
     }
 
     // Checkstyle: CyclomaticComplexity ON
@@ -229,10 +224,6 @@ public class TokenClaimsSet {
         }
         if (tokenClaimsSet.getStringClaim(KEY_SCOPE) == null) {
             throw new ParseException("claim scope must exist and not be null", 0);
-        }
-        // Voluntary fields
-        if (tokenClaimsSet.getClaims().containsKey(KEY_SESSIONID)) {
-            tokenClaimsSet.getStringClaim(KEY_SESSIONID);
         }
         if (tokenClaimsSet.getClaims().containsKey(KEY_ACR)) {
             tokenClaimsSet.getStringClaim(KEY_ACR);
@@ -348,16 +339,6 @@ public class TokenClaimsSet {
     @Nonnull
     public String getPrincipal() {
         return (String) tokenClaimsSet.getClaim(KEY_USER_PRINCIPAL);
-    }
-
-    /**
-     * Get idp session id.
-     * 
-     * @return idp session id.
-     */
-    @Nonnull
-    public String getSessionId() {
-        return (String) tokenClaimsSet.getClaim(KEY_SESSIONID);
     }
 
     /**

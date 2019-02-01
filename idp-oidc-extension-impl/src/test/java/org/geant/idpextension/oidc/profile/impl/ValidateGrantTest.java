@@ -59,25 +59,31 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
 public class ValidateGrantTest extends BaseOIDCResponseActionTest {
 
     private ValidateGrant action;
+
     TokenClaimsSet acClaims;
+
     TokenClaimsSet rfClaims;
+
     AuthorizationGrant codeGrant;
+
     RefreshTokenGrant rfGrant;
+
     URI callback;
-    
+
     @SuppressWarnings("unchecked")
-    private void init() throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException, DataSealerException {
+    private void init()
+            throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException, DataSealerException {
         Date now = new Date();
-        acClaims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(clientId), "issuer", "userPrin",
-                "subject", new ACR("0"), now, new Date(now.getTime()+100000), new Nonce(), now, new URI("http://example.com"),
-                new Scope(), "id", null, null, null, null, null, null);
-        rfClaims = new RefreshTokenClaimsSet(acClaims,now, new Date(now.getTime()+100000));
+        acClaims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(clientId), "issuer", "userPrin", "subject",
+                new ACR("0"), now, new Date(now.getTime() + 100000), new Nonce(), now, new URI("http://example.com"),
+                new Scope(), null, null, null, null, null, null);
+        rfClaims = new RefreshTokenClaimsSet(acClaims, now, new Date(now.getTime() + 100000));
         AuthorizationCode code = new AuthorizationCode(acClaims.serialize(getDataSealer()));
-        RefreshToken rfToken= new RefreshToken(rfClaims.serialize(getDataSealer()));
+        RefreshToken rfToken = new RefreshToken(rfClaims.serialize(getDataSealer()));
         callback = new URI("https://client.com/callback");
         codeGrant = new AuthorizationCodeGrant(code, callback);
-        rfGrant=new RefreshTokenGrant(rfToken);
-        //by default we create authz code request
+        rfGrant = new RefreshTokenGrant(rfToken);
+        // by default we create authz code request
         TokenRequest req = new TokenRequest(callback, new ClientID(clientId), codeGrant);
         profileRequestCtx.getInboundMessageContext().setMessage(req);
         action = new ValidateGrant(getDataSealer());
@@ -90,68 +96,78 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
         action.setReplayCache(replayCache);
         action.initialize();
     }
-    
+
     @Test
-    public void testAuthorizeCodeSuccess() throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
+    public void testAuthorizeCodeSuccess()
+            throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
         ActionTestingSupport.assertProceedEvent(action.execute(requestCtx));
     }
-    
+
     @Test
-    public void testAuthorizeCodeReplayed() throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
+    public void testAuthorizeCodeReplayed()
+            throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
         ActionTestingSupport.assertProceedEvent(action.execute(requestCtx));
         ActionTestingSupport.assertEvent(action.execute(requestCtx), OidcEventIds.INVALID_GRANT);
     }
-    
+
     @SuppressWarnings("unchecked")
     @Test
-    public void testRefreshTokenSuccess() throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
+    public void testRefreshTokenSuccess()
+            throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
         TokenRequest req = new TokenRequest(callback, new ClientID(clientId), rfGrant);
         profileRequestCtx.getInboundMessageContext().setMessage(req);
         ActionTestingSupport.assertProceedEvent(action.execute(requestCtx));
     }
-    
+
     @SuppressWarnings("unchecked")
     @Test
-    public void testRefreshTokenReplayed() throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
+    public void testRefreshTokenReplayed()
+            throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
         TokenRequest req = new TokenRequest(callback, new ClientID(clientId), rfGrant);
         profileRequestCtx.getInboundMessageContext().setMessage(req);
         ActionTestingSupport.assertProceedEvent(action.execute(requestCtx));
         ActionTestingSupport.assertProceedEvent(action.execute(requestCtx));
     }
-    
+
     @SuppressWarnings("unchecked")
     @Test
-    public void testMixGrant() throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
+    public void testMixGrant()
+            throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
-        TokenRequest req = new TokenRequest(callback, new ClientID(clientId), new RefreshTokenGrant(new RefreshToken(acClaims.serialize(getDataSealer()))));
+        TokenRequest req = new TokenRequest(callback, new ClientID(clientId),
+                new RefreshTokenGrant(new RefreshToken(acClaims.serialize(getDataSealer()))));
         profileRequestCtx.getInboundMessageContext().setMessage(req);
         ActionTestingSupport.assertEvent(action.execute(requestCtx), OidcEventIds.INVALID_GRANT);
     }
-    
+
     @SuppressWarnings("unchecked")
     @Test
-    public void testWrongClient() throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
+    public void testWrongClient()
+            throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
         Date now = new Date();
         acClaims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID("clientIdWrong"), "issuer", "userPrin",
-                "subject", new ACR("0"), now, new Date(now.getTime()+100000), new Nonce(), now, new URI("http://example.com"),
-                new Scope(), "id", null, null, null, null, null, null);
-        TokenRequest req = new TokenRequest(callback, new ClientID(clientId), new AuthorizationCodeGrant(new AuthorizationCode(acClaims.serialize(getDataSealer())), callback));
+                "subject", new ACR("0"), now, new Date(now.getTime() + 100000), new Nonce(), now,
+                new URI("http://example.com"), new Scope(), null, null, null, null, null, null);
+        TokenRequest req = new TokenRequest(callback, new ClientID(clientId),
+                new AuthorizationCodeGrant(new AuthorizationCode(acClaims.serialize(getDataSealer())), callback));
         profileRequestCtx.getInboundMessageContext().setMessage(req);
         ActionTestingSupport.assertEvent(action.execute(requestCtx), OidcEventIds.INVALID_GRANT);
     }
-    
+
     @SuppressWarnings("unchecked")
     @Test
-    public void testExpired() throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
+    public void testExpired()
+            throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
         Date now = new Date();
-        rfClaims = new RefreshTokenClaimsSet(acClaims,now, new Date(now.getTime()-10));
-        TokenRequest req = new TokenRequest(callback, new ClientID(clientId), new RefreshTokenGrant(new RefreshToken(rfClaims.serialize(getDataSealer()))));
+        rfClaims = new RefreshTokenClaimsSet(acClaims, now, new Date(now.getTime() - 10));
+        TokenRequest req = new TokenRequest(callback, new ClientID(clientId),
+                new RefreshTokenGrant(new RefreshToken(rfClaims.serialize(getDataSealer()))));
         profileRequestCtx.getInboundMessageContext().setMessage(req);
         ActionTestingSupport.assertEvent(action.execute(requestCtx), OidcEventIds.INVALID_GRANT);
     }
@@ -167,18 +183,17 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
         action.setReplayCache(replayCache);
         action.initialize();
     }
-    
+
     @Test(expectedExceptions = ConstraintViolationException.class)
     public void testNoReplayCache() throws NoSuchAlgorithmException, ComponentInitializationException {
         action = new ValidateGrant(getDataSealer());
         action.setRevocationCache(new MockRevocationCache(false, true));
         action.initialize();
     }
-    
+
     @Test(expectedExceptions = ConstraintViolationException.class)
     public void testNoDataSealer() throws NoSuchAlgorithmException, ComponentInitializationException {
         action = new ValidateGrant(null);
     }
 
-    
 }
