@@ -30,13 +30,11 @@ package org.geant.idpextension.oidc.profile.impl;
 import java.net.URI;
 import java.net.URISyntaxException;
 import net.shibboleth.idp.profile.ActionTestingSupport;
-import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.idpextension.oidc.profile.OidcEventIds;
 import org.opensaml.profile.action.EventIds;
-import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -73,12 +71,10 @@ public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
      * @throws ComponentInitializationException
      * @throws URISyntaxException
      */
-    @SuppressWarnings("rawtypes")
     @Test
     public void testNoMatch() throws ComponentInitializationException, URISyntaxException {
         init();
-        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        OIDCMetadataContext oidcCtx = prc.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, true);
+        OIDCMetadataContext oidcCtx = profileRequestCtx.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, true);
         OIDCClientMetadata metaData = new OIDCClientMetadata();
         metaData.setRedirectionURI(new URI("https://notmatching.org"));
         OIDCClientInformation information = new OIDCClientInformation(new ClientID("test"), null, metaData, null, null, null);
@@ -94,12 +90,10 @@ public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
      * @throws ComponentInitializationException
      * @throws URISyntaxException
      */
-    @SuppressWarnings("rawtypes")
     @Test
     public void testMatch() throws ComponentInitializationException, URISyntaxException {
         init();
-        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        OIDCMetadataContext oidcCtx = prc.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, true);
+        OIDCMetadataContext oidcCtx = profileRequestCtx.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, true);
         OIDCClientMetadata metaData = new OIDCClientMetadata();
         metaData.setRedirectionURI(new URI("https://client.example.org/cb"));
         OIDCClientInformation information = new OIDCClientInformation(new ClientID("test"), null, metaData, null, null, null);
