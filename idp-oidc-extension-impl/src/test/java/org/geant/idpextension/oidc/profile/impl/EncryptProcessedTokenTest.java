@@ -28,20 +28,26 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
+import net.minidev.json.JSONObject;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.component.UnmodifiableComponentException;
+import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
+
 import java.net.URI;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.security.jwk.BasicJWKCredential;
 import org.opensaml.messaging.context.BaseContext;
+import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.saml.saml2.profile.context.EncryptionContext;
@@ -51,6 +57,7 @@ import org.springframework.webflow.execution.RequestContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Functions;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -65,6 +72,7 @@ import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
@@ -86,6 +94,8 @@ public class EncryptProcessedTokenTest {
 
     private KeyPair kp;
 
+    private EncryptionContext encCtx;
+
     @SuppressWarnings("unchecked")
     @BeforeMethod
     public void setup() throws ComponentInitializationException, NoSuchAlgorithmException, JOSEException {
@@ -102,7 +112,7 @@ public class EncryptProcessedTokenTest {
                 new Secret("ultimatetopsecretultimatetopsecret"), null, null);
         oidcCtx.setClientInformation(information);
         BaseContext ctx = prc.getSubcontext(RelyingPartyContext.class, true);
-        EncryptionContext encCtx = (EncryptionContext) ctx.getSubcontext(EncryptionContext.class, true);
+        encCtx = (EncryptionContext) ctx.getSubcontext(EncryptionContext.class, true);
         EncryptionParameters params = new EncryptionParameters();
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
@@ -133,6 +143,52 @@ public class EncryptProcessedTokenTest {
     }
 
     /**
+     * Test success case of encrypting unsigned userinfo.
+     */
+    @Test
+    public void testSuccessUserInfo() {
+        oidcRespCtx.setProcessedToken(null);
+        JSONObject info = new JSONObject();
+        info.put("sub", "alice");
+        oidcRespCtx.setUserInfo(new UserInfo(info));
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertTrue(oidcRespCtx.getProcessedToken() instanceof EncryptedJWT);
+    }
+
+    /**
+     * Test success basic case using EC. Encrypts ProcessedToken.
+     * 
+     * @throws NoSuchAlgorithmException
+     */
+    @Test
+    public void testSuccessEC() throws NoSuchAlgorithmException {
+        EncryptionParameters params = new EncryptionParameters();
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        kpg.initialize(256);
+        kp = kpg.generateKeyPair();
+        BasicJWKCredential credentialEC = new BasicJWKCredential();
+        credentialEC.setPublicKey(kp.getPublic());
+        params.setKeyTransportEncryptionCredential(credentialEC);
+        params.setKeyTransportEncryptionAlgorithm("ECDH-ES");
+        params.setDataEncryptionAlgorithm("A128CBC-HS256");
+        encCtx.setAssertionEncryptionParameters(params);
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertTrue(oidcRespCtx.getProcessedToken() instanceof EncryptedJWT);
+    }
+
+    /**
+     * Test fail case of nothing to encrypt.
+     */
+    @Test
+    public void testFailNoInput() {
+        oidcRespCtx.setProcessedToken(null);
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, EventIds.UNABLE_TO_ENCRYPT);
+    }
+
+    /**
      * Test case of missing encryption context.
      */
     @Test
@@ -140,6 +196,38 @@ public class EncryptProcessedTokenTest {
         prc.getSubcontext(RelyingPartyContext.class, false).removeSubcontext(EncryptionContext.class);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_PROFILE_CTX);
+    }
+
+    /**
+     * Test case of missing encryption parameters. Should do nothing.
+     */
+    @Test
+    public void testSuccessNoEnc() throws ParseException {
+        prc.getSubcontext(RelyingPartyContext.class, false).getSubcontext(EncryptionContext.class, false)
+                .setAssertionEncryptionParameters(null);
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertEquals("alice", oidcRespCtx.getProcessedToken().getJWTClaimsSet().getSubject());
+    }
+
+    /**
+     * Strategy cannot be set after initialization
+     */
+    @SuppressWarnings("rawtypes")
+    @Test(expectedExceptions = UnmodifiableComponentException.class)
+    public void testInitializationFail() {
+        action.setEncryptionContextLookupStrategy(
+                Functions.compose(new ChildContextLookup<>(EncryptionContext.class, false),
+                        new ChildContextLookup<ProfileRequestContext, RelyingPartyContext>(RelyingPartyContext.class)));
+    }
+
+    /**
+     * Strategy cannot be null
+     */
+    @Test(expectedExceptions = ConstraintViolationException.class)
+    public void testInitializationFail2() {
+        action = new EncryptProcessedToken();
+        action.setEncryptionContextLookupStrategy(null);
     }
 
 }
