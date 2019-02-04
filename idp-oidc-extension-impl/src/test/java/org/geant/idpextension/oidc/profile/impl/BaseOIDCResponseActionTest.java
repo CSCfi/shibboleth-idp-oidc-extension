@@ -73,13 +73,18 @@ import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.Audience;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
+
 import net.shibboleth.ext.spring.resource.ResourceHelper;
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
@@ -131,6 +136,8 @@ abstract class BaseOIDCResponseActionTest {
         profileRequestCtx.getOutboundMessageContext().addSubcontext(respCtx);
         metadataCtx = (OIDCMetadataContext) profileRequestCtx.getInboundMessageContext()
                 .addSubcontext(new OIDCMetadataContext());
+        OIDCClientInformation information = new OIDCClientInformation(new ClientID(clientId), new Date(), new OIDCClientMetadata(), new Secret());
+        metadataCtx.setClientInformation(information );
         RelyingPartyContext rpCtx = profileRequestCtx.getSubcontext(RelyingPartyContext.class, true);
         rpCtx.setRelyingPartyId(clientId);
         respCtx.setSubject(subject);
