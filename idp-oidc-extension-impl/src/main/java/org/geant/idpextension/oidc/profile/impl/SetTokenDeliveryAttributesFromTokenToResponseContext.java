@@ -95,6 +95,8 @@ public class SetTokenDeliveryAttributesFromTokenToResponseContext extends Abstra
     public void setIDTokenDeliveryClaimsLookupStrategy(
             @Nullable final Function<ProfileRequestContext, ClaimsSet> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        idTokenDeliveryClaimsLookupStrategy =
+                Constraint.isNotNull(strategy, "IDTokenDeliveryClaimsLookupStrategy lookup strategy cannot be null");
     }
 
     /**
@@ -105,6 +107,8 @@ public class SetTokenDeliveryAttributesFromTokenToResponseContext extends Abstra
     public void setUserinfoDeliveryClaimsLookupStrategy(
             @Nullable final Function<ProfileRequestContext, ClaimsSet> strategy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        userinfoDeliveryClaimsLookupStrategy =
+                Constraint.isNotNull(strategy, "UserinfoDeliveryClaims lookup strategy cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -116,21 +120,17 @@ public class SetTokenDeliveryAttributesFromTokenToResponseContext extends Abstra
                     getOidcResponseContext().getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, true);
             tokenClaimsCtx.getClaims().putAll(claims);
         }
-        if (idTokenDeliveryClaimsLookupStrategy != null) {
-            claims = idTokenDeliveryClaimsLookupStrategy.apply(profileRequestContext);
-            if (claims != null) {
-                OIDCAuthenticationResponseTokenClaimsContext tokenClaimsCtx = getOidcResponseContext()
-                        .getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, true);
-                tokenClaimsCtx.getIdtokenClaims().putAll(claims);
-            }
+        claims = idTokenDeliveryClaimsLookupStrategy.apply(profileRequestContext);
+        if (claims != null) {
+            OIDCAuthenticationResponseTokenClaimsContext tokenClaimsCtx =
+                    getOidcResponseContext().getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, true);
+            tokenClaimsCtx.getIdtokenClaims().putAll(claims);
         }
-        if (userinfoDeliveryClaimsLookupStrategy != null) {
-            claims = userinfoDeliveryClaimsLookupStrategy.apply(profileRequestContext);
-            if (claims != null) {
-                OIDCAuthenticationResponseTokenClaimsContext tokenClaimsCtx = getOidcResponseContext()
-                        .getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, true);
-                tokenClaimsCtx.getUserinfoClaims().putAll(claims);
-            }
+        claims = userinfoDeliveryClaimsLookupStrategy.apply(profileRequestContext);
+        if (claims != null) {
+            OIDCAuthenticationResponseTokenClaimsContext tokenClaimsCtx =
+                    getOidcResponseContext().getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class, true);
+            tokenClaimsCtx.getUserinfoClaims().putAll(claims);
         }
 
     }
