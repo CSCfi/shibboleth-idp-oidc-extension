@@ -29,12 +29,14 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.shibboleth.idp.attribute.resolver.context.AttributeResolutionContext;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
+
+import org.geant.idpextension.oidc.profile.OidcEventIds;
 import org.geant.idpextension.oidc.profile.context.navigate.SectorIdentifierLookupFunction;
 import org.geant.idpextension.oidc.profile.logic.DefaultSubjectTypeStrategy;
+import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +62,6 @@ public class SetSectorIdentifierForAttributeResolution extends AbstractOIDCAuthe
     /** Strategy used to obtain subject type. */
     @Nonnull
     private Function<ProfileRequestContext, SubjectType> subjectTypeLookupStrategy;
-
-    /** Sector identifier. */
-    @Nullable
-    private String sectorIdentifier;
 
     /**
      * Constructor.
@@ -97,23 +95,18 @@ public class SetSectorIdentifierForAttributeResolution extends AbstractOIDCAuthe
 
     /** {@inheritDoc} */
     @Override
-    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        sectorIdentifier = sectorIdentifierLookupStrategy.apply(profileRequestContext);
-        if (sectorIdentifier == null) {
-            log.warn("{} No sector identifier, nothing to do", getLogPrefix());
-            return false;
-        }
-        return super.doPreExecute(profileRequestContext);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         if (SubjectType.PUBLIC.equals(subjectTypeLookupStrategy.apply(profileRequestContext))) {
             ((AttributeResolutionContext) profileRequestContext.getSubcontext(AttributeResolutionContext.class, true))
                     .setAttributeRecipientGroupID("public");
             log.debug("{} Attribute recipient group id set to value public for generating subject of type public",
                     getLogPrefix());
+            return;
+        }
+        String sectorIdentifier = sectorIdentifierLookupStrategy.apply(profileRequestContext);
+        if (sectorIdentifier == null) {
+            log.error("{} No sector identifier, pairwise subject cannot be generated", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, OidcEventIds.MISSING_REDIRECT_URIS);
             return;
         }
         ((AttributeResolutionContext) profileRequestContext.getSubcontext(AttributeResolutionContext.class, true))
