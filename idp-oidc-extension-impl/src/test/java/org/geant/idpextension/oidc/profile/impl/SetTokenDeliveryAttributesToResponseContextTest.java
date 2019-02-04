@@ -90,7 +90,7 @@ public class SetTokenDeliveryAttributesToResponseContextTest extends BaseOIDCRes
         List<StringAttributeValue> stringAttributeValues3 = new ArrayList<StringAttributeValue>();
         stringAttributeValues3.add(new StringAttributeValue("value3"));
         attribute3.setValues(stringAttributeValues3);
-        
+
         // Attribute to be carried in tokens, also for id token
         Collection<AttributeEncoder<?>> newEncoders4 = new ArrayList<AttributeEncoder<?>>();
         OIDCStringAttributeEncoder encoder4 = new OIDCStringAttributeEncoder();
