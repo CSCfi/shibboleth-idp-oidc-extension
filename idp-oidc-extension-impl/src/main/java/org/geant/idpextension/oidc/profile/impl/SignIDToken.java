@@ -39,7 +39,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 
 /**
- * Action that signs {@link IDTokenClaimsSet} and sets it to {@link OidcResponseContext#getSignedIDToken}. Actions fails
+ * Action that signs {@link IDTokenClaimsSet} and sets it to {@link OidcResponseContext#getProcessedToken}. Actions fails
  * silently if there are no signing parameters available.
  */
 public class SignIDToken extends AbstractSignJWTAction {
