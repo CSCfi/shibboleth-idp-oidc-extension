@@ -45,7 +45,7 @@ import net.shibboleth.utilities.java.support.component.ComponentSupport;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
- * Action that signs {@link UserInfo} and sets it to {@link OidcResponseContext#getSignedIDToken}. Actions fails
+ * Action that signs {@link UserInfo} and sets it to {@link OidcResponseContext#getProcessedToken}. Actions fails
  * silently if signing is not requested.
  */
 public class SignUserInfoResponse extends AbstractSignJWTAction {
