@@ -54,7 +54,6 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     private SignIDToken action = new SignIDToken();
 
-   
     SecurityParametersContext spCtx;
 
     private void init(String algo, Credential credential) throws ComponentInitializationException, URISyntaxException {
@@ -65,13 +64,10 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         params.setSigningCredential(credential);
         params.setSignatureAlgorithm(algo);
         profileRequestCtx.addSubcontext(spCtx);
-   
     }
 
     /**
      * Test that action does nothing if there is no sec ctx
-     * 
-     * @throws ComponentInitializationException
      */
     @Test
     public void testNoSecCtx() throws ComponentInitializationException {
@@ -83,10 +79,6 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that action does nothing if there is no signing parameters
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testNoSigningParameters() throws ComponentInitializationException, URISyntaxException {
@@ -99,10 +91,6 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that action fails if there is no id token
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testNoIdToken() throws ComponentInitializationException, URISyntaxException {
@@ -118,18 +106,12 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertNotNull(respCtx.getProcessedToken());
-        Assert.assertTrue(((SignedJWT)respCtx.getProcessedToken()).verify(verifier));
+        Assert.assertTrue(((SignedJWT) respCtx.getProcessedToken()).verify(verifier));
 
     }
 
     /**
      * Test that action is able to form success message.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws JOSEException
-     * @throws ParseException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testSuccessMessageRS256()
@@ -141,12 +123,6 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that action is able to form success message.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws JOSEException
-     * @throws ParseException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testSuccessMessageRS384()
@@ -157,12 +133,6 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that action is able to form success message.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws JOSEException
-     * @throws ParseException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testSuccessMessageRS512()
@@ -174,12 +144,6 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that action is able to form success message.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws JOSEException
-     * @throws ParseException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testSuccessMessageES256()
@@ -191,12 +155,6 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that action is able to form success message.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws JOSEException
-     * @throws ParseException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testSuccessMessageES384()
@@ -208,12 +166,6 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that action is able to form success message.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws JOSEException
-     * @throws ParseException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testSuccessMessageES512()
@@ -226,11 +178,6 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
     /**
      * Test that action is able to form success message.
      * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws JOSEException
-     * @throws ParseException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testSuccessMessageHS256()
@@ -241,12 +188,6 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that action is able to form success message.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws JOSEException
-     * @throws ParseException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testSuccessMessageHS384()
@@ -257,12 +198,6 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that action is able to form success message.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws JOSEException
-     * @throws ParseException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     public void testSuccessMessageHS512()
