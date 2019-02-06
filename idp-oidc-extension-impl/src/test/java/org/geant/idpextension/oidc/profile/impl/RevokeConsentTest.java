@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import net.shibboleth.idp.consent.context.ConsentManagementContext;
+import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
 
@@ -76,7 +77,7 @@ public class RevokeConsentTest extends BaseOIDCResponseActionTest {
         Scope scope = new Scope();
         scope.add(OIDCScopeValue.OFFLINE_ACCESS);
         respCtx.setScope(scope);
-        action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(action.execute(requestCtx));
         Assert.assertTrue(profileRequestCtx.getSubcontext(ConsentManagementContext.class).getRevokeConsent());
     }
 
@@ -90,7 +91,7 @@ public class RevokeConsentTest extends BaseOIDCResponseActionTest {
                         .state(new State()).build();
         setAuthenticationRequest(req);
         action.initialize();
-        action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(action.execute(requestCtx));
         Assert.assertTrue(profileRequestCtx.getSubcontext(ConsentManagementContext.class).getRevokeConsent());
     }
 
