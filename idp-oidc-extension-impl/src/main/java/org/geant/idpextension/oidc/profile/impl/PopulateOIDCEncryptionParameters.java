@@ -127,6 +127,7 @@ public class PopulateOIDCEncryptionParameters extends AbstractProfileAction {
      * @param forDecryption true if we should resolve decryption parameters.
      */
     public void setForDecryption(boolean value) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
         forDecryption = value;
     }
 
