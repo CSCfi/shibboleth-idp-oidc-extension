@@ -25,6 +25,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.geant.idpextension.oidc.profile.impl;
 
 import java.net.URI;
@@ -37,6 +38,7 @@ import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.EventIds;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -48,7 +50,8 @@ public class FormOutboundAuthenticationResponseMessageTest extends BaseOIDCRespo
 
     private FormOutboundAuthenticationResponseMessage action;
 
-    private void init() throws ComponentInitializationException, URISyntaxException {
+    @BeforeMethod
+    public void init() throws ComponentInitializationException, URISyntaxException {
         action = new FormOutboundAuthenticationResponseMessage();
         respCtx.setRedirectURI(new URI("http://example.org"));
         action.initialize();
@@ -56,32 +59,21 @@ public class FormOutboundAuthenticationResponseMessageTest extends BaseOIDCRespo
 
     /**
      * Test that action copes with no redirect uri in response context.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
      */
     @Test
     public void testNoRedirectUri() throws ComponentInitializationException, URISyntaxException {
-        init();
         respCtx.setRedirectURI(null);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_MESSAGE);
 
     }
 
-    
     /**
      * Test that action is able to form success message.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
-     * @throws JOSEException
-     * @throws ParseException
      */
     @Test
-    public void testSuccessMessage() throws ComponentInitializationException, URISyntaxException, ParseException,
-            JOSEException {
-        init();
+    public void testSuccessMessage()
+            throws ComponentInitializationException, URISyntaxException, ParseException, JOSEException {
         setIdTokenToResponseContext("iss", "sub", "aud", new Date(), new Date());
         signIdTokenInResponseContext();
         final Event event = action.execute(requestCtx);
