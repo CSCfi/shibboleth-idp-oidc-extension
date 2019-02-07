@@ -65,8 +65,7 @@ public class FormOutboundTokenResponseMessageTest extends BaseOIDCResponseAction
             throws ComponentInitializationException, URISyntaxException, ParseException, JOSEException {
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        TokenResponse resp = (TokenResponse) ((MessageContext<?>) respCtx.getParent()).getMessage();
-        Assert.assertTrue(resp instanceof TokenResponse);
+        Assert.assertTrue(((MessageContext<?>) respCtx.getParent()).getMessage() instanceof TokenResponse);
     }
 
     /**

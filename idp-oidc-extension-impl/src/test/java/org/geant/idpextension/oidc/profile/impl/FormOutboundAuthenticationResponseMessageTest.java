@@ -42,7 +42,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 
 /** {@link FormOutboundAuthenticationResponseMessage} unit test. */
@@ -65,7 +64,6 @@ public class FormOutboundAuthenticationResponseMessageTest extends BaseOIDCRespo
         respCtx.setRedirectURI(null);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_MESSAGE);
-
     }
 
     /**
@@ -78,8 +76,8 @@ public class FormOutboundAuthenticationResponseMessageTest extends BaseOIDCRespo
         signIdTokenInResponseContext();
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        AuthenticationResponse resp = (AuthenticationResponse) ((MessageContext<?>) respCtx.getParent()).getMessage();
-        Assert.assertTrue(resp instanceof AuthenticationSuccessResponse);
+        Assert.assertTrue(
+                ((MessageContext<?>) respCtx.getParent()).getMessage() instanceof AuthenticationSuccessResponse);
     }
 
 }
