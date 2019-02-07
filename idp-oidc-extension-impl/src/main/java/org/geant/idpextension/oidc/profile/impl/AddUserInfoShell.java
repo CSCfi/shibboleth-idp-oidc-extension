@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
@@ -145,9 +146,7 @@ public class AddUserInfoShell extends AbstractOIDCResponseAction {
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         UserInfo userInfo = new UserInfo(new Subject(getOidcResponseContext().getSubject()));
         if (userInfoSigAlgStrategy.apply(profileRequestContext) != null) {
-            // TODO: claims set parsing fails if aud set as array. Has to be set "manually". See where the actual
-            // problem lies.
-            userInfo.setClaim("aud", rpCtx.getRelyingPartyId());
+            userInfo.setAudience(new Audience(rpCtx.getRelyingPartyId()));
             userInfo.setIssuer(new Issuer(issuerId));
         }
         log.debug("{} Setting userinfo response shell to response context {}", getLogPrefix(),
