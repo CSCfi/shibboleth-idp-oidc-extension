@@ -31,6 +31,8 @@ package org.geant.idpextension.oidc.profile.impl;
 import javax.annotation.Nonnull;
 
 import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.profile.action.ActionSupport;
+import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,11 +58,16 @@ public class FormOutboundUserInfoResponseMessage extends AbstractOIDCTokenRespon
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         UserInfoSuccessResponse resp;
-        if (getOidcResponseContext().getProcessedToken() == null) {
+        if (getOidcResponseContext().getProcessedToken() != null) {
+            resp = new UserInfoSuccessResponse(getOidcResponseContext().getProcessedToken());
+        } else if (getOidcResponseContext().getUserInfo() != null) {
             resp = new UserInfoSuccessResponse(getOidcResponseContext().getUserInfo());
         } else {
-            resp = new UserInfoSuccessResponse(getOidcResponseContext().getProcessedToken());
+            log.error("{} no content to form userinfo response", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+            return;
         }
         ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
+
     }
 }
