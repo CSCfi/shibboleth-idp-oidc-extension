@@ -45,6 +45,7 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.KeyType;
+import com.nimbusds.jose.jwk.KeyUse;
 import com.google.common.io.ByteStreams;
 
 /** factory bean for Basic JSON Web Keys (JWK). */
@@ -72,14 +73,13 @@ public class BasicJWKCredentialFactoryBean extends AbstractCredentialFactoryBean
      * @return usage type.
      */
     private UsageType getUsageType(JWK jwk) {
-        switch (jwk.getKeyUse()) {
-            case ENCRYPTION:
-                return UsageType.ENCRYPTION;
-            case SIGNATURE:
-                return UsageType.SIGNING;
-            default:
-                return UsageType.UNSPECIFIED;
+        if (jwk.getKeyUse().equals(KeyUse.ENCRYPTION)) {
+            return UsageType.ENCRYPTION;
         }
+        if (jwk.getKeyUse().equals(KeyUse.SIGNATURE)) {
+            return UsageType.SIGNING;
+        }
+        return UsageType.UNSPECIFIED;
     }
 
     /** {@inheritDoc} */
