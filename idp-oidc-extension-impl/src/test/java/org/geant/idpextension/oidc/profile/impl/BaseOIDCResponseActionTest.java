@@ -82,6 +82,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
@@ -172,7 +173,19 @@ abstract class BaseOIDCResponseActionTest {
                 respCtx.getIDToken().toJWTClaimsSet());
         jwt.sign(new RSASSASigner(credentialRSA.getPrivateKey()));
         respCtx.setProcessedToken(jwt);
-
+    }
+    
+    protected void setUserInfoResponseToResponseContext(String sub) {
+        UserInfo info = new UserInfo(new Subject(sub));
+        respCtx.setUserInfo(info);
+    }
+    
+    protected void signUserInfoResponseInResponseContext() throws ParseException, JOSEException {
+        SignedJWT jwt = null;
+        jwt = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("id").build(),
+                respCtx.getUserInfo().toJWTClaimsSet());
+        jwt.sign(new RSASSASigner(credentialRSA.getPrivateKey()));
+        respCtx.setProcessedToken(jwt);
     }
 
     protected DataSealer getDataSealer() throws ComponentInitializationException, NoSuchAlgorithmException {
