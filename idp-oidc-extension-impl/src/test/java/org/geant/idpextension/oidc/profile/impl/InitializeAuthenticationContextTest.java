@@ -25,94 +25,114 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.geant.idpextension.oidc.profile.impl;
 
+import net.shibboleth.idp.authn.AuthenticationResult;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
+
+import java.net.URI;
+
+import javax.security.auth.Subject;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
-import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.Prompt;
+
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
 /** {@link InitializeAuthenticationContext} unit test. */
 public class InitializeAuthenticationContextTest {
 
-	
-    /**
-     * Test that the action functions properly if the inbound message is a oidc
-     * authentication request.
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-	@Test
-    public void testOIDCAuthnRequestNoFlags() throws Exception {
-        AuthenticationRequest req = AuthenticationRequest
-                .parse("response_type=code&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
-        final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
-        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        prc.setOutboundMessageContext(new MessageContext());
-        OIDCAuthenticationResponseContext oidcCtx = new OIDCAuthenticationResponseContext();
-        prc.getOutboundMessageContext().addSubcontext(oidcCtx);
-        oidcCtx.setRequestObject(req.getRequestObject());
-        final InitializeAuthenticationContext action = new InitializeAuthenticationContext();
-        action.initialize();
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertProceedEvent(event);
-        AuthenticationContext authnCtx = prc.getSubcontext(AuthenticationContext.class);
-        Assert.assertFalse(authnCtx.isForceAuthn());
-        Assert.assertFalse(authnCtx.isPassive());
-        Assert.assertEquals(authnCtx.getHintedName(), "foo");
+    private InitializeAuthenticationContext action;
 
+    private RequestContext requestCtx;
+
+    @SuppressWarnings("rawtypes")
+    private ProfileRequestContext prc;
+
+    @BeforeMethod
+    public void init() throws ComponentInitializationException, ParseException {
+        action = new InitializeAuthenticationContext();
+        action.initialize();
+        AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
+                new ClientID("000123"), URI.create("https://example.com/callback")).state(new State())
+                        .prompt(new Prompt(Prompt.Type.LOGIN)).loginHint("foo").build();
+        requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
+        prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+        AuthenticationContext existingContext = new AuthenticationContext();
+        existingContext.setAuthenticationResult(new AuthenticationResult("flowId", new Subject()));
+        prc.addSubcontext(existingContext);
+        prc.getOutboundMessageContext().addSubcontext(new OIDCAuthenticationResponseContext());
     }
 
     /**
-     * Test that the action functions properly if the inbound message is a oidc
-     * authentication request.
+     * Test forced, hinted name and existing initial result
      */
     @Test
-    public void testOIDCAuthnRequestPromptNone() throws Exception {
-        AuthenticationRequest req = AuthenticationRequest
-                .parse("response_type=code&prompt=none&client_id=s6BhdRkqt3&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
-        final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
-        @SuppressWarnings("rawtypes")
-        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        OIDCAuthenticationResponseContext oidcCtx = new OIDCAuthenticationResponseContext();
-        prc.getOutboundMessageContext().addSubcontext(oidcCtx);
-        oidcCtx.setRequestObject(req.getRequestObject());
-        final InitializeAuthenticationContext action = new InitializeAuthenticationContext();
-        action.initialize();
+    public void testOIDCAuthnRequestForcedWithHintedName() throws Exception {
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
-        AuthenticationContext authnCtx = prc.getSubcontext(AuthenticationContext.class);
-        Assert.assertTrue(authnCtx.isPassive());
-    }
-    
-    /**
-     * Test that the action functions properly if the inbound message is a oidc
-     * authentication request.
-     */
-    @Test
-    public void testOIDCAuthnRequestFlagsPromptLogin() throws Exception {
-        AuthenticationRequest req = AuthenticationRequest
-                .parse("response_type=code&prompt=login&client_id=s6BhdRkqt3&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20profile&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
-        final RequestContext requestCtx = new RequestContextBuilder().setInboundMessage(req).buildRequestContext();
-        @SuppressWarnings("rawtypes")
-        final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        OIDCAuthenticationResponseContext oidcCtx = new OIDCAuthenticationResponseContext();
-        prc.getOutboundMessageContext().addSubcontext(oidcCtx);
-        oidcCtx.setRequestObject(req.getRequestObject());
-        final InitializeAuthenticationContext action = new InitializeAuthenticationContext();
-        action.initialize();
-        final Event event = action.execute(requestCtx);
-        ActionTestingSupport.assertProceedEvent(event);
-        AuthenticationContext authnCtx = prc.getSubcontext(AuthenticationContext.class);
+        AuthenticationContext authnCtx = prc.getSubcontext(AuthenticationContext.class, false);
+        Assert.assertNotNull(authnCtx);
         Assert.assertTrue(authnCtx.isForceAuthn());
+        Assert.assertFalse(authnCtx.isPassive());
+        Assert.assertEquals(authnCtx.getMaxAge(), 0);
+        Assert.assertEquals(authnCtx.getHintedName(), "foo");
+        Assert.assertNotNull(prc.getSubcontext(AuthenticationContext.class).getInitialAuthenticationResult());
+    }
+
+    /**
+     * Test passive max 5s
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testOIDCAuthnRequestPassive() throws Exception {
+        AuthenticationRequest req = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"),
+                new ClientID("000123"), URI.create("https://example.com/callback")).state(new State())
+                        .prompt(new Prompt(Prompt.Type.NONE)).maxAge(5).build();
+        prc.getInboundMessageContext().setMessage(req);
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        AuthenticationContext authnCtx = prc.getSubcontext(AuthenticationContext.class, false);
+        Assert.assertNotNull(authnCtx);
+        Assert.assertFalse(authnCtx.isForceAuthn());
+        Assert.assertTrue(authnCtx.isPassive());
+        Assert.assertEquals(authnCtx.getMaxAge(), 5000);
+    }
+
+    @Test(expectedExceptions = ConstraintViolationException.class)
+    public void testSetNullLoginHintLookupStrategy() throws Exception {
+        action = new InitializeAuthenticationContext();
+        action.setLoginHintLookupStrategy(null);
+    }
+
+    @Test(expectedExceptions = ConstraintViolationException.class)
+    public void testSetNullPromptLookupStrategy() throws Exception {
+        action = new InitializeAuthenticationContext();
+        action.setPromptLookupStrategy(null);
+    }
+
+    @Test(expectedExceptions = ConstraintViolationException.class)
+    public void testSetNullMaxAgeLookupStrategy() throws Exception {
+        action = new InitializeAuthenticationContext();
+        action.setMaxAgeLookupStrategy(null);
     }
 
 }
