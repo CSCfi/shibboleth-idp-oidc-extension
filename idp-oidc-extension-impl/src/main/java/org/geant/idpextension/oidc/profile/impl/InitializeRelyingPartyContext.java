@@ -47,10 +47,8 @@ import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
-import com.nimbusds.oauth2.sdk.AbstractRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 /**
@@ -137,20 +135,9 @@ public class InitializeRelyingPartyContext extends AbstractProfileAction {
             log.error("{} pre-execute failed", getLogPrefix());
             return false;
         }
-        if (profileRequestContext.getInboundMessageContext() == null) {
-            log.error("{} Unable to locate inbound message context", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
-        Object message = profileRequestContext.getInboundMessageContext().getMessage();
-        if (message == null || !(message instanceof AbstractRequest)) {
-            log.error("{} Unable to locate inbound message", getLogPrefix());
-            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
-            return false;
-        }
         clientId = clientIDLookupStrategy.apply(profileRequestContext.getInboundMessageContext());
         if (clientId == null) {
-            log.error("{} Unable to locate client id", getLogPrefix());
+            log.error("{} Unable to locate client id from the request", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MSG_CTX);
             return false;
         }
