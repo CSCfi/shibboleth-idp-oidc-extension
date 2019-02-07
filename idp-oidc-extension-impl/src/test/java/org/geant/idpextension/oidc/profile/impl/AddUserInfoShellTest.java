@@ -29,18 +29,26 @@
 package org.geant.idpextension.oidc.profile.impl;
 
 import net.shibboleth.idp.profile.ActionTestingSupport;
+import net.shibboleth.idp.profile.IdPEventIds;
+import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
+
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.nimbusds.jose.JWSAlgorithm;
 
 /** {@link AddUserInfoShell} unit test. */
 public class AddUserInfoShellTest extends BaseOIDCResponseActionTest {
 
     private AddUserInfoShell action;
 
-    private void init() throws ComponentInitializationException {
+    @BeforeMethod
+    public void init() throws ComponentInitializationException {
         action = new AddUserInfoShell();
         action.setIssuerLookupStrategy(new ResponderIdLookupFunction());
         action.initialize();
@@ -48,15 +56,58 @@ public class AddUserInfoShellTest extends BaseOIDCResponseActionTest {
 
     /**
      * Test that user info shell is generated.
-     * 
-     * @throws ComponentInitializationException
      */
     @Test
-    public void testSuccess() throws ComponentInitializationException {
-        init();
+    public void testSuccess() {
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertEquals(respCtx.getUserInfo().getClaim("sub"), subject);
-
+        Assert.assertNull(respCtx.getUserInfo().getAudience());
+        Assert.assertNull(respCtx.getUserInfo().getIssuer());
     }
+
+    /**
+     * Test that user info shell is generated for signed response.
+     */
+    @Test
+    public void testSuccessForSigned() {
+        metadataCtx.getClientInformation().getOIDCMetadata().setUserInfoJWSAlg(JWSAlgorithm.HS256);
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertEquals(respCtx.getUserInfo().getClaim("sub"), subject);
+        Assert.assertTrue(!respCtx.getUserInfo().getAudience().isEmpty());
+        Assert.assertNotNull(respCtx.getUserInfo().getIssuer());
+    }
+
+    /**
+     * Test no relying party context.
+     */
+    @Test
+    public void testFailNoRPContext() {
+        profileRequestCtx.removeSubcontext(RelyingPartyContext.class);
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, IdPEventIds.INVALID_RELYING_PARTY_CTX);
+    }
+
+    /** Test setting null stategy. */
+    @Test(expectedExceptions = ConstraintViolationException.class)
+    public void testNullIssuerLookupStrategy() {
+        action = new AddUserInfoShell();
+        action.setIssuerLookupStrategy(null);
+    }
+
+    /** Test setting null strategy. */
+    @Test(expectedExceptions = ConstraintViolationException.class)
+    public void testNullRelyingPartyContextLookupStrategy() {
+        action = new AddUserInfoShell();
+        action.setRelyingPartyContextLookupStrategy(null);
+    }
+
+    /** Test setting null strategy. */
+    @Test(expectedExceptions = ConstraintViolationException.class)
+    public void testNulltUserInfoSigningAlgLookupStrategy() {
+        action = new AddUserInfoShell();
+        action.setUserInfoSigningAlgLookupStrategy(null);
+    }
+
 }
