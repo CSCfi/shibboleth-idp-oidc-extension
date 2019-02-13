@@ -63,7 +63,11 @@
 
     <bean id="SetTokenDeliveryAttributesToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetTokenDeliveryAttributesFromTokenToResponseContext"
-        scope="prototype" />
+        scope="prototype">
+        <property name="iDTokenDeliveryClaimsLookupStrategy">
+            <null />
+        </property>
+    </bean>
 
     <bean id="SetConsentToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetConsentFromTokenToResponseContext" scope="prototype">

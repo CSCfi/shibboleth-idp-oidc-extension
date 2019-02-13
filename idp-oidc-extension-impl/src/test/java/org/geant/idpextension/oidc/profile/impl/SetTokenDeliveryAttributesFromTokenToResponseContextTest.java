@@ -116,21 +116,40 @@ public class SetTokenDeliveryAttributesFromTokenToResponseContextTest extends Ba
     }
 
     /**
-     * Test setting null strategy for ui delivery claims.
+     * Test setting null strategy for id token delivery claims.
      */
-    @Test(expectedExceptions = ConstraintViolationException.class)
-    public void testNullStrategyUIDClaims() {
+    @Test
+    public void testNullStrategyIDTokenDClaims() throws ComponentInitializationException, URISyntaxException {
+        init();
         action = new SetTokenDeliveryAttributesFromTokenToResponseContext();
-        action.setUserinfoDeliveryClaimsLookupStrategy(null);
+        action.setIDTokenDeliveryClaimsLookupStrategy(null);
+        action.initialize();
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        OIDCAuthenticationResponseTokenClaimsContext respTokenClaims =
+                respCtx.getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class);
+        Assert.assertNotNull(respTokenClaims);
+        Assert.assertEquals(respTokenClaims.getUserinfoClaims().getClaim("deliveryClaimUI"), "deliveryClaimUIValue");
+        Assert.assertNull(respTokenClaims.getIdtokenClaims().getClaim("deliveryClaimID"));
+        Assert.assertEquals(respTokenClaims.getClaims().getClaim("deliveryClaim"), "deliveryClaimValue");
     }
 
     /**
-     * Test setting null strategy for id token delivery claims.
+     * Test setting null strategy for ui delivery claims.
      */
-    @Test(expectedExceptions = ConstraintViolationException.class)
-    public void testNullStrategyIDDClaims() {
+    @Test
+    public void testNullStrategyUIDClaims() throws ComponentInitializationException, URISyntaxException {
+        init();
         action = new SetTokenDeliveryAttributesFromTokenToResponseContext();
-        action.setIDTokenDeliveryClaimsLookupStrategy(null);
+        action.setUserinfoDeliveryClaimsLookupStrategy(null);
+        action.initialize();
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        OIDCAuthenticationResponseTokenClaimsContext respTokenClaims =
+                respCtx.getSubcontext(OIDCAuthenticationResponseTokenClaimsContext.class);
+        Assert.assertNotNull(respTokenClaims);
+        Assert.assertNull(respTokenClaims.getUserinfoClaims().getClaim("deliveryClaimUI"));
+        Assert.assertEquals(respTokenClaims.getIdtokenClaims().getClaim("deliveryClaimID"), "deliveryClaimIDValue");
+        Assert.assertEquals(respTokenClaims.getClaims().getClaim("deliveryClaim"), "deliveryClaimValue");
     }
-
 }
