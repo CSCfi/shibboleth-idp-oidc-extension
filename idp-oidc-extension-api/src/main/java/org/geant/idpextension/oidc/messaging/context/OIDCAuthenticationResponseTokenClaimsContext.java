@@ -38,8 +38,9 @@ import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
  * Subcontext carrying information to form token and userinfo responses for relying party. This context appears as a
  * subcontext of the {@link OIDCAuthenticationResponseContext}.
  * 
- * This context is populated by authentication endpoint if there are unresolvable attributes that need to be carried in
- * token.
+ * This context is populated by authentication endpoint if there are attributes unresolvable in token/userinfo endpoints
+ * that need to be carried in token. Token and userinfo endpoints populate the same context with carried claims to be
+ * returned in response.
  */
 public class OIDCAuthenticationResponseTokenClaimsContext extends BaseContext {
 
