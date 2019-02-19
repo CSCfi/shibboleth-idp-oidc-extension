@@ -131,6 +131,19 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>net.shibboleth.idp</groupId>
+                <version>${shib.idp.version}</version>
+                <artifactId>idp-conf</artifactId>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.shibboleth.idp</groupId>
+                <version>${shib.idp.version}</version>
+                <artifactId>idp-conf</artifactId>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.opensaml</groupId>
                 <version>${opensaml.version}</version>
                 <artifactId>opensaml-profile-impl</artifactId>
