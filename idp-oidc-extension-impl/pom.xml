@@ -116,6 +116,17 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-conf</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-conf</artifactId>
+            <scope>test</scope>
+        </dependency>        
+        <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-profile-impl</artifactId>
             <type>test-jar</type>
@@ -129,7 +140,18 @@
         </dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-profile-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
             <artifactId>opensaml-storage-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-messaging-impl</artifactId>
+            <optional>true</optional>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -137,6 +159,29 @@
             <artifactId>idp-oidc-extension-api</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.unboundid</groupId>
+            <artifactId>unboundid-ldapsdk</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-session-impl</artifactId>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-cas-impl</artifactId>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-admin-impl</artifactId>
+            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
     <build>
