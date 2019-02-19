@@ -27,10 +27,6 @@
         scope="prototype"
         p:metricStrategy="#{getObject('shibboleth.metrics.MetricStrategy')}" />
 
-    <!-- Declares audit field extractor functions injected into beans that 
-        populate the audit context. -->
-    <import resource="../../../system/conf/audit-system.xml" />
-
     <!-- The profile and logging id used as arguments are for development 
         phase only -->
     <bean id="InitializeProfileRequestContext"
@@ -223,10 +219,6 @@
                 class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
         </property>
     </bean>
-
-    <bean id="RecordResponseComplete"
-        class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
-        scope="prototype" />
 
     <bean id="PostResponsePopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext"
         p:fieldExtractors="#{getObject('shibboleth.oidc.RegistrationPostResponseAuditExtractors') ?: getObject('shibboleth.oidc.DefaultRegistrationPostResponseAuditExtractors')}" />
