@@ -1,0 +1,39 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:c="http://www.springframework.org/schema/c" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+
+    default-init-method="initialize" default-destroy-method="destroy">
+
+    <!-- 
+         This file contains oidc services.
+         This file should be imported to services.xml
+    -->
+    
+    <bean id="shibboleth.ClientInformationResolverService"
+        class="net.shibboleth.ext.spring.service.ReloadableSpringService"
+        depends-on="shibboleth.AttributeResolverService"
+        p:serviceConfigurations-ref="shibboleth.ClientInformationResolverResources"
+        p:failFast="%{idp.service.metadata.failFast:%{idp.service.failFast:false}}"
+        p:reloadCheckDelay="%{idp.service.metadata.checkInterval:PT0S}"
+        p:beanFactoryPostProcessors-ref="shibboleth.PropertySourcesPlaceholderConfigurer">
+        <constructor-arg name="claz"
+            value="org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver" />
+        <constructor-arg name="strategy">
+            <bean
+                class="org.geant.idpextension.oidc.profile.spring.relyingparty.metadata.impl.ClientInformationResolverServiceStrategy" />
+        </constructor-arg>
+    </bean>
+
+    <bean id="shibboleth.ClientInformationResolver"
+        class="org.geant.idpextension.oidc.metadata.impl.ReloadingRelyingPartyClientInformationProvider"
+        c:resolverService-ref="shibboleth.ClientInformationResolverService" />
+
+    <util:list id="shibboleth.ClientInformationResolverResources">
+        <value>%{idp.home}/conf/oidc-metadata-providers.xml</value>
+    </util:list>
+
+</beans>
