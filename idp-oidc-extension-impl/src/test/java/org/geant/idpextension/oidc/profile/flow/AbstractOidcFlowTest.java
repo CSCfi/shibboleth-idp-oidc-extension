@@ -28,20 +28,37 @@
 
 package org.geant.idpextension.oidc.profile.flow;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
+import org.geant.idpextension.oidc.metadata.impl.BaseStorageServiceClientInformationComponent;
+import org.opensaml.storage.StorageService;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.webflow.test.MockExternalContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
+import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Response;
+import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 
 import net.shibboleth.idp.test.flows.AbstractFlowTest;
 import net.shibboleth.utilities.java.support.net.HttpServletRequestResponseContext;
@@ -49,7 +66,7 @@ import net.shibboleth.utilities.java.support.net.HttpServletRequestResponseConte
 /**
  * Abstract unit test for the OIDC flows.
  */
-public abstract class AbstractOidcFlowTest<ResponseType extends Response> extends AbstractFlowTest {
+public abstract class AbstractOidcFlowTest<AResponseType extends Response> extends AbstractFlowTest {
     
     /**
      * Initialize mock request, response, and external context. Overrides to remove authorization header.
@@ -70,7 +87,7 @@ public abstract class AbstractOidcFlowTest<ResponseType extends Response> extend
     }
     
     protected void assertSuccess() throws ParseException, UnsupportedEncodingException {
-        ResponseType parsedResponse = parseSuccessResponse();
+        AResponseType parsedResponse = parseSuccessResponse();
         Assert.assertTrue(parsedResponse.indicatesSuccess());        
     }
     
@@ -82,15 +99,31 @@ public abstract class AbstractOidcFlowTest<ResponseType extends Response> extend
     }
     
     protected void assertErrorCode(String errorCode) throws UnsupportedEncodingException, ParseException {
-        HTTPResponse httpResponse = new HTTPResponse(response.getStatus());
-        httpResponse.setContentType(response.getContentType());
-        httpResponse.setContent(response.getContentAsString());
+        HTTPResponse httpResponse = parseResponse();
         Assert.assertFalse(httpResponse.indicatesSuccess());
         Assert.assertEquals((String) httpResponse.getContentAsJSONObject().get("error"), errorCode);
+    }
+
+    protected void assertErrorDescriptionContains(String errorDescription) throws UnsupportedEncodingException, 
+        ParseException {
+        HTTPResponse httpResponse = parseResponse();
+        Assert.assertFalse(httpResponse.indicatesSuccess());
+        Assert.assertTrue(((String) httpResponse.getContentAsJSONObject().get("error_description"))
+                .contains(errorDescription));
     }
     
     protected void setJsonRequest(String method, String body) {
         setRequest(method, body, "application/json");
+    }
+    
+    protected void setHttpFormRequest(String method, Map<String, String> parameters) {
+        setRequest(method, "", "application/x-www-form-urlencoded");
+        request.setParameters(parameters);
+    }
+    
+    protected void setBasicAuth(String username, String password) {
+        request.addHeader("Authorization",
+                "Basic " + new String(Base64.encodeBase64(new String(username + ":" + password).getBytes())));
     }
     
     protected void setRequest(String method, String body, String contentType) {
@@ -99,7 +132,33 @@ public abstract class AbstractOidcFlowTest<ResponseType extends Response> extend
         request.setContent(body.getBytes());   
     }
     
-    protected abstract ResponseType parseSuccessResponse() throws ParseException, UnsupportedEncodingException;
+    protected void storeMetadata(StorageService storageService, String clientId, String secret, String... redirectUri) throws IOException {
+        OIDCClientMetadata metadata = new OIDCClientMetadata();
+        metadata.setGrantTypes(new HashSet<GrantType>(Arrays.asList(GrantType.AUTHORIZATION_CODE)));
+        HashSet<URI> uris = new HashSet<>();
+        for (String uri : redirectUri) {
+            try {
+                uris.add(new URI(uri));
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+        HashSet<ResponseType> responseTypes = new HashSet<>();
+        responseTypes.add(new ResponseType("code"));
+        metadata.setResponseTypes(responseTypes);
+        metadata.setRedirectionURIs(uris);
+        metadata.setScope(Scope.parse("openid profile"));
+        OIDCClientInformation information = new OIDCClientInformation(new ClientID(clientId), new Date(), metadata, 
+                new Secret(secret));
+        storageService.create(BaseStorageServiceClientInformationComponent.CONTEXT_NAME, clientId, 
+                information.toJSONObject().toJSONString(), System.currentTimeMillis() + 60000);
+    }
+    
+    protected void removeMetadata(StorageService storageService, String clientId) throws IOException {
+        storageService.delete(BaseStorageServiceClientInformationComponent.CONTEXT_NAME, clientId);
+    }
+
+    protected abstract AResponseType parseSuccessResponse() throws ParseException, UnsupportedEncodingException;
 
 
 }
