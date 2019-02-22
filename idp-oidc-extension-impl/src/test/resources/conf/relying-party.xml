@@ -25,7 +25,6 @@
     <bean id="shibboleth.UnverifiedRelyingParty" parent="RelyingParty">
         <property name="profileConfigurations">
             <list>
-            <!-- <bean parent="SAML2.SSO" p:encryptAssertions="false" /> -->
                 <bean parent="OIDC.Registration" />
                 <bean parent="OIDC.Configuration" />
             </list>
@@ -45,6 +44,7 @@
                 <ref bean="SAML2.Logout.MDDriven" />
                 <ref bean="SAML2.AttributeQuery.MDDriven" />
                 <ref bean="SAML2.ArtifactResolution.MDDriven" />
+                <bean parent="OIDC.SSO"/>
             </list>
         </property>
     </bean>
