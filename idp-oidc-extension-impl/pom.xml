@@ -200,11 +200,34 @@
                             <outputDirectory>${project.target.directory}</outputDirectory>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>net.shibboleth.idp</includeGroupIds>
+                            <includeArtifactIds>idp-conf</includeArtifactIds>
+                            <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                            <includes>system/**,conf/**</includes>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>system/**</exclude>
+                        <exclude>conf/**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
