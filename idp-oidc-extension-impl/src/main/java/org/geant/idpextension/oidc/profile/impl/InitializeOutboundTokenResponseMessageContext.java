@@ -28,19 +28,15 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import net.shibboleth.idp.profile.IdPEventIds;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 
 /**
  * Action that adds an outbound {@link MessageContext} and related OIDC contexts to the {@link ProfileRequestContext}
- * based on the identity of a relying party accessed via a lookup strategy, by default an immediate child of the profile
- * request context.
- * 
- * 
+ * not knowing the relying party yet.
+ *
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
- * @event {@link IdPEventIds#INVALID_RELYING_PARTY_CTX}
  */
 public class InitializeOutboundTokenResponseMessageContext
         extends AbstractInitializeOutboundResponseMessageContext<TokenResponse> {

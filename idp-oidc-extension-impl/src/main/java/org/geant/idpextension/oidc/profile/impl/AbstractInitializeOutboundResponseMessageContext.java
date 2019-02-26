@@ -31,7 +31,6 @@ package org.geant.idpextension.oidc.profile.impl;
 import javax.annotation.Nonnull;
 
 import net.shibboleth.idp.profile.AbstractProfileAction;
-import net.shibboleth.idp.profile.IdPEventIds;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -44,7 +43,6 @@ import org.slf4j.LoggerFactory;
  * @param <T> response message implementation class.
  * 
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
- * @event {@link IdPEventIds#INVALID_RELYING_PARTY_CTX}
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractInitializeOutboundResponseMessageContext<T> extends AbstractProfileAction {

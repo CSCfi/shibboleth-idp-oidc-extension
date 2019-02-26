@@ -28,7 +28,6 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import net.shibboleth.idp.profile.IdPEventIds;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
@@ -37,9 +36,7 @@ import com.nimbusds.openid.connect.sdk.UserInfoResponse;
  * Action that adds an outbound {@link MessageContext} and related OIDC contexts to the {@link ProfileRequestContext}
  * not knowing the relying party yet.
  * 
- * 
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
- * @event {@link IdPEventIds#INVALID_RELYING_PARTY_CTX}
  */
 public class InitializeOutboundUserInfoResponseMessageContext
         extends AbstractInitializeOutboundResponseMessageContext<UserInfoResponse> {
