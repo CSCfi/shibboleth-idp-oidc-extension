@@ -222,11 +222,10 @@
          The connector may be used to generate both public and pairwise subject values -->
     <DataConnector id="computedSubjectId" xsi:type="ComputedId"
             generatedAttributeID="subjectId"
-            sourceAttributeID="%{idp.oidc.subject.sourceAttribute}"
             salt="%{idp.oidc.subject.salt}"
             algorithm="%{idp.oidc.subject.algorithm:SHA}"
             encoding="%{idp.oidc.subject.encoding:BASE32}">
-            <Dependency ref="%{idp.oidc.subject.sourceAttribute}"/>
+            <InputAttributeDefinition ref="%{idp.oidc.subject.sourceAttribute}"/>
     </DataConnector>
     
     <DataConnector id="staticAttributes" xsi:type="Static">
