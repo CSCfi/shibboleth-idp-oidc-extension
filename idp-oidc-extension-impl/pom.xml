@@ -210,7 +210,7 @@
                             <includeGroupIds>net.shibboleth.idp</includeGroupIds>
                             <includeArtifactIds>idp-conf</includeArtifactIds>
                             <outputDirectory>${project.build.directory}/classes</outputDirectory>
-                            <includes>system/**,conf/**</includes>
+                            <includes>system/**,conf/**,credentials/ldap-server.crt</includes>
                         </configuration>
                     </execution>
                 </executions>
@@ -226,6 +226,7 @@
                     <excludes>
                         <exclude>system/**</exclude>
                         <exclude>conf/**</exclude>
+                        <exclude>credentials/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
