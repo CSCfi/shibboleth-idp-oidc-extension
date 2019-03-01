@@ -96,6 +96,17 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
         action.setReplayCache(replayCache);
         action.initialize();
     }
+    
+    public static AuthorizationCode buildAuthorizationCode(String clientId, String issuer, String userPrincipal,
+            String sub, String callbackUrl) throws URISyntaxException, NoSuchAlgorithmException, DataSealerException, 
+            ComponentInitializationException {
+        Date now = new Date();
+        ValidateGrantTest test = new ValidateGrantTest();
+        TokenClaimsSet acClaims = new AuthorizeCodeClaimsSet(test.new idStrat(), new ClientID(clientId), issuer,
+                userPrincipal, sub, new ACR("0"), now, new Date(now.getTime() + 100000), new Nonce(), now,
+                new URI(callbackUrl), new Scope(), null, null, null, null, null, null);
+        return new AuthorizationCode(acClaims.serialize(test.getDataSealer()));
+    }
 
     @Test
     public void testAuthorizeCodeSuccess()
@@ -149,12 +160,10 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
     public void testWrongClient()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
-        Date now = new Date();
-        acClaims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID("clientIdWrong"), "issuer", "userPrin",
-                "subject", new ACR("0"), now, new Date(now.getTime() + 100000), new Nonce(), now,
-                new URI("http://example.com"), new Scope(), null, null, null, null, null, null);
-        TokenRequest req = new TokenRequest(callback, new ClientID(clientId),
-                new AuthorizationCodeGrant(new AuthorizationCode(acClaims.serialize(getDataSealer())), callback));
+        AuthorizationCode code = buildAuthorizationCode("clientIdWrong", "issuer", "userPrin", "subject", 
+                "http://example.com");
+        TokenRequest req = new TokenRequest(callback, new ClientID(clientId), new AuthorizationCodeGrant(code, 
+                callback));
         profileRequestCtx.getInboundMessageContext().setMessage(req);
         ActionTestingSupport.assertEvent(action.execute(requestCtx), OidcEventIds.INVALID_GRANT);
     }
