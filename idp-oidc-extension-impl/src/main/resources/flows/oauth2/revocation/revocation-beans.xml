@@ -47,7 +47,8 @@
         p:clientIDLookupStrategy-ref="shibboleth.TokenRequestClientIDLookupStrategy" />
 
     <bean id="InitializeOutboundMessageContext"
-        class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundTokenResponseMessageContext" scope="prototype" />
+        class="org.geant.idpextension.oauth2.profile.impl.InitializeOutboundRevokeTokenResponseMessageContext"
+        scope="prototype" />
 
     <bean id="ValidateEndpointAuthentication"
         class="org.geant.idpextension.oidc.profile.impl.ValidateEndpointAuthentication" scope="prototype"
