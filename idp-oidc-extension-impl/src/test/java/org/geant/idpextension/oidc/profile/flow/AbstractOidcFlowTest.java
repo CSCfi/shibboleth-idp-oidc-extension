@@ -28,8 +28,6 @@
 
 package org.geant.idpextension.oidc.profile.flow;
 
-import static org.testng.Assert.assertEquals;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -70,6 +68,8 @@ import net.shibboleth.utilities.java.support.net.HttpServletRequestResponseConte
  */
 public abstract class AbstractOidcFlowTest extends AbstractFlowTest {
     
+    public static final String END_STATE_ID = "CommitResponse";
+    
     private String flowId;
     
     protected AbstractOidcFlowTest(String flowId) {
@@ -80,7 +80,7 @@ public abstract class AbstractOidcFlowTest extends AbstractFlowTest {
      * Initialize mock request, response, and external context. Overrides to remove authorization header.
      */
     @BeforeMethod public void initializeMocks() {
-        overrideEndStateOutput(flowId, "CommitResponse");
+        overrideEndStateOutput(flowId, END_STATE_ID);
 
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
@@ -97,7 +97,7 @@ public abstract class AbstractOidcFlowTest extends AbstractFlowTest {
     }
     
     protected Response parseResponse(final FlowExecutionResult result) {
-        assertEquals(result.getOutcome().getId(), "CommitResponse");
+        assertFlowExecutionOutcome(result.getOutcome(), END_STATE_ID);
         ProfileRequestContext<?, ?> prc = retrieveProfileRequestContext(result);
         Assert.assertNotNull(prc);
         Assert.assertNotNull(prc.getOutboundMessageContext());
