@@ -99,6 +99,8 @@ abstract class BaseOIDCResponseActionTest {
     protected OIDCMetadataContext metadataCtx;
 
     protected AuthenticationRequest request;
+    
+    protected RelyingPartyContext rpCtx;
 
     final protected String subject = "generatedSubject";
 
@@ -139,7 +141,7 @@ abstract class BaseOIDCResponseActionTest {
                 .addSubcontext(new OIDCMetadataContext());
         OIDCClientInformation information = new OIDCClientInformation(new ClientID(clientId), new Date(), new OIDCClientMetadata(), new Secret());
         metadataCtx.setClientInformation(information );
-        RelyingPartyContext rpCtx = profileRequestCtx.getSubcontext(RelyingPartyContext.class, true);
+        rpCtx = profileRequestCtx.getSubcontext(RelyingPartyContext.class, true);
         rpCtx.setRelyingPartyId(clientId);
         respCtx.setSubject(subject);
         rpCtx.setProfileConfig(new OIDCCoreProtocolConfiguration());

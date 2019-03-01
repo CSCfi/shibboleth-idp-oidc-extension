@@ -4,7 +4,7 @@
    "registration_endpoint":"https://{{ service_name }}/idp/profile/oidc/register",
    "token_endpoint":"https://{{ service_name }}/idp/profile/oidc/token",
    "userinfo_endpoint":"https://{{ service_name }}/idp/profile/oidc/userinfo",
-   "jwks_uri":"https://{{ service_name }}/oidc/keyset.jwk",
+   "jwks_uri":"https://{{ service_name }}/idp/profile/oidc/keyset",
    "response_types_supported":[
       "code",
       "id_token",

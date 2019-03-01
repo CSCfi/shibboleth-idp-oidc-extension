@@ -26,7 +26,45 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.geant.idpextension.oidc.profile.impl;
+
+import javax.annotation.Nonnull;
+
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.profile.context.ProfileRequestContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.nimbusds.oauth2.sdk.Response;
+
+import net.shibboleth.idp.profile.AbstractProfileAction;
+
 /**
- * OIDC messaging interfaces and classes.
+ * Action that adds an outbound {@link MessageContext} typed to generic {@link Response} to
+ * {@link ProfileRequestContext}.
+ *
+ * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
  */
-package org.geant.idpextension.oidc.messaging;
+@SuppressWarnings("rawtypes")
+public class InitializeOutboundResponseMessageContext extends AbstractProfileAction {
+
+    /** Class logger. */
+    @Nonnull
+    private final Logger log = LoggerFactory.getLogger(AbstractInitializeOutboundResponseMessageContext.class);
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+        return super.doPreExecute(profileRequestContext);
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+        final MessageContext<Response> msgCtx = new MessageContext<Response>();
+        profileRequestContext.setOutboundMessageContext(msgCtx);
+        log.debug("{} Initialized outbound message context", getLogPrefix());
+    }
+}

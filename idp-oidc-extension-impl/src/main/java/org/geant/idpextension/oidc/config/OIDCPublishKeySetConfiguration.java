@@ -26,7 +26,38 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.geant.idpextension.oidc.config;
+
+import javax.annotation.Nonnull;
+
+import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+
 /**
- * OIDC messaging interfaces and classes.
+ * Profile configuration for publishing OP key set.
  */
-package org.geant.idpextension.oidc.messaging;
+public class OIDCPublishKeySetConfiguration extends AbstractOIDCProfileConfiguration {
+
+    /** OIDC base protocol URI. Section 3 jwks_uri is the relevant. */
+    public static final String PROTOCOL_URI =
+            "https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata";
+
+    /** ID for this profile configuration. */
+    public static final String PROFILE_ID = "http://csc.fi/ns/profiles/oidc/keyset";
+
+    /**
+     * Constructor.
+     */
+    public OIDCPublishKeySetConfiguration() {
+        this(PROFILE_ID);
+    }
+
+    /**
+     * Creates a new configuration instance.
+     *
+     * @param profileId Unique profile identifier.
+     */
+    public OIDCPublishKeySetConfiguration(@Nonnull @NotEmpty final String profileId) {
+        super(profileId);
+    }
+
+}

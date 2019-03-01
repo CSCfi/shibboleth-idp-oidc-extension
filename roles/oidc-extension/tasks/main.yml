@@ -116,12 +116,7 @@
     - "idp-signing-es.jwk"
     - "idp-signing-rs.jwk" 
     - "idp-encryption-rsa.jwk"
-    
-- name: Publish keyset.
-  template: src={{ playbook_dir }}/roles/oidc-extension/templates/{{item}} dest=/opt/shibboleth-idp/static/oidc/{{item}}
-  with_items:
-    - "keyset.jwk"
-
+   
 - name: Setting openid-configuration
   template:
     src: openid-configuration

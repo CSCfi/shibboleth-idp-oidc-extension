@@ -26,7 +26,45 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * OIDC messaging interfaces and classes.
- */
-package org.geant.idpextension.oidc.messaging;
+package org.geant.idpextension.oidc.profile.impl;
+
+import net.shibboleth.idp.profile.ActionTestingSupport;
+import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
+
+import org.opensaml.profile.context.ProfileRequestContext;
+import org.springframework.webflow.execution.Event;
+import org.springframework.webflow.execution.RequestContext;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import net.shibboleth.idp.profile.RequestContextBuilder;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+
+/** {@link InitializeOutboundResponseMessageContext} unit test. */
+public class InitializeOutboundResponseMessageContextTest {
+
+    private InitializeOutboundResponseMessageContext action;
+
+    private RequestContext requestCtx;
+
+    @SuppressWarnings("rawtypes")
+    private ProfileRequestContext prc;
+
+    @BeforeMethod
+    public void init() throws ComponentInitializationException {
+        action = new InitializeOutboundResponseMessageContext();
+        action.initialize();
+        requestCtx = new RequestContextBuilder().buildRequestContext();
+        prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+    }
+
+    /** Test that outbound message context exists. */
+    @Test
+    public void testSuccess() {
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertNotNull(prc.getOutboundMessageContext());
+    }
+
+}

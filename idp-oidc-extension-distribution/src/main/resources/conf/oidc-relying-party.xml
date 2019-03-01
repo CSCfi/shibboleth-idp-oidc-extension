@@ -13,7 +13,7 @@
     <!-- This is one of the few properties we rely on that has no default. -->
     <bean id="issuer" class="java.lang.String" c:_0="%{idp.oidc.issuer}" />
 
-    <!-- Configure profiles that need to use other than entity id as responder id. -->
+    <!-- Configure profiles that need to use issuer instead of entity id as responder id. -->
     <util:map id="profileResponders">
         <entry key-ref="OIDC.SSO" value="#{getObject('issuer')}" />
         <entry key-ref="OIDC.Registration" value="#{getObject('issuer')}" />
@@ -47,6 +47,9 @@
     <bean id="OAUTH2.Revocation" class="org.geant.idpextension.oauth2.config.OAuth2TokenRevocationConfiguration"
         p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
         p:servletRequest-ref="shibboleth.HttpServletRequest" />
+    <bean id="OIDC.Keyset" class="org.geant.idpextension.oidc.config.OIDCPublishKeySetConfiguration"
+        p:securityConfiguration-ref="shibboleth.oidc.PublishKeySetSecurityConfiguration"
+        p:servletRequest-ref="shibboleth.HttpServletRequest" />
 
     <!-- Security Configuration Defaults. These settings establish the default security configurations for signatures and 
         loads the default credentials used. -->
@@ -68,13 +71,8 @@
     </bean>
         
     <!-- Configuration for credentials and supported algorithms for ID Token and UserInfo response signing. -->    
-    <bean id="shibboleth.oidc.SigningConfiguration" parent="shibboleth.BasicSignatureSigningConfiguration">
-        <property name="signingCredentials">
-            <list>
-                <ref bean="shibboleth.oidc.DefaultRSSigningCredential" />
-                <ref bean="shibboleth.oidc.DefaultESSigningCredential" />
-            </list>
-        </property>
+    <bean id="shibboleth.oidc.SigningConfiguration" parent="shibboleth.BasicSignatureSigningConfiguration"
+        p:signingCredentials-ref="shibboleth.oidc.SigningCredentials">
         <property name="signatureAlgorithms">
             <list>
                 <util:constant
@@ -87,7 +85,8 @@
                     static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_256" />
 
                 <!-- 
-                                          Not supported by the default P-256 EC key. 
+                  Not supported by the default P-256 EC key. P-384 and P-512 need to be added as credential if activated.
+                  
                 <util:constant 
                      static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_384" /> 
                 <util:constant 
@@ -147,12 +146,8 @@
     </bean>
     
     <!-- Configuration for credentials and supported algorithms for request object decryption. -->
-    <bean id="shibboleth.oidc.requestObjectDecryptionConfiguration" parent="shibboleth.BasicEncryptionConfiguration">
-        <property name="keyTransportEncryptionCredentials">
-            <list>
-                <ref bean="shibboleth.oidc.DefaultRSAEncryptionCredential" />
-            </list>
-        </property>
+    <bean id="shibboleth.oidc.requestObjectDecryptionConfiguration" parent="shibboleth.BasicEncryptionConfiguration"
+    p:keyTransportEncryptionCredentials-ref="shibboleth.oidc.EncryptionCredentials">
         <property name="keyTransportEncryptionAlgorithms">
             <list>
                 <util:constant
@@ -218,5 +213,24 @@
             </list>
         </property>
     </bean>
+    
+    <!--  Configuration for publishing key set. -->
+    <bean id="shibboleth.oidc.PublishKeySetSecurityConfiguration"
+        class="org.geant.idpextension.oidc.profile.api.OIDCSecurityConfiguration">
+        <property name="signatureSigningConfiguration">
+            <ref bean="shibboleth.oidc.PublishKeySetSigningConfiguration" />
+        </property>
+        <property name="requestObjectDecryptionConfiguration">
+            <ref bean="shibboleth.oidc.PublishKeySetRequestObjectDecryptionConfiguration" />
+        </property>
+    </bean>
+    
+    <!--  Signing keys to publish. -->
+    <bean id="shibboleth.oidc.PublishKeySetSigningConfiguration" parent="shibboleth.BasicSignatureSigningConfiguration"
+        p:signingCredentials-ref="shibboleth.oidc.SigningCredentialsToPublish"/>
+        
+    <!--  Encryption keys to publish. -->    
+    <bean id="shibboleth.oidc.PublishKeySetRequestObjectDecryptionConfiguration" parent="shibboleth.BasicEncryptionConfiguration"
+        p:keyTransportEncryptionCredentials-ref="shibboleth.oidc.EncryptionCredentialsToPublish"/>
 
 </beans>

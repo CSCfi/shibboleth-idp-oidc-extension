@@ -26,7 +26,23 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.geant.idpextension.oidc.profile.impl;
+
+import org.geant.idpextension.oidc.messaging.JSONErrorResponse;
+import org.opensaml.profile.context.EventContext;
+import org.opensaml.profile.context.ProfileRequestContext;
+import com.nimbusds.oauth2.sdk.ErrorObject;
+
 /**
- * OIDC messaging interfaces and classes.
+ * This action reads an event from the configured {@link EventContext} lookup strategy, constructs a json error response
+ * message and attaches it as the outbound message.
  */
-package org.geant.idpextension.oidc.messaging;
+public class BuildJSONErrorResponseFromEvent extends AbstractBuildErrorResponseFromEvent<JSONErrorResponse> {
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    protected JSONErrorResponse buildErrorResponse(ErrorObject error, ProfileRequestContext profileRequestContext) {
+        return new JSONErrorResponse(error);
+    }
+
+}

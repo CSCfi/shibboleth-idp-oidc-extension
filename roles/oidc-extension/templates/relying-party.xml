@@ -26,6 +26,7 @@
             <list>
             <bean parent="OIDC.Registration" />
             <bean parent="OIDC.Configuration" />
+            <bean parent="OIDC.Keyset" />
             </list>
         </property>
     </bean>
