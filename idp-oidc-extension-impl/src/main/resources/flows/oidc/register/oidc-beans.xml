@@ -48,7 +48,7 @@
     </bean>
 
     <bean id="InitializeRelyingPartyContext"
-        class="org.geant.idpextension.oidc.profile.impl.InitializeRegistrationRelyingPartyContext"
+        class="org.geant.idpextension.oidc.profile.impl.InitializeUnverifiedRelyingPartyContext"
         scope="prototype" />
 
     <bean id="CheckRedirectURIs"

@@ -50,21 +50,21 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
  * 
  * @event {@link IdpEventIds#INVALID_RELYING_PARTY_CTX}
  * @post ProfileRequestContext.getSubcontext(RelyingPartyContext.class) != null
- *       WITHOUT relying party id currently set.
+ *       WITHOUT relying party id set.
  */
 @SuppressWarnings("rawtypes")
-public class InitializeRegistrationRelyingPartyContext extends AbstractProfileAction {
+public class InitializeUnverifiedRelyingPartyContext extends AbstractProfileAction {
 
     /** Class logger. */
     @Nonnull
-    private final Logger log = LoggerFactory.getLogger(InitializeRegistrationRelyingPartyContext.class);
+    private final Logger log = LoggerFactory.getLogger(InitializeUnverifiedRelyingPartyContext.class);
     
     /** Strategy that will return or create a {@link RelyingPartyContext}. */
     @Nonnull
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextCreationStrategy;
 
     /** Constructor. */
-    public InitializeRegistrationRelyingPartyContext() {
+    public InitializeUnverifiedRelyingPartyContext() {
         relyingPartyContextCreationStrategy = new ChildContextLookup<>(RelyingPartyContext.class, true);
     }
     
@@ -93,7 +93,6 @@ public class InitializeRegistrationRelyingPartyContext extends AbstractProfileAc
             return;
         }
         log.debug("{} new RelyingPartyContext successfully created and attached", getLogPrefix());
-       //TODO: no client ID is currently attached even though access token would be included in the request
     }
 
 }
