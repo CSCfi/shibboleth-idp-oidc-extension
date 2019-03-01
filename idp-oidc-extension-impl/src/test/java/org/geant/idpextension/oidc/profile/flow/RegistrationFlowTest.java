@@ -28,8 +28,6 @@
 
 package org.geant.idpextension.oidc.profile.flow;
 
-import static org.testng.Assert.assertEquals;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
@@ -52,39 +50,39 @@ import net.minidev.json.parser.JSONParser;
 /**
  * Some tests for the dynamic registration flow.
  */
-public class RegistrationFlowTest extends AbstractOidcFlowTest<OIDCClientInformationResponse> {
+public class RegistrationFlowTest extends AbstractOidcFlowTest {
     
-    String FLOW_ID = "oidc/register";
+    public static final String FLOW_ID = "oidc/register";
     
     String redirectUri = "https://example.org/cb";
     
     @Autowired
     @Qualifier("shibboleth.StorageService")
     StorageService storageService;
+    
+    public RegistrationFlowTest() {
+        super(FLOW_ID);
+    }
 
     @Test
     public void testNoRedirectUri() throws UnsupportedEncodingException, ParseException {
         setJsonRequest("POST", "{ \"test\":false }");
         final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
-        assertEquals(result.getOutcome().getId(), "CommitResponse");
-        assertErrorCode("invalid_redirect_uri");
+        assertErrorCode(result, "invalid_redirect_uri");
     }
 
     @Test
     public void testInvalidMessage() throws UnsupportedEncodingException, ParseException {
         setJsonRequest("POST", "{ \"test\":not_json");
         final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
-        assertEquals(result.getOutcome().getId(), "CommitResponse");
-        assertErrorCode("invalid_request");
+        assertErrorCode(result, "invalid_request");
     }
     
     @Test
     public void testSuccess() throws ParseException, IOException, net.minidev.json.parser.ParseException {
         setJsonRequest("POST", "{ \"redirect_uris\":[\"" + redirectUri + "\"] }");
         final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
-        assertEquals(result.getOutcome().getId(), "CommitResponse");
-        assertSuccess();
-        OIDCClientInformationResponse parsedResponse = parseSuccessResponse();
+        OIDCClientInformationResponse parsedResponse = parseSuccessResponse(result, OIDCClientInformationResponse.class);
         OIDCClientInformation clientInfo = parsedResponse.getOIDCClientInformation();
         OIDCClientMetadata metadata = clientInfo.getOIDCMetadata();
         String record = storageService.read(BaseStorageServiceClientInformationComponent.CONTEXT_NAME, 
@@ -98,7 +96,4 @@ public class RegistrationFlowTest extends AbstractOidcFlowTest<OIDCClientInforma
         Assert.assertTrue(metadata.getRedirectionURIStrings().contains(redirectUri));
     }
 
-    protected OIDCClientInformationResponse parseSuccessResponse() throws ParseException, UnsupportedEncodingException {
-        return OIDCClientInformationResponse.parse(super.parseResponse());
-    }   
 }

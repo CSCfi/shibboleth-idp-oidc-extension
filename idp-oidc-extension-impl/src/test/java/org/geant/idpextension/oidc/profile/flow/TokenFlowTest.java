@@ -28,28 +28,33 @@
 
 package org.geant.idpextension.oidc.profile.flow;
 
-import static org.testng.Assert.assertEquals;
-
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.geant.idpextension.oidc.profile.impl.ValidateGrantTest;
 import org.opensaml.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.webflow.executor.FlowExecutionResult;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.security.DataSealerException;
+
 /**
  * Unit tests for the token flow.
  */
-public class TokenFlowTest extends AbstractOidcFlowTest<OIDCTokenResponse> {
+public class TokenFlowTest extends AbstractOidcFlowTest {
     
-    String FLOW_ID = "oidc/token";
+    public static final String FLOW_ID = "oidc/token";
     
     String redirectUri = "https://example.org/cb";
     String clientId = "mockClientId";
@@ -59,31 +64,37 @@ public class TokenFlowTest extends AbstractOidcFlowTest<OIDCTokenResponse> {
     @Qualifier("shibboleth.StorageService")
     StorageService storageService;
     
+    public TokenFlowTest() {
+        super(FLOW_ID);
+    }
+    
+    @BeforeMethod
+    public void setup() throws IOException {
+        removeMetadata(storageService, clientId);
+    }
+    
     @Test
     public void testNoClientId() throws IOException, ParseException {
         setHttpFormRequest("POST", createRequestParameters(redirectUri, "authorization_code", "mockCode", null));
         final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
-        assertEquals(result.getOutcome().getId(), "CommitResponse");
-        assertErrorCode("invalid_request");
-        assertErrorDescriptionContains("UnableToDecode");
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "UnableToDecode");
     }
 
     @Test
     public void testNoGrantType() throws IOException, ParseException {
         setHttpFormRequest("POST", createRequestParameters(redirectUri, null, "mockCode", clientId));
         final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
-        assertEquals(result.getOutcome().getId(), "CommitResponse");
-        assertErrorCode("invalid_request");
-        assertErrorDescriptionContains("UnableToDecode");
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "UnableToDecode");
     }
 
     @Test
     public void testUntrustedClient() throws IOException, ParseException {
         setHttpFormRequest("POST", createRequestParameters(null, "authorization_code", "mockCode", clientId + "2"));
         final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
-        assertEquals(result.getOutcome().getId(), "CommitResponse");
-        assertErrorCode("invalid_request");
-        assertErrorDescriptionContains("InvalidProfileConfiguration");
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "InvalidProfileConfiguration");
     }
     
     @Test
@@ -91,10 +102,8 @@ public class TokenFlowTest extends AbstractOidcFlowTest<OIDCTokenResponse> {
         setHttpFormRequest("POST", createRequestParameters(redirectUri, "authorization_code", "mockCode", clientId));
         storeMetadata(storageService, clientId, clientSecret);
         final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
-        removeMetadata(storageService, clientId);
-        assertEquals(result.getOutcome().getId(), "CommitResponse");
-        assertErrorCode("invalid_request");
-        assertErrorDescriptionContains("AccessDenied");
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "AccessDenied");
     }
 
     @Test
@@ -103,14 +112,24 @@ public class TokenFlowTest extends AbstractOidcFlowTest<OIDCTokenResponse> {
         storeMetadata(storageService, clientId, clientSecret);
         setBasicAuth(clientId, clientSecret);
         final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
-        removeMetadata(storageService, clientId);
-        assertEquals(result.getOutcome().getId(), "CommitResponse");
-        assertErrorCode("invalid_grant");
+        assertErrorCode(result, "invalid_grant");
     }
-    
-    //TODO: add tests with valid grants
-    
-    protected Map<String, String> createRequestParameters(String redirectUri, String grantType, String code, String clientId) {
+
+    @Test
+    public void testValidGrant() throws ParseException, IOException, NoSuchAlgorithmException, URISyntaxException,
+        DataSealerException, ComponentInitializationException {
+        String code = ValidateGrantTest.buildAuthorizationCode(clientId, "https://op.example.org", "jdoe", "mock",
+                redirectUri).toString();
+        setHttpFormRequest("POST", createRequestParameters(redirectUri, "authorization_code", code, clientId));
+        storeMetadata(storageService, clientId, clientSecret);
+        setBasicAuth(clientId, clientSecret);
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
+        Assert.assertNotNull(response.getTokens().getAccessToken());
+    }
+
+    protected Map<String, String> createRequestParameters(String redirectUri, String grantType, String code, 
+            String clientId) {
         Map<String, String> parameters = new HashMap<>();
         addNonNullValue(parameters, "redirect_uri", redirectUri);
         addNonNullValue(parameters, "grant_type", grantType);
@@ -123,11 +142,5 @@ public class TokenFlowTest extends AbstractOidcFlowTest<OIDCTokenResponse> {
         if (value != null) {
             map.put(key, value);
         }
-    }
-    
-    /** {@inheritDoc} */
-    @Override
-    protected OIDCTokenResponse parseSuccessResponse() throws ParseException, UnsupportedEncodingException {
-        return OIDCTokenResponse.parse(super.parseResponse());
     }
 }
