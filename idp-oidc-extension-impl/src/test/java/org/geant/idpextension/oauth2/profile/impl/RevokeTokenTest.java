@@ -55,6 +55,7 @@ import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 
 /**
  * Tests for {@link RevokeToken}.
@@ -102,9 +103,9 @@ public class RevokeTokenTest extends BaseTokenClaimsSetTest {
     protected void init()
             throws ComponentInitializationException, NoSuchAlgorithmException, DataSealerException, URISyntaxException {
         // init tokens
-        AuthorizeCodeClaimsSet acClaimsSet = new AuthorizeCodeClaimsSet(new MockIdStrategy(), clientID, issuer,
-                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
-                dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
+        AuthorizeCodeClaimsSet acClaimsSet = new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(),
+                clientID, issuer, userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims,
+                dlClaims, dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
         atClaimsSet = new AccessTokenClaimsSet(acClaimsSet, scope, dlClaims, dlClaimsUI, iat, exp);
         rfClaimsSet = new RefreshTokenClaimsSet(acClaimsSet, iat, exp);
         // init action

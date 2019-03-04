@@ -30,7 +30,7 @@ package org.geant.idpextension.oidc.profile.context.navigate;
 
 import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
-import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 
 import java.net.URI;
 import java.util.Date;
@@ -66,7 +66,7 @@ public class AbstractTokenClaimsLookupFunctionTest {
         prc.setOutboundMessageContext(new MessageContext());
         oidcCtx = new OIDCAuthenticationResponseContext();
         prc.getOutboundMessageContext().addSubcontext(oidcCtx);
-        oidcCtx.setTokenClaimsSet(new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
+        oidcCtx.setTokenClaimsSet(new AccessTokenClaimsSet(new SecureRandomIdentifierGenerationStrategy(), new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(System.currentTimeMillis() + 1000), new Nonce(),
                 new Date(), new URI("http://example.com"), new Scope(), null, null, null, null, null));
     }
@@ -98,19 +98,5 @@ public class AbstractTokenClaimsLookupFunctionTest {
             return tokenClaims.getClaimsSet().getClaim("sub");
         }
     }
-
-    public class idStrat implements IdentifierGenerationStrategy {
-
-        @Override
-        public String generateIdentifier() {
-            return "identifier";
-        }
-
-        @Override
-        public String generateIdentifier(boolean xmlSafe) {
-            return "identifier";
-        }
-
-    }
-
+    
 }

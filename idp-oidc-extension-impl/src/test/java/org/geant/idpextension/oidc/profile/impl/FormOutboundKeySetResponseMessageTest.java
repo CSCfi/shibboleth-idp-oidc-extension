@@ -58,7 +58,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Response;
 

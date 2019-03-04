@@ -30,7 +30,8 @@ package org.geant.idpextension.oidc.token.support;
 
 import org.testng.annotations.Test;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
-import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
+
 import java.text.ParseException;
 import org.testng.Assert;
 
@@ -42,9 +43,9 @@ public class AuthorizeCodeClaimsSetTest extends BaseTokenClaimsSetTest {
     private AuthorizeCodeClaimsSet acClaimsSet;
 
     protected void init() {
-        acClaimsSet = new AuthorizeCodeClaimsSet(new MockIdStrategy(), clientID, issuer, userPrincipal, subject, acr,
-                iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims, dlClaimsID, dlClaimsUI,
-                consentableClaims, consentedClaims);
+        acClaimsSet = new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
+                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
+                dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
     }
 
     @Test
@@ -58,25 +59,9 @@ public class AuthorizeCodeClaimsSetTest extends BaseTokenClaimsSetTest {
 
     @Test(expectedExceptions = ParseException.class)
     public void testSerializationWrongType() throws ParseException {
-        AccessTokenClaimsSet accessnClaimsSet = new AccessTokenClaimsSet(new MockIdStrategy(), clientID, issuer,
-                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
-                dlClaimsUI, consentableClaims, consentedClaims);
+        AccessTokenClaimsSet accessnClaimsSet = new AccessTokenClaimsSet(new SecureRandomIdentifierGenerationStrategy(),
+                clientID, issuer, userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims,
+                dlClaims, dlClaimsUI, consentableClaims, consentedClaims);
         acClaimsSet = AuthorizeCodeClaimsSet.parse(accessnClaimsSet.serialize());
     }
-
-    public class MockIdStrategy implements IdentifierGenerationStrategy {
-
-        @Override
-        public String generateIdentifier() {
-            return "x";
-        }
-
-        @Override
-        public String generateIdentifier(boolean xmlSafe) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-    }
-
 }

@@ -28,15 +28,9 @@
 
 package org.geant.idpextension.oidc.profile.api;
 
-import java.util.Collection;
-import java.util.List;
-
-import org.opensaml.security.credential.Credential;
+import org.mockito.Mockito;
 import org.opensaml.xmlsec.EncryptionConfiguration;
-import org.opensaml.xmlsec.KeyTransportAlgorithmPredicate;
 import org.opensaml.xmlsec.SignatureSigningConfiguration;
-import org.opensaml.xmlsec.encryption.support.RSAOAEPParameters;
-import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -55,7 +49,6 @@ public class OIDCSecurityConfigurationTest {
 
     @Test
     public void testInitialState() {
-
         Assert.assertNull(config.getRequestObjectDecryptionConfiguration());
         Assert.assertNull(config.getRequestObjectSignatureValidationConfiguration());
     }
@@ -63,176 +56,12 @@ public class OIDCSecurityConfigurationTest {
     @Test
     public void testSetters() {
         config = new OIDCSecurityConfiguration();
-        EncryptionConfiguration confEnc = new mockEncryptionConfiguration();
+        EncryptionConfiguration confEnc = Mockito.mock(EncryptionConfiguration.class);
         config.setRequestObjectDecryptionConfiguration(confEnc);
         Assert.assertEquals(confEnc, config.getRequestObjectDecryptionConfiguration());
-        SignatureSigningConfiguration confDec = new mockSignatureSigningConfiguration();
+        SignatureSigningConfiguration confDec = Mockito.mock(SignatureSigningConfiguration.class);
         config.setRequestObjectSignatureValidationConfiguration(confDec);
         Assert.assertEquals(confDec, config.getRequestObjectSignatureValidationConfiguration());
-    }
-
-    public class mockSignatureSigningConfiguration implements SignatureSigningConfiguration {
-
-        @Override
-        public Collection<String> getWhitelistedAlgorithms() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean isWhitelistMerge() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public Collection<String> getBlacklistedAlgorithms() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean isBlacklistMerge() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public Precedence getWhitelistBlacklistPrecedence() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<Credential> getSigningCredentials() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<String> getSignatureAlgorithms() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<String> getSignatureReferenceDigestMethods() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public String getSignatureReferenceCanonicalizationAlgorithm() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public String getSignatureCanonicalizationAlgorithm() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Integer getSignatureHMACOutputLength() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public NamedKeyInfoGeneratorManager getKeyInfoGeneratorManager() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-    }
-
-    public class mockEncryptionConfiguration implements EncryptionConfiguration {
-
-        @Override
-        public Collection<String> getWhitelistedAlgorithms() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean isWhitelistMerge() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public Collection<String> getBlacklistedAlgorithms() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean isBlacklistMerge() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public Precedence getWhitelistBlacklistPrecedence() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<Credential> getDataEncryptionCredentials() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<String> getDataEncryptionAlgorithms() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<Credential> getKeyTransportEncryptionCredentials() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<String> getKeyTransportEncryptionAlgorithms() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public NamedKeyInfoGeneratorManager getDataKeyInfoGeneratorManager() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public NamedKeyInfoGeneratorManager getKeyTransportKeyInfoGeneratorManager() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public RSAOAEPParameters getRSAOAEPParameters() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean isRSAOAEPParametersMerge() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public KeyTransportAlgorithmPredicate getKeyTransportAlgorithmPredicate() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
     }
 
 }

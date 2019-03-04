@@ -28,6 +28,7 @@
 
 package org.geant.idpextension.oidc.config;
 
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -45,7 +46,7 @@ public class AbstractOIDCProfileConfigurationTest {
 
     @BeforeMethod
     protected void setUp() throws Exception {
-        config = new MockOIDCProfileConfiguration("profileId");
+        config = Mockito.mock(AbstractOIDCProfileConfiguration.class, Mockito.CALLS_REAL_METHODS);
         config.setSecurityConfiguration(new SecurityConfiguration());
     }
 
@@ -61,13 +62,5 @@ public class AbstractOIDCProfileConfigurationTest {
         config.setSecurityConfiguration(null);
         Assert.assertFalse(config.isInitialized());
         config.initialize();
-    }
-
-    public class MockOIDCProfileConfiguration extends AbstractOIDCProfileConfiguration {
-
-        protected MockOIDCProfileConfiguration(String profileId) {
-            super(profileId);
-        }
-
     }
 }

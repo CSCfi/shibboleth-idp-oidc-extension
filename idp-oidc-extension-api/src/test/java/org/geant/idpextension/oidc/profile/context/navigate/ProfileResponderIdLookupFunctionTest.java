@@ -29,18 +29,16 @@
 package org.geant.idpextension.oidc.profile.context.navigate;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import org.mockito.Mockito;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.RequestContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.idp.profile.config.ProfileConfiguration;
-import net.shibboleth.idp.profile.config.SecurityConfiguration;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
@@ -61,8 +59,12 @@ public class ProfileResponderIdLookupFunctionTest {
         lookup.setDefaultResponder("defaultvalue");
         Map<ProfileConfiguration, String> resp = new HashMap<ProfileConfiguration, String>();
         lookup.initialize();
-        resp.put(new MockProfileConfiguration("id1"), "value1");
-        resp.put(new MockProfileConfiguration("id2"), "value2");
+        ProfileConfiguration conf1 = Mockito.mock(ProfileConfiguration.class);
+        Mockito.when(conf1.getId()).thenReturn("id1");
+        resp.put(conf1, "value1");
+        ProfileConfiguration conf2 = Mockito.mock(ProfileConfiguration.class);
+        Mockito.when(conf2.getId()).thenReturn("id2");
+        resp.put(conf2, "value2");
         lookup.setProfileResponders(resp);
     }
 
@@ -81,39 +83,6 @@ public class ProfileResponderIdLookupFunctionTest {
         lookup = new ProfileResponderIdLookupFunction();
         lookup.setId("1");
         lookup.initialize();
-    }
-
-    public class MockProfileConfiguration implements ProfileConfiguration {
-
-        public String id;
-
-        MockProfileConfiguration(String id) {
-            this.id = id;
-        }
-
-        @Override
-        public String getId() {
-            return id;
-        }
-
-        @Override
-        public List<String> getInboundInterceptorFlows() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<String> getOutboundInterceptorFlows() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public SecurityConfiguration getSecurityConfiguration() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
     }
 
 }

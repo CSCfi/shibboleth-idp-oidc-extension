@@ -170,8 +170,8 @@ public class SignIDTokenTest extends BaseOIDCResponseActionTest {
     @Test
     public void testSuccessMessageES512()
             throws ComponentInitializationException, URISyntaxException, JOSEException, ParseException {
-        init("ES512", credentialEC512);
-        testSuccessMessage(new ECDSAVerifier((ECPublicKey) credentialEC512.getPublicKey()));
+        init("ES512", credentialEC521);
+        testSuccessMessage(new ECDSAVerifier((ECPublicKey) credentialEC521.getPublicKey()));
 
     }
 

@@ -30,6 +30,8 @@ package org.geant.idpextension.oidc.token.support;
 
 import org.testng.annotations.Test;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
+
 import java.text.ParseException;
 import org.testng.Assert;
 
@@ -41,9 +43,9 @@ public class RefreshTokenClaimsSetTest extends BaseTokenClaimsSetTest {
     private RefreshTokenClaimsSet rfClaimsSet;
 
     protected void init() {
-        AuthorizeCodeClaimsSet acClaimsSet = new AuthorizeCodeClaimsSet(new MockIdStrategy(), clientID, issuer,
-                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
-                dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
+        AuthorizeCodeClaimsSet acClaimsSet = new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(),
+                clientID, issuer, userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims,
+                dlClaims, dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
         rfClaimsSet = new RefreshTokenClaimsSet(acClaimsSet, iat, exp);
     }
 
@@ -58,9 +60,10 @@ public class RefreshTokenClaimsSetTest extends BaseTokenClaimsSetTest {
 
     @Test(expectedExceptions = ParseException.class)
     public void testSerializationWrongType() throws ParseException {
-        AuthorizeCodeClaimsSet accessnClaimsSet = new AuthorizeCodeClaimsSet(new MockIdStrategy(), clientID, issuer,
-                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims, null,
-                dlClaimsUI, consentableClaims, consentedClaims);
+        AuthorizeCodeClaimsSet accessnClaimsSet =
+                new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
+                        userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
+                        null, dlClaimsUI, consentableClaims, consentedClaims);
         rfClaimsSet = RefreshTokenClaimsSet.parse(accessnClaimsSet.serialize());
     }
 

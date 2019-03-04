@@ -39,10 +39,7 @@ import net.shibboleth.ext.spring.resource.ResourceHelper;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.security.BasicKeystoreKeyStrategy;
 import net.shibboleth.utilities.java.support.security.DataSealer;
-import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
-
 import org.testng.annotations.BeforeMethod;
-
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -119,20 +116,4 @@ public class BaseTokenClaimsSetTest {
         consentableClaims.add("consentableClaim");
         consentedClaims.add("consentedClaim");
     }
-    
-    public class MockIdStrategy implements IdentifierGenerationStrategy {
-
-        @Override
-        public String generateIdentifier() {
-            return "x";
-        }
-
-        @Override
-        public String generateIdentifier(boolean xmlSafe) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-    }
-
 }
