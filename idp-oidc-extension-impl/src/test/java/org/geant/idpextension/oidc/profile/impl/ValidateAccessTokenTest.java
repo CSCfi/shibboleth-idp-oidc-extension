@@ -77,7 +77,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
     public void testSuccess()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
-        TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
+        TokenClaimsSet claims = new AccessTokenClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(System.currentTimeMillis() + 1000), new Nonce(), new Date(),
                 new URI("http://example.com"), new Scope(), null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
@@ -94,7 +94,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
     public void testFailsNotAccessToken()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
-        TokenClaimsSet claims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
+        TokenClaimsSet claims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
                 new Scope(), null, null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
@@ -111,7 +111,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
     public void testFailsExpired()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
-        TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
+        TokenClaimsSet claims = new AccessTokenClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(System.currentTimeMillis() - 1), new Nonce(), new Date(),
                 new URI("http://example.com"), new Scope(), null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
@@ -130,7 +130,7 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
         action = new ValidateAccessToken(getDataSealer());
         action.setRevocationCache(new MockRevocationCache(true, true));
         action.initialize();
-        TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
+        TokenClaimsSet claims = new AccessTokenClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(System.currentTimeMillis() + 1000), new Nonce(), new Date(),
                 new URI("http://example.com"), new Scope(), null, null, null, null, null);
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));

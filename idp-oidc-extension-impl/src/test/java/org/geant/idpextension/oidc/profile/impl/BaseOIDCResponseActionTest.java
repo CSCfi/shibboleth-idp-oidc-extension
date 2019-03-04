@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 import javax.annotation.Nonnull;
 import javax.crypto.KeyGenerator;
@@ -52,6 +51,7 @@ import net.shibboleth.utilities.java.support.component.ComponentInitializationEx
 import net.shibboleth.utilities.java.support.security.BasicKeystoreKeyStrategy;
 import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
@@ -107,6 +107,8 @@ abstract class BaseOIDCResponseActionTest {
     final protected String clientId = "s6BhdRkqt3";
 
     private DataSealer dataSealer;
+    
+    protected IdentifierGenerationStrategy idGenerator;
 
     @SuppressWarnings("rawtypes")
     protected ProfileRequestContext profileRequestCtx;
@@ -145,6 +147,7 @@ abstract class BaseOIDCResponseActionTest {
         rpCtx.setRelyingPartyId(clientId);
         respCtx.setSubject(subject);
         rpCtx.setProfileConfig(new OIDCCoreProtocolConfiguration());
+        idGenerator = new SecureRandomIdentifierGenerationStrategy();
     }
 
     @SuppressWarnings("unchecked")
@@ -291,20 +294,6 @@ abstract class BaseOIDCResponseActionTest {
         @Override
         public UsageType getUsageType() {
             return null;
-        }
-
-    }
-
-    public class idStrat implements IdentifierGenerationStrategy {
-
-        @Override
-        public String generateIdentifier() {
-            return new Long(new Random().nextLong()).toString();
-        }
-
-        @Override
-        public String generateIdentifier(boolean xmlSafe) {
-            return new Long(new Random().nextLong()).toString();
         }
 
     }

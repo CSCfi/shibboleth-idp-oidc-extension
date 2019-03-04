@@ -32,6 +32,8 @@ import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
@@ -74,7 +76,7 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
     private void init()
             throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException, DataSealerException {
         Date now = new Date();
-        acClaims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(clientId), "issuer", "userPrin", "subject",
+        acClaims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(clientId), "issuer", "userPrin", "subject",
                 new ACR("0"), now, new Date(now.getTime() + 100000), new Nonce(), now, new URI("http://example.com"),
                 new Scope(), null, null, null, null, null, null);
         rfClaims = new RefreshTokenClaimsSet(acClaims, now, new Date(now.getTime() + 100000));
@@ -102,9 +104,10 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
             ComponentInitializationException {
         Date now = new Date();
         ValidateGrantTest test = new ValidateGrantTest();
-        TokenClaimsSet acClaims = new AuthorizeCodeClaimsSet(test.new idStrat(), new ClientID(clientId), issuer,
-                userPrincipal, sub, new ACR("0"), now, new Date(now.getTime() + 100000), new Nonce(), now,
-                new URI(callbackUrl), new Scope(), null, null, null, null, null, null);
+        TokenClaimsSet acClaims = new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(),
+                new ClientID(clientId), issuer, userPrincipal, sub, new ACR("0"), now,
+                new Date(now.getTime() + 100000), new Nonce(), now, new URI(callbackUrl), new Scope(), null, null,
+                null, null, null, null);
         return new AuthorizationCode(acClaims.serialize(test.getDataSealer()));
     }
 

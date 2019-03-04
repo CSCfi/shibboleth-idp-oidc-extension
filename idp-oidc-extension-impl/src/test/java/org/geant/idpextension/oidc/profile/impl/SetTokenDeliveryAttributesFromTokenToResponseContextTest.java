@@ -64,7 +64,7 @@ public class SetTokenDeliveryAttributesFromTokenToResponseContextTest extends Ba
         dlClaimsUI.setClaim("deliveryClaimUI", "deliveryClaimUIValue");
         ClaimsSet dlClaimsID = new TokenDeliveryClaimsClaimsSet();
         dlClaimsID.setClaim("deliveryClaimID", "deliveryClaimIDValue");
-        AuthorizeCodeClaimsSet acClaims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(clientId), "issuer",
+        AuthorizeCodeClaimsSet acClaims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(clientId), "issuer",
                 "userPrin", "subject", new ACR("0"), now, new Date(now.getTime() + 100000), new Nonce(), now,
                 new URI("http://example.com"), new Scope(), null, dlClaims, dlClaimsID, dlClaimsUI, null, null);
         respCtx.setTokenClaimsSet(acClaims);

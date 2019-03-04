@@ -61,7 +61,7 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
         Scope scope = new Scope();
         scope.add(OIDCScopeValue.OFFLINE_ACCESS);
         respCtx.setScope(scope);
-        TokenClaimsSet claims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
+        TokenClaimsSet claims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
                 new Scope(), null, null, null, null, null, null);
         respCtx.setTokenClaimsSet(claims);
@@ -128,7 +128,7 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
     public void testFailTokenNotCodeOrRefresh()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         init();
-        TokenClaimsSet claims = new AccessTokenClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin", "subject",
+        TokenClaimsSet claims = new AccessTokenClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin", "subject",
                 new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
                 new Scope(), null, null, null, null, null);
         respCtx.setTokenClaimsSet(claims);

@@ -54,7 +54,7 @@ public class SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContex
     private SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContext action;
 
     private void init() throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException {
-        TokenClaimsSet claims = new AuthorizeCodeClaimsSet(new idStrat(), new ClientID(), "issuer", "userPrin",
+        TokenClaimsSet claims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin",
                 "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
                 new Scope(), null, null, null, null, null, null);
         respCtx.setTokenClaimsSet(claims);
