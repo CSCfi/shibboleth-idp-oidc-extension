@@ -179,9 +179,9 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
         }
 
         /**
-         * Builds AuthorizeCodeClaimsSet.
+         * Builds AccessTokenClaimsSet.
          * 
-         * @return AuthorizeCodeClaimsSet instance.
+         * @return AccessTokenClaimsSet instance.
          */
         public AccessTokenClaimsSet build() {
             return new AccessTokenClaimsSet(idGen, rpId, iss, usrPrincipal, sub, acr, iat, exp, nonce, authTime,
