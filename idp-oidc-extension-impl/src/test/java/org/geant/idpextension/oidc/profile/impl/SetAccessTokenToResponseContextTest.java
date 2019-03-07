@@ -34,6 +34,7 @@ import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
@@ -55,7 +56,6 @@ import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
-import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 /** {@link SetAccessTokenToResponseContext} unit test. */
@@ -65,9 +65,9 @@ public class SetAccessTokenToResponseContextTest extends BaseOIDCResponseActionT
 
     private void init() throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException {
         respCtx.setScope(new Scope());
-        TokenClaimsSet claims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin",
-                "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null, null);
+        TokenClaimsSet claims = new AuthorizeCodeClaimsSet.Builder(idGenerator, new ClientID(), "issuer", "userPrin",
+                "subject", new Date(), new Date(), new Date(), new URI("http://example.com"),
+                new Scope()).setACR(new ACR("0")).build();
         respCtx.setSubject("subject");
         respCtx.setAuthTime(System.currentTimeMillis());
         respCtx.setTokenClaimsSet(claims);
@@ -220,9 +220,8 @@ public class SetAccessTokenToResponseContextTest extends BaseOIDCResponseActionT
     public void testFailTokenNotCodeOrRefresh()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         init();
-        TokenClaimsSet claims = new AccessTokenClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin", "subject",
-                new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null);
+        TokenClaimsSet claims = new AccessTokenClaimsSet.Builder(idGenerator, new ClientID(), "issuer",
+                "userPrin", "subject", new Date(), new Date(), new Date(), new URI("http://example.com"), new Scope()).build();
         respCtx.setTokenClaimsSet(claims);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_PROFILE_CTX);

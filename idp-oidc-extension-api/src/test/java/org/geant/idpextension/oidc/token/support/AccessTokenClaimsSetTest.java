@@ -29,10 +29,11 @@
 package org.geant.idpextension.oidc.token.support;
 
 import org.testng.annotations.Test;
+
 import net.shibboleth.utilities.java.support.security.DataSealerException;
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
-
 import java.text.ParseException;
+
 import org.testng.Assert;
 
 /**
@@ -43,15 +44,15 @@ public class AccessTokenClaimsSetTest extends BaseTokenClaimsSetTest {
     private AccessTokenClaimsSet atClaimsSet;
 
     protected void init() {
-        atClaimsSet = new AccessTokenClaimsSet(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
-                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
-                dlClaimsUI, consentableClaims, consentedClaims);
+        atClaimsSet = new AccessTokenClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
+                userPrincipal, subject, iat, exp, authTime, redirectURI, scope).setACR(acr).build();
+
     }
 
     protected void init2() {
-        AuthorizeCodeClaimsSet acClaimsSet = new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(),
-                clientID, issuer, userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims,
-                dlClaims, dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
+        AuthorizeCodeClaimsSet acClaimsSet =
+                new AuthorizeCodeClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
+                        userPrincipal, subject, iat, exp, authTime, redirectURI, scope).setACR(acr).build();
         atClaimsSet = new AccessTokenClaimsSet(acClaimsSet, scope, dlClaims, dlClaimsUI, iat, exp);
     }
 
@@ -76,9 +77,8 @@ public class AccessTokenClaimsSetTest extends BaseTokenClaimsSetTest {
     @Test(expectedExceptions = ParseException.class)
     public void testSerializationWrongType() throws ParseException {
         AuthorizeCodeClaimsSet accessnClaimsSet =
-                new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
-                        userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
-                        null, dlClaimsUI, consentableClaims, consentedClaims);
+                new AuthorizeCodeClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
+                        userPrincipal, subject, iat, exp, authTime, redirectURI, scope).setACR(acr).build();
         atClaimsSet = AccessTokenClaimsSet.parse(accessnClaimsSet.serialize());
     }
 

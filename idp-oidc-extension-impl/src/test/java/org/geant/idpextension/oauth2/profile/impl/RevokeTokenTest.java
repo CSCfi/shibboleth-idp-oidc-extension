@@ -103,9 +103,9 @@ public class RevokeTokenTest extends BaseTokenClaimsSetTest {
     protected void init()
             throws ComponentInitializationException, NoSuchAlgorithmException, DataSealerException, URISyntaxException {
         // init tokens
-        AuthorizeCodeClaimsSet acClaimsSet = new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(),
-                clientID, issuer, userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims,
-                dlClaims, dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
+        AuthorizeCodeClaimsSet acClaimsSet =
+                new AuthorizeCodeClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
+                        userPrincipal, subject, iat, exp, authTime, redirectURI, scope).build();
         atClaimsSet = new AccessTokenClaimsSet(acClaimsSet, scope, dlClaims, dlClaimsUI, iat, exp);
         rfClaimsSet = new RefreshTokenClaimsSet(acClaimsSet, iat, exp);
         // init action

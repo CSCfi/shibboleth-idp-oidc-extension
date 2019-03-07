@@ -31,7 +31,7 @@ package org.geant.idpextension.oidc.profile.context.navigate;
 import net.minidev.json.JSONArray;
 import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
-import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -122,23 +122,11 @@ public class BaseTokenRequestLookupFunctionTest {
         prc.setOutboundMessageContext(new MessageContext());
         oidcCtx = new OIDCAuthenticationResponseContext();
         prc.getOutboundMessageContext().addSubcontext(oidcCtx);
-        oidcCtx.setTokenClaimsSet(new AuthorizeCodeClaimsSet(new idStrat(), cliendID, issuer, userPrin, subject, acr,
-                iat, exp, nonce, authTime, redirectUri, scope, claimsRequest, tokenDeliveryClaims,
-                tokenToIdTokenDeliveryClaims, tokenToUserInfoTokenDeliveryClaims, consentableClaims, consentedClaims));
-    }
-
-    public class idStrat implements IdentifierGenerationStrategy {
-
-        @Override
-        public String generateIdentifier() {
-            return "identifier";
-        }
-
-        @Override
-        public String generateIdentifier(boolean xmlSafe) {
-            return "identifier";
-        }
-
+        oidcCtx.setTokenClaimsSet(new AuthorizeCodeClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(),
+                cliendID, issuer, userPrin, subject, iat, exp, authTime, redirectUri, scope).setACR(acr).setNonce(nonce)
+                        .setClaims(claimsRequest).setDlClaims(tokenDeliveryClaims)
+                        .setDlClaimsID(tokenToIdTokenDeliveryClaims).setDlClaimsUI(tokenToUserInfoTokenDeliveryClaims)
+                        .setConsentableClaims(consentableClaims).setConsentedClaims(consentedClaims).build());
     }
 
 }

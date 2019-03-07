@@ -41,8 +41,6 @@ import org.springframework.webflow.execution.Event;
 import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 import junit.framework.Assert;
 
@@ -73,9 +71,8 @@ public class InitializeSubjectContextTest extends BaseOIDCResponseActionTest {
     @Test
     public void testSuccess() throws ComponentInitializationException, URISyntaxException {
         init();
-        TokenClaimsSet claims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin",
-                "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null, null);
+        TokenClaimsSet claims = new AuthorizeCodeClaimsSet.Builder(idGenerator, new ClientID(), "issuer", "userPrin",
+                "subject", new Date(), new Date(), new Date(), new URI("http://example.com"), new Scope()).build();
         respCtx.setTokenClaimsSet(claims);
         final Event event = action.execute(requestCtx);
         SubjectContext ctx = profileRequestCtx.getSubcontext(SubjectContext.class);

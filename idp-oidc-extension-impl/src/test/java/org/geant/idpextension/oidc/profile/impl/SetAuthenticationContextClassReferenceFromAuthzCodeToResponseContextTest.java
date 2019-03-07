@@ -44,7 +44,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 /** {@link SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContext} unit test. */
@@ -54,9 +53,9 @@ public class SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContex
     private SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContext action;
 
     private void init() throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException {
-        TokenClaimsSet claims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin",
-                "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null, null);
+        TokenClaimsSet claims = new AuthorizeCodeClaimsSet.Builder(idGenerator, new ClientID(), "issuer", "userPrin",
+                "subject", new Date(), new Date(), new Date(), new URI("http://example.com"),
+                new Scope()).setACR(new ACR("0")).build();
         respCtx.setTokenClaimsSet(claims);
         action = new SetAuthenticationContextClassReferenceFromAuthzCodeToResponseContext();
         action.initialize();

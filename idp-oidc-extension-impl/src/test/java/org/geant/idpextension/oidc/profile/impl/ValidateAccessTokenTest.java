@@ -45,9 +45,7 @@ import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
-import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 /** {@link ValidateAccessToken} unit test. */
 public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
@@ -77,9 +75,9 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
     public void testSuccess()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
-        TokenClaimsSet claims = new AccessTokenClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin", "subject",
-                new ACR("0"), new Date(), new Date(System.currentTimeMillis() + 1000), new Nonce(), new Date(),
-                new URI("http://example.com"), new Scope(), null, null, null, null, null);
+        TokenClaimsSet claims = new AccessTokenClaimsSet.Builder(idGenerator, new ClientID(), "issuer", "userPrin",
+                "subject", new Date(), new Date(System.currentTimeMillis() + 1000), new Date(),
+                new URI("http://example.com"), new Scope()).build();
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);
@@ -94,9 +92,9 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
     public void testFailsNotAccessToken()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
-        TokenClaimsSet claims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin",
-                "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null, null);
+        TokenClaimsSet claims =
+                new AuthorizeCodeClaimsSet.Builder(idGenerator, new ClientID(clientId), "issuer", "userPrin", "subject",
+                        new Date(), new Date(), new Date(), new URI("http://example.com"), new Scope()).build();
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);
@@ -111,9 +109,9 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
     public void testFailsExpired()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
-        TokenClaimsSet claims = new AccessTokenClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin", "subject",
-                new ACR("0"), new Date(), new Date(System.currentTimeMillis() - 1), new Nonce(), new Date(),
-                new URI("http://example.com"), new Scope(), null, null, null, null, null);
+        TokenClaimsSet claims = new AccessTokenClaimsSet.Builder(idGenerator, new ClientID(), "issuer", "userPrin",
+                "subject", new Date(), new Date(System.currentTimeMillis() - 1), new Date(),
+                new URI("http://example.com"), new Scope()).build();
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);
@@ -130,9 +128,9 @@ public class ValidateAccessTokenTest extends BaseOIDCResponseActionTest {
         action = new ValidateAccessToken(getDataSealer());
         action.setRevocationCache(new MockRevocationCache(true, true));
         action.initialize();
-        TokenClaimsSet claims = new AccessTokenClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin", "subject",
-                new ACR("0"), new Date(), new Date(System.currentTimeMillis() + 1000), new Nonce(), new Date(),
-                new URI("http://example.com"), new Scope(), null, null, null, null, null);
+        TokenClaimsSet claims = new AccessTokenClaimsSet.Builder(idGenerator, new ClientID(), "issuer", "userPrin",
+                "subject", new Date(), new Date(System.currentTimeMillis() + 1000), new Date(),
+                new URI("http://example.com"), new Scope()).build();
         BearerAccessToken token = new BearerAccessToken(claims.serialize(getDataSealer()));
         UserInfoRequest req = new UserInfoRequest(new URI("http://example.com"), token);
         setUserInfoRequest(req);

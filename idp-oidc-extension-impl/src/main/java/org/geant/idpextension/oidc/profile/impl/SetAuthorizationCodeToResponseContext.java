@@ -251,13 +251,15 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
             claimsUI = tokenClaimsCtx.getUserinfoClaims();
         }
         Date dateExp = new Date(System.currentTimeMillis() + authCodeLifetime);
-        AuthorizeCodeClaimsSet claimsSet = new AuthorizeCodeClaimsSet(idGenerator,
+        AuthorizeCodeClaimsSet claimsSet = new AuthorizeCodeClaimsSet.Builder(idGenerator,
                 getAuthenticationRequest().getClientID(), issuerLookupStrategy.apply(profileRequestContext),
-                subjectCtx.getPrincipalName(), getOidcResponseContext().getSubject(), getOidcResponseContext().getAcr(),
-                new Date(), dateExp, new DefaultRequestNonceLookupFunction().apply(profileRequestContext),
+                subjectCtx.getPrincipalName(), getOidcResponseContext().getSubject(), new Date(), dateExp,
                 getOidcResponseContext().getAuthTime(), getOidcResponseContext().getRedirectURI(),
-                getOidcResponseContext().getScope(), getOidcResponseContext().getRequestedClaims(), claims, claimsID,
-                claimsUI, consentable, consented);
+                getOidcResponseContext().getScope()).setACR(getOidcResponseContext().getAcr())
+                        .setNonce(new DefaultRequestNonceLookupFunction().apply(profileRequestContext))
+                        .setClaims(getOidcResponseContext().getRequestedClaims()).setDlClaims(claims)
+                        .setDlClaimsID(claimsID).setDlClaimsUI(claimsUI).setConsentableClaims(consentable)
+                        .setConsentedClaims(consented).build();
         // We set token claims set to response context for possible access token generation.
         getOidcResponseContext().setTokenClaimsSet(claimsSet);
         try {

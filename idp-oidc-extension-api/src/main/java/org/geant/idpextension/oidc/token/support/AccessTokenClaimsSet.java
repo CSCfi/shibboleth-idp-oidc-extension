@@ -66,6 +66,8 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
      * 
      * @param tokenClaimSet Authorize Code / Refresh Token this token is based on. Must not be NULL.
      * @param scope Validated and possibly reduced scope of the authentication request. Must not be NULL.
+     * @param dlClaims Claims set for token delivery.
+     * @param dlClaimsUI Claims set for token delivery, user info only.
      * @param iat Issue time of the token. Must not be NULL.
      * @param exp Expiration time of the token. Must not be NULL.
      * @throws RuntimeException if called with non allowed null parameters
@@ -103,12 +105,12 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
      * @param consentedClaims consented claims. May be NULL.
      * @throws RuntimeException if called with nonallowed null parameters
      */
-    public AccessTokenClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
+    private AccessTokenClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nullable ACR acr,
             @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
             @Nonnull URI redirectURI, @Nonnull Scope scope, @Nullable ClaimsRequest claims,
-            @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsUI, JSONArray consentableClaims,
-            JSONArray consentedClaims) {
+            @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsUI, @Nullable JSONArray consentableClaims,
+            @Nullable JSONArray consentedClaims) {
         super(VALUE_TYPE_AT, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, subject, acr, iat, exp,
                 nonce, authTime, redirectURI, scope, claims, dlClaims, null, dlClaimsUI, consentableClaims,
                 consentedClaims);
@@ -149,6 +151,43 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
     public static AccessTokenClaimsSet parse(@Nonnull String wrappedAccessToken, @Nonnull DataSealer dataSealer)
             throws ParseException, DataSealerException {
         return parse(dataSealer.unwrap(wrappedAccessToken));
+    }
+
+    /** Builder to create instance of AccessTokenClaimsSet. */
+    public static class Builder extends TokenClaimsSet.Builder<AccessTokenClaimsSet> {
+
+        /**
+         * Constructor for access token builder.
+         * 
+         * @param idGenerator Generator for pseudo unique identifier for the code. Must not be NULL.
+         * @param clientID Client Id of the rp. Must not be NULL.
+         * @param issuer OP issuer value. Must not be NULL.
+         * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
+         * @param subject subject of the authenticated user. Must not be NULL
+         * @param issuedAt Issue time of the authorize code. Must not be NULL.
+         * @param expiresAt Expiration time of the authorize code. Must not be NULL.
+         * @param authenticationTime Authentication time of the user. Must not be NULL.
+         * @param redirectURI Validated redirect URI of the authentication request. Must not be NULL.
+         * @param scope Scope of the authentication request. Must not be NULL.
+         */
+        public Builder(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
+                @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nonnull Date issuedAt,
+                @Nonnull Date expiresAt, @Nonnull Date authenticationTime, @Nonnull URI redirectURI,
+                @Nonnull Scope scope) {
+            super(idGenerator, clientID, issuer, userPrincipal, subject, issuedAt, expiresAt, authenticationTime,
+                    redirectURI, scope);
+        }
+
+        /**
+         * Builds AuthorizeCodeClaimsSet.
+         * 
+         * @return AuthorizeCodeClaimsSet instance.
+         */
+        public AccessTokenClaimsSet build() {
+            return new AccessTokenClaimsSet(idGen, rpId, iss, usrPrincipal, sub, acr, iat, exp, nonce, authTime,
+                    redirect, reqScope, claims, dlClaims, dlClaimsUI, cnsntlClaims, cnsntdClaims);
+        }
+
     }
 
 }

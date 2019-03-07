@@ -43,9 +43,9 @@ public class RefreshTokenClaimsSetTest extends BaseTokenClaimsSetTest {
     private RefreshTokenClaimsSet rfClaimsSet;
 
     protected void init() {
-        AuthorizeCodeClaimsSet acClaimsSet = new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(),
-                clientID, issuer, userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims,
-                dlClaims, dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
+        AuthorizeCodeClaimsSet acClaimsSet =
+                new AuthorizeCodeClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
+                        userPrincipal, subject, iat, exp, authTime, redirectURI, scope).setACR(acr).build();
         rfClaimsSet = new RefreshTokenClaimsSet(acClaimsSet, iat, exp);
     }
 
@@ -61,9 +61,8 @@ public class RefreshTokenClaimsSetTest extends BaseTokenClaimsSetTest {
     @Test(expectedExceptions = ParseException.class)
     public void testSerializationWrongType() throws ParseException {
         AuthorizeCodeClaimsSet accessnClaimsSet =
-                new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
-                        userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
-                        null, dlClaimsUI, consentableClaims, consentedClaims);
+                new AuthorizeCodeClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
+                        userPrincipal, subject, iat, exp, authTime, redirectURI, scope).build();
         rfClaimsSet = RefreshTokenClaimsSet.parse(accessnClaimsSet.serialize());
     }
 

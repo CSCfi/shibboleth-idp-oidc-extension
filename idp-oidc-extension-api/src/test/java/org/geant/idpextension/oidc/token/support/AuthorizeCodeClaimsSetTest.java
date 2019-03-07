@@ -43,9 +43,8 @@ public class AuthorizeCodeClaimsSetTest extends BaseTokenClaimsSetTest {
     private AuthorizeCodeClaimsSet acClaimsSet;
 
     protected void init() {
-        acClaimsSet = new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
-                userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims, dlClaims,
-                dlClaimsID, dlClaimsUI, consentableClaims, consentedClaims);
+        acClaimsSet = new AuthorizeCodeClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(), clientID,
+                issuer, userPrincipal, subject, iat, exp, authTime, redirectURI, scope).setACR(acr).build();
     }
 
     @Test
@@ -59,9 +58,9 @@ public class AuthorizeCodeClaimsSetTest extends BaseTokenClaimsSetTest {
 
     @Test(expectedExceptions = ParseException.class)
     public void testSerializationWrongType() throws ParseException {
-        AccessTokenClaimsSet accessnClaimsSet = new AccessTokenClaimsSet(new SecureRandomIdentifierGenerationStrategy(),
-                clientID, issuer, userPrincipal, subject, acr, iat, exp, nonce, authTime, redirectURI, scope, claims,
-                dlClaims, dlClaimsUI, consentableClaims, consentedClaims);
+        AccessTokenClaimsSet accessnClaimsSet =
+                new AccessTokenClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(), clientID, issuer,
+                        userPrincipal, subject, iat, exp, authTime, redirectURI, scope).build();
         acClaimsSet = AuthorizeCodeClaimsSet.parse(accessnClaimsSet.serialize());
     }
 }

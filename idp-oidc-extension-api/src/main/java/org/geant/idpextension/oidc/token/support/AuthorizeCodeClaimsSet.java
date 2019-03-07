@@ -69,7 +69,7 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
      * @param issuer OP issuer value. Must not be NULL.
      * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
      * @param subject subject of the authenticated user. Must not be NULL
-     * @param acr Authentication context class reference value of the authentication. Must not be NULL.
+     * @param acr Authentication context class reference value of the authentication. May be NULL.
      * @param iat Issue time of the authorize code. Must not be NULL.
      * @param exp Expiration time of the authorize code. Must not be NULL.
      * @param nonce Nonce of the authentication request. May be NULL.
@@ -84,12 +84,12 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
      * @param consentedClaims consented claims. May be NULL.
      * @throws RuntimeException if called with nonallowed null parameters
      */
-    public AuthorizeCodeClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
+    private AuthorizeCodeClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
             @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nonnull ACR acr,
             @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
             @Nonnull URI redirectURI, @Nonnull Scope scope, @Nullable ClaimsRequest claims,
             @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI,
-            JSONArray consentableClaims, JSONArray consentedClaims) {
+            @Nullable JSONArray consentableClaims, @Nullable JSONArray consentedClaims) {
         super(VALUE_TYPE_AC, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, subject, acr, iat, exp,
                 nonce, authTime, redirectURI, scope, claims, dlClaims, dlClaimsID, dlClaimsUI, consentableClaims,
                 consentedClaims);
@@ -130,6 +130,43 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
     public static AuthorizeCodeClaimsSet parse(@Nonnull String wrappedAuthCode, @Nonnull DataSealer dataSealer)
             throws ParseException, DataSealerException {
         return parse(dataSealer.unwrap(wrappedAuthCode));
+    }
+
+    /** Builder to create instance of AuthorizeCodeClaimsSet. */
+    public static class Builder extends TokenClaimsSet.Builder<AuthorizeCodeClaimsSet> {
+
+        /**
+         * Constructor for authorize code builder.
+         * 
+         * @param idGenerator Generator for pseudo unique identifier for the code. Must not be NULL.
+         * @param clientID Client Id of the rp. Must not be NULL.
+         * @param issuer OP issuer value. Must not be NULL.
+         * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
+         * @param subject subject of the authenticated user. Must not be NULL
+         * @param issuedAt Issue time of the authorize code. Must not be NULL.
+         * @param expiresAt Expiration time of the authorize code. Must not be NULL.
+         * @param authenticationTime Authentication time of the user. Must not be NULL.
+         * @param redirectURI Validated redirect URI of the authentication request. Must not be NULL.
+         * @param scope Scope of the authentication request. Must not be NULL.
+         */
+        public Builder(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
+                @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nonnull Date issuedAt,
+                @Nonnull Date expiresAt, @Nonnull Date authenticationTime, @Nonnull URI redirectURI,
+                @Nonnull Scope scope) {
+            super(idGenerator, clientID, issuer, userPrincipal, subject, issuedAt, expiresAt, authenticationTime,
+                    redirectURI, scope);
+        }
+
+        /**
+         * Builds AuthorizeCodeClaimsSet.
+         * 
+         * @return AuthorizeCodeClaimsSet instance.
+         */
+        public AuthorizeCodeClaimsSet build() {
+            return new AuthorizeCodeClaimsSet(idGen, rpId, iss, usrPrincipal, sub, acr, iat, exp, nonce, authTime,
+                    redirect, reqScope, claims, dlClaims, dlClaimsID, dlClaimsUI, cnsntlClaims, cnsntdClaims);
+        }
+
     }
 
 }

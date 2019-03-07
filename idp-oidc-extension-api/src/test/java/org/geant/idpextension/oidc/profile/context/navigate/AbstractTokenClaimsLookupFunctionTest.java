@@ -45,8 +45,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 import junit.framework.Assert;
 
@@ -66,9 +64,10 @@ public class AbstractTokenClaimsLookupFunctionTest {
         prc.setOutboundMessageContext(new MessageContext());
         oidcCtx = new OIDCAuthenticationResponseContext();
         prc.getOutboundMessageContext().addSubcontext(oidcCtx);
-        oidcCtx.setTokenClaimsSet(new AccessTokenClaimsSet(new SecureRandomIdentifierGenerationStrategy(), new ClientID(), "issuer", "userPrin",
-                "subject", new ACR("0"), new Date(), new Date(System.currentTimeMillis() + 1000), new Nonce(),
-                new Date(), new URI("http://example.com"), new Scope(), null, null, null, null, null));
+        oidcCtx.setTokenClaimsSet(
+                new AccessTokenClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(), new ClientID(),
+                        "issuer", "userPrin", "subject", new Date(), new Date(System.currentTimeMillis() + 1000),
+                        new Date(), new URI("http://example.com"), new Scope()).build());
     }
 
     @Test
@@ -98,5 +97,5 @@ public class AbstractTokenClaimsLookupFunctionTest {
             return tokenClaims.getClaimsSet().getClaim("sub");
         }
     }
-    
+
 }

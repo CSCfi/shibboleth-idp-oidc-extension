@@ -45,8 +45,6 @@ import org.testng.annotations.Test;
 
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
 /** {@link SetTokenDeliveryAttributesFromTokenToResponseContext} unit test. */
@@ -64,9 +62,10 @@ public class SetTokenDeliveryAttributesFromTokenToResponseContextTest extends Ba
         dlClaimsUI.setClaim("deliveryClaimUI", "deliveryClaimUIValue");
         ClaimsSet dlClaimsID = new TokenDeliveryClaimsClaimsSet();
         dlClaimsID.setClaim("deliveryClaimID", "deliveryClaimIDValue");
-        AuthorizeCodeClaimsSet acClaims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(clientId), "issuer",
-                "userPrin", "subject", new ACR("0"), now, new Date(now.getTime() + 100000), new Nonce(), now,
-                new URI("http://example.com"), new Scope(), null, dlClaims, dlClaimsID, dlClaimsUI, null, null);
+        AuthorizeCodeClaimsSet acClaims =
+                new AuthorizeCodeClaimsSet.Builder(idGenerator, new ClientID(clientId), "issuer", "userPrin", "subject",
+                        now, new Date(now.getTime() + 100000), now, new URI("http://example.com"), new Scope())
+                                .setDlClaims(dlClaims).setDlClaimsID(dlClaimsID).setDlClaimsUI(dlClaimsUI).build();
         respCtx.setTokenClaimsSet(acClaims);
     }
 

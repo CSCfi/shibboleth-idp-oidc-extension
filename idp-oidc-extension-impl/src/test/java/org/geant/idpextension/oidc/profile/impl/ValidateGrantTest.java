@@ -54,8 +54,6 @@ import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
-import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 /** {@link ValidateGrant} unit test. */
 public class ValidateGrantTest extends BaseOIDCResponseActionTest {
@@ -76,9 +74,9 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
     private void init()
             throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException, DataSealerException {
         Date now = new Date();
-        acClaims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(clientId), "issuer", "userPrin", "subject",
-                new ACR("0"), now, new Date(now.getTime() + 100000), new Nonce(), now, new URI("http://example.com"),
-                new Scope(), null, null, null, null, null, null);
+        acClaims =
+                new AuthorizeCodeClaimsSet.Builder(idGenerator, new ClientID(clientId), "issuer", "userPrin", "subject",
+                        now, new Date(now.getTime() + 100000), now, new URI("http://example.com"), new Scope()).build();
         rfClaims = new RefreshTokenClaimsSet(acClaims, now, new Date(now.getTime() + 100000));
         AuthorizationCode code = new AuthorizationCode(acClaims.serialize(getDataSealer()));
         RefreshToken rfToken = new RefreshToken(rfClaims.serialize(getDataSealer()));
@@ -98,16 +96,15 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
         action.setReplayCache(replayCache);
         action.initialize();
     }
-    
+
     public static AuthorizationCode buildAuthorizationCode(String clientId, String issuer, String userPrincipal,
-            String sub, String callbackUrl) throws URISyntaxException, NoSuchAlgorithmException, DataSealerException, 
-            ComponentInitializationException {
+            String sub, String callbackUrl)
+            throws URISyntaxException, NoSuchAlgorithmException, DataSealerException, ComponentInitializationException {
         Date now = new Date();
         ValidateGrantTest test = new ValidateGrantTest();
-        TokenClaimsSet acClaims = new AuthorizeCodeClaimsSet(new SecureRandomIdentifierGenerationStrategy(),
-                new ClientID(clientId), issuer, userPrincipal, sub, new ACR("0"), now,
-                new Date(now.getTime() + 100000), new Nonce(), now, new URI(callbackUrl), new Scope(), null, null,
-                null, null, null, null);
+        TokenClaimsSet acClaims = new AuthorizeCodeClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(),
+                new ClientID(clientId), issuer, userPrincipal, sub, now, new Date(now.getTime() + 100000), now,
+                new URI(callbackUrl), new Scope()).build();
         return new AuthorizationCode(acClaims.serialize(test.getDataSealer()));
     }
 
@@ -163,10 +160,10 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
     public void testWrongClient()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
         init();
-        AuthorizationCode code = buildAuthorizationCode("clientIdWrong", "issuer", "userPrin", "subject", 
-                "http://example.com");
-        TokenRequest req = new TokenRequest(callback, new ClientID(clientId), new AuthorizationCodeGrant(code, 
-                callback));
+        AuthorizationCode code =
+                buildAuthorizationCode("clientIdWrong", "issuer", "userPrin", "subject", "http://example.com");
+        TokenRequest req =
+                new TokenRequest(callback, new ClientID(clientId), new AuthorizationCodeGrant(code, callback));
         profileRequestCtx.getInboundMessageContext().setMessage(req);
         ActionTestingSupport.assertEvent(action.execute(requestCtx), OidcEventIds.INVALID_GRANT);
     }

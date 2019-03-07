@@ -99,7 +99,7 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
     /** Strategy used to obtain the response issuer value. */
     @Nonnull
     private Function<ProfileRequestContext, String> issuerLookupStrategy;
-    
+
     /** Subject context. */
     private SubjectContext subjectCtx;
 
@@ -294,12 +294,13 @@ public class SetAccessTokenToResponseContext extends AbstractOIDCResponseAction 
                 consented = consentCtx.getConsentedAttributes();
             }
             // "token id_token" response type. Access token is not derived from Authorization code / Refresh token..
-            claimsSet = new AccessTokenClaimsSet(idGenerator, authenticationRequest.getClientID(),
+            claimsSet = new AccessTokenClaimsSet.Builder(idGenerator, authenticationRequest.getClientID(),
                     issuerLookupStrategy.apply(profileRequestContext), subjectCtx.getPrincipalName(),
-                    getOidcResponseContext().getSubject(), getOidcResponseContext().getAcr(), new Date(), dateExp,
-                    authenticationRequest.getNonce(), getOidcResponseContext().getAuthTime(),
-                    getOidcResponseContext().getRedirectURI(), getOidcResponseContext().getScope(), 
-                    authenticationRequest.getClaims(), claims, claimsUI, consentable, consented);
+                    getOidcResponseContext().getSubject(), new Date(), dateExp, getOidcResponseContext().getAuthTime(),
+                    getOidcResponseContext().getRedirectURI(), getOidcResponseContext().getScope())
+                            .setACR(getOidcResponseContext().getAcr()).setClaims(authenticationRequest.getClaims())
+                            .setConsentableClaims(consentable).setConsentedClaims(consented).setDlClaims(claims)
+                            .setDlClaimsUI(claimsUI).setNonce(authenticationRequest.getNonce()).build();
         }
         try {
             getOidcResponseContext().setAccessToken(claimsSet.serialize(dataSealer), accessTokenLifetime / 1000);

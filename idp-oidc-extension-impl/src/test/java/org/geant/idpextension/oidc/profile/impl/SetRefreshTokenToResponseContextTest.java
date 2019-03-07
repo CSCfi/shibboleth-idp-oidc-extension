@@ -48,7 +48,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 
@@ -61,9 +60,9 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
         Scope scope = new Scope();
         scope.add(OIDCScopeValue.OFFLINE_ACCESS);
         respCtx.setScope(scope);
-        TokenClaimsSet claims = new AuthorizeCodeClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin",
-                "subject", new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null, null);
+        TokenClaimsSet claims = new AuthorizeCodeClaimsSet.Builder(idGenerator, new ClientID(), "issuer", "userPrin",
+                "subject", new Date(), new Date(), new Date(), new URI("http://example.com"),
+                new Scope()).setACR(new ACR("0")).build();
         respCtx.setTokenClaimsSet(claims);
         action = new SetRefreshTokenToResponseContext(getDataSealer());
         action.initialize();
@@ -128,9 +127,8 @@ public class SetRefreshTokenToResponseContextTest extends BaseOIDCResponseAction
     public void testFailTokenNotCodeOrRefresh()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException {
         init();
-        TokenClaimsSet claims = new AccessTokenClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin", "subject",
-                new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null);
+        TokenClaimsSet claims =  new AccessTokenClaimsSet.Builder(idGenerator, new ClientID(), "issuer",
+                "userPrin", "subject", new Date(), new Date(), new Date(), new URI("http://example.com"), new Scope()).build();
         respCtx.setTokenClaimsSet(claims);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_PROFILE_CTX);

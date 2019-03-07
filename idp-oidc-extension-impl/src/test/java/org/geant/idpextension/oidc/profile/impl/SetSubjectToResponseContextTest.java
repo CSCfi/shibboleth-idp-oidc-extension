@@ -46,8 +46,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.claims.ACR;
 
 /** {@link SetSubjectToResponseContext} unit test. */
 public class SetSubjectToResponseContextTest extends BaseOIDCResponseActionTest {
@@ -61,8 +59,6 @@ public class SetSubjectToResponseContextTest extends BaseOIDCResponseActionTest 
 
     /**
      * Test that action handles case of no subject available.
-     * 
-     * @throws ComponentInitializationException
      */
     @Test
     public void testNoSubject() throws ComponentInitializationException {
@@ -73,21 +69,15 @@ public class SetSubjectToResponseContextTest extends BaseOIDCResponseActionTest 
 
     /**
      * Test that action throws error when null strategy is set.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
      */
     @Test(expectedExceptions = ConstraintViolationException.class)
     public void testNoStrategy() throws NoSuchAlgorithmException, ComponentInitializationException {
         action = new SetSubjectToResponseContext();
         action.setSubjectLookupStrategy(null);
     }
-    
+
     /**
      * Test that action throws error when strategy is being set when already initialized.
-     * 
-     * @throws ComponentInitializationException
-     * @throws NoSuchAlgorithmException
      */
     @Test(expectedExceptions = UnmodifiableComponentException.class)
     public void testInitialized() throws NoSuchAlgorithmException, ComponentInitializationException {
@@ -97,16 +87,12 @@ public class SetSubjectToResponseContextTest extends BaseOIDCResponseActionTest 
 
     /**
      * Test that action copies subject to response ctx.
-     * 
-     * @throws ComponentInitializationException
-     * @throws URISyntaxException
      */
     @Test
     public void testSuccess() throws ComponentInitializationException, URISyntaxException {
         init();
-        TokenClaimsSet claims = new AccessTokenClaimsSet(idGenerator, new ClientID(), "issuer", "userPrin", "subject",
-                new ACR("0"), new Date(), new Date(), new Nonce(), new Date(), new URI("http://example.com"),
-                new Scope(), null, null, null, null, null);
+        TokenClaimsSet claims = new AccessTokenClaimsSet.Builder(idGenerator, new ClientID(), "issuer", "userPrin",
+                "subject", new Date(), new Date(), new Date(), new URI("http://example.com"), new Scope()).build();
         respCtx.setTokenClaimsSet(claims);
         profileRequestCtx.removeSubcontext(ConsentContext.class);
         final Event event = action.execute(requestCtx);

@@ -48,13 +48,22 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.shibboleth.utilities.java.support.security.DataSealer;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
+import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
+
 import java.net.URI;
 import java.text.ParseException;
 
 /**
- * Class to extend for token claims sets. Offers the base functionality to Authorize Code and Access Token.
+ * Class to extend for token claims sets. Offers the base functionality to Authorize Code, Refresh Token and Access
+ * Token.
  */
 public class TokenClaimsSet {
+
+    /** Identifier for the token. */
+    public static final String KEY_AC_ID = "jti";
+
+    /** Type of the token. */
+    public static final String KEY_TYPE = "type";
 
     /** OP issuer. */
     public static final String KEY_ISSUER = "iss";
@@ -74,15 +83,7 @@ public class TokenClaimsSet {
     /** Issue time of the token. */
     public static final String KEY_ISSUED_AT = "iat";
 
-    /** Unique identifier for the token. */
-    public static final String KEY_AC_ID = "jti";
-
-    /** Type of the token. */
-    public static final String KEY_TYPE = "type";
-
-    /**
-     * Authentication context class reference value of the performed authentication.
-     */
+    /** Authentication context class reference value of the performed authentication. */
     public static final String KEY_ACR = "acr";
 
     /** Nonce of the original authentication request. */
@@ -133,7 +134,7 @@ public class TokenClaimsSet {
      * Constructor for token claims set.
      * 
      * @param tokenType Token type. Must not be NULL.
-     * @param tokenID Generated pseudo unique identifier for the token. Must not be NULL.
+     * @param tokenID identifier for the token. Must not be NULL.
      * @param clientID Client Id of the rp. Must not be NULL.
      * @param issuer OP issuer value. Must not be NULL.
      * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
@@ -358,9 +359,9 @@ public class TokenClaimsSet {
     }
 
     /**
-     * Get copy of the nonce in authentication request.
+     * Get nonce of the authentication request.
      * 
-     * @return copy of the nonce in authentication request.
+     * @return nonce of the authentication request.
      */
     @Nonnull
     public Nonce getNonce() {
@@ -371,9 +372,9 @@ public class TokenClaimsSet {
     }
 
     /**
-     * Get copy of the claims request in authentication request.
+     * Get claims request of the authentication request.
      * 
-     * @return copy of the claims request in authentication request, null if not existing.
+     * @return claims request in authentication request, null if not existing.
      */
     @Nullable
     public ClaimsRequest getClaimsRequest() {
@@ -389,9 +390,9 @@ public class TokenClaimsSet {
     }
 
     /**
-     * Get copy of the delivery claims in token.
+     * Get token delivery claims.
      * 
-     * @return copy of the delivery claims in token
+     * @return token delivery claims
      */
     public ClaimsSet getDeliveryClaims() {
         TokenDeliveryClaimsClaimsSet claimsSet = new TokenDeliveryClaimsClaimsSet();
@@ -409,9 +410,9 @@ public class TokenClaimsSet {
     }
 
     /**
-     * Get copy of the id token delivery claims in token.
+     * Get id token token delivery claims.
      * 
-     * @return copy of the id token delivery claims in token
+     * @return id token token delivery claims
      */
     public ClaimsSet getIDTokenDeliveryClaims() {
         TokenDeliveryClaimsClaimsSet claimsSet = new TokenDeliveryClaimsClaimsSet();
@@ -430,9 +431,9 @@ public class TokenClaimsSet {
     }
 
     /**
-     * Get copy of the user info delivery claims in token.
+     * Get user info response token delivery claims.
      * 
-     * @return copy of the user info delivery claims in token
+     * @return user info response token delivery claims
      */
     public ClaimsSet getUserinfoDeliveryClaims() {
         TokenDeliveryClaimsClaimsSet claimsSet = new TokenDeliveryClaimsClaimsSet();
@@ -451,38 +452,27 @@ public class TokenClaimsSet {
     }
 
     /**
-     * Get copy of the consentable claims in token.
+     * Get consentable claims.
      * 
-     * @return copy of the consentable claims in token
+     * @return consentable claims
      */
     public JSONArray getConsentableClaims() {
-
-        JSONArray consentableClaims = (JSONArray) tokenClaimsSet.getClaim(KEY_CONSENTABLE_CLAIMS);
-        if (consentableClaims == null) {
-            return null;
-        }
-        return consentableClaims;
-
+        return (JSONArray) tokenClaimsSet.getClaim(KEY_CONSENTABLE_CLAIMS);
     }
 
     /**
-     * Get copy of the consented claims in token.
+     * Get consented claims.
      * 
-     * @return copy of the consented claims in token
+     * @return consented claims
      */
     public JSONArray getConsentedClaims() {
-
-        JSONArray consentedClaims = (JSONArray) tokenClaimsSet.getClaim(KEY_CONSENTED_CLAIMS);
-        if (consentedClaims == null) {
-            return null;
-        }
-        return consentedClaims;
+        return (JSONArray) tokenClaimsSet.getClaim(KEY_CONSENTED_CLAIMS);
     }
 
     /**
-     * Get copy of the scope in authentication request.
+     * Get scope of the authentication request.
      * 
-     * @return copy of the scope in authentication request.
+     * @return scope of the authentication request.
      */
     @Nonnull
     public Scope getScope() {
@@ -513,6 +503,202 @@ public class TokenClaimsSet {
     @Nonnull
     public ClientID getClientID() {
         return new ClientID((String) tokenClaimsSet.getClaim(KEY_CLIENTID));
+    }
+
+    /** Abstract builder to extend builders from that are instantiating claims sets extending TokenClaimsSet. */
+    public abstract static class Builder<T extends TokenClaimsSet> {
+
+        /** Generator for pseudo unique identifier for the claims set. */
+        @Nonnull
+        protected IdentifierGenerationStrategy idGen;
+
+        /** Client Id of the rp. */
+        @Nonnull
+        protected ClientID rpId;
+
+        /** OP issuer value. */
+        @Nonnull
+        protected String iss;
+
+        /** User Principal of the authenticated user. */
+        @Nonnull
+        protected String usrPrincipal;
+
+        /** Subject claim value of the authenticated user. */
+        @Nonnull
+        protected String sub;
+
+        /** Authentication context class reference value of the authentication. */
+        @Nonnull
+        protected ACR acr;
+
+        /** Issue time of the claims set. */
+        @Nonnull
+        protected Date iat;
+
+        /** Expiration time of the claims set. */
+        @Nonnull
+        protected Date exp;
+
+        /** Authentication time of the user. */
+        @Nonnull
+        protected Date authTime;
+
+        /** Validated redirect URI of the authentication request. */
+        @Nonnull
+        protected URI redirect;
+
+        /** Scope of the authentication request. */
+        @Nonnull
+        protected Scope reqScope;
+
+        /** Nonce of the authentication request. */
+        @Nullable
+        protected Nonce nonce;
+
+        /** Claims request of the authentication request. */
+        @Nullable
+        protected ClaimsRequest claims;
+
+        /** Token delivery claims delivered both for id token and userinfo response. */
+        @Nullable
+        protected ClaimsSet dlClaims;
+
+        /** Token delivery claims delivered for id token. */
+        @Nullable
+        protected ClaimsSet dlClaimsID;
+
+        /** Token delivery claims delivered for userinfo response. */
+        @Nullable
+        protected ClaimsSet dlClaimsUI;
+
+        /** Consentable claims. */
+        @Nullable
+        protected JSONArray cnsntlClaims;
+
+        /** consented claims. */
+        @Nullable
+        protected JSONArray cnsntdClaims;
+
+        /**
+         * Constructor for authorize code builder.
+         * 
+         * @param idGenerator Generator for pseudo unique identifier for the claims set. Must not be NULL.
+         * @param clientID Client Id of the rp. Must not be NULL.
+         * @param issuer OP issuer value. Must not be NULL.
+         * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
+         * @param subject subject of the authenticated user. Must not be NULL
+         * @param issuedAt Issue time of the authorize code. Must not be NULL.
+         * @param expiresAt Expiration time of the authorize code. Must not be NULL.
+         * @param authenticationTime Authentication time of the user. Must not be NULL.
+         * @param redirectURI Validated redirect URI of the authentication request. Must not be NULL.
+         * @param scope Scope of the authentication request. Must not be NULL.
+         */
+        protected Builder(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
+                @Nonnull String issuer, @Nonnull String userPrincipal, @Nonnull String subject, @Nonnull Date issuedAt,
+                @Nonnull Date expiresAt, @Nonnull Date authenticationTime, @Nonnull URI redirectURI,
+                @Nonnull Scope scope) {
+
+            idGen = idGenerator;
+            rpId = clientID;
+            iss = issuer;
+            usrPrincipal = userPrincipal;
+            sub = subject;
+            iat = issuedAt;
+            exp = expiresAt;
+            authTime = authenticationTime;
+            redirect = redirectURI;
+            reqScope = scope;
+
+        }
+
+        /**
+         * Set authentication context class reference value of the authentication.
+         * 
+         * @param authenticationContextReference authentication context class reference value of the authentication.
+         */
+        public Builder<T> setACR(@Nullable ACR authenticationContextReference) {
+            acr = authenticationContextReference;
+            return this;
+        }
+
+        /**
+         * Set nonce of the authentication request.
+         * 
+         * @param requestNonce nonce of the authentication request.
+         */
+        public Builder<T> setNonce(@Nullable Nonce requestNonce) {
+            nonce = requestNonce;
+            return this;
+        }
+
+        /**
+         * Set claims request of the authentication request.
+         * 
+         * @param requestedClaims claims request of the authentication request.
+         */
+        public Builder<T> setClaims(@Nullable ClaimsRequest requestedClaims) {
+            claims = requestedClaims;
+            return this;
+        }
+
+        /**
+         * Set token delivery claims delivered both for id token and userinfo response.
+         * 
+         * @param deliveryClaims token delivery claims delivered both for id token and userinfo response.
+         */
+        public Builder<T> setDlClaims(@Nullable ClaimsSet deliveryClaims) {
+            dlClaims = deliveryClaims;
+            return this;
+        }
+
+        /**
+         * Set token delivery claims delivered for id token.
+         * 
+         * @param deliveryClaimsIDToken token delivery claims delivered for id token
+         */
+        public Builder<T> setDlClaimsID(@Nullable ClaimsSet deliveryClaimsIDToken) {
+            dlClaimsID = deliveryClaimsIDToken;
+            return this;
+        }
+
+        /**
+         * Set token delivery claims delivered for userinfo response.
+         * 
+         * @param deliveryClaimsUserInfo token delivery claims delivered for userinfo response
+         */
+        public Builder<T> setDlClaimsUI(@Nullable ClaimsSet deliveryClaimsUserInfo) {
+            dlClaimsUI = deliveryClaimsUserInfo;
+            return this;
+        }
+
+        /**
+         * Set consentable claims.
+         * 
+         * @param consentableClaims consentable claims
+         */
+        public Builder<T> setConsentableClaims(@Nullable JSONArray consentableClaims) {
+            cnsntlClaims = consentableClaims;
+            return this;
+        }
+
+        /**
+         * Set consented claims.
+         * 
+         * @param consentedClaims consented claims
+         */
+        public Builder<T> setConsentedClaims(@Nullable JSONArray consentedClaims) {
+            cnsntdClaims = consentedClaims;
+            return this;
+        }
+
+        /**
+         * Builds claims set.
+         * 
+         * @return claims set instance.
+         */
+        public abstract T build();
+
     }
 
 }
