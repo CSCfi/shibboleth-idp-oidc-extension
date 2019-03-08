@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.geant.idpextension.oidc.messaging.JSONSuccessResponse;
 import org.geant.idpextension.oidc.metadata.impl.DynamicFilesystemProviderMetadataResolver;
 import org.geant.idpextension.oidc.metadata.impl.FilesystemProviderMetadataResolver;
 import org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver;
@@ -46,42 +47,47 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-
 import net.minidev.json.JSONObject;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.idp.profile.RequestContextBuilder;
+import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
 /**
- * Unit tests for {@link BuildDiscoveryResponse}.
+ * Unit tests for {@link FormOutboundDiscoveryResponse}.
  */
-public class BuildDiscoveryResponseTest {
+public class FormOutboundDiscoveryResponseTest {
 
-    protected BuildDiscoveryResponse action;
+    protected FormOutboundDiscoveryResponse action;
 
     protected RequestContext requestCtx;
-    
+
+    @SuppressWarnings("rawtypes")
+    protected ProfileRequestContext profileRequestCtx;
+
     protected File opfile;
+
     protected String dynamicClaim;
+
     protected String dynamicClaimValue;
 
     @BeforeMethod
     protected void setUpContext() throws ComponentInitializationException {
         action = buildAction();
         requestCtx = new RequestContextBuilder().buildRequestContext();
+        profileRequestCtx = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
         opfile = new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/openid-configuration.json");
         dynamicClaim = "dynamicClaimName";
         dynamicClaimValue = "dynamicClaimValue";
     }
-    
-    protected BuildDiscoveryResponse buildAction() {
-        action = new BuildDiscoveryResponse();
+
+    protected FormOutboundDiscoveryResponse buildAction() {
+        action = new FormOutboundDiscoveryResponse();
         action.setHttpServletRequest(new MockHttpServletRequest());
         action.setHttpServletResponse(new MockHttpServletResponse());
         return action;
     }
-    
+
     protected ProviderMetadataResolver initMetadataResolver() throws Exception {
         final FilesystemProviderMetadataResolver resolver = new FilesystemProviderMetadataResolver(opfile);
         resolver.setId("mockStaticResolver");
@@ -94,12 +100,15 @@ public class BuildDiscoveryResponseTest {
         action.setMetadataResolver(initMetadataResolver());
         action.initialize();
         ActionTestingSupport.assertProceedEvent(action.execute(requestCtx));
-        final MockHttpServletResponse response = (MockHttpServletResponse) action.getHttpServletResponse();
-        final JSONObject jsonObject = JSONObjectUtils.parse(response.getContentAsString());
+        Assert.assertTrue(profileRequestCtx.getOutboundMessageContext().getMessage() instanceof JSONSuccessResponse);
+        final JSONSuccessResponse resp =
+                (JSONSuccessResponse) profileRequestCtx.getOutboundMessageContext().getMessage();
+        Assert.assertTrue(resp.indicatesSuccess());
+        final JSONObject jsonObject = resp.toHTTPResponse().getContentAsJSONObject();
         Assert.assertEquals(jsonObject.size(), 17);
         Assert.assertNull(jsonObject.get(dynamicClaim));
     }
-    
+
     @Test
     public void testDynamic() throws Exception {
         final Map<String, MetadataValueResolver> map = new HashMap<>();
@@ -107,27 +116,30 @@ public class BuildDiscoveryResponseTest {
         action.setMetadataResolver(initMetadataResolver(map));
         action.initialize();
         ActionTestingSupport.assertProceedEvent(action.execute(requestCtx));
-        final MockHttpServletResponse response = (MockHttpServletResponse) action.getHttpServletResponse();
-        final JSONObject jsonObject = JSONObjectUtils.parse(response.getContentAsString());
+        final JSONSuccessResponse resp =
+                (JSONSuccessResponse) profileRequestCtx.getOutboundMessageContext().getMessage();
+        Assert.assertTrue(resp.indicatesSuccess());
+        final JSONObject jsonObject = resp.toHTTPResponse().getContentAsJSONObject();
         Assert.assertEquals(jsonObject.size(), 18);
         Assert.assertNotNull(jsonObject.get(dynamicClaim));
         Assert.assertEquals(jsonObject.get(dynamicClaim), dynamicClaimValue);
     }
-    
-    protected ProviderMetadataResolver initMetadataResolver(final Map<String, MetadataValueResolver> map) 
+
+    protected ProviderMetadataResolver initMetadataResolver(final Map<String, MetadataValueResolver> map)
             throws Exception {
-        final DynamicFilesystemProviderMetadataResolver resolver = 
+        final DynamicFilesystemProviderMetadataResolver resolver =
                 new DynamicFilesystemProviderMetadataResolver(opfile);
         resolver.setDynamicValueResolvers(map);
         resolver.setId("mockDynamicResolver");
         resolver.initialize();
         return resolver;
     }
-    
+
+    @SuppressWarnings("rawtypes")
     protected MetadataValueResolver initMockResolver(final Object value) throws Exception {
         MetadataValueResolver resolver = Mockito.mock(MetadataValueResolver.class);
-        Mockito.when(resolver.resolve((ProfileRequestContext)Mockito.any())).thenReturn(Arrays.asList(value));
-        Mockito.when(resolver.resolveSingle((ProfileRequestContext)Mockito.any())).thenReturn(value);
+        Mockito.when(resolver.resolve((ProfileRequestContext) Mockito.any())).thenReturn(Arrays.asList(value));
+        Mockito.when(resolver.resolveSingle((ProfileRequestContext) Mockito.any())).thenReturn(value);
         return resolver;
     }
 }

@@ -68,10 +68,36 @@ public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorRespons
     /** Map of eventIds to pre-configured error objects. */
     private Map<String, ErrorObject> mappedErrors;
 
+    /** The status code for unmapped events. */
+    private int defaultStatusCode;
+
+    /** The code for unmapped events. */
+    private String defaultCode;
+
     /** Constructor. */
     public AbstractBuildErrorResponseFromEvent() {
         eventContextLookupStrategy = new CurrentOrPreviousEventLookup();
         mappedErrors = new HashMap<>();
+        defaultStatusCode = HTTPResponse.SC_BAD_REQUEST;
+        defaultCode = "invalid_request";
+    }
+
+    /**
+     * Set the status code for unmapped events.
+     * 
+     * @param code The default status code for unmapped events.
+     */
+    public void setDefaultStatusCode(final int code) {
+        defaultStatusCode = code;
+    }
+
+    /**
+     * Set the code for unmapped events.
+     * 
+     * @param code The default status code for unmapped events.
+     */
+    public void setDefaultCode(@Nonnull final String code) {
+        defaultCode = Constraint.isNotNull(code, "Default code cannot be null");
     }
 
     /**
@@ -120,9 +146,8 @@ public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorRespons
             log.debug("{} Found mapped event for {}", getLogPrefix(), event);
             error = mappedErrors.get(event);
         } else {
-            log.debug("{} No mapped event found for {}, creating general invalid_request", getLogPrefix(), event);
-            error = new ErrorObject("invalid_request", "Invalid request: " + eventCtx.getEvent().toString(),
-                    HTTPResponse.SC_BAD_REQUEST);
+            log.debug("{} No mapped event found for {}, creating general {}", getLogPrefix(), event, defaultCode);
+            error = new ErrorObject(defaultCode, eventCtx.getEvent().toString(), defaultStatusCode);
         }
         ErrorResponse errorResponse = buildErrorResponse(error, profileRequestContext);
         if (errorResponse != null) {

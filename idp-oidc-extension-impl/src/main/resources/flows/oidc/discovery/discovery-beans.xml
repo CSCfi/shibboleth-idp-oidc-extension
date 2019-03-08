@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:c="http://www.springframework.org/schema/c" xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
@@ -10,70 +9,54 @@
 
     <!-- Import core common beans. -->
     <import resource="../oidc-core-common-beans.xml" />
-    
-    <bean
-        class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
-        p:placeholderPrefix="%{" p:placeholderSuffix="}" />
 
-    <bean
-        class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
-    <bean
-        class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer" p:placeholderPrefix="%{"
+        p:placeholderSuffix="}" />
 
-    <bean id="PopulateMetricContext"
-        class="org.opensaml.profile.action.impl.PopulateMetricContext"
+    <bean class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
+    <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
+
+    <bean id="PopulateMetricContext" class="org.opensaml.profile.action.impl.PopulateMetricContext"
         scope="prototype" p:metricStrategy="#{getObject('shibboleth.metrics.MetricStrategy')}" />
 
-    <!-- Declares audit field extractor functions injected into beans that 
-        populate the audit context. -->
+    <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
     <import resource="../../../system/conf/audit-system.xml" />
 
-    <!-- The profile and logging id used as arguments are for development 
-        phase only -->
+    <!-- The profile and logging id used as arguments are for development phase only -->
     <bean id="InitializeProfileRequestContext"
-        class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
-        scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/configuration"
-        p:loggingId="%{idp.service.logging.saml2sso:SSO}"
+        class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" scope="prototype"
+        p:profileId="http://csc.fi/ns/profiles/oidc/configuration" p:loggingId="%{idp.service.logging.saml2sso:SSO}"
         p:browserProfile="true" />
 
     <bean id="InitializeRelyingPartyContext"
-        class="org.geant.idpextension.oidc.profile.impl.InitializeUnverifiedRelyingPartyContext"
-        scope="prototype" />
+        class="org.geant.idpextension.oidc.profile.impl.InitializeUnverifiedRelyingPartyContext" scope="prototype" />
 
     <bean id="SelectRelyingPartyConfiguration"
-        class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration"
-        scope="prototype" p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+        class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration" scope="prototype"
+        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
 
-    <bean id="SelectProfileConfiguration"
-        class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
+    <bean id="SelectProfileConfiguration" class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
         scope="prototype" />
 
-    <bean id="SetResponseStatusCodeFromEvent"
-        class="org.geant.idpextension.oidc.profile.impl.SetResponseStatusCodeFromEvent"
-        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse">
+    <bean id="InitializeOutboundMessageContext"
+        class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundResponseMessageContext" scope="prototype" />
+
+    <bean id="BuildErrorResponseFromEvent"
+        class="org.geant.idpextension.oidc.profile.impl.BuildJSONErrorResponseFromEvent" scope="prototype"
+        p:defaultStatusCode="500" p:defaultCode="server_error"
+        p:httpServletResponse-ref="shibboleth.HttpServletResponse">
         <property name="eventContextLookupStrategy">
-            <bean
-                class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
-        </property>
-        <property name="mappedErrors">
-            <map value-type="java.lang.Integer">
-                <entry
-                    key="#{T(org.opensaml.profile.action.EventIds).IO_ERROR}"
-                    value="503" />
-            </map>
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
         </property>
     </bean>
 
-    <bean id="BuildDiscoveryResponse"
-        class="org.geant.idpextension.oidc.profile.impl.BuildDiscoveryResponse"
-        scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse"
-        p:metadataResolver-ref="shibboleth.oidc.OpenIdConfigurationResolver" />
+    <bean id="FormOutboundMessage" class="org.geant.idpextension.oidc.profile.impl.FormOutboundDiscoveryResponse"
+        scope="prototype" p:metadataResolver-ref="shibboleth.oidc.OpenIdConfigurationResolver" />
 
     <bean id="shibboleth.oidc.OpenIdConfigurationResolver"
         class="org.geant.idpextension.oidc.metadata.impl.DynamicFilesystemProviderMetadataResolver">
         <property name="dynamicValueResolvers">
-            <map
-                value-type="org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver">
+            <map value-type="org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver">
                 <entry key="signing-keys" value-ref="CredentialResolver" />
                 <entry key="id_token_signing_alg_values_supported" value-ref="SignatureAlgorithmInfoResolver" />
                 <entry key="userinfo_signing_alg_values_supported" value-ref="SignatureAlgorithmInfoResolver" />
@@ -85,28 +68,24 @@
             value="/opt/shibboleth-idp/static/.well-known/openid-configuration" />
     </bean>
 
-    <bean id="CredentialResolver"
-        class="org.geant.idpextension.oidc.metadata.impl.CredentialMetadataValueResolver"/>
-        
+    <bean id="CredentialResolver" class="org.geant.idpextension.oidc.metadata.impl.CredentialMetadataValueResolver" />
+
     <bean id="SignatureAlgorithmInfoResolver"
         class="org.geant.idpextension.oidc.metadata.impl.AlgorithmInfoMetadataValueResolver"
         p:resolveEncryptionAlgs="false" />
-         
+
     <bean id="EncryptionAlgorithmInfoResolver"
         class="org.geant.idpextension.oidc.metadata.impl.AlgorithmInfoMetadataValueResolver"
         p:resolveEncryptionAlgs="true" />
 
-    <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent"
-        scope="prototype"
+    <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
         p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
         <property name="eventContextLookupStrategy">
-            <bean
-                class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
         </property>
     </bean>
 
-    <bean id="RecordResponseComplete"
-        class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
+    <bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
         scope="prototype" />
 
 </beans>

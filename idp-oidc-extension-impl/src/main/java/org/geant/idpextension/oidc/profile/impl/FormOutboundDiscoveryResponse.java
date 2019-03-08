@@ -28,11 +28,8 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.io.IOException;
-
 import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletResponse;
-
+import org.geant.idpextension.oidc.messaging.JSONSuccessResponse;
 import org.geant.idpextension.oidc.metadata.resolver.ProviderMetadataResolver;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -42,30 +39,33 @@ import org.slf4j.LoggerFactory;
 
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
-import net.minidev.json.JSONValue;
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
- * This action builds a response for the OP configuration discovery request. The response contains the contents of
- * the attached {@link ProviderMetadataResolver}, possibly containing dynamic values.
+ * This action builds a response for the OP configuration discovery request. The response contains the contents of the
+ * attached {@link ProviderMetadataResolver}, possibly containing dynamic values.
  */
-public class BuildDiscoveryResponse extends AbstractProfileAction {
+@SuppressWarnings("rawtypes")
+public class FormOutboundDiscoveryResponse extends AbstractProfileAction {
 
     /** Class logger. */
     @Nonnull
-    private final Logger log = LoggerFactory.getLogger(BuildDiscoveryResponse.class);
-    
+    private final Logger log = LoggerFactory.getLogger(FormOutboundDiscoveryResponse.class);
+
     /** The resolver for the metadata that is being distributed. */
     private ProviderMetadataResolver metadataResolver;
-    
+
+    /** metadata to publish. */
+    private OIDCProviderMetadata metadata;;
+
     /** Constructor. */
-    public BuildDiscoveryResponse() {
+    public FormOutboundDiscoveryResponse() {
         super();
     }
-    
+
     /** {@inheritDoc} */
     @Override
     protected void doInitialize() throws ComponentInitializationException {
@@ -74,33 +74,43 @@ public class BuildDiscoveryResponse extends AbstractProfileAction {
             throw new ComponentInitializationException("The metadata resolver cannot be null!");
         }
     }
-    
+
     /**
      * Set the resolver for the metadata that is being distributed.
+     * 
      * @param resolver What to set.
      */
     public void setMetadataResolver(final ProviderMetadataResolver resolver) {
         metadataResolver = Constraint.isNotNull(resolver, "The metadata resolver cannot be null!");
     }
-    
+
     /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+
+        if (!super.doPreExecute(profileRequestContext)) {
+            return false;
+        }
+        try {
+            metadata = metadataResolver.resolveSingle(profileRequestContext);
+        } catch (ResolverException e) {
+            log.error("{} Could not resolve provider metadata", getLogPrefix(), e);
+            ActionSupport.buildEvent(profileRequestContext, EventIds.IO_ERROR);
+            return false;
+        }
+        if (metadata == null) {
+            log.error("{} Could not resolve provider metadata", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.IO_ERROR);
+            return false;
+        }
+        return true;
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        final HttpServletResponse servletResponse = getHttpServletResponse();
-        servletResponse.setContentType("application/json");
-        try {
-            final OIDCProviderMetadata metadata = 
-                    metadataResolver.resolveSingle(profileRequestContext);
-            if (metadata == null) {
-                log.error("{} Could not resolve any metadata", getLogPrefix());
-                ActionSupport.buildEvent(profileRequestContext, EventIds.IO_ERROR);
-            } else {
-                JSONValue.writeJSONString(metadata.toJSONObject(), servletResponse.getWriter());
-                log.debug("{} Discovery response successfully applied to the HTTP response", getLogPrefix());
-            }
-        } catch (IOException | ResolverException e) {
-            log.error("{} Could not encode the JSON response to the servlet response", getLogPrefix(), e);
-            ActionSupport.buildEvent(profileRequestContext, EventIds.IO_ERROR);
-        }        
+        profileRequestContext.getOutboundMessageContext().setMessage(new JSONSuccessResponse(metadata.toJSONObject()));
     }
 }
