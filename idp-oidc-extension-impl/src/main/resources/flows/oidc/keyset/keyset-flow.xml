@@ -1,13 +1,6 @@
-<flow xmlns="http://www.springframework.org/schema/webflow"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd">
 
-
-<!-- 
-Actions takes a list of credentials as input. Find out how to wire that from properties
-Actions creates a jwk keyset of the keys
-
- -->
     <action-state id="InitializeMandatoryContexts">
         <evaluate expression="InitializeProfileRequestContext" />
         <evaluate expression="InitializeRelyingPartyContext" />
@@ -16,13 +9,13 @@ Actions creates a jwk keyset of the keys
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="OutboundContexts" />
     </action-state>
-    
+
     <action-state id="OutboundContexts">
         <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="BuildResponse" />
     </action-state>
-    
+
     <action-state id="BuildResponse">
         <evaluate expression="FormOutboundMessage" />
         <evaluate expression="'proceed'" />
