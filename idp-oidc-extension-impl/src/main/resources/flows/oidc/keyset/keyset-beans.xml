@@ -36,6 +36,7 @@
 
     <bean id="BuildErrorResponseFromEvent"
         class="org.geant.idpextension.oidc.profile.impl.BuildJSONErrorResponseFromEvent" scope="prototype"
+        p:defaultStatusCode="500" p:defaultCode="server_error"
         p:httpServletResponse-ref="shibboleth.HttpServletResponse">
         <property name="eventContextLookupStrategy">
             <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
