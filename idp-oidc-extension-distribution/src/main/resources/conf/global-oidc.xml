@@ -18,10 +18,10 @@
     <bean id="shibboleth.OIDCAuthnContextClassReference"
         class="org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal" abstract="true" />
 
-    <!-- Returns true unless subject is already populated in oidc response context. -->
+    <!-- Returns true if resolver is executed in authz endpoint. -->
     <bean id="SubjectRequired" class="org.geant.idpextension.oidc.profile.logic.SubjectActivationCondition" />
 
-    <!-- Returns true if client has registered public subject and subject is not already populated in oidc response context -->
+    <!-- Returns true if client has registered public subject and resolver is executed in authz endpoint -->
     <bean id="PublicRequired" parent="shibboleth.Conditions.AND">
         <constructor-arg>
             <list>
@@ -31,7 +31,7 @@
         </constructor-arg>
     </bean>
 
-    <!-- Returns true if client has registered pairwise subject and subject is not already populated in oidc response context -->
+    <!-- Returns true if client has registered pairwise subject and resolver is executed in authz endpoint -->
     <bean id="PairwiseRequired" parent="shibboleth.Conditions.AND">
         <constructor-arg>
             <list>
