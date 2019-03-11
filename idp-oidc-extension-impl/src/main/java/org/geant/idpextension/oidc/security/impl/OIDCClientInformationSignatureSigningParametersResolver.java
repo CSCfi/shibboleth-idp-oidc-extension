@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.security.impl;
 
 import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.List;
 
@@ -51,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Predicate;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -124,6 +126,27 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
         }
     }
 
+    /**
+     * Helper to match ECKey curve to JWS algorithm ES256, ES384 and ES512.
+     * 
+     * @param curve curve to match.
+     * @param algorithm algorithm to match.
+     * @return true if key curve matches algorithm, otherwise false.
+     */
+
+    private boolean curveMatchesESAlgorithm(Curve curve, JWSAlgorithm algorithm) {
+        if (algorithm.equals(JWSAlgorithm.ES256)) {
+            return curve.equals(Curve.P_256);
+        }
+        if (algorithm.equals(JWSAlgorithm.ES384)) {
+            return curve.equals(Curve.P_384);
+        }
+        if (algorithm.equals(JWSAlgorithm.ES512)) {
+            return curve.equals(Curve.P_521);
+        }
+        return false;
+    }
+
     // Checkstyle: CyclomaticComplexity|ReturnCount OFF
     /** {@inheritDoc} */
     @Override
@@ -192,7 +215,10 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
                 if ((JWSAlgorithm.Family.RSA.contains(algorithm)
                         && (credential.getPrivateKey() instanceof RSAPrivateKey))
                         || (JWSAlgorithm.Family.EC.contains(algorithm)
-                                && (credential.getPrivateKey() instanceof ECPrivateKey))) {
+                                && (credential.getPrivateKey() instanceof ECPrivateKey)
+                                && curveMatchesESAlgorithm(Curve.forECParameterSpec(
+                                        ((java.security.interfaces.ECKey) credential.getPrivateKey()).getParams()),
+                                        algorithm))) {
                     log.trace("Credential picked for algorithm {}", algorithm.getName());
                     params.setSigningCredential(credential);
                     params.setSignatureAlgorithm(algorithm.getName());
@@ -210,8 +236,9 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
                 if (KeyUse.ENCRYPTION.equals(key.getKeyUse())) {
                     continue;
                 }
-                if ((JWSAlgorithm.Family.RSA.contains(algorithm) && key.getKeyType().equals(KeyType.RSA))
-                        || (JWSAlgorithm.Family.EC.contains(algorithm) && key.getKeyType().equals(KeyType.EC))) {
+                if ((JWSAlgorithm.Family.RSA.contains(algorithm) && key instanceof RSAKey)
+                        || (JWSAlgorithm.Family.EC.contains(algorithm) && key instanceof ECKey
+                                && curveMatchesESAlgorithm(((ECKey) key).getCurve(), algorithm))) {
                     BasicJWKCredential jwkCredential = new BasicJWKCredential();
                     jwkCredential.setAlgorithm(algorithm);
                     jwkCredential.setKid(key.getKeyID());

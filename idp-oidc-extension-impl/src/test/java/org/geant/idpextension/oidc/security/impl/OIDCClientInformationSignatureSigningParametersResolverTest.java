@@ -30,32 +30,28 @@
 
 package org.geant.idpextension.oidc.security.impl;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 import org.geant.idpextension.oidc.criterion.ClientInformationCriterion;
+import org.geant.idpextension.oidc.profile.spring.factory.BasicJWKCredentialFactoryBean;
 import org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver.ParameterType;
-import org.geant.security.jwk.BasicJWKCredential;
+import org.mockito.Mockito;
 import org.opensaml.security.credential.Credential;
-import org.opensaml.security.credential.UsageType;
 import org.opensaml.xmlsec.SignatureSigningConfiguration;
+import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.opensaml.xmlsec.criterion.SignatureSigningConfigurationCriterion;
-import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
+import org.springframework.core.io.ClassPathResource;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -81,23 +77,57 @@ public class OIDCClientInformationSignatureSigningParametersResolverTest {
         resolver = new OIDCClientInformationSignatureSigningParametersResolver();
         // Signing configuration
         List<SignatureSigningConfiguration> configs = new ArrayList<SignatureSigningConfiguration>();
-        configs.add(new MockSigningConfiguration());
+        SignatureSigningConfiguration signConfig = Mockito.mock(SignatureSigningConfiguration.class);
+        Mockito.when(signConfig.getSignatureAlgorithms())
+                .thenReturn(Arrays.asList("RS256", "HS256", "ES256", "ES384", "ES512"));
+        List<Credential> signCreds = new ArrayList<Credential>();
+        BasicJWKCredentialFactoryBean factory = new BasicJWKCredentialFactoryBean();
+        factory.setJWKResource(new ClassPathResource("credentials/idp-signing-es.jwk"));
+        factory.afterPropertiesSet();
+        signCreds.add(factory.getObject());
+        factory = new BasicJWKCredentialFactoryBean();
+        factory.setJWKResource(new ClassPathResource("credentials/idp-signing-es384.jwk"));
+        factory.afterPropertiesSet();
+        signCreds.add(factory.getObject());
+        factory = new BasicJWKCredentialFactoryBean();
+        factory.setJWKResource(new ClassPathResource("credentials/idp-signing-es521.jwk"));
+        factory.afterPropertiesSet();
+        signCreds.add(factory.getObject());
+        factory = new BasicJWKCredentialFactoryBean();
+        factory.setJWKResource(new ClassPathResource("credentials/idp-signing-rs.jwk"));
+        factory.afterPropertiesSet();
+        signCreds.add(factory.getObject());
+        Mockito.when(signConfig.getSigningCredentials()).thenReturn(signCreds);
+        configs.add(signConfig);
         criteria = new CriteriaSet(new SignatureSigningConfigurationCriterion(configs));
         metaData = new OIDCClientMetadata();
         metaData.setIDTokenJWSAlg(JWSAlgorithm.RS256);
         metaData.setUserInfoJWSAlg(JWSAlgorithm.ES256);
         metaData.setRequestObjectJWSAlg(JWSAlgorithm.ES256);
-        JWKSet jwkSet = JWKSet.parse("{\n" + 
-                "  \"keys\": [\n" + 
-                "    {\n" + 
-                "      \"kty\": \"EC\",\n" + 
-                "      \"d\": \"MeEUizlBfHEfftMzSUYmtltJr87NUn2WZqxKDVPMlxM\",\n" + 
-                "      \"crv\": \"P-256\",\n" + 
-                "      \"x\": \"psUf_1U4lV0u2zSRjVepDMyLV4JeLoWNcz3F3C91z4Y\",\n" + 
-                "      \"y\": \"z29JaoRl_1wgGPEKq7-5qvts9vbEwA7hk5Vg01h8ESc\"\n" + 
-                "    }\n" + 
-                "  ]\n" + 
-                "}");
+        JWKSet jwkSet = JWKSet.parse("{\n" + "   \"keys\":[\n" + "      {\n" + "         \"kty\":\"RSA\",\n"
+                + "         \"e\":\"AQAB\",\n" + "         \"use\":\"enc\",\n"
+                + "         \"kid\":\"testkeyRSAEncryption\",\n"
+                + "         \"n\":\"47mkdLGrenv7QFkAWv1JryydVjq8HsEVCKz-qRttVe2II1-lQc-4sObf-9X0LtAwdtK0g1_EpRzZNuGaK2nFISr9uZQQ5evNHETgUKE2oKJs3r0wnfgvEZVHV6wXg4B7NRmDBgphExIYndBt__L-tC9_S_isaJOXQ_PAx17621pmxdyg8WEnJx9Azc23vH-Cii0ttMxDLNqUTu-tdgtZ8eo0IX7VPBWAnXVi0bRKHJuuvzJ4B8QqwsZsj8hGrwqNkRMoJVEiz-5M6ACLo-rgGNjtCBJRaezolrHSCc-r-hZbAaBKq0dOPRNPcMtRm8TUdmuRKBY7rXaFi7zGV7XDdw\"\n"
+                + "      },\n" + "      {\n" + "         \"kty\":\"RSA\",\n" + "         \"e\":\"AQAB\",\n"
+                + "         \"use\":\"sig\",\n" + "         \"kid\":\"testkeyRS\",\n"
+                + "         \"n\":\"pNf03ghVzMAw5sWrwDAMAZdSYNY2q7OVlxMInljMgz8XB5mf8XKH3EtP7AKrb8IAf7rGhfuH3T1N1C7F-jwIeYjXxMm2nIAZ0hXApgbccvBpf4n2H7IZflMjt4A3tt587QQSxQ069drCP4sYevxhTcLplJy6RWA0cLj-5CHyWy94zPeeA4GRd6xgHFLz0RNiSF0pF0kE4rmRgQVZ-b4_BmD9SsWnIpwhms5Ihciw36WyAGQUeZqULGsfwAMwlNLIaTCBLAoRgv370p-XsLrgz86pTkNBJqXP5GwI-ZfgiLmJuHjQ9l85KqHM87f-QdsqiV8KoRcslgXPqb6VOTJBVw\"\n"
+                + "      },\n" + "      {\n" + "         \"kty\":\"EC\",\n" + "         \"use\":\"sig\",\n"
+                + "         \"crv\":\"P-256\",\n" + "         \"kid\":\"testkeyES256\",\n"
+                + "         \"x\":\"2uzfE1oK0cf1_c11SFc9vFdGLnJoH3e0AKTrGPAmUis\",\n"
+                + "         \"y\":\"14410NGKqwLM58b26ZcvGOruFixpHt_SJTw8I5wwgLQ\"\n" + "      },\n" + "      {\n"
+                + "         \"kty\":\"EC\",\n" + "         \"use\":\"sig\",\n" + "         \"crv\":\"P-384\",\n"
+                + "         \"kid\":\"testkeyES384\",\n"
+                + "         \"x\":\"-loVdvssxvUq_jCPULEk0cMkF4uvEGfHfbh8az8T9J_er6frv0jhosDLCxoLE7E6\",\n"
+                + "         \"y\":\"Er9Blt5x5ADxQXmezf3OEmQbLjjblgB9XwbXXcQyEOQ2qXNv659AgdZiq4UJBnPH\"\n" + "      },\n"
+                + "      {\n" + "         \"kty\":\"EC\",\n" + "         \"use\":\"sig\",\n"
+                + "         \"crv\":\"P-521\",\n" + "         \"kid\":\"testkeyES512\",\n"
+                + "         \"x\":\"AVjIdU6xZBwRdC9yZYyqT583EM3GbxdVyGwinPqeba0EildGZWM1L7HfJXV_r_cOBcuCsEZcuSqFO3v5KRLY5Wj-\",\n"
+                + "         \"y\":\"ATeLywfo7kLDEwUCm8ZQFynqH36WXSdQClAz2cZ63tHfjSumm_SfMOfdWEDmdtgkbVDrBXWYqWoYaofigmDZkxok\"\n"
+                + "      },\n" + "      {\n" + "         \"kty\":\"EC\",\n" + "         \"crv\":\"P-521\",\n"
+                + "         \"kid\":\"testkeyES512-2\",\n"
+                + "         \"x\":\"AQL7ZCkzcAyuUdaqYiCSAf2u2MR_l4rqSppQ8lvEEjmjy7ETiPB77BqeH7glJ6xtkK1YhmHxKDKz0E0zdmqWWVYp\",\n"
+                + "         \"y\":\"AXI7UFlH-Zy2jEf1XoY3NHblkJDsOK4kiv82fRrKtHAoKM_ud25XNzT3lrfbJ--zZlmWUB7fV2jHR0pbmjOOrEF_\"\n"
+                + "      }\n" + "   ]\n" + "}");
         metaData.setJWKSet(jwkSet);
         OIDCClientInformation clientInformation =
                 new OIDCClientInformation(new ClientID(), new Date(), metaData, new Secret("abcdefgh"));
@@ -106,133 +136,100 @@ public class OIDCClientInformationSignatureSigningParametersResolverTest {
 
     @Test
     public void testIdTokenParameters() throws ResolverException {
-        Assert.assertEquals("RS256", resolver.resolveSingle(criteria).getSignatureAlgorithm());
-        Assert.assertTrue(
-                resolver.resolveSingle(criteria).getSigningCredential().getPrivateKey() instanceof RSAPrivateKey);
+        SignatureSigningParameters params = resolver.resolveSingle(criteria);
+        Assert.assertEquals(params.getSignatureAlgorithm(), "RS256");
+        Assert.assertTrue(params.getSigningCredential().getPrivateKey() instanceof RSAPrivateKey);
     }
 
     @Test
     public void testDefaultIdTokenParameters() throws ResolverException {
         metaData.setIDTokenJWSAlg(null);
-        Assert.assertEquals("RS256", resolver.resolveSingle(criteria).getSignatureAlgorithm());
-        Assert.assertTrue(
-                resolver.resolveSingle(criteria).getSigningCredential().getPrivateKey() instanceof RSAPrivateKey);
+        SignatureSigningParameters params = resolver.resolveSingle(criteria);
+        Assert.assertEquals(params.getSignatureAlgorithm(), "RS256");
+        Assert.assertTrue(params.getSigningCredential().getPrivateKey() instanceof RSAPrivateKey);
     }
 
     @Test
     public void testIdTokenParametersHS() throws ResolverException {
         metaData.setIDTokenJWSAlg(JWSAlgorithm.HS256);
-        Assert.assertEquals("HS256", resolver.resolveSingle(criteria).getSignatureAlgorithm());
-        Assert.assertNotNull(resolver.resolveSingle(criteria).getSigningCredential().getSecretKey());
+        SignatureSigningParameters params = resolver.resolveSingle(criteria);
+        Assert.assertEquals(params.getSignatureAlgorithm(), "HS256");
+        Assert.assertNotNull(params.getSigningCredential().getSecretKey());
     }
 
     @Test
     public void testUserInfoParameters() throws ResolverException {
         resolver.setParameterType(ParameterType.USERINFO_SIGNING);
-        Assert.assertEquals("ES256", resolver.resolveSingle(criteria).getSignatureAlgorithm());
-        Assert.assertTrue(
-                resolver.resolveSingle(criteria).getSigningCredential().getPrivateKey() instanceof ECPrivateKey);
+        SignatureSigningParameters params = resolver.resolveSingle(criteria);
+        Assert.assertEquals(params.getSignatureAlgorithm(), "ES256");
+        Assert.assertTrue(params.getSigningCredential().getPrivateKey() instanceof ECPrivateKey);
+        Assert.assertEquals(
+                Curve.forECParameterSpec(
+                        ((java.security.interfaces.ECKey) params.getSigningCredential().getPrivateKey()).getParams()),
+                Curve.P_256);
+    }
+
+    @Test
+    public void testUserInfoParametersES384() throws ResolverException {
+        metaData.setUserInfoJWSAlg(JWSAlgorithm.ES384);
+        resolver.setParameterType(ParameterType.USERINFO_SIGNING);
+        SignatureSigningParameters params = resolver.resolveSingle(criteria);
+        Assert.assertEquals(params.getSignatureAlgorithm(), "ES384");
+        Assert.assertTrue(params.getSigningCredential().getPrivateKey() instanceof ECPrivateKey);
+        Assert.assertEquals(
+                Curve.forECParameterSpec(
+                        ((java.security.interfaces.ECKey) params.getSigningCredential().getPrivateKey()).getParams()),
+                Curve.P_384);
+    }
+
+    @Test
+    public void testUserInfoParametersES512() throws ResolverException {
+        metaData.setUserInfoJWSAlg(JWSAlgorithm.ES512);
+        resolver.setParameterType(ParameterType.USERINFO_SIGNING);
+        SignatureSigningParameters params = resolver.resolveSingle(criteria);
+        Assert.assertEquals(params.getSignatureAlgorithm(), "ES512");
+        Assert.assertTrue(params.getSigningCredential().getPrivateKey() instanceof ECPrivateKey);
+        Assert.assertEquals(
+                Curve.forECParameterSpec(
+                        ((java.security.interfaces.ECKey) params.getSigningCredential().getPrivateKey()).getParams()),
+                Curve.P_521);
     }
 
     @Test
     public void testRequestObjectParameters() throws ResolverException {
         resolver.setParameterType(ParameterType.REQUEST_OBJECT_VALIDATION);
-        Assert.assertEquals("ES256", resolver.resolveSingle(criteria).getSignatureAlgorithm());
-        Assert.assertTrue(
-                resolver.resolveSingle(criteria).getSigningCredential().getPublicKey() instanceof ECPublicKey);
+        OIDCSignatureValidationParameters params = (OIDCSignatureValidationParameters) resolver.resolveSingle(criteria);
+        Assert.assertEquals(params.getSignatureAlgorithm(), "ES256");
+        Assert.assertTrue(params.getValidationCredentials().size() == 1);
+        Assert.assertEquals(Curve.forECParameterSpec(
+                ((java.security.interfaces.ECKey) params.getValidationCredentials().get(0).getPublicKey()).getParams()),
+                Curve.P_256);
     }
 
-    public class MockSigningConfiguration implements SignatureSigningConfiguration {
-
-        private List<Credential> credentials;
-
-        private void initializeCredentials() throws NoSuchAlgorithmException {
-            credentials = new ArrayList<Credential>();
-            // RSA
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-            keyGen.initialize(2048);
-            KeyPair keyPair = keyGen.genKeyPair();
-            BasicJWKCredential credential = new BasicJWKCredential();
-            credential.setUsageType(UsageType.SIGNING);
-            credential.setPrivateKey(keyPair.getPrivate());
-            credentials.add(credential);
-            // EC
-            keyGen = KeyPairGenerator.getInstance("EC");
-            keyGen.initialize(256);
-            keyPair = keyGen.genKeyPair();
-            credential = new BasicJWKCredential();
-            credential.setUsageType(UsageType.SIGNING);
-            credential.setPrivateKey(keyPair.getPrivate());
-            credentials.add(credential);
-        }
-
-        @Override
-        public Collection<String> getWhitelistedAlgorithms() {
-            return new HashSet<String>();
-        }
-
-        @Override
-        public boolean isWhitelistMerge() {
-            return false;
-        }
-
-        @Override
-        public Collection<String> getBlacklistedAlgorithms() {
-            return new HashSet<String>();
-        }
-
-        @Override
-        public boolean isBlacklistMerge() {
-            return false;
-        }
-
-        @Override
-        public Precedence getWhitelistBlacklistPrecedence() {
-            return null;
-        }
-
-        @Override
-        public List<Credential> getSigningCredentials() {
-            if (credentials == null) {
-                try {
-                    initializeCredentials();
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                }
-            }
-            return credentials;
-        }
-
-        @Override
-        public List<String> getSignatureAlgorithms() {
-            return Arrays.asList("RS256", "ES256", "HS256", "RS384", "ES384", "HS384");
-        }
-
-        @Override
-        public List<String> getSignatureReferenceDigestMethods() {
-            return new ArrayList<String>();
-        }
-
-        @Override
-        public String getSignatureReferenceCanonicalizationAlgorithm() {
-            return null;
-        }
-
-        @Override
-        public String getSignatureCanonicalizationAlgorithm() {
-            return null;
-        }
-
-        @Override
-        public Integer getSignatureHMACOutputLength() {
-            return null;
-        }
-
-        @Override
-        public NamedKeyInfoGeneratorManager getKeyInfoGeneratorManager() {
-            return null;
-        }
-
+    @Test
+    public void testRequestObjectParametersES384() throws ResolverException {
+        metaData.setRequestObjectJWSAlg(JWSAlgorithm.ES384);
+        resolver.setParameterType(ParameterType.REQUEST_OBJECT_VALIDATION);
+        OIDCSignatureValidationParameters params = (OIDCSignatureValidationParameters) resolver.resolveSingle(criteria);
+        Assert.assertEquals(params.getSignatureAlgorithm(), "ES384");
+        Assert.assertTrue(params.getValidationCredentials().size() == 1);
+        Assert.assertEquals(Curve.forECParameterSpec(
+                ((java.security.interfaces.ECKey) params.getValidationCredentials().get(0).getPublicKey()).getParams()),
+                Curve.P_384);
     }
 
+    @Test
+    public void testRequestObjectParametersES512() throws ResolverException {
+        metaData.setRequestObjectJWSAlg(JWSAlgorithm.ES512);
+        resolver.setParameterType(ParameterType.REQUEST_OBJECT_VALIDATION);
+        OIDCSignatureValidationParameters params = (OIDCSignatureValidationParameters) resolver.resolveSingle(criteria);
+        Assert.assertEquals(params.getSignatureAlgorithm(), "ES512");
+        Assert.assertTrue(params.getValidationCredentials().size() == 2);
+        Assert.assertEquals(Curve.forECParameterSpec(
+                ((java.security.interfaces.ECKey) params.getValidationCredentials().get(0).getPublicKey()).getParams()),
+                Curve.P_521);
+        Assert.assertEquals(Curve.forECParameterSpec(
+                ((java.security.interfaces.ECKey) params.getValidationCredentials().get(1).getPublicKey()).getParams()),
+                Curve.P_521);
+    }
 }
