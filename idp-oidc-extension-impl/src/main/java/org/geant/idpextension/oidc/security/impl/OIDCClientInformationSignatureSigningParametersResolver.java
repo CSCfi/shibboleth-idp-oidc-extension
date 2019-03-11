@@ -29,7 +29,6 @@
 package org.geant.idpextension.oidc.security.impl;
 
 import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.List;
 
