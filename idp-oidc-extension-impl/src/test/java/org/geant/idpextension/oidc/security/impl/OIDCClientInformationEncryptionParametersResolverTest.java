@@ -30,27 +30,20 @@
 
 package org.geant.idpextension.oidc.security.impl;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 import org.geant.idpextension.oidc.criterion.ClientInformationCriterion;
+import org.geant.idpextension.oidc.profile.spring.factory.BasicJWKCredentialFactoryBean;
 import org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver.ParameterType;
-import org.geant.security.jwk.BasicJWKCredential;
+import org.mockito.Mockito;
 import org.opensaml.security.credential.Credential;
-import org.opensaml.security.credential.UsageType;
 import org.opensaml.xmlsec.EncryptionConfiguration;
 import org.opensaml.xmlsec.EncryptionParameters;
-import org.opensaml.xmlsec.KeyTransportAlgorithmPredicate;
 import org.opensaml.xmlsec.criterion.EncryptionConfigurationCriterion;
-import org.opensaml.xmlsec.encryption.support.RSAOAEPParameters;
-import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
+import org.springframework.core.io.ClassPathResource;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -66,7 +59,7 @@ import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
- * Tests for {@link OIDCClientInformationEncryptionParametersResolver}. 
+ * Tests for {@link OIDCClientInformationEncryptionParametersResolver}.
  */
 public class OIDCClientInformationEncryptionParametersResolverTest {
 
@@ -81,7 +74,18 @@ public class OIDCClientInformationEncryptionParametersResolverTest {
         resolver = new OIDCClientInformationEncryptionParametersResolver();
         // Encryption configuration
         List<EncryptionConfiguration> configs = new ArrayList<EncryptionConfiguration>();
-        configs.add(new MockEncryptionConfiguration());
+        EncryptionConfiguration encConfig = Mockito.mock(EncryptionConfiguration.class);
+        Mockito.when(encConfig.getDataEncryptionAlgorithms()).thenReturn(
+                Arrays.asList("A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM"));
+        Mockito.when(encConfig.getKeyTransportEncryptionAlgorithms()).thenReturn(
+                Arrays.asList("ECDH-ES", "RSA1_5", "RSA-OAEP", "RSA-OAEP-256", "A128GCMKW", "A192GCMKW", "A256GCMKW"));
+        List<Credential> encCreds = new ArrayList<Credential>();
+        BasicJWKCredentialFactoryBean factory = new BasicJWKCredentialFactoryBean();
+        factory.setJWKResource(new ClassPathResource("credentials/idp-encryption-rsa.jwk"));
+        factory.afterPropertiesSet();
+        encCreds.add(factory.getObject());
+        Mockito.when(encConfig.getKeyTransportEncryptionCredentials()).thenReturn(encCreds);
+        configs.add(encConfig);
         criteria = new CriteriaSet(new EncryptionConfigurationCriterion(configs));
         metaData = new OIDCClientMetadata();
         metaData.setIDTokenJWEAlg(JWEAlgorithm.RSA_OAEP_256);
@@ -139,116 +143,5 @@ public class OIDCClientInformationEncryptionParametersResolverTest {
         Assert.assertEquals("A192GCM", params.getDataEncryptionAlgorithm());
         Assert.assertNotNull(
                 ((OIDCDecryptionParameters) params).getKeyTransportDecryptionCredentials().get(0).getPrivateKey());
-        Assert.assertNotNull(
-                ((OIDCDecryptionParameters) params).getKeyTransportDecryptionCredentials().get(1).getPrivateKey());
     }
-
-    public class MockEncryptionConfiguration implements EncryptionConfiguration {
-
-        private List<Credential> credentials;
-
-        private void initializeCredentials() throws NoSuchAlgorithmException {
-            credentials = new ArrayList<Credential>();
-            // RSA
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-            keyGen.initialize(2048);
-            KeyPair keyPair = keyGen.genKeyPair();
-            BasicJWKCredential credential = new BasicJWKCredential();
-            credential.setUsageType(UsageType.ENCRYPTION);
-            credential.setPrivateKey(keyPair.getPrivate());
-            credentials.add(credential);
-            // lets add second RSA key, it's the same but who cares.
-            credentials.add(credential);
-            // EC
-            keyGen = KeyPairGenerator.getInstance("EC");
-            keyGen.initialize(256);
-            keyPair = keyGen.genKeyPair();
-            credential = new BasicJWKCredential();
-            credential.setUsageType(UsageType.ENCRYPTION);
-            credential.setPrivateKey(keyPair.getPrivate());
-            credentials.add(credential);
-            // lets add second EC key, it's the same but who cares.
-            credentials.add(credential);
-        }
-
-        @Override
-        public Collection<String> getWhitelistedAlgorithms() {
-            return new HashSet<String>();
-        }
-
-        @Override
-        public boolean isWhitelistMerge() {
-            return false;
-        }
-
-        @Override
-        public Collection<String> getBlacklistedAlgorithms() {
-            return new HashSet<String>();
-        }
-
-        @Override
-        public boolean isBlacklistMerge() {
-            return false;
-        }
-
-        @Override
-        public Precedence getWhitelistBlacklistPrecedence() {
-            return null;
-        }
-
-        @Override
-        public List<Credential> getDataEncryptionCredentials() {
-            return null;
-        }
-
-        @Override
-        public List<String> getDataEncryptionAlgorithms() {
-            return Arrays.asList("A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM");
-        }
-
-        @Override
-        public List<Credential> getKeyTransportEncryptionCredentials() {
-            if (credentials == null) {
-                try {
-                    initializeCredentials();
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                }
-            }
-            return credentials;
-        }
-
-        @Override
-        public List<String> getKeyTransportEncryptionAlgorithms() {
-            return Arrays.asList("ECDH-ES", "RSA1_5", "RSA-OAEP", "RSA-OAEP-256", "A128GCMKW", "A192GCMKW",
-                    "A256GCMKW");
-        }
-
-        @Override
-        public NamedKeyInfoGeneratorManager getDataKeyInfoGeneratorManager() {
-            return null;
-        }
-
-        @Override
-        public NamedKeyInfoGeneratorManager getKeyTransportKeyInfoGeneratorManager() {
-            return null;
-        }
-
-        @Override
-        public RSAOAEPParameters getRSAOAEPParameters() {
-            return null;
-        }
-
-        @Override
-        public boolean isRSAOAEPParametersMerge() {
-            return false;
-        }
-
-        @Override
-        public KeyTransportAlgorithmPredicate getKeyTransportAlgorithmPredicate() {
-            return null;
-        }
-
-    }
-
 }
