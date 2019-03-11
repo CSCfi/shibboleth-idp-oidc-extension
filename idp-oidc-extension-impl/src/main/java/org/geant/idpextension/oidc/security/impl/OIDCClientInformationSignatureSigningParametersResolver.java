@@ -152,6 +152,11 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
     protected void resolveAndPopulateCredentialAndSignatureAlgorithm(@Nonnull final SignatureSigningParameters params,
             @Nonnull final CriteriaSet criteria, @Nonnull final Predicate<String> whitelistBlacklistPredicate) {
 
+        log.debug("Resolving SignatureSigningParameters, purpose {}",
+                target.equals(ParameterType.REQUEST_OBJECT_VALIDATION) ? "request object signature verification"
+                        : target.equals(ParameterType.IDTOKEN_SIGNING) ? "id token signing"
+                                : "userinfo response signing");
+
         if (!criteria.contains(ClientInformationCriterion.class)) {
             log.debug("No client criterion, nothing to do");
             super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);

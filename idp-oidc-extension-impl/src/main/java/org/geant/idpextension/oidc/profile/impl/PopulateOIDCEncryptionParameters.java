@@ -217,7 +217,9 @@ public class PopulateOIDCEncryptionParameters extends AbstractProfileAction {
             }
             CriteriaSet criteria = buildCriteriaSet(profileRequestContext);
             final EncryptionParameters params = encParamsresolver.resolveSingle(criteria);
-            log.debug("{} {} EncryptionParameters", getLogPrefix(), params != null ? "Resolved" : "Failed to resolve");
+            log.debug("{} {} EncryptionParameters for {}", getLogPrefix(),
+                    params != null ? "Resolved" : "Failed to resolve",
+                    forDecryption ? "request object decryption" : "response encryption");
             if (params != null) {
                 if (forDecryption) {
                     // Decryption parameters for request object decryption

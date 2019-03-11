@@ -185,7 +185,7 @@ public class OIDCClientInformationEncryptionParametersResolver extends BasicEncr
                 encryptionMethod = clientInformation.getOIDCMetadata().getIDTokenJWEEnc();
         }
         if (keyTransportAlgorithm == null) {
-            log.debug("No {} algorithm information in client information, nothing to do");
+            log.debug("No algorithm information in client information, nothing to do");
             criteria.add(new EncryptionOptionalCriterion(true));
             super.resolveAndPopulateCredentialsAndAlgorithms(params, criteria, whitelistBlacklistPredicate);
             return;
