@@ -274,11 +274,11 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
     @Override
     protected boolean validate(@Nonnull final SignatureSigningParameters params) {
         if (params.getSigningCredential() == null) {
-            log.warn("Validation failure: Unable to resolve signing credential");
+            log.debug("Validation failure: Unable to resolve signing credential");
             return false;
         }
         if (params.getSignatureAlgorithm() == null) {
-            log.warn("Validation failure: Unable to resolve signing algorithm URI");
+            log.debug("Validation failure: Unable to resolve signing algorithm URI");
             return false;
         }
         return true;
