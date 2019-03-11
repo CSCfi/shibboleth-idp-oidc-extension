@@ -13,6 +13,10 @@
          This file contains global oidc bean definitions.
          This file should be imported to global.xml
     -->
+    
+    <!-- OIDC authentication context class reference parent declaration -->
+    <bean id="shibboleth.OIDCAuthnContextClassReference"
+        class="org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal" abstract="true" />
 
     <!-- Returns true unless subject is already populated in oidc response context. -->
     <bean id="SubjectRequired" class="org.geant.idpextension.oidc.profile.logic.SubjectActivationCondition" />

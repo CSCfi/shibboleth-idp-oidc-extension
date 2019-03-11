@@ -26,10 +26,6 @@
     customization, as the examples below for IP address and SPNEGO authentication illustrate.
     -->
 
-    <!-- OIDC authentication context class reference parent declaration -->
-    <bean id="shibboleth.OIDCAuthnContextClassReference"
-    	class="org.geant.idpextension.oidc.authn.principal.AuthenticationContextClassReferencePrincipal" abstract="true" />
-
     <util:list id="shibboleth.AvailableAuthenticationFlows">
         
         <bean id="authn/IPAddress" parent="shibboleth.AuthenticationFlow"
