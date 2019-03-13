@@ -51,16 +51,14 @@ import org.slf4j.LoggerFactory;
  * 
  * Based on {@link org.opensaml.profile.action.impl.EncodeMessage}.
  * 
- * The difference is having encoder also directly injected without factory.
- * TODO: Consider if we want to apply message encoder factory and loose the
- * direct injection. In the long run we should get rid of this copied class.
+ * The difference is having encoder also directly injected without factory. TODO: Consider if we want to apply message
+ * encoder factory and loose the direct injection. In the long run we should get rid of this copied class.
  * 
- * Action that encodes an outbound response from the outbound
- * {@link MessageContext}.
+ * Action that encodes an outbound response from the outbound {@link MessageContext}.
  * 
  * <p>
- * The {@link MessageEncoderFactory} is used to obtain a new
- * {@link MessageEncoder} to use, and the encoder is destroyed upon completion.
+ * The {@link MessageEncoderFactory} is used to obtain a new {@link MessageEncoder} to use, and the encoder is destroyed
+ * upon completion.
  * </p>
  *
  * 
@@ -68,8 +66,7 @@ import org.slf4j.LoggerFactory;
  * @event {@link EventIds#INVALID_MSG_CTX}
  * @event {@link EventIds#UNABLE_TO_ENCODE}
  * 
- * @post If ProfileRequestContext.getOutboundMessageContext() != null, it will
- *       be injected and encoded.
+ * @post If ProfileRequestContext.getOutboundMessageContext() != null, it will be injected and encoded.
  */
 @SuppressWarnings("rawtypes")
 public class EncodeMessage extends AbstractProfileAction {
@@ -85,9 +82,8 @@ public class EncodeMessage extends AbstractProfileAction {
     private MessageEncoder encoder;
 
     /**
-     * An optional {@link MessageHandler} instance to be invoked after
-     * {@link MessageEncoder#prepareContext()} and prior to
-     * {@link MessageEncoder#encode()}.
+     * An optional {@link MessageHandler} instance to be invoked after {@link MessageEncoder#prepareContext()} and prior
+     * to {@link MessageEncoder#encode()}.
      */
     @Nullable
     private MessageHandler messageHandler;
@@ -99,8 +95,7 @@ public class EncodeMessage extends AbstractProfileAction {
     /**
      * Set the encoder factory to use.
      * 
-     * @param factory
-     *            factory to use
+     * @param factory factory to use
      */
     public void setMessageEncoderFactory(@Nonnull final MessageEncoderFactory factory) {
         encoderFactory = Constraint.isNotNull(factory, "MessageEncoderFactory cannot be null");
@@ -109,8 +104,7 @@ public class EncodeMessage extends AbstractProfileAction {
     /**
      * Set the encoder factory to use.
      * 
-     * @param factory
-     *            factory to use
+     * @param factory factory to use
      */
     public void setMessageEncoder(@Nonnull final MessageEncoder enc) {
         encoder = Constraint.isNotNull(enc, "MessageEncoder cannot be null");
@@ -118,17 +112,14 @@ public class EncodeMessage extends AbstractProfileAction {
 
     /**
      * <p>
-     * The supplied {@link MessageHandler} will be invoked on the
-     * {@link MessageContext} after {@link MessageEncoder#prepareContext()}, and
-     * prior to invoking {@link MessageEncoder#encode()}. Its use is optional
-     * and primarily used for transport/binding-specific message handling, as
-     * opposed to more generalized message handling operations which would
-     * typically be invoked earlier than this action. For more details see
+     * The supplied {@link MessageHandler} will be invoked on the {@link MessageContext} after
+     * {@link MessageEncoder#prepareContext()}, and prior to invoking {@link MessageEncoder#encode()}. Its use is
+     * optional and primarily used for transport/binding-specific message handling, as opposed to more generalized
+     * message handling operations which would typically be invoked earlier than this action. For more details see
      * {@link MessageEncoder}.
      * </p>
      * 
-     * @param handler
-     *            a message handler
+     * @param handler a message handler
      */
     public void setMessageHandler(@Nullable final MessageHandler handler) {
         messageHandler = handler;
@@ -189,16 +180,16 @@ public class EncodeMessage extends AbstractProfileAction {
             encoder.prepareContext();
 
             if (messageHandler != null) {
-                log.debug("{} Invoking message handler of type {} for this response", getLogPrefix(), messageHandler
-                        .getClass().getName());
+                log.debug("{} Invoking message handler of type {} for this response", getLogPrefix(),
+                        messageHandler.getClass().getName());
                 messageHandler.invoke(msgContext);
             }
 
             encoder.encode();
 
             if (msgContext.getMessage() != null) {
-                log.debug("{} Outbound message encoded from a message of type {}", getLogPrefix(), msgContext
-                        .getMessage().getClass().getName());
+                log.debug("{} Outbound message encoded from a message of type {}", getLogPrefix(),
+                        msgContext.getMessage().getClass().getName());
             } else {
                 log.debug("{} Outbound message was encoded from protocol-specific data "
                         + "rather than MessageContext#getMessage()", getLogPrefix());
