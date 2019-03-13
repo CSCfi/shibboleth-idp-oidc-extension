@@ -28,9 +28,12 @@
 
 package org.geant.idpextension.oidc.encoding.impl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.servlet.http.HttpServletResponse;
 
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
@@ -39,7 +42,7 @@ class ResponseUtil {
     /**
      * Helper method to print response to string for logging.
      * 
-     * @param httpResponse request to be printed
+     * @param httpResponse response to be printed
      * @return response as formatted string.
      */
     protected static String toString(HTTPResponse httpResponse) {
@@ -60,4 +63,30 @@ class ResponseUtil {
         }
         return ret;
     }
+
+    /**
+     * Helper method to print response to string for logging.
+     * 
+     * @param httpServletResponse response to be printed
+     * @return response as formatted string.
+     */
+    protected static String toString(HttpServletResponse httpServletResponse, String content) {
+        if (httpServletResponse == null) {
+            return null;
+        }
+        String nl = System.lineSeparator();
+        String ret = nl;
+        Collection<String> headerNames = httpServletResponse.getHeaderNames();
+        if (headerNames != null) {
+            ret += "Headers:" + nl;
+            for (String headerName : headerNames) {
+                ret += "\t" + headerName + ":" + httpServletResponse.getHeader(headerName) + nl;
+            }
+        }
+        if (content != null) {
+            ret += "Content:" + content;
+        }
+        return ret;
+    }
+
 }

@@ -4,42 +4,45 @@
 ##
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-    </head>
-    <body onload="document.forms[0].submit()">
+
+<head>
+    <meta charset="utf-8" />
+</head>
+
+<body onload="document.forms[0].submit()">
+    <noscript>
+        <p>
+            <strong>Note:</strong> Since your browser does not support JavaScript, you must press the Continue button once to proceed.
+        </p>
+    </noscript>
+
+    <form action="${action}" method="post">
+        <div>
+            #if($code)
+            <input type="hidden" name="code" value="${code}" />#end #if($state)
+
+            <input type="hidden" name="state" value="${state}" />#end #if($access_token)
+
+            <input type="hidden" name="access_token" value="${access_token}" />#end #if($token_type)
+
+            <input type="hidden" name="token_type" value="${token_type}" />#end #if($id_token)
+
+            <input type="hidden" name="id_token" value="${id_token}" />#end #if($expires_in)
+
+            <input type="hidden" name="expires_in" value="${expires_in}" />#end #if($error)
+
+            <input type="hidden" name="error" value="${error}" />#end #if($error_description)
+
+            <input type="hidden" name="error_description" value="${error_description}" />#end #if($error_uri)
+
+            <input type="hidden" name="error_uri" value="${error_uri}" />#end
+        </div>
         <noscript>
-            <p>
-                <strong>Note:</strong> Since your browser does not support JavaScript,
-                you must press the Continue button once to proceed.
-            </p>
-        </noscript>
-        
-        <form action="${action}" method="post">
             <div>
-                #if($code)<input type="hidden" name="code" value="${code}"/>#end
-                
-                #if($state)<input type="hidden" name="state" value="${state}"/>#end
-                
-                #if($access_token)<input type="hidden" name="access_token" value="${access_token}"/>#end
-                
-                #if($token_type)<input type="hidden" name="token_type" value="${token_type}"/>#end
-                
-                #if($id_token)<input type="hidden" name="id_token" value="${id_token}"/>#end
-                
-                #if($expires_in)<input type="hidden" name="expires_in" value="${expires_in}"/>#end
-                
-                #if($error)<input type="hidden" name="error" value="${error}"/>#end
-                
-                #if($error_description)<input type="hidden" name="error_description" value="${error_description}"/>#end
-                
-                #if($error_uri)<input type="hidden" name="error_uri" value="${error_uri}"/>#end
+                <input type="submit" value="Continue" />
             </div>
-            <noscript>
-                <div>
-                    <input type="submit" value="Continue"/>
-                </div>
-            </noscript>
-        </form>
-    </body>
+        </noscript>
+    </form>
+</body>
+
 </html>

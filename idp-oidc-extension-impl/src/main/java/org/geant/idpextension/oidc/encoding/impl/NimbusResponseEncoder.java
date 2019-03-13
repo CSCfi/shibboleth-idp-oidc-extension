@@ -30,6 +30,7 @@ package org.geant.idpextension.oidc.encoding.impl;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
@@ -144,7 +145,11 @@ public class NimbusResponseEncoder extends AbstractHttpServletResponseMessageEnc
                 final Writer out = new OutputStreamWriter(response.getOutputStream(), "UTF-8");
                 velocityEngine.mergeTemplate(velocityTemplateId, "UTF-8", context, out);
                 out.flush();
-                //TODO: log outbound message
+                out.close();
+                // Write it also to log
+                final StringWriter writer = new StringWriter();
+                velocityEngine.mergeTemplate(velocityTemplateId, "UTF-8", context, writer);
+                log.debug("Outbound response {}", ResponseUtil.toString(response, writer.toString()));
                 return;
             }
             final HTTPResponse resp = getMessageContext().getMessage().toHTTPResponse();
