@@ -152,7 +152,6 @@ public class PopulateOIDCEncryptionParametersTest extends BaseOIDCResponseAction
 
         @Override
         public Iterable<EncryptionParameters> resolve(CriteriaSet criteria) throws ResolverException {
-            // TODO Auto-generated method stub
             return null;
         }
 
