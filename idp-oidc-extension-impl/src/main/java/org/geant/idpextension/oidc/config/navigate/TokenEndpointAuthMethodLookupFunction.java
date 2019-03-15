@@ -31,6 +31,7 @@ package org.geant.idpextension.oidc.config.navigate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.geant.idpextension.oidc.config.AbstractOIDCClientAuthenticableProfileConfiguration;
 import org.geant.idpextension.oidc.config.AbstractOIDCFlowAwareProfileConfiguration;
 import org.opensaml.profile.context.ProfileRequestContext;
 
@@ -57,10 +58,10 @@ public class TokenEndpointAuthMethodLookupFunction
         final RelyingPartyContext rpc = getRelyingPartyContextLookupStrategy().apply(input);
         if (rpc != null) {
             final ProfileConfiguration pc = rpc.getProfileConfig();
-            if (pc != null && pc instanceof AbstractOIDCFlowAwareProfileConfiguration) {
+            if (pc != null && pc instanceof AbstractOIDCClientAuthenticableProfileConfiguration) {
                 final List<ClientAuthenticationMethod> result = new ArrayList<>();
                 for (final String tokenAuthMethod : 
-                    ((AbstractOIDCFlowAwareProfileConfiguration)pc).getTokenEndpointAuthMethods()) {
+                    ((AbstractOIDCClientAuthenticableProfileConfiguration)pc).getTokenEndpointAuthMethods()) {
                     result.add(new ClientAuthenticationMethod(tokenAuthMethod));
                 }
                 return result;
