@@ -63,9 +63,16 @@ public class AlgorithmInfoMetadataValueResolver extends AbstractIdentifiableInit
     private Function<ProfileRequestContext, RelyingPartyContext> relyingPartyContextLookupStrategy;
 
     /**
-     * Whether to resolve data encryption algorithms. Defaults to false, when signature algorithms are resolved.
+     * Whether to resolve data and key transport encryption algorithms. Defaults to false, when signature algorithms
+     * are resolved.
      */
     private boolean resolveEncryptionAlgs = false;
+    
+    /**
+     * Whether to resolve key transport encryption algorithms. Defaults to false, when data encryption algorithms are 
+     * resolved. This flag is only used when resolveEncryptionAlgs is enabled.
+     */
+    private boolean resolveKeyTransportEncAlgs = false;
 
     public AlgorithmInfoMetadataValueResolver() {
         relyingPartyContextLookupStrategy = new ChildContextLookup<>(RelyingPartyContext.class);
@@ -94,6 +101,16 @@ public class AlgorithmInfoMetadataValueResolver extends AbstractIdentifiableInit
     public void setResolveEncryptionAlgs(final boolean flag) {
         resolveEncryptionAlgs = flag;
     }
+    
+    /**
+     * Set whether to resolve key transport algorithms. Defaults to false, when data encryption algorithms are
+     * resolved. In any case, resolveEncryptionAlgs must be enabled.
+     * 
+     * @param flag What to set.
+     */
+    public void setResolveKeyTransportEncAlgs(final boolean flag) {
+        resolveKeyTransportEncAlgs = flag;
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -111,7 +128,11 @@ public class AlgorithmInfoMetadataValueResolver extends AbstractIdentifiableInit
             final EncryptionConfiguration encryptionConfig =
                     rpCtx.getProfileConfig().getSecurityConfiguration().getEncryptionConfiguration();
             if (encryptionConfig != null) {
-                algorithms = encryptionConfig.getDataEncryptionAlgorithms();
+                if (resolveKeyTransportEncAlgs) {
+                    algorithms = encryptionConfig.getKeyTransportEncryptionAlgorithms();
+                } else {
+                    algorithms = encryptionConfig.getDataEncryptionAlgorithms();
+                }
             } else {
                 algorithms = new ArrayList<String>();
             }
