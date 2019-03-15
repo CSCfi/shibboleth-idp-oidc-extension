@@ -22,7 +22,7 @@
     
     <import resource="oidc-relying-party.xml"/>
     
-    <bean id="shibboleth.UnverifiedRelyingParty" parent="RelyingParty">
+    <bean id="shibboleth.UnverifiedRelyingParty" p:responderIdLookupStrategy-ref="profileResponderIdLookupFunction" parent="RelyingParty">
         <property name="profileConfigurations">
             <list>
                 <bean parent="OIDC.Registration" />
