@@ -44,13 +44,8 @@
     <bean id="ExampleFileResolver"
         class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" 
         p:id="ExampleFileResolver1"
-        p:remoteJwkSetCache-ref="shibboleth.oidc.RemoteJwkSetCache">
-        <constructor-arg>
-            <bean class="java.io.File" id="ExampleFile">
-                <constructor-arg type="String" value="/opt/shibboleth-idp/metadata/oidc-client.json" />
-            </bean>
-        </constructor-arg>
-    </bean>
+        p:remoteJwkSetCache-ref="shibboleth.oidc.RemoteJwkSetCache"
+        c:metadata="/opt/shibboleth-idp/metadata/oidc-client.json" />
 
     <bean id="ExampleStorageClientInformationResolver"
         class="org.geant.idpextension.oidc.metadata.impl.StorageServiceClientInformationResolver"
