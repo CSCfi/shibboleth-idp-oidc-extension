@@ -55,17 +55,21 @@
 
     <bean id="shibboleth.oidc.OpenIdConfigurationResolver"
         class="org.geant.idpextension.oidc.metadata.impl.DynamicFilesystemProviderMetadataResolver"
-        c:metadata="%{idp.oidc.discovery.template:/opt/shibboleth-idp/static/.well-known/openid-configuration}">
+        c:metadata-ref="MetadataSkeleton">
         <property name="dynamicValueResolvers">
             <map value-type="org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver">
-                <entry key="signing-keys" value-ref="CredentialResolver" />
                 <entry key="id_token_signing_alg_values_supported" value-ref="SignatureAlgorithmInfoResolver" />
                 <entry key="userinfo_signing_alg_values_supported" value-ref="SignatureAlgorithmInfoResolver" />
-                <entry key="id_token_encryption_alg_values_supported" value-ref="EncryptionAlgorithmInfoResolver" />
-                <entry key="userinfo_encryption_alg_values_supported" value-ref="EncryptionAlgorithmInfoResolver" />
+                <entry key="id_token_encryption_enc_values_supported" value-ref="DataEncryptionAlgorithmInfoResolver" />
+                <entry key="userinfo_encryption_enc_values_supported" value-ref="DataEncryptionAlgorithmInfoResolver" />
+                <entry key="id_token_encryption_alg_values_supported" value-ref="KeyTransportEncryptionAlgorithmInfoResolver" />
+                <entry key="userinfo_encryption_alg_values_supported" value-ref="KeyTransportEncryptionAlgorithmInfoResolver" />
             </map>
         </property>
     </bean>
+    
+    <bean id="MetadataSkeleton" class="org.springframework.core.io.FileSystemResource"
+        c:path="%{idp.oidc.discovery.template:/opt/shibboleth-idp/static/.well-known/openid-configuration}"/>
 
     <bean id="CredentialResolver" class="org.geant.idpextension.oidc.metadata.impl.CredentialMetadataValueResolver" />
 
@@ -73,9 +77,13 @@
         class="org.geant.idpextension.oidc.metadata.impl.AlgorithmInfoMetadataValueResolver"
         p:resolveEncryptionAlgs="false" />
 
-    <bean id="EncryptionAlgorithmInfoResolver"
+    <bean id="DataEncryptionAlgorithmInfoResolver"
         class="org.geant.idpextension.oidc.metadata.impl.AlgorithmInfoMetadataValueResolver"
-        p:resolveEncryptionAlgs="true" />
+        p:resolveEncryptionAlgs="true" p:resolveKeyTransportEncAlgs="false" />
+
+    <bean id="KeyTransportEncryptionAlgorithmInfoResolver"
+        class="org.geant.idpextension.oidc.metadata.impl.AlgorithmInfoMetadataValueResolver"
+        p:resolveEncryptionAlgs="true" p:resolveKeyTransportEncAlgs="true" />
 
     <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
         p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
