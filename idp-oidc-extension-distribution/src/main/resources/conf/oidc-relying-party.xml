@@ -46,6 +46,7 @@
         p:servletRequest-ref="shibboleth.HttpServletRequest" />
     <bean id="OAUTH2.Revocation" class="org.geant.idpextension.oauth2.config.OAuth2TokenRevocationConfiguration"
         p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
+        p:tokenEndpointAuthMethods="%{idp.oidc.dynreg.tokenEndpointAuthMethods:client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt}"
         p:servletRequest-ref="shibboleth.HttpServletRequest" />
     <bean id="OIDC.Keyset" class="org.geant.idpextension.oidc.config.OIDCPublishKeySetConfiguration"
         p:securityConfiguration-ref="shibboleth.oidc.PublishKeySetSecurityConfiguration"
