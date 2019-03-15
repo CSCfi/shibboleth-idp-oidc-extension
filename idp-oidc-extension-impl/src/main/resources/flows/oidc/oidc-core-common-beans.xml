@@ -115,6 +115,18 @@
                         </constructor-arg>
                     </bean>
                 </entry>
+                <entry>
+                    <key>
+                        <util:constant static-field="org.geant.idpextension.oidc.audit.AuditFields.REVOKED_TOKEN"/>
+                    </key>
+                    <bean class="org.geant.idpextension.oidc.audit.impl.RevokedTokenAuditExtractor">
+                        <constructor-arg>
+                            <bean class="com.google.common.base.Functions" factory-method="compose"
+                                c:g-ref="shibboleth.MessageLookup.oidc.TokenRevocationRequest"
+                                c:f-ref="shibboleth.MessageContextLookup.Inbound" />
+                        </constructor-arg>
+                    </bean>
+                </entry>
             </map>
         </property>
     </bean>
@@ -122,6 +134,10 @@
     <bean id="shibboleth.MessageLookup.oidc.AuthenticationRequest"
         class="org.opensaml.messaging.context.navigate.MessageLookup"
         c:type="#{ T(com.nimbusds.openid.connect.sdk.AuthenticationRequest) }" />
+        
+    <bean id="shibboleth.MessageLookup.oidc.TokenRevocationRequest"
+        class="org.opensaml.messaging.context.navigate.MessageLookup"
+        c:type="#{ T(com.nimbusds.oauth2.sdk.TokenRevocationRequest) }" />
         
     <bean id="shibboleth.oidc.DefaultPostResponseAuditExtractors"
             class="org.springframework.beans.factory.config.MapFactoryBean">

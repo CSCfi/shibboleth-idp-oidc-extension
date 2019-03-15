@@ -26,56 +26,44 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.geant.idpextension.oidc.audit;
+package org.geant.idpextension.oidc.audit.impl;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+import org.opensaml.profile.context.ProfileRequestContext;
 
-/**
- * Constants to use for audit logging fields stored in an {@link net.shibboleth.idp.profile.context.AuditContext}.
- */
-public final class AuditFields {
+import com.google.common.base.Function;
+import com.nimbusds.oauth2.sdk.TokenRevocationRequest;
 
-    
-    /** OIDC client ID. */
-    @Nonnull @NotEmpty public static final String CLIENT_ID = "SP";
-    
-    /** OIDC issuer. */
-    @Nonnull @NotEmpty public static final String ISSUER = "IDP";
+import net.shibboleth.utilities.java.support.logic.Constraint;
 
-    /** The inbound (Nimbus) message class. */
-    @Nonnull @NotEmpty public static final String INBOUND_MESSAGE_CLASS = "b";
-    
-    /** The outbound (Nimbus) message class. */
-    @Nonnull @NotEmpty public static final String OUTBOUND_MESSAGE_CLASS = "bb";
-    
-    /** The authentication context reference value. */
-    @Nonnull @NotEmpty public static final String ACR = "ac";
+/** {@link Function} that returns token to be revoked by {@link TokenRevocationRequest}. */
+@SuppressWarnings("rawtypes")
+public class RevokedTokenAuditExtractor implements Function<ProfileRequestContext, String> {
 
-    /** The subject value. */
-    @Nonnull @NotEmpty public static final String SUB_VALUE = "n";
-    
-    /** The subject format (public/pairwise). */
-    @Nonnull @NotEmpty public static final String SUB_FORMAT = "f";
+    /** Lookup strategy for message to read from. */
+    @Nonnull
+    private final Function<ProfileRequestContext, TokenRevocationRequest> requestLookupStrategy;
 
-    /** The flag whether the id_token is encrypted. */
-    @Nonnull @NotEmpty public static final String ENCRYPTED_ID_TOKEN = "X";
-
-    /** prompt=none requested field. */
-    @Nonnull @NotEmpty public static final String IS_PASSIVE = "pasv";
-
-    /** prompt=login requested field. */
-    @Nonnull @NotEmpty public static final String FORCE_AUTHN = "fauth";
-    
-    /** Revoked Token. */
-    @Nonnull @NotEmpty public static final String REVOKED_TOKEN = "i";
-    
     /**
      * Constructor.
+     *
+     * @param strategy lookup strategy for message
      */
-    private AuditFields() {
-        // no op
+    public RevokedTokenAuditExtractor(@Nonnull final Function<ProfileRequestContext, TokenRevocationRequest> strategy) {
+        requestLookupStrategy = Constraint.isNotNull(strategy, "TokenRevocationRequest lookup strategy cannot be null");
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Nullable
+    public String apply(@Nullable final ProfileRequestContext input) {
+        final TokenRevocationRequest request = requestLookupStrategy.apply(input);
+        if (request != null && request.getToken() != null) {
+            return request.getToken().getValue();
+        }
+        return null;
     }
 
 }
