@@ -28,11 +28,11 @@
 
 package org.geant.idpextension.oidc.metadata.impl;
 
-import java.io.File;
 import java.util.HashMap;
 
 import org.geant.idpextension.oidc.metadata.resolver.RefreshableMetadataValueResolver;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.springframework.core.io.ClassPathResource;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -57,7 +57,7 @@ public class DynamicFilesystemProviderMetadataResolverTest extends FilesystemPro
         name = "mockName";
         value = "mockValue";
         FilesystemMetadataValueResolver valueResolver = new FilesystemMetadataValueResolver(
-                new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/dyn-value1.json"));
+                new ClassPathResource("/org/geant/idpextension/oidc/metadata/impl/dyn-value1.json"));
         valueResolver.setId("mock");
         valueResolver.initialize();
         final HashMap<String, RefreshableMetadataValueResolver> map = new HashMap<>();

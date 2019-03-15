@@ -50,22 +50,12 @@
     </util:list>
 
     <bean id="ExampleFileResolver"
-        class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" p:id="ExampleFileResolver1">
-        <constructor-arg>
-            <bean class="java.io.File" id="ExampleFile">
-                <constructor-arg type="String" value="src/test/resources/org/geant/idpextension/oidc/metadata/impl/oidc-client.json" />
-            </bean>
-        </constructor-arg>
-    </bean>
+        class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" p:id="ExampleFileResolver1"
+        c:metadata="/org/geant/idpextension/oidc/metadata/impl/oidc-client.json"/>
 
     <bean id="ExampleFileResolver2"
-        class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" p:id="ExampleFileResolver1">
-        <constructor-arg>
-            <bean class="java.io.File" id="ExampleFile2">
-                <constructor-arg type="String" value="src/test/resources/org/geant/idpextension/oidc/metadata/impl/oidc-client2.json" />
-            </bean>
-        </constructor-arg>
-    </bean>
+        class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" p:id="ExampleFileResolver2"
+        c:metadata="/org/geant/idpextension/oidc/metadata/impl/oidc-client2.json"/>
     
 </beans>
 

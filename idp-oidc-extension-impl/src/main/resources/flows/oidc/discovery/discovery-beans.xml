@@ -54,7 +54,8 @@
         scope="prototype" p:metadataResolver-ref="shibboleth.oidc.OpenIdConfigurationResolver" />
 
     <bean id="shibboleth.oidc.OpenIdConfigurationResolver"
-        class="org.geant.idpextension.oidc.metadata.impl.DynamicFilesystemProviderMetadataResolver">
+        class="org.geant.idpextension.oidc.metadata.impl.DynamicFilesystemProviderMetadataResolver"
+        c:metadata="%{idp.oidc.discovery.template:/opt/shibboleth-idp/static/.well-known/openid-configuration}">
         <property name="dynamicValueResolvers">
             <map value-type="org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver">
                 <entry key="signing-keys" value-ref="CredentialResolver" />
@@ -64,8 +65,6 @@
                 <entry key="userinfo_encryption_alg_values_supported" value-ref="EncryptionAlgorithmInfoResolver" />
             </map>
         </property>
-        <constructor-arg type="java.io.File"
-            value="/opt/shibboleth-idp/static/.well-known/openid-configuration" />
     </bean>
 
     <bean id="CredentialResolver" class="org.geant.idpextension.oidc.metadata.impl.CredentialMetadataValueResolver" />

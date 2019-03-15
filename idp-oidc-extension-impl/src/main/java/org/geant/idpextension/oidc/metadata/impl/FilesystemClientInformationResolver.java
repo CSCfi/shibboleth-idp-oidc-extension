@@ -28,7 +28,7 @@
 
 package org.geant.idpextension.oidc.metadata.impl;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -44,6 +44,7 @@ import org.geant.idpextension.oidc.metadata.resolver.RefreshableClientInformatio
 import org.geant.idpextension.oidc.metadata.resolver.RemoteJwkSetCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -83,9 +84,9 @@ public class FilesystemClientInformationResolver extends AbstractFileOIDCEntityR
      * 
      * @param metadata the metadata file
      * 
-     * @throws ResolverException this exception is no longer thrown
+     * @throws IOException If the metedata cannot be loaded.
      */
-    public FilesystemClientInformationResolver(@Nonnull final File metadata) throws ResolverException {
+    public FilesystemClientInformationResolver(@Nonnull final Resource metadata) throws IOException {
         super(metadata);
     }
 
@@ -95,10 +96,10 @@ public class FilesystemClientInformationResolver extends AbstractFileOIDCEntityR
      * @param metadata the metadata file
      * @param backgroundTaskTimer timer used to refresh metadata in the background
      * 
-     * @throws ResolverException this exception is no longer thrown
+     * @throws IOException If the metedata cannot be loaded.
      */
-    public FilesystemClientInformationResolver(@Nullable final Timer backgroundTaskTimer, @Nonnull final File metadata)
-            throws ResolverException {
+    public FilesystemClientInformationResolver(@Nullable final Timer backgroundTaskTimer,
+            @Nonnull final Resource metadata) throws IOException {
         super(backgroundTaskTimer, metadata);
     }
     

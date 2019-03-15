@@ -28,7 +28,7 @@
 
 package org.geant.idpextension.oidc.metadata.impl;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
@@ -40,6 +40,7 @@ import org.geant.idpextension.oidc.metadata.resolver.RefreshableMetadataValueRes
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.Identifier;
@@ -62,9 +63,9 @@ public class FilesystemMetadataValueResolver extends AbstractFileOIDCEntityResol
      * 
      * @param metadata the metadata file
      * 
-     * @throws ResolverException this exception is no longer thrown
+     * @throws IOException If the metedata cannot be loaded.
      */
-    public FilesystemMetadataValueResolver(@Nonnull final File metadata) throws ResolverException {
+    public FilesystemMetadataValueResolver(@Nonnull final Resource metadata) throws IOException {
         super(metadata);
     }
     
@@ -74,10 +75,10 @@ public class FilesystemMetadataValueResolver extends AbstractFileOIDCEntityResol
      * @param metadata the metadata file
      * @param backgroundTaskTimer timer used to refresh metadata in the background
      * 
-     * @throws ResolverException this exception is no longer thrown
+     * @throws IOException If the metedata cannot be loaded.
      */
     public FilesystemMetadataValueResolver(@Nullable final Timer backgroundTaskTimer, 
-            @Nonnull final File metadata) throws ResolverException {
+            @Nonnull final Resource metadata) throws IOException {
         super(backgroundTaskTimer, metadata);
     }
 

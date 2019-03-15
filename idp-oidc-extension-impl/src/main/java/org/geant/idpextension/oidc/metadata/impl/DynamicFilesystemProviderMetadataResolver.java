@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,6 +48,7 @@ import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 
 import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -76,22 +78,22 @@ public class DynamicFilesystemProviderMetadataResolver extends FilesystemProvide
      * 
      * @param metadata the metadata file
      * 
-     * @throws ResolverException this exception is no longer thrown
+     * @throws IOException If the metedata cannot be loaded.
      */
-    public DynamicFilesystemProviderMetadataResolver(@Nonnull final File metadata) throws ResolverException {
+    public DynamicFilesystemProviderMetadataResolver(@Nonnull final Resource metadata) throws IOException {
         super(metadata);
     }
 
     /**
      * Constructor.
      * 
-     * @param metadata the metadata file
      * @param backgroundTaskTimer timer used to refresh metadata in the background
+     * @param metadata the metadata file
      * 
-     * @throws ResolverException this exception is no longer thrown
+     * @throws IOException If the metedata cannot be loaded.
      */
     public DynamicFilesystemProviderMetadataResolver(@Nullable final Timer backgroundTaskTimer,
-            @Nonnull final File metadata) throws ResolverException {
+            @Nonnull final Resource metadata) throws IOException {
         super(backgroundTaskTimer, metadata);
     }
 

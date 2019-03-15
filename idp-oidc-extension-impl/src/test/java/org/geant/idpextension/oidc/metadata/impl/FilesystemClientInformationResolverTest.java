@@ -33,6 +33,8 @@ import java.net.URI;
 import java.util.Set;
 
 import org.geant.idpextension.oidc.criterion.ClientIDCriterion;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -61,7 +63,7 @@ public class FilesystemClientInformationResolverTest {
     public void initTest(final String filename) throws Exception {
         clientId = "demo_rp";
         clientId2 = "demo_rp2";
-        final File file = new File(filename);
+        final Resource file = new ClassPathResource(filename);
         resolver = new FilesystemClientInformationResolver(file);
         resolver.setId("mockId");
         resolver.initialize();
@@ -71,7 +73,7 @@ public class FilesystemClientInformationResolverTest {
     
     @Test
     public void testNotFound() throws Exception {
-        initTest("src/test/resources/org/geant/idpextension/oidc/metadata/impl/oidc-client.json");
+        initTest("/org/geant/idpextension/oidc/metadata/impl/oidc-client.json");
         final ClientIDCriterion criterion = new ClientIDCriterion(new ClientID("not_found"));
         final ClientInformation clientInfo = resolver.resolveSingle(new CriteriaSet(criterion));
         Assert.assertNull(clientInfo);
@@ -79,7 +81,7 @@ public class FilesystemClientInformationResolverTest {
     
     @Test
     public void testSingleSuccess() throws Exception {
-        initTest("src/test/resources/org/geant/idpextension/oidc/metadata/impl/oidc-client.json");
+        initTest("/org/geant/idpextension/oidc/metadata/impl/oidc-client.json");
         final ClientIDCriterion criterion = new ClientIDCriterion(new ClientID(clientId));
         final OIDCClientInformation clientInfo = resolver.resolveSingle(new CriteriaSet(criterion));
         Assert.assertNotNull(clientInfo);
@@ -95,7 +97,7 @@ public class FilesystemClientInformationResolverTest {
 
     @Test
     public void testArraySuccess() throws Exception {
-        initTest("src/test/resources/org/geant/idpextension/oidc/metadata/impl/oidc-clients.json");
+        initTest("/org/geant/idpextension/oidc/metadata/impl/oidc-clients.json");
         final ClientIDCriterion criterion = new ClientIDCriterion(new ClientID(clientId2));
         final OIDCClientInformation clientInfo = resolver.resolveSingle(new CriteriaSet(criterion));
         Assert.assertNotNull(clientInfo);

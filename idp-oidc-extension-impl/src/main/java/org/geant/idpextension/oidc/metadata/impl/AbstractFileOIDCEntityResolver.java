@@ -40,6 +40,7 @@ import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 
 import com.nimbusds.oauth2.sdk.id.Identifier;
 
@@ -64,11 +65,11 @@ public abstract class AbstractFileOIDCEntityResolver<Key extends Identifier, Val
      * 
      * @param metadata the metadata file
      * 
-     * @throws ResolverException  this exception is no longer thrown
+     * @throws IOException If the metedata cannot be loaded.
      */
-    public AbstractFileOIDCEntityResolver(@Nonnull final File metadata) throws ResolverException {
+    public AbstractFileOIDCEntityResolver(@Nonnull final Resource metadata) throws IOException {
         super();
-        setMetadataFile(metadata);
+        setMetadataFile(metadata.getFile());
     }
 
     /**
@@ -77,22 +78,20 @@ public abstract class AbstractFileOIDCEntityResolver<Key extends Identifier, Val
      * @param metadata the metadata file
      * @param backgroundTaskTimer timer used to refresh metadata in the background
      * 
-     * @throws ResolverException  this exception is no longer thrown
+     * @throws IOException If the metedata cannot be loaded.
      */
-    public AbstractFileOIDCEntityResolver(@Nullable final Timer backgroundTaskTimer, @Nonnull final File metadata)
-            throws ResolverException {
+    public AbstractFileOIDCEntityResolver(@Nullable final Timer backgroundTaskTimer, @Nonnull final Resource metadata)
+            throws IOException {
         super(backgroundTaskTimer);
-        setMetadataFile(metadata);
+        setMetadataFile(metadata.getFile());
     }
 
     /**
      * Sets the file from which metadata is read.
      * 
      * @param file path to the metadata file
-     * 
-     * @throws ResolverException this exception is no longer thrown
      */
-    protected void setMetadataFile(@Nonnull final File file) throws ResolverException {
+    protected void setMetadataFile(@Nonnull final File file) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
         ComponentSupport.ifDestroyedThrowDestroyedComponentException(this);
 

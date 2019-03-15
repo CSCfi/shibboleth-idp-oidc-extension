@@ -28,7 +28,6 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +39,8 @@ import org.geant.idpextension.oidc.metadata.resolver.MetadataValueResolver;
 import org.geant.idpextension.oidc.metadata.resolver.ProviderMetadataResolver;
 import org.mockito.Mockito;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.webflow.execution.RequestContext;
@@ -65,7 +66,7 @@ public class FormOutboundDiscoveryResponseTest {
     @SuppressWarnings("rawtypes")
     protected ProfileRequestContext profileRequestCtx;
 
-    protected File opfile;
+    protected Resource opfile;
 
     protected String dynamicClaim;
 
@@ -76,7 +77,7 @@ public class FormOutboundDiscoveryResponseTest {
         action = buildAction();
         requestCtx = new RequestContextBuilder().buildRequestContext();
         profileRequestCtx = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
-        opfile = new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/openid-configuration.json");
+        opfile = new ClassPathResource("/org/geant/idpextension/oidc/metadata/impl/openid-configuration.json");
         dynamicClaim = "dynamicClaimName";
         dynamicClaimValue = "dynamicClaimValue";
     }

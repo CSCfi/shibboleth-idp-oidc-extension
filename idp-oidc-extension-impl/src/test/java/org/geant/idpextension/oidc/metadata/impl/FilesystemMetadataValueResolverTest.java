@@ -30,6 +30,8 @@ package org.geant.idpextension.oidc.metadata.impl;
 
 import java.io.File;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -41,7 +43,7 @@ import net.minidev.json.JSONObject;
 public class FilesystemMetadataValueResolverTest {
     
     public FilesystemMetadataValueResolver initTests(final String filename) throws Exception {
-        final File file = new File(filename);
+        final Resource file = new ClassPathResource(filename);
         final FilesystemMetadataValueResolver resolver = new FilesystemMetadataValueResolver(file);
         resolver.setId("mockId");
         resolver.initialize();
@@ -51,7 +53,7 @@ public class FilesystemMetadataValueResolverTest {
     @Test
     public void testString() throws Exception {
         final FilesystemMetadataValueResolver resolver = 
-                initTests("src/test/resources/org/geant/idpextension/oidc/metadata/impl/dyn-value1.json");
+                initTests("/org/geant/idpextension/oidc/metadata/impl/dyn-value1.json");
         final Object value = resolver.resolveSingle(null);
         Assert.assertNotNull(value);
         Assert.assertTrue(value instanceof String);
@@ -61,7 +63,7 @@ public class FilesystemMetadataValueResolverTest {
     @Test
     public void testJson() throws Exception {
         final FilesystemMetadataValueResolver resolver = 
-                initTests("src/test/resources/org/geant/idpextension/oidc/metadata/impl/dyn-value2.json");
+                initTests("/org/geant/idpextension/oidc/metadata/impl/dyn-value2.json");
         final Object value = resolver.resolveSingle(null);
         Assert.assertNotNull(value);
         Assert.assertTrue(value instanceof JSONObject);

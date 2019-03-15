@@ -33,6 +33,8 @@ import java.io.File;
 import org.geant.idpextension.oidc.criterion.IssuerCriterion;
 import org.geant.idpextension.oidc.metadata.resolver.ProviderMetadataResolver;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -47,11 +49,11 @@ public class FilesystemProviderMetdataResolverTest {
 
     ProviderMetadataResolver resolver;
     
-    File file;
+    Resource file;
     
     @BeforeMethod
     public void initTests() throws Exception {
-        file = new File("src/test/resources/org/geant/idpextension/oidc/metadata/impl/openid-configuration.json");
+        file = new ClassPathResource("/org/geant/idpextension/oidc/metadata/impl/openid-configuration.json");
         resolver = new FilesystemProviderMetadataResolver(file);
         ((FilesystemProviderMetadataResolver)resolver).setId("mockId");
         ((FilesystemProviderMetadataResolver)resolver).initialize();
