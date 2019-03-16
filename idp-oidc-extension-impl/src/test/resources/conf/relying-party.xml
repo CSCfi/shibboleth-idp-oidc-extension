@@ -25,6 +25,7 @@
     <bean id="shibboleth.UnverifiedRelyingParty" p:responderIdLookupStrategy-ref="profileResponderIdLookupFunction" parent="RelyingParty">
         <property name="profileConfigurations">
             <list>
+                <bean parent="OIDC.Keyset" />
                 <bean parent="OIDC.Registration" />
                 <bean parent="OIDC.Configuration" />
             </list>
