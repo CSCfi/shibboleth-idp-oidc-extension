@@ -47,6 +47,8 @@
     <end-state id="CommitResponse">
         <on-entry>
             <evaluate expression="EncodeMessage" />
+            <evaluate expression="PublishFlowPostResponsePopulateAuditContext" />
+            <evaluate expression="WriteAuditLog" />
             <evaluate expression="RecordResponseComplete" />
         </on-entry>
     </end-state>

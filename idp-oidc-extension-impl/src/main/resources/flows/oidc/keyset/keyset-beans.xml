@@ -9,6 +9,9 @@
 
     <!-- Import core common beans. -->
     <import resource="../oidc-core-common-beans.xml" />
+    
+    <!-- Name of the publish flow for audit -->
+    <bean id="PublishFlowAuditName" class="java.lang.String" c:_0="KeySet" />
 
     <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer" p:placeholderPrefix="%{"
         p:placeholderSuffix="}" />
@@ -49,8 +52,5 @@
             <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
         </property>
     </bean>
-
-    <bean id="RecordResponseComplete" class="net.shibboleth.idp.profile.impl.RecordResponseComplete"
-        scope="prototype" />
 
 </beans>
