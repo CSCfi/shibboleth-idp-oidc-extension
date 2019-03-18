@@ -36,10 +36,10 @@ import com.nimbusds.oauth2.sdk.AbstractOptionallyIdentifiedRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 /**
- * For Token and Revocation end points.
+ * For Token, Revocation and other end points supporting client authentication.
  * 
- * A function that returns client id of the request via a lookup function. This lookup locates client id from oidc token
- * requests and oauth2 token revocation requests if available. If information is not available, null is returned.
+ * A function that returns client id of the request via a lookup function. This lookup locates client id for optionally
+ * identified requests if available. If information is not available, null is returned.
  */
 @SuppressWarnings("rawtypes")
 public class TokenRequestClientIDLookupFunction implements ContextDataLookupFunction<MessageContext, ClientID> {
@@ -55,10 +55,9 @@ public class TokenRequestClientIDLookupFunction implements ContextDataLookupFunc
             return null;
         }
         AbstractOptionallyIdentifiedRequest req = (AbstractOptionallyIdentifiedRequest) message;
-        ClientID id = req.getClientID();
-        if (id == null && req.getClientAuthentication() != null) {
-            id = req.getClientAuthentication().getClientID();
+        if (req.getClientAuthentication() != null && req.getClientAuthentication().getClientID() != null) {
+            return req.getClientAuthentication().getClientID();
         }
-        return id;
+        return req.getClientID();
     }
 }
