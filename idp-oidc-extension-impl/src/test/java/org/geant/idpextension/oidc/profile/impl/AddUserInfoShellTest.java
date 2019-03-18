@@ -62,7 +62,7 @@ public class AddUserInfoShellTest extends BaseOIDCResponseActionTest {
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertEquals(respCtx.getUserInfo().getClaim("sub"), subject);
-        Assert.assertNull(respCtx.getUserInfo().getAudience());
+        Assert.assertNull(respCtx.getUserInfo().getClaim("aud"));
         Assert.assertNull(respCtx.getUserInfo().getIssuer());
     }
 
@@ -75,7 +75,7 @@ public class AddUserInfoShellTest extends BaseOIDCResponseActionTest {
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertEquals(respCtx.getUserInfo().getClaim("sub"), subject);
-        Assert.assertTrue(!respCtx.getUserInfo().getAudience().isEmpty());
+        Assert.assertNotNull(respCtx.getUserInfo().getClaim("sub"));
         Assert.assertNotNull(respCtx.getUserInfo().getIssuer());
     }
 

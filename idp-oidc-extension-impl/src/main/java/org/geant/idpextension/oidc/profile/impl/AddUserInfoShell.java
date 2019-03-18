@@ -146,7 +146,7 @@ public class AddUserInfoShell extends AbstractOIDCResponseAction {
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         UserInfo userInfo = new UserInfo(new Subject(getOidcResponseContext().getSubject()));
         if (userInfoSigAlgStrategy.apply(profileRequestContext) != null) {
-            userInfo.setAudience(new Audience(rpCtx.getRelyingPartyId()));
+            userInfo.setClaim("aud",rpCtx.getRelyingPartyId());
             userInfo.setIssuer(new Issuer(issuerId));
         }
         log.debug("{} Setting userinfo response shell to response context {}", getLogPrefix(),
