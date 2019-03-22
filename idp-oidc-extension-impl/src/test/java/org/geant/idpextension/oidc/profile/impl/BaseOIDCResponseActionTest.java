@@ -77,7 +77,7 @@ import net.shibboleth.ext.spring.resource.ResourceHelper;
 import net.shibboleth.idp.profile.RequestContextBuilder;
 
 /** base class for tests expecting to have inbound and outbound msg ctxs etc in place. */
-abstract class BaseOIDCResponseActionTest {
+public abstract class BaseOIDCResponseActionTest {
 
     protected RequestContext requestCtx;
 
@@ -212,9 +212,13 @@ abstract class BaseOIDCResponseActionTest {
     }
 
     protected DataSealer getDataSealer() throws ComponentInitializationException, NoSuchAlgorithmException {
-        if (dataSealer != null) {
-            return dataSealer;
+        if (dataSealer == null) {
+            dataSealer = initializeDataSealer();
         }
+        return dataSealer;
+    }
+    
+    public static DataSealer initializeDataSealer() throws ComponentInitializationException, NoSuchAlgorithmException {
         final BasicKeystoreKeyStrategy strategy = new BasicKeystoreKeyStrategy();
         strategy.setKeystoreResource(ResourceHelper.of(new ClassPathResource("credentials/sealer.jks")));
         strategy.setKeyVersionResource(ResourceHelper.of(new ClassPathResource("credentials/sealer.kver")));
@@ -222,11 +226,12 @@ abstract class BaseOIDCResponseActionTest {
         strategy.setKeyAlias("secret");
         strategy.setKeyPassword("password");
         strategy.initialize();
-        dataSealer = new DataSealer();
+        final DataSealer dataSealer = new DataSealer();
         dataSealer.setKeyStrategy(strategy);
         dataSealer.setRandom(SecureRandom.getInstance("SHA1PRNG"));
         dataSealer.initialize();
         return dataSealer;
+        
     }
 
     public class MockRevocationCache extends RevocationCache {
