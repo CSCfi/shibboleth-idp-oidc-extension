@@ -46,6 +46,7 @@
                 <ref bean="SAML2.AttributeQuery.MDDriven" />
                 <ref bean="SAML2.ArtifactResolution.MDDriven" />
                 <bean parent="OIDC.SSO"/>
+                <bean parent="OIDC.UserInfo"/>
             </list>
         </property>
     </bean>
