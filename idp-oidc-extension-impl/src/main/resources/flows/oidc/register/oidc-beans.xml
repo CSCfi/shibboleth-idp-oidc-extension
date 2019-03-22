@@ -10,9 +10,6 @@
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
     default-init-method="initialize" default-destroy-method="destroy">
     
-    <!-- Import core common beans. -->
-    <import resource="../oidc-core-common-beans.xml" />
-
     <bean
         class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
         p:placeholderPrefix="%{" p:placeholderSuffix="}" />
@@ -21,11 +18,6 @@
         class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
     <bean
         class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
-
-    <bean id="PopulateMetricContext"
-        class="org.opensaml.profile.action.impl.PopulateMetricContext"
-        scope="prototype"
-        p:metricStrategy="#{getObject('shibboleth.metrics.MetricStrategy')}" />
 
     <!-- The profile and logging id used as arguments are for development 
         phase only -->
@@ -209,16 +201,6 @@
         scope="prototype"
         p:messageEncoderFactory-ref="oidc.messageEncoderFactory"
         p:httpServletResponse-ref="shibboleth.HttpServletResponse" />
-
-    <bean id="LogEvent"
-        class="org.opensaml.profile.action.impl.LogEvent"
-        scope="prototype"
-        p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
-        <property name="eventContextLookupStrategy">
-            <bean
-                class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
-        </property>
-    </bean>
 
     <bean id="PostResponsePopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext"
         p:fieldExtractors="#{getObject('shibboleth.oidc.RegistrationPostResponseAuditExtractors') ?: getObject('shibboleth.oidc.DefaultRegistrationPostResponseAuditExtractors')}" />

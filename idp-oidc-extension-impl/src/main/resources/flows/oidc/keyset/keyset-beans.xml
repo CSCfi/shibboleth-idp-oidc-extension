@@ -7,9 +7,6 @@
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
     default-init-method="initialize" default-destroy-method="destroy">
 
-    <!-- Import core common beans. -->
-    <import resource="../oidc-core-common-beans.xml" />
-    
     <!-- Name of the publish flow for audit -->
     <bean id="PublishFlowAuditName" class="java.lang.String" c:_0="KeySet" />
 
@@ -46,10 +43,19 @@
         </property>
     </bean>
 
-    <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype"
-        p:suppressedEvents="#{getObject('shibboleth.SuppressedEvents') ?: getObject('shibboleth.DefaultSuppressedEvents')}">
-        <property name="eventContextLookupStrategy">
-            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+    <bean id="shibboleth.oidc.PostResponseAuditExtractors"
+        class="org.springframework.beans.factory.config.MapFactoryBean">
+        <property name="sourceMap">
+            <map>
+                <entry>
+                    <key>
+                        <util:constant
+                            static-field="org.geant.idpextension.oidc.audit.AuditFields.INBOUND_MESSAGE_CLASS" />
+                    </key>
+                    <bean class="com.google.common.base.Functions" factory-method="constant"
+                        c:value="#{getObject('PublishFlowAuditName')}" />
+                </entry>
+            </map>
         </property>
     </bean>
 

@@ -7,9 +7,6 @@
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
     default-init-method="initialize" default-destroy-method="destroy">
 
-    <!-- Import core common beans. -->
-    <import resource="../oidc-core-common-beans.xml" />
-
     <!-- The profile and logging id used as arguments are for development phase only -->
     <bean id="InitializeProfileRequestContext"
         class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" scope="prototype"

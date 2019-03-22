@@ -1,5 +1,7 @@
-<flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd">
+<flow xmlns="http://www.springframework.org/schema/webflow"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+    parent="oidc">
 
     <action-state id="InitializeMandatoryContexts">
         <evaluate expression="InitializeProfileRequestContext" />
@@ -22,16 +24,6 @@
         <transition on="proceed" to="CommitResponse" />
     </action-state>
 
-    <!-- Passthrough state if an exception is thrown. -->
-    <action-state id="LogRuntimeException">
-        <on-entry>
-            <evaluate
-                expression="T(org.slf4j.LoggerFactory).getLogger('org.geant.idpextension.oidc.profile').error('Uncaught runtime exception', flowExecutionException.getCause())" />
-        </on-entry>
-        <evaluate expression="'RuntimeException'" />
-        <transition to="HandleError" />
-    </action-state>
-
     <action-state id="HandleError">
         <on-entry>
             <evaluate
@@ -42,16 +34,6 @@
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="CommitResponse" />
     </action-state>
-
-    <!-- end state -->
-    <end-state id="CommitResponse">
-        <on-entry>
-            <evaluate expression="EncodeMessage" />
-            <evaluate expression="PublishFlowPostResponsePopulateAuditContext" />
-            <evaluate expression="WriteAuditLog" />
-            <evaluate expression="RecordResponseComplete" />
-        </on-entry>
-    </end-state>
 
     <!-- all unhandled non proceed results are turned into errors -->
     <global-transitions>

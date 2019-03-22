@@ -219,24 +219,9 @@
             </map>
         </property>
     </bean>
+
+    <bean id="PopulateMetricContext"
+        class="org.opensaml.profile.action.impl.PopulateMetricContext" scope="prototype"
+        p:metricStrategy="#{getObject('shibboleth.metrics.MetricStrategy')}" />
     
-    <bean id="PublishFlowPostResponsePopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext"
-    p:fieldExtractors="#{getObject('shibboleth.oidc.PublishFlowPostResponseAuditExtractors') ?: getObject('shibboleth.oidc.PublishFlowDefaultPostResponseAuditExtractors')}" />
-
-    <bean id="shibboleth.oidc.PublishFlowDefaultPostResponseAuditExtractors"
-        class="org.springframework.beans.factory.config.MapFactoryBean">
-        <property name="sourceMap">
-            <map>
-                <entry>
-                    <key>
-                        <util:constant
-                            static-field="org.geant.idpextension.oidc.audit.AuditFields.INBOUND_MESSAGE_CLASS" />
-                    </key>
-                    <bean class="com.google.common.base.Functions" factory-method="constant"
-                        c:value="#{getObject('PublishFlowAuditName')}" />
-                </entry>
-            </map>
-        </property>
-    </bean>
-
 </beans>

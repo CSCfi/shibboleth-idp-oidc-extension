@@ -1,0 +1,37 @@
+<flow xmlns="http://www.springframework.org/schema/webflow" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+    abstract="true">
+
+    <!--  Actions common to most OIDC profile flows. -->
+    
+    <!-- Passthrough state if an exception is thrown. -->
+    <action-state id="LogRuntimeException">
+        <on-entry>
+            <evaluate
+                expression="T(org.slf4j.LoggerFactory).getLogger('org.geant.idpextension.oidc.profile').error('Uncaught runtime exception', flowExecutionException.getCause())" />
+        </on-entry>
+        <evaluate expression="'RuntimeException'" />
+        <transition to="HandleError" />
+    </action-state>
+    
+    <!-- end state -->
+    <end-state id="CommitResponse">
+        <on-entry>
+            <evaluate expression="EncodeMessage" />
+            <evaluate expression="PostResponsePopulateAuditContext" />
+            <evaluate expression="WriteAuditLog" />
+            <evaluate expression="RecordResponseComplete" />
+        </on-entry>
+    </end-state>
+
+    <!-- all unhandled non proceed results are turned into errors -->
+    <global-transitions>
+        <transition on-exception="java.lang.RuntimeException" to="LogRuntimeException" />
+        <transition on="#{!'proceed'.equals(currentEvent.id)}" to="HandleError" />
+    </global-transitions>
+
+    <!-- The file really exists in this directory, but it's referenced from extending flow-directories -->
+    <bean-import resource="../oidc-core-common-beans.xml" />
+
+</flow>

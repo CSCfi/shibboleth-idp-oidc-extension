@@ -1,6 +1,7 @@
-<flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd">
-
+<flow xmlns="http://www.springframework.org/schema/webflow"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+    parent="oidc">
 
     <action-state id="InitializeProfileRequestContext">
         <evaluate expression="InitializeProfileRequestContext" />
@@ -198,22 +199,6 @@
         </on-render>
         <exception-handler bean="RethrowingFlowExecutionExceptionHandler" />
     </view-state>
-
-    <!-- end state -->
-    <end-state id="CommitResponse">
-        <on-entry>
-            <evaluate expression="EncodeMessage" />
-            <evaluate expression="PostResponsePopulateAuditContext" />
-            <evaluate expression="WriteAuditLog" />
-            <evaluate expression="RecordResponseComplete" />
-        </on-entry>
-    </end-state>
-
-    <!-- all unhandled non proceed results are turned into errors -->
-    <global-transitions>
-        <transition on-exception="java.lang.RuntimeException" to="LogRuntimeException" />
-        <transition on="#{!'proceed'.equals(currentEvent.id)}" to="HandleError" />
-    </global-transitions>
 
     <bean-import resource="oidc-beans.xml" />
 
