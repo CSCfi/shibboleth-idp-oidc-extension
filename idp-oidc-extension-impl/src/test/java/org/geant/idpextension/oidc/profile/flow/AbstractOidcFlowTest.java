@@ -169,7 +169,7 @@ public abstract class AbstractOidcFlowTest extends AbstractFlowTest {
         responseTypes.add(new ResponseType("code"));
         metadata.setResponseTypes(responseTypes);
         metadata.setRedirectionURIs(uris);
-        metadata.setScope(Scope.parse("openid profile"));
+        metadata.setScope(Scope.parse("openid profile email"));
         OIDCClientInformation information = new OIDCClientInformation(new ClientID(clientId), new Date(), metadata, 
                 new Secret(secret));
         storageService.create(BaseStorageServiceClientInformationComponent.CONTEXT_NAME, clientId, 
