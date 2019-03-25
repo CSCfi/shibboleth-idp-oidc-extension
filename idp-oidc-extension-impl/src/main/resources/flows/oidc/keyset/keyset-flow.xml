@@ -15,13 +15,7 @@
     <action-state id="OutboundContexts">
         <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="'proceed'" />
-        <transition on="proceed" to="BuildResponse" />
-    </action-state>
-
-    <action-state id="BuildResponse">
-        <evaluate expression="FormOutboundMessage" />
-        <evaluate expression="'proceed'" />
-        <transition on="proceed" to="CommitResponse" />
+        <transition on="proceed" to="BuildResponseMessage" />
     </action-state>
 
     <action-state id="HandleError">

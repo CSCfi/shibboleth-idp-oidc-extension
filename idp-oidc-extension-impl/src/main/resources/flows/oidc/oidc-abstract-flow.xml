@@ -4,7 +4,12 @@
     abstract="true">
 
     <!--  Actions common to most OIDC profile flows. -->
-    
+    <action-state id="BuildResponseMessage">
+        <evaluate expression="FormOutboundMessage" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="CommitResponse" />
+    </action-state>
+
     <!-- Passthrough state if an exception is thrown. -->
     <action-state id="LogRuntimeException">
         <on-entry>

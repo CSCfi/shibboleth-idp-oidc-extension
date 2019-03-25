@@ -19,15 +19,9 @@
         <evaluate expression="CheckWebFingerRel" />
         <evaluate expression="CheckWebFingerResource" />
         <evaluate expression="'proceed'" />
-        <transition on="proceed" to="BuildResponse" />
+        <transition on="proceed" to="BuildResponseMessage" />
     </action-state>
     
-    <action-state id="BuildResponse">
-        <evaluate expression="BuildWebFingerResponse" />
-        <evaluate expression="'proceed'" />
-        <transition on="proceed" to="CommitResponse" />
-    </action-state>
-
     <action-state id="HandleError">
         <on-entry>
             <evaluate

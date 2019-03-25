@@ -182,7 +182,7 @@
         </property>
     </bean>
 
-    <bean id="BuildClientInformation"
+    <bean id="FormOutboundMessage"
         class="org.geant.idpextension.oidc.profile.impl.BuildClientInformation"
         scope="prototype" />
 

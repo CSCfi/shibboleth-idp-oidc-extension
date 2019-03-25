@@ -54,9 +54,8 @@
         <evaluate expression="AddTokenDeliveryAttributesToUserinfo" />
         <evaluate expression="SignUserInfoResponse" />
         <evaluate expression="EncryptUserInfoResponse" />
-        <evaluate expression="FormOutboundMessage" />
         <evaluate expression="'proceed'" />
-        <transition on="proceed" to="CommitResponse" />
+        <transition on="proceed" to="BuildResponseMessage" />
     </action-state>
 
     <action-state id="HandleError">

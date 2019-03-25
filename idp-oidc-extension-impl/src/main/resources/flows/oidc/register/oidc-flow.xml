@@ -22,10 +22,7 @@
     </action-state>
 
     <action-state id="OutboundContextsAndSecurityParameters">
-        <!--  Validate message (possible initial access token, other validations) -->
         <evaluate expression="CheckRedirectURIs" />
-        <!--  token_endpoint_auth_method? -->
-        <!--  userinfo_encrypted_response_* -->
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="BuildResponse" />
     </action-state>
@@ -49,16 +46,15 @@
         <evaluate expression="AddSecurityConfigurationToClientMetadata" />
         <evaluate expression="AddRequestObjectSecurityConfigurationToClientMetadata" />
         <evaluate expression="'proceed'" />
-        <transition on="proceed" to="HandleOutboundMessage" />
+        <transition on="proceed" to="BuildResponseMessage" />
     </action-state>
 
-    <action-state id="HandleOutboundMessage">
-        <evaluate expression="BuildClientInformation" />
-        <evaluate expression="StoreClientInformation" />
-        <evaluate expression="'proceed'" />
-        <transition on="proceed" to="CommitResponse" />
+    <action-state id="BuildResponseMessage">
+        <on-exit>
+            <evaluate expression="StoreClientInformation" />
+        </on-exit>
     </action-state>
-    
+
     <action-state id="HandleError">
         <on-entry>
             <evaluate

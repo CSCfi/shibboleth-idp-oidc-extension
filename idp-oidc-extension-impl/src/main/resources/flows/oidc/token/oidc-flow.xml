@@ -65,9 +65,8 @@
         <evaluate expression="AddAccessTokenHashToIDToken" />
         <evaluate expression="SignIDToken" />
         <evaluate expression="EncryptIDToken" />
-        <evaluate expression="FormOutboundMessage" />
         <evaluate expression="'proceed'" />
-        <transition on="proceed" to="CommitResponse" />
+        <transition on="proceed" to="BuildResponseMessage" />
     </action-state>
 
     <action-state id="HandleError">

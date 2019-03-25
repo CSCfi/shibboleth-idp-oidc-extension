@@ -54,7 +54,7 @@
         </property>
     </bean>
 
-    <bean id="BuildWebFingerResponse" class="org.geant.idpextension.oidc.profile.impl.BuildWebFingerResponse"
+    <bean id="FormOutboundMessage" class="org.geant.idpextension.oidc.profile.impl.BuildWebFingerResponse"
         scope="prototype" p:httpServletResponse-ref="shibboleth.HttpServletResponse"
         p:issuer="%{idp.oidc.issuer}"/>
 
