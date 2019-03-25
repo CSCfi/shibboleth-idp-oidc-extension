@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+    default-init-method="initialize" default-destroy-method="destroy">
+
+    <bean id="InitializeRelyingPartyContext"
+        class="org.geant.idpextension.oidc.profile.impl.InitializeUnverifiedRelyingPartyContext" scope="prototype" />
+
+    <bean id="SelectRelyingPartyConfiguration"
+        class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration" scope="prototype"
+        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+
+    <bean id="SelectProfileConfiguration" class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
+        scope="prototype" />
+
+    <bean id="InitializeOutboundMessageContext"
+        class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundResponseMessageContext" scope="prototype" />
+
+    <bean id="BuildErrorResponseFromEvent"
+        class="org.geant.idpextension.oidc.profile.impl.BuildJSONErrorResponseFromEvent" scope="prototype"
+        p:defaultStatusCode="500" p:defaultCode="server_error"
+        p:httpServletResponse-ref="shibboleth.HttpServletResponse">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>
+    </bean>
+
+    <bean id="CredentialResolver" class="org.geant.idpextension.oidc.metadata.impl.CredentialMetadataValueResolver" />
+
+    <bean id="shibboleth.oidc.PostResponseAuditExtractors"
+        class="org.springframework.beans.factory.config.MapFactoryBean">
+        <property name="sourceMap">
+            <map>
+                <entry>
+                    <key>
+                        <util:constant
+                            static-field="org.geant.idpextension.oidc.audit.AuditFields.INBOUND_MESSAGE_CLASS" />
+                    </key>
+                    <bean class="com.google.common.base.Functions" factory-method="constant"
+                        c:value="#{getObject('OidcApiInfoFlowAuditName')}" />
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+</beans>

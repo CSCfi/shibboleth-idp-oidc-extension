@@ -1,22 +1,7 @@
 <flow xmlns="http://www.springframework.org/schema/webflow"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
-    parent="oidc/abstract-api">
-
-    <action-state id="InitializeMandatoryContexts">
-        <evaluate expression="InitializeProfileRequestContext" />
-        <evaluate expression="InitializeRelyingPartyContext" />
-        <evaluate expression="SelectRelyingPartyConfiguration" />
-        <evaluate expression="SelectProfileConfiguration" />
-        <evaluate expression="'proceed'" />
-        <transition on="proceed" to="OutboundContexts" />
-    </action-state>
-
-    <action-state id="OutboundContexts">
-        <evaluate expression="InitializeOutboundMessageContext" />
-        <evaluate expression="'proceed'" />
-        <transition on="proceed" to="BuildResponseMessage" />
-    </action-state>
+    parent="oidc/abstract-api-info">
 
     <bean-import resource="discovery-beans.xml" />
 

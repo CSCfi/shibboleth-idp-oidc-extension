@@ -9,35 +9,13 @@
 
 
     <!-- Name of the publish flow for audit -->
-    <bean id="PublishFlowAuditName" class="java.lang.String" c:_0="Discovery" />
-
-    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer" p:placeholderPrefix="%{"
-        p:placeholderSuffix="}" />
-
-    <bean class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
-    <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
-
-    <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
-    <import resource="../../../system/conf/audit-system.xml" />
+    <bean id="OidcApiInfoFlowAuditName" class="java.lang.String" c:_0="Discovery" />
 
     <!-- The profile and logging id used as arguments are for development phase only -->
     <bean id="InitializeProfileRequestContext"
         class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" scope="prototype"
         p:profileId="http://csc.fi/ns/profiles/oidc/configuration" p:loggingId="%{idp.service.logging.saml2sso:SSO}"
         p:browserProfile="true" />
-
-    <bean id="InitializeRelyingPartyContext"
-        class="org.geant.idpextension.oidc.profile.impl.InitializeUnverifiedRelyingPartyContext" scope="prototype" />
-
-    <bean id="SelectRelyingPartyConfiguration"
-        class="net.shibboleth.idp.profile.impl.SelectRelyingPartyConfiguration" scope="prototype"
-        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
-
-    <bean id="SelectProfileConfiguration" class="net.shibboleth.idp.profile.impl.SelectProfileConfiguration"
-        scope="prototype" />
-
-    <bean id="InitializeOutboundMessageContext"
-        class="org.geant.idpextension.oidc.profile.impl.InitializeOutboundResponseMessageContext" scope="prototype" />
 
     <bean id="BuildErrorResponseFromEvent"
         class="org.geant.idpextension.oidc.profile.impl.BuildJSONErrorResponseFromEvent" scope="prototype"
@@ -82,21 +60,5 @@
     <bean id="KeyTransportEncryptionAlgorithmInfoResolver"
         class="org.geant.idpextension.oidc.metadata.impl.AlgorithmInfoMetadataValueResolver"
         p:resolveEncryptionAlgs="true" p:resolveKeyTransportEncAlgs="true" />
-
-    <bean id="shibboleth.oidc.PostResponseAuditExtractors"
-        class="org.springframework.beans.factory.config.MapFactoryBean">
-        <property name="sourceMap">
-            <map>
-                <entry>
-                    <key>
-                        <util:constant
-                            static-field="org.geant.idpextension.oidc.audit.AuditFields.INBOUND_MESSAGE_CLASS" />
-                    </key>
-                    <bean class="com.google.common.base.Functions" factory-method="constant"
-                        c:value="#{getObject('PublishFlowAuditName')}" />
-                </entry>
-            </map>
-        </property>
-    </bean>
 
 </beans>
