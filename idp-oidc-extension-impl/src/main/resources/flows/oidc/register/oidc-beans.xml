@@ -178,6 +178,9 @@
                 <entry
                     key="#{T(org.geant.idpextension.oidc.profile.OidcEventIds).MISSING_REDIRECT_URIS}"
                     value="#{T(com.nimbusds.oauth2.sdk.client.RegistrationError).INVALID_REDIRECT_URI}" />
+                <entry
+                    key="#{T(org.opensaml.profile.action.EventIds).IO_ERROR}"
+                    value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).SERVER_ERROR}" />
             </map>
         </property>
     </bean>
