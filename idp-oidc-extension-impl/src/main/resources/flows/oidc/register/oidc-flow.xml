@@ -50,9 +50,13 @@
     </action-state>
 
     <action-state id="BuildResponseMessage">
-        <on-exit>
-            <evaluate expression="StoreClientInformation" />
-        </on-exit>
+        <transition on="proceed" to="StoreClientInformation" />
+    </action-state>
+
+    <action-state id="StoreClientInformation">
+        <evaluate expression="StoreClientInformation" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="CommitResponse" />
     </action-state>
 
     <action-state id="HandleError">
