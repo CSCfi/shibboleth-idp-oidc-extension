@@ -7,12 +7,6 @@
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
     default-init-method="initialize" default-destroy-method="destroy">
 
-    <!-- Name of the publish flow for audit -->
-    <bean id="OidcApiInfoFlowAuditName" class="java.lang.String" c:_0="KeySet" />
-
-    <bean id="shibboleth.oidc.profileId" class="java.lang.String" c:_0="http://csc.fi/ns/profiles/oidc/keyset" />
-    
-    <bean id="FormOutboundMessage"
-        class="org.geant.idpextension.oidc.profile.impl.FormOutboundKeySetResponseMessage" scope="prototype" />
+    <bean id="shibboleth.oidc.browserProfile" class="java.lang.Boolean" c:_0="false" />
 
 </beans>

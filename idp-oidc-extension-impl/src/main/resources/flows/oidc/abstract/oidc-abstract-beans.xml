@@ -18,6 +18,13 @@
 
     <bean class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
     <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
+
+    <bean id="shibboleth.oidc.loggingId" class="java.lang.String" c:_0="%{idp.service.logging.oidcsso:OIDCSSO}" />
+
+    <bean id="InitializeProfileRequestContext"
+        class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" scope="prototype"
+        p:profileId-ref="shibboleth.oidc.profileId" p:loggingId-ref="shibboleth.oidc.loggingId"
+        p:browserProfile-ref="shibboleth.oidc.browserProfile" />
     
     <!-- Sealer used to protect confidentiality and integrity of authorize code, access token and refresh token. -->
     <bean id="tokenSealer" lazy-init="true" class="net.shibboleth.utilities.java.support.security.DataSealer"

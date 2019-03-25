@@ -11,11 +11,7 @@
     <!-- Name of the publish flow for audit -->
     <bean id="OidcApiInfoFlowAuditName" class="java.lang.String" c:_0="Discovery" />
 
-    <!-- The profile and logging id used as arguments are for development phase only -->
-    <bean id="InitializeProfileRequestContext"
-        class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" scope="prototype"
-        p:profileId="http://csc.fi/ns/profiles/oidc/configuration" p:loggingId="%{idp.service.logging.saml2sso:SSO}"
-        p:browserProfile="true" />
+    <bean id="shibboleth.oidc.profileId" class="java.lang.String" c:_0="http://csc.fi/ns/profiles/oidc/configuration" />
 
     <bean id="BuildErrorResponseFromEvent"
         class="org.geant.idpextension.oidc.profile.impl.BuildJSONErrorResponseFromEvent" scope="prototype"

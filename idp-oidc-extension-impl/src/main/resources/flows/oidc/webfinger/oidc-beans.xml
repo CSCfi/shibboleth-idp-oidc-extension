@@ -11,13 +11,8 @@
     <!-- Name of the publish flow for audit -->
     <bean id="FlowAuditName" class="java.lang.String" c:_0="Webfinger" />
 
-    <!-- The profile and logging id used as arguments are for development 
-        phase only -->
-    <bean id="InitializeProfileRequestContext"
-        class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
-        scope="prototype" p:profileId="http://csc.fi/ns/profiles/oidc/webfinger"
-        p:loggingId="%{idp.service.logging.saml2sso:SSO}"
-        p:browserProfile="true" />
+    <bean id="shibboleth.oidc.profileId" class="java.lang.String" c:_0="http://csc.fi/ns/profiles/oidc/webfinger" />
+    <bean id="shibboleth.oidc.browserProfile" class="java.lang.Boolean" c:_0="false" />
 
     <bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage"
         scope="prototype">

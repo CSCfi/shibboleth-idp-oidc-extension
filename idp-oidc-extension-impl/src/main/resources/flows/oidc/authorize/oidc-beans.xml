@@ -7,10 +7,8 @@
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
     default-init-method="initialize" default-destroy-method="destroy">
 
-    <bean id="InitializeProfileRequestContext"
-        class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" scope="prototype"
-        p:profileId="http://csc.fi/ns/profiles/oidc/sso/browser" p:loggingId="%{idp.service.logging.saml2sso:SSO}"
-        p:browserProfile="true" />
+    <bean id="shibboleth.oidc.browserProfile" class="java.lang.Boolean" c:_0="true" />
+    <bean id="shibboleth.oidc.profileId" class="java.lang.String" c:_0="http://csc.fi/ns/profiles/oidc/sso/browser" />
 
     <bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage" scope="prototype">
         <constructor-arg>
