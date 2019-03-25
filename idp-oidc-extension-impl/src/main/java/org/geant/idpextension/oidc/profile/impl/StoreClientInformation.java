@@ -193,6 +193,7 @@ public class StoreClientInformation extends AbstractProfileAction {
             }
         } catch (ClientInformationManagerException e) {
             log.error("{} Could not store the client information", getLogPrefix(), e);
+            ActionSupport.buildEvent(profileRequestContext, EventIds.IO_ERROR);
             return;
         }
         log.info("{} Client information successfully stored for {}", getLogPrefix(), 
