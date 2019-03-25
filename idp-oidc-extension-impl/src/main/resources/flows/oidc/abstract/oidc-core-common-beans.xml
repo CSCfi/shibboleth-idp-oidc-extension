@@ -8,10 +8,10 @@
     default-init-method="initialize" default-destroy-method="destroy">
     
     <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
-    <import resource="../../system/conf/audit-system.xml" />    
+    <import resource="../../../system/conf/audit-system.xml" />    
     
     <!-- Import core common beans. -->
-    <import resource="../../system/flows/saml/security-beans.xml" />
+    <import resource="../../../system/flows/saml/security-beans.xml" />
     
     <!-- Sealer used to protect confidentiality and integrity of authorize code, access token and refresh token. -->
     <bean id="tokenSealer" lazy-init="true" class="net.shibboleth.utilities.java.support.security.DataSealer"
