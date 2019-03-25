@@ -13,6 +13,12 @@
     <!-- Import core common beans. -->
     <import resource="../../../system/flows/saml/security-beans.xml" />
     
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer" p:placeholderPrefix="%{"
+        p:placeholderSuffix="}" />
+
+    <bean class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
+    <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
+    
     <!-- Sealer used to protect confidentiality and integrity of authorize code, access token and refresh token. -->
     <bean id="tokenSealer" lazy-init="true" class="net.shibboleth.utilities.java.support.security.DataSealer"
         p:keyStrategy-ref="shibboleth.DataSealerKeyStrategy" p:encoder-ref="base64Codec" p:decoder-ref="base64Codec" />

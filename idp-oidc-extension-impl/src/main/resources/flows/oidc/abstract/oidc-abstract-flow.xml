@@ -37,6 +37,6 @@
     </global-transitions>
 
     <!-- The file really exists in this directory, but it's referenced from extending flow-directories -->
-    <bean-import resource="../abstract/oidc-core-common-beans.xml" />
+    <bean-import resource="../abstract/oidc-abstract-beans.xml" />
 
 </flow>
