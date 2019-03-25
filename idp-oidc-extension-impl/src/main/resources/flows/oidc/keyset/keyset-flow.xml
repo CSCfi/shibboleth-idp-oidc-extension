@@ -1,7 +1,7 @@
 <flow xmlns="http://www.springframework.org/schema/webflow"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
-    parent="oidc/abstract">
+    parent="oidc/abstract-api">
 
     <action-state id="InitializeMandatoryContexts">
         <evaluate expression="InitializeProfileRequestContext" />
@@ -16,17 +16,6 @@
         <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="BuildResponseMessage" />
-    </action-state>
-
-    <action-state id="HandleError">
-        <on-entry>
-            <evaluate
-                expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.SpringRequestContext), true).setRequestContext(flowRequestContext)" />
-            <evaluate expression="LogEvent" />
-        </on-entry>
-        <evaluate expression="BuildErrorResponseFromEvent" />
-        <evaluate expression="'proceed'" />
-        <transition on="proceed" to="CommitResponse" />
     </action-state>
 
     <bean-import resource="keyset-beans.xml" />
