@@ -34,19 +34,13 @@ import java.util.Collections;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseContext;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultResponseClaimsSetLookupFunction;
 import org.geant.idpextension.oidc.profile.context.navigate.UserInfoResponseClaimsSetLookupFunction;
-import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 
 import com.google.common.base.Function;
-import com.google.common.base.Functions;
-import com.google.common.base.Predicate;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
-import net.shibboleth.idp.attribute.context.AttributeContext;
-import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /** {@link Function} that returns the released claims for the endpoint. */
