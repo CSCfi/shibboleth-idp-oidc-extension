@@ -206,7 +206,7 @@
                     <key>
                         <util:constant static-field="net.shibboleth.idp.profile.IdPAuditFields.ATTRIBUTES"/>
                     </key>
-                    <bean class="net.shibboleth.idp.profile.audit.impl.AttributesAuditExtractor">
+                    <bean class="org.geant.idpextension.oidc.audit.impl.ClaimsAuditExtractor">
                     </bean>
                 </entry>
                 <entry>
