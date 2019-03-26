@@ -49,7 +49,7 @@ import net.shibboleth.idp.attribute.context.AttributeContext;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 
-/** {@link Function} that returns the attribute IDs from an {@link AttributeContext}. */
+/** {@link Function} that returns the released claims for the endpoint. */
 public class ClaimsAuditExtractor implements Function<ProfileRequestContext, Collection<String>> {
 
     /** Lookup strategy for id token claims to read from. */
