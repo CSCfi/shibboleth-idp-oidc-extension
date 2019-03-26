@@ -229,6 +229,13 @@
                     </key>
                     <bean class="org.geant.idpextension.oidc.audit.impl.AuthenticationContextReferenceAuditExtractor" />
                 </entry>
+                <entry>
+                    <key>
+                        <util:constant
+                            static-field="org.geant.idpextension.oidc.audit.AuditFields.OUTBOUND_MESSAGE_CLASS" />
+                    </key>
+                    <bean class="org.geant.idpextension.oidc.audit.impl.OutboundMessageClassLookupFunction" />
+                </entry>
             </map>
         </property>
     </bean>
