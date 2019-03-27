@@ -28,7 +28,6 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.net.MalformedURLException;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -50,27 +49,14 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.jwk.source.RemoteJWKSet;
-import com.nimbusds.jose.proc.BadJOSEException;
-import com.nimbusds.jose.proc.JWSKeySelector;
-import com.nimbusds.jose.proc.JWSVerificationKeySelector;
-import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.AbstractOptionallyAuthenticatedRequest;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
-import com.nimbusds.oauth2.sdk.auth.ClientSecretJWT;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
+import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
 import com.nimbusds.oauth2.sdk.auth.PlainClientSecret;
-import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
@@ -229,28 +215,16 @@ public class ValidateEndpointAuthentication extends AbstractOIDCRequestAction<Ab
                 log.warn("{} Unrecognized client authentication {} for client_secret_post", getLogPrefix(), 
                         request.getClientAuthentication());
             }
-        } else if (enabledAndEquals(enabledMethods, clientAuthMethod, ClientAuthenticationMethod.CLIENT_SECRET_JWT)) {
-            if (clientAuth instanceof ClientSecretJWT) {
-                final ClientSecretJWT secretJwt = (ClientSecretJWT) clientAuth;
-                final SignedJWT jwt = secretJwt.getClientAssertion();
-                final JWKSource keySource = new ImmutableSecret(clientInformation.getSecret().getValueBytes());
-                if (validateJwt(jwt, keySource, clientMetadata.getTokenEndpointAuthJWSAlg())) {
-                    return;
-                }
-            }
-        } else if (enabledAndEquals(enabledMethods, clientAuthMethod, ClientAuthenticationMethod.PRIVATE_KEY_JWT)) {
-            if (clientAuth instanceof PrivateKeyJWT) {
-                final PrivateKeyJWT keyJwt = (PrivateKeyJWT) clientAuth;
-                final SignedJWT jwt = keyJwt.getClientAssertion();
-
+        } else if (enabledAndEquals(enabledMethods, clientAuthMethod, ClientAuthenticationMethod.CLIENT_SECRET_JWT)
+                || enabledAndEquals(enabledMethods, clientAuthMethod, ClientAuthenticationMethod.PRIVATE_KEY_JWT)) {
+            if (clientAuth instanceof JWTAuthentication) {
+                final SignedJWT jwt = ((JWTAuthentication) clientAuth).getClientAssertion();
                 final String errorEventId = JWTSignatureValidationUtil.validateSignature(
                         securityParametersLookupStrategy.apply(profileRequestContext), jwt, EventIds.ACCESS_DENIED);
-                
                 if (errorEventId != null) {
                     ActionSupport.buildEvent(profileRequestContext, errorEventId);
                 }
                 return;
-
             }
         } else {
             log.warn("{} Unsupported client authentication method {}", getLogPrefix(), clientAuth.getMethod());
@@ -280,26 +254,6 @@ public class ValidateEndpointAuthentication extends AbstractOIDCRequestAction<Ab
         }
         return false;
     }
-
-    /**
-     * Initializes the JWK source from the given client's metadata.
-     * @param clientMetadata The client metadata.
-     * @return The JWK source corresponding to the metadata.
-     */
-    protected JWKSource initializeKeySource(final OIDCClientMetadata clientMetadata) {
-        if (clientMetadata.getJWKSet() != null) {
-            return new ImmutableJWKSet(clientMetadata.getJWKSet());
-        } else if (clientMetadata.getJWKSetURI() != null) {
-            try {
-                return new RemoteJWKSet(clientMetadata.getJWKSetURI().toURL());
-            } catch (MalformedURLException e) {
-                log.warn("{} Could not convert the URI {} to URL", getLogPrefix(), clientMetadata.getJWKSetURI());
-            }
-        } else {
-            log.error("{} No jwks or jwks_uri registered for this client", getLogPrefix());
-        }
-        return null;
-    }
     
     /**
      * Validates the given client secret against the one stored in the client's metadata.
@@ -322,32 +276,4 @@ public class ValidateEndpointAuthentication extends AbstractOIDCRequestAction<Ab
         return false;
     }
     
-    /**
-     * Validates the given JWT using the given key source and algorithm.
-     * @param jwt The JWT to be validated.
-     * @param keySource The key source used for validation.
-     * @param expectedAlg The expected algorithm. If null, then the algorithm defined in the JWT's header is used.
-     * @return True if the JWT is valid, false otherwise.
-     */
-    protected boolean validateJwt(final SignedJWT jwt, final JWKSource keySource, final JWSAlgorithm expectedAlg) {
-        //TODO verify that the algorithm is accepted
-        final JWSAlgorithm algorithm = (expectedAlg == null) ? jwt.getHeader().getAlgorithm() : expectedAlg;
-        final ConfigurableJWTProcessor jwtProcessor = new DefaultJWTProcessor();
-        final JWSKeySelector keySelector = new JWSVerificationKeySelector(algorithm, keySource);
-        jwtProcessor.setJWSKeySelector(keySelector);
-        try {
-            final JWTClaimsSet claimsSet = jwtProcessor.process(jwt, null);
-            claimsSet.getJWTID();
-            if (!replayCache.check(getClass().getName(), claimsSet.getJWTID(),
-                    claimsSet.getExpirationTime().getTime())) {
-                log.warn("{} Replay detected for JWT id {}", getLogPrefix(), claimsSet.getJWTID());
-                return false;
-            }
-        } catch (BadJOSEException | JOSEException e) {
-            log.warn("{} Could not validate the signature", getLogPrefix());
-            return false;
-        }
-        log.debug("{} The incoming JWT successfully verified", getLogPrefix());
-        return true;
-    }
 }

@@ -39,6 +39,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.crypto.spec.SecretKeySpec;
+
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.idpextension.oidc.security.impl.OIDCSignatureValidationParameters;
 import org.geant.security.jwk.BasicJWKCredential;
@@ -118,27 +120,36 @@ public class ValidateEndpointAuthenticationTest {
         OIDCMetadataContext oidcContext = new OIDCMetadataContext();
         OIDCClientMetadata metadata = new OIDCClientMetadata();
         metadata.setTokenEndpointAuthMethod(storedMethod);
-        if (storedMethod != null && storedMethod.equals(ClientAuthenticationMethod.PRIVATE_KEY_JWT)) {
-            
-            SecurityParametersContext secCtx =
-                    (SecurityParametersContext) prc.addSubcontext(new SecurityParametersContext());
-            OIDCSignatureValidationParameters params = new OIDCSignatureValidationParameters();
-            BasicJWKCredential credentialRSA = new BasicJWKCredential();
-            
-            RSAKey rsaKey;
-            if (sameSecret) {
-                rsaKey = new RSAKey.Builder(rsaPublicKey).build();
-            } else {
-                KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-                keyGen.initialize(1024);
-                rsaKey = new RSAKey.Builder((RSAPublicKey)keyGen.genKeyPair().getPublic()).build();
-            }
-            credentialRSA.setPublicKey(rsaKey.toPublicKey());
-            params.getValidationCredentials().add(credentialRSA);
-            params.setSignatureAlgorithm("RS256");
-            secCtx.setSignatureSigningParameters(params);
-        }
         Secret secret = sameSecret ? clientSecret : new Secret("WRONG1234567890secret1234567890secret1234567890");
+        if (storedMethod != null) {
+            BasicJWKCredential credential = null;
+            OIDCSignatureValidationParameters params = new OIDCSignatureValidationParameters();
+            
+            if (storedMethod.equals(ClientAuthenticationMethod.PRIVATE_KEY_JWT)) {
+                params.setSignatureAlgorithm("RS256");
+                credential = new BasicJWKCredential();
+                RSAKey rsaKey;
+                if (sameSecret) {
+                    rsaKey = new RSAKey.Builder(rsaPublicKey).build();
+                } else {
+                    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+                    keyGen.initialize(1024);
+                    rsaKey = new RSAKey.Builder((RSAPublicKey)keyGen.genKeyPair().getPublic()).build();
+                }
+                credential.setPublicKey(rsaKey.toPublicKey());
+            } else if (storedMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_JWT)) {
+                params.setSignatureAlgorithm("HS256");
+                credential = new BasicJWKCredential();
+                credential.setSecretKey(new SecretKeySpec(secret.getValueBytes(), "NONE"));
+            }
+            
+            if (credential != null) {
+                SecurityParametersContext secCtx =
+                        (SecurityParametersContext) prc.addSubcontext(new SecurityParametersContext());
+                params.getValidationCredentials().add(credential);
+                secCtx.setSignatureSigningParameters(params);
+            }
+        }
         OIDCClientInformation clientInformation = 
                 new OIDCClientInformation(clientId, new Date(), metadata, secret);
         oidcContext.setClientInformation(clientInformation);
