@@ -29,6 +29,7 @@
 package org.geant.idpextension.oidc.profile.flow;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -43,7 +44,14 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretJWT;
+import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
+import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
@@ -58,7 +66,7 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
     
     String redirectUri = "https://example.org/cb";
     String clientId = "mockClientId";
-    String clientSecret = "mockClientSecret";
+    String clientSecret = "mockClientSecretmockClientSecretmockClientSecret";
     
     @Autowired
     @Qualifier("shibboleth.StorageService")
@@ -126,6 +134,49 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
         final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
         OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
         Assert.assertNotNull(response.getTokens().getAccessToken());
+    }
+
+    @Test
+    public void testValidSecretJWT() throws ParseException, IOException, NoSuchAlgorithmException, URISyntaxException,
+        DataSealerException, ComponentInitializationException, JOSEException {
+        String code = ValidateGrantTest.buildAuthorizationCode(clientId, "https://op.example.org", "jdoe", "mock",
+                redirectUri).toString();
+        storeMetadata(storageService, clientId, clientSecret, JWSAlgorithm.HS256,
+                ClientAuthenticationMethod.CLIENT_SECRET_JWT);
+        ClientSecretJWT clientAuth = buildSecretJwtAuth(clientSecret);
+        Map<String, String> requestParameters = createRequestParameters(redirectUri, "authorization_code", code, clientId);
+        populateClientAssertionParams(requestParameters, clientAuth);
+        setHttpFormRequest("POST", requestParameters);
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
+        Assert.assertNotNull(response.getTokens().getAccessToken());
+    }
+
+    @Test
+    public void testInvalidSecretJWT() throws ParseException, IOException, NoSuchAlgorithmException, URISyntaxException,
+        DataSealerException, ComponentInitializationException, JOSEException {
+        String code = ValidateGrantTest.buildAuthorizationCode(clientId, "https://op.example.org", "jdoe", "mock",
+                redirectUri).toString();
+        storeMetadata(storageService, clientId, clientSecret, JWSAlgorithm.HS256,
+                ClientAuthenticationMethod.CLIENT_SECRET_JWT);
+        ClientSecretJWT clientAuth = buildSecretJwtAuth(clientSecret + "invalid");
+        Map<String, String> requestParameters = createRequestParameters(redirectUri, "authorization_code", code, clientId);
+        populateClientAssertionParams(requestParameters, clientAuth);
+        setHttpFormRequest("POST", requestParameters);
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "AccessDenied");
+    }
+    
+    protected ClientSecretJWT buildSecretJwtAuth(String secret) throws JOSEException, URISyntaxException {
+        return new ClientSecretJWT(new ClientID(clientId), new URI("https://op.example.org"),
+                JWSAlgorithm.HS256, new Secret(secret));
+    }
+    
+    protected void populateClientAssertionParams(final Map<String, String> requestParameters, 
+            final JWTAuthentication clientAuth) {
+        requestParameters.put("client_assertion", clientAuth.getClientAssertion().serialize());
+        requestParameters.put("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
     }
 
     protected Map<String, String> createRequestParameters(String redirectUri, String grantType, String code, 
