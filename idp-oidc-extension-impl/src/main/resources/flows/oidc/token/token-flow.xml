@@ -69,6 +69,6 @@
         <transition on="proceed" to="BuildResponseMessage" />
     </action-state>
 
-    <bean-import resource="oidc-beans.xml" />
+    <bean-import resource="token-beans.xml" />
 
 </flow>

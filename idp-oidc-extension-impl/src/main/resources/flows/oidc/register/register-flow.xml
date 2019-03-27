@@ -59,6 +59,6 @@
         <transition on="proceed" to="CommitResponse" />
     </action-state>
 
-    <bean-import resource="oidc-beans.xml" />
+    <bean-import resource="register-beans.xml" />
 
 </flow>

@@ -40,6 +40,6 @@
         </on-entry>
     </end-state>
 
-    <bean-import resource="oidc-beans.xml" />
+    <bean-import resource="webfinger-beans.xml" />
 
 </flow>
