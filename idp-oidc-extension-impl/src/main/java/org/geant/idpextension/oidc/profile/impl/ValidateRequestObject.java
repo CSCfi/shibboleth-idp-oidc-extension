@@ -28,33 +28,22 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
-import java.util.Iterator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.geant.idpextension.oidc.profile.OidcEventIds;
+import org.geant.idpextension.oidc.security.impl.JWTSignatureValidationUtil;
 import org.geant.idpextension.oidc.security.impl.OIDCSignatureValidationParameters;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
-import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
-import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.context.SecurityParametersContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
-import com.nimbusds.jose.Algorithm;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.ECDSAVerifier;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
@@ -137,77 +126,10 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
         if (!(requestObject instanceof PlainJWT)) {
             // Verify req object is signed with correct algorithm
             final SecurityParametersContext secParamCtx = securityParametersLookupStrategy.apply(profileRequestContext);
-            if (secParamCtx == null) {
-                log.error("{} No security parameters context is available", getLogPrefix());
-                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_SEC_CFG);
-                return;
-            }
-            if (secParamCtx.getSignatureSigningParameters() == null
-                    || !(secParamCtx.getSignatureSigningParameters() instanceof OIDCSignatureValidationParameters)) {
-                log.error("{} No signature validation credentials available", getLogPrefix());
-                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_SEC_CFG);
-                return;
-            }
-            signatureValidationParameters =
-                    (OIDCSignatureValidationParameters) secParamCtx.getSignatureSigningParameters();
-            Algorithm reqObjSignAlgorithm = requestObject.getHeader().getAlgorithm();
-            if (!signatureValidationParameters.getSignatureAlgorithm().equals(reqObjSignAlgorithm.getName())) {
-                log.error("{} Request object signed with algorithm {} but the registered algorithm is {}",
-                        getLogPrefix(), reqObjSignAlgorithm.getName(),
-                        signatureValidationParameters.getSignatureAlgorithm());
-                ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
-                return;
-            }
-            Iterator it = signatureValidationParameters.getValidationCredentials().iterator();
-            boolean verified = false;
-            while (it.hasNext()) {
-                Credential credential = (Credential) it.next();
-                JWSVerifier verifier = null;
-                try {
-                    if (JWSAlgorithm.Family.HMAC_SHA.contains(reqObjSignAlgorithm)) {
-                        verifier = new MACVerifier(credential.getSecretKey());
-                    }
-                    if (JWSAlgorithm.Family.RSA.contains(reqObjSignAlgorithm)) {
-                        verifier = new RSASSAVerifier((RSAPublicKey) credential.getPublicKey());
-                    }
-                    if (JWSAlgorithm.Family.EC.contains(reqObjSignAlgorithm)) {
-                        verifier = new ECDSAVerifier((ECPublicKey) credential.getPublicKey());
-                    }
-                    if (verifier == null) {
-                        log.error("{} No verifier for request object for alg {}", getLogPrefix(),
-                                reqObjSignAlgorithm.getName());
-                        ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_SEC_CFG);
-                    }
-                    if (!((SignedJWT) requestObject).verify(verifier)) {
-                        if (it.hasNext()) {
-                            log.debug("{} Unable to validate request object with credential, picking next key",
-                                    getLogPrefix());
-                            continue;
-                        } else {
-                            log.error("{} Unable to validate request object with any of the credentials",
-                                    getLogPrefix());
-                            ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
-                            return;
-                        }
-                    }
-                    verified = true;
-                    break;
-                } catch (JOSEException e) {
-                    if (it.hasNext()) {
-                        log.debug("{} Unable to validate request object with credential, {}, picking next key",
-                                getLogPrefix(), e.getMessage());
-                    } else {
-                        log.error("{} Unable to validate request object with any of the credentials, {}",
-                                getLogPrefix(), e.getMessage());
-                        ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
-                        return;
-                    }
-                }
-            }
-            if (!verified) {
-                // This is executed only if there was no credentials (which should not happen).
-                log.error("{} Unable to validate request object signature", getLogPrefix());
-                ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_SEC_CFG);
+            final String errorEventId = JWTSignatureValidationUtil.validateSignature(secParamCtx,
+                    (SignedJWT) requestObject, OidcEventIds.INVALID_REQUEST_OBJECT);
+            if (errorEventId != null) {
+                ActionSupport.buildEvent(profileRequestContext, errorEventId);
                 return;
             }
 
@@ -234,5 +156,5 @@ public class ValidateRequestObject extends AbstractOIDCAuthenticationResponseAct
             ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REQUEST_OBJECT);
             return;
         }
-    }
+    }    
 }
