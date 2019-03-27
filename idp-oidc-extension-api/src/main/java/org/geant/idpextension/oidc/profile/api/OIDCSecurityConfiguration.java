@@ -48,6 +48,10 @@ public class OIDCSecurityConfiguration extends SecurityConfiguration {
     @Nullable
     private SignatureSigningConfiguration requestObjectSignatureValidationConfig;
 
+    /** Configuration used when validating token endpoint authentication JWT signatures. */
+    @Nullable
+    private SignatureSigningConfiguration tokenEndpointJwtSignatureValidationConfig;
+
     /**
      * Get the configuration used when decrypting request object information.
      * 
@@ -84,6 +88,25 @@ public class OIDCSecurityConfiguration extends SecurityConfiguration {
      */
     public void setRequestObjectSignatureValidationConfiguration(@Nullable final SignatureSigningConfiguration config) {
         requestObjectSignatureValidationConfig = config;
+    }
+
+    /**
+     * Get the configuration used when validating token endpoint authentication JWT signatures.
+     * 
+     * @return configuration used when validating token endpoint authentication JWT signatures, or null
+     */
+    @Nullable
+    public SignatureSigningConfiguration getTokenEndpointJwtSignatureValidationConfiguration() {
+        return tokenEndpointJwtSignatureValidationConfig;
+    }
+
+    /**
+     * Set the configuration used when validating token endpoint authentication JWT signatures.
+     * 
+     * @param configuration used when validating token endpoint authentication JWT signatures, or null
+     */
+    public void setTokenEndpointJwtSignatureValidationConfiguration(@Nullable final SignatureSigningConfiguration config) {
+        tokenEndpointJwtSignatureValidationConfig = config;
     }
 
 }
