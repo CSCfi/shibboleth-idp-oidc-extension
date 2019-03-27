@@ -40,10 +40,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
+import org.geant.idpextension.oidc.security.impl.OIDCSignatureValidationParameters;
+import org.geant.security.jwk.BasicJWKCredential;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.storage.ReplayCache;
 import org.opensaml.storage.impl.MemoryStorageService;
+import org.opensaml.xmlsec.context.SecurityParametersContext;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 import org.testng.Assert;
@@ -54,7 +57,6 @@ import org.testng.annotations.Test;
 import com.google.common.base.Function;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
@@ -112,10 +114,17 @@ public class ValidateEndpointAuthenticationTest {
 
         @SuppressWarnings("rawtypes")
         final ProfileRequestContext prc = new WebflowRequestContextProfileRequestContextLookup().apply(requestCtx);
+        
         OIDCMetadataContext oidcContext = new OIDCMetadataContext();
         OIDCClientMetadata metadata = new OIDCClientMetadata();
         metadata.setTokenEndpointAuthMethod(storedMethod);
         if (storedMethod != null && storedMethod.equals(ClientAuthenticationMethod.PRIVATE_KEY_JWT)) {
+            
+            SecurityParametersContext secCtx =
+                    (SecurityParametersContext) prc.addSubcontext(new SecurityParametersContext());
+            OIDCSignatureValidationParameters params = new OIDCSignatureValidationParameters();
+            BasicJWKCredential credentialRSA = new BasicJWKCredential();
+            
             RSAKey rsaKey;
             if (sameSecret) {
                 rsaKey = new RSAKey.Builder(rsaPublicKey).build();
@@ -124,8 +133,10 @@ public class ValidateEndpointAuthenticationTest {
                 keyGen.initialize(1024);
                 rsaKey = new RSAKey.Builder((RSAPublicKey)keyGen.genKeyPair().getPublic()).build();
             }
-            JWKSet jwkSet = new JWKSet(rsaKey);
-            metadata.setJWKSet(jwkSet);
+            credentialRSA.setPublicKey(rsaKey.toPublicKey());
+            params.getValidationCredentials().add(credentialRSA);
+            params.setSignatureAlgorithm("RS256");
+            secCtx.setSignatureSigningParameters(params);
         }
         Secret secret = sameSecret ? clientSecret : new Secret("WRONG1234567890secret1234567890secret1234567890");
         OIDCClientInformation clientInformation = 

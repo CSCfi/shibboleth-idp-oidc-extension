@@ -36,12 +36,15 @@ import javax.annotation.Nullable;
 
 import org.geant.idpextension.oidc.config.navigate.TokenEndpointAuthMethodLookupFunction;
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
+import org.geant.idpextension.oidc.security.impl.JWTSignatureValidationUtil;
+import org.geant.idpextension.oidc.security.impl.OIDCSignatureValidationParameters;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.profile.context.navigate.InboundMessageContextLookup;
 import org.opensaml.storage.ReplayCache;
+import org.opensaml.xmlsec.context.SecurityParametersContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +64,6 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.AbstractOptionallyAuthenticatedRequest;
-import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
@@ -72,8 +74,6 @@ import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
-
-import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.utilities.java.support.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.component.ComponentSupport;
@@ -103,6 +103,17 @@ public class ValidateEndpointAuthentication extends AbstractOIDCRequestAction<Ab
     /** The attached OIDC metadata context. */
     private OIDCMetadataContext oidcMetadataContext;
     
+    /*** The signature validation parameters. */
+    @Nullable
+    private OIDCSignatureValidationParameters signatureValidationParameters;
+
+    /**
+     * Strategy used to locate the {@link SecurityParametersContext} to use for signing.
+     */
+    @Nonnull
+    private Function<ProfileRequestContext, SecurityParametersContext> securityParametersLookupStrategy;
+
+    
     /**
      * Constructor.
      */
@@ -110,6 +121,7 @@ public class ValidateEndpointAuthentication extends AbstractOIDCRequestAction<Ab
         oidcMetadataContextLookupStrategy = Functions.compose(new ChildContextLookup<>(OIDCMetadataContext.class),
                 new InboundMessageContextLookup());
         tokenEndpointAuthMethodsLookupStrategy = new TokenEndpointAuthMethodLookupFunction();
+        securityParametersLookupStrategy = new ChildContextLookup<>(SecurityParametersContext.class);
     }
         
     /**
@@ -147,6 +159,19 @@ public class ValidateEndpointAuthentication extends AbstractOIDCRequestAction<Ab
         replayCache = Constraint.isNotNull(cache, "ReplayCache cannot be null");
     }
     
+    /**
+     * Set the strategy used to locate the {@link SecurityParametersContext} to use.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setSecurityParametersLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, SecurityParametersContext> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+
+        securityParametersLookupStrategy =
+                Constraint.isNotNull(strategy, "SecurityParameterContext lookup strategy cannot be null");
+    }
+
     /** {@inheritDoc} */
     @Override
     protected void doInitialize() throws ComponentInitializationException {
@@ -207,7 +232,6 @@ public class ValidateEndpointAuthentication extends AbstractOIDCRequestAction<Ab
         } else if (enabledAndEquals(enabledMethods, clientAuthMethod, ClientAuthenticationMethod.CLIENT_SECRET_JWT)) {
             if (clientAuth instanceof ClientSecretJWT) {
                 final ClientSecretJWT secretJwt = (ClientSecretJWT) clientAuth;
-                //TODO: make sure that Nimbus checks client_assertion_type
                 final SignedJWT jwt = secretJwt.getClientAssertion();
                 final JWKSource keySource = new ImmutableSecret(clientInformation.getSecret().getValueBytes());
                 if (validateJwt(jwt, keySource, clientMetadata.getTokenEndpointAuthJWSAlg())) {
@@ -217,14 +241,16 @@ public class ValidateEndpointAuthentication extends AbstractOIDCRequestAction<Ab
         } else if (enabledAndEquals(enabledMethods, clientAuthMethod, ClientAuthenticationMethod.PRIVATE_KEY_JWT)) {
             if (clientAuth instanceof PrivateKeyJWT) {
                 final PrivateKeyJWT keyJwt = (PrivateKeyJWT) clientAuth;
-                //TODO: make sure that Nimbus checks client_assertion_type
                 final SignedJWT jwt = keyJwt.getClientAssertion();
-                final JWKSource keySource = initializeKeySource(clientMetadata);
-                if (keySource != null) {
-                    if (validateJwt(jwt, keySource, clientMetadata.getTokenEndpointAuthJWSAlg())) {
-                        return;                        
-                    }
-                }                
+
+                final String errorEventId = JWTSignatureValidationUtil.validateSignature(
+                        securityParametersLookupStrategy.apply(profileRequestContext), jwt, EventIds.ACCESS_DENIED);
+                
+                if (errorEventId != null) {
+                    ActionSupport.buildEvent(profileRequestContext, errorEventId);
+                }
+                return;
+
             }
         } else {
             log.warn("{} Unsupported client authentication method {}", getLogPrefix(), clientAuth.getMethod());
