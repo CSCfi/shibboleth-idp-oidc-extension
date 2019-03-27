@@ -22,6 +22,7 @@
     </action-state>
 
     <action-state id="OutboundContextsAndSecurityParameters">
+        <evaluate expression="PopulateTokenEndpointJwtSignatureValidationParameters"/>
         <evaluate expression="ValidateEndpointAuthentication" />
         <evaluate expression="ValidateGrantType" />
         <evaluate expression="ValidateGrant" />

@@ -68,6 +68,9 @@
         <property name="requestObjectSignatureValidationConfiguration">
             <ref bean="#{'%{idp.oidc.rovalid.config:shibboleth.oidc.requestObjectSignatureValidationConfiguration}'.trim()}" />
         </property>
+        <property name="tokenEndpointJwtSignatureValidationConfiguration">
+            <ref bean="#{'%{idp.oidc.rovalid.config:shibboleth.oidc.tokenEndpointJwtSignatureValidationConfiguration}'.trim()}" />
+        </property>
     </bean>
         
     <!-- Configuration for credentials and supported algorithms for ID Token and UserInfo response signing. -->    
@@ -190,6 +193,32 @@
     
     <!-- Configuration for supported algorithms for request object signature validation. -->
     <bean id="shibboleth.oidc.requestObjectSignatureValidationConfiguration" parent="shibboleth.BasicSignatureSigningConfiguration">
+        <property name="signatureAlgorithms">
+            <list>
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_256" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_384" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_RS_512" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_256" />
+                <util:constant 
+                     static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_384" /> 
+                <util:constant 
+                     static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_ES_512" /> 
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_256" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_384" />
+                <util:constant
+                    static-field="org.geant.idpextension.oidc.crypto.support.SignatureConstants.ALGO_ID_SIGNATURE_HS_512" />
+            </list>
+        </property>
+    </bean>
+
+    <!-- Configuration for supported algorithms for token endpoint authentication JWT signature validation. -->
+    <bean id="shibboleth.oidc.tokenEndpointJwtSignatureValidationConfiguration" parent="shibboleth.BasicSignatureSigningConfiguration">
         <property name="signatureAlgorithms">
             <list>
                 <util:constant

@@ -218,4 +218,27 @@
         </constructor-arg>
     </bean>
 
+    <bean id="PopulateTokenEndpointJwtSignatureValidationParameters"
+        class="org.geant.idpextension.oidc.profile.impl.PopulateOIDCSignatureSigningParameters " scope="prototype"
+        p:configurationLookupStrategy-ref="shibboleth.oidc.SignatureValidationConfigurationLookup"
+        p:signatureSigningParametersResolver-ref="shibboleth.oidc.TokenEndpointJwtSignatureValidationParametersResolver">
+        <property name="securityParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters"
+                c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+        <property name="existingParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.MessageContextLookup.Outbound" />
+        </property>
+    </bean>
+
+    <bean id="shibboleth.oidc.SignatureValidationConfigurationLookup"
+        class="org.geant.idpextension.oidc.config.navigate.TokenEndpointJwtSignatureValidationConfigurationLookupFunction"
+        p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
+
+    <bean id="shibboleth.oidc.TokenEndpointJwtSignatureValidationParametersResolver"
+        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver"
+        p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver.ParameterType).TOKEN_ENDPOINT_JWT_VALIDATION}" />
+
 </beans>
