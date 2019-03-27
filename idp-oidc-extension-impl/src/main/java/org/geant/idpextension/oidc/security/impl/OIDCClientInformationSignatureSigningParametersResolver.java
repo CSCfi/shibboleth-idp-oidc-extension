@@ -218,6 +218,9 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
             log.trace("HS Credential initialized from client secret");
             params.setSigningCredential(jwkCredential);
             params.setSignatureAlgorithm(algorithm.getName());
+            if (params instanceof OIDCSignatureValidationParameters) {
+                ((OIDCSignatureValidationParameters) params).getValidationCredentials().add(jwkCredential);
+            }
             return;
         }
         if (target != ParameterType.REQUEST_OBJECT_VALIDATION && 
