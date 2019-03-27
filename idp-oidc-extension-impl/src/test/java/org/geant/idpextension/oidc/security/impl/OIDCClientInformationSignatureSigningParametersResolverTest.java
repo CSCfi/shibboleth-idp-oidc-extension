@@ -104,6 +104,7 @@ public class OIDCClientInformationSignatureSigningParametersResolverTest {
         metaData.setIDTokenJWSAlg(JWSAlgorithm.RS256);
         metaData.setUserInfoJWSAlg(JWSAlgorithm.ES256);
         metaData.setRequestObjectJWSAlg(JWSAlgorithm.ES256);
+        metaData.setTokenEndpointAuthJWSAlg(JWSAlgorithm.ES256);
         JWKSet jwkSet = JWKSet.parse("{\n" + "   \"keys\":[\n" + "      {\n" + "         \"kty\":\"RSA\",\n"
                 + "         \"e\":\"AQAB\",\n" + "         \"use\":\"enc\",\n"
                 + "         \"kid\":\"testkeyRSAEncryption\",\n"
@@ -197,19 +198,50 @@ public class OIDCClientInformationSignatureSigningParametersResolverTest {
 
     @Test
     public void testRequestObjectParameters() throws ResolverException {
-        resolver.setParameterType(ParameterType.REQUEST_OBJECT_VALIDATION);
-        OIDCSignatureValidationParameters params = (OIDCSignatureValidationParameters) resolver.resolveSingle(criteria);
-        Assert.assertEquals(params.getSignatureAlgorithm(), "ES256");
-        Assert.assertTrue(params.getValidationCredentials().size() == 1);
-        Assert.assertEquals(Curve.forECParameterSpec(
-                ((java.security.interfaces.ECKey) params.getValidationCredentials().get(0).getPublicKey()).getParams()),
-                Curve.P_256);
+        testSigningValidationES256(ParameterType.REQUEST_OBJECT_VALIDATION);
     }
 
     @Test
     public void testRequestObjectParametersES384() throws ResolverException {
         metaData.setRequestObjectJWSAlg(JWSAlgorithm.ES384);
-        resolver.setParameterType(ParameterType.REQUEST_OBJECT_VALIDATION);
+        testSigningValidationES384(ParameterType.REQUEST_OBJECT_VALIDATION);
+    }
+
+    @Test
+    public void testRequestObjectParametersES512() throws ResolverException {
+        metaData.setRequestObjectJWSAlg(JWSAlgorithm.ES512);
+        testSigningValidationES512(ParameterType.REQUEST_OBJECT_VALIDATION);
+    }
+
+    @Test
+    public void testTokenEndpointJwtParameters() throws ResolverException {
+        testSigningValidationES256(ParameterType.TOKEN_ENDPOINT_JWT_VALIDATION);
+    }
+
+    @Test
+    public void testTokenEndpointJwtParametersES384() throws ResolverException {
+        metaData.setTokenEndpointAuthJWSAlg(JWSAlgorithm.ES384);
+        testSigningValidationES384(ParameterType.TOKEN_ENDPOINT_JWT_VALIDATION);
+    }
+
+    @Test
+    public void testTokenEndpointJwtParametersES512() throws ResolverException {
+        metaData.setTokenEndpointAuthJWSAlg(JWSAlgorithm.ES512);
+        testSigningValidationES512(ParameterType.TOKEN_ENDPOINT_JWT_VALIDATION);
+    }
+
+    protected void testSigningValidationES256(ParameterType parameterType) throws ResolverException {
+        resolver.setParameterType(parameterType);
+        OIDCSignatureValidationParameters params = (OIDCSignatureValidationParameters) resolver.resolveSingle(criteria);
+        Assert.assertEquals(params.getSignatureAlgorithm(), "ES256");
+        Assert.assertTrue(params.getValidationCredentials().size() == 1);
+        Assert.assertEquals(Curve.forECParameterSpec(
+                ((java.security.interfaces.ECKey) params.getValidationCredentials().get(0).getPublicKey()).getParams()),
+                Curve.P_256);        
+    }
+
+    protected void testSigningValidationES384(ParameterType parameterType) throws ResolverException {
+        resolver.setParameterType(parameterType);
         OIDCSignatureValidationParameters params = (OIDCSignatureValidationParameters) resolver.resolveSingle(criteria);
         Assert.assertEquals(params.getSignatureAlgorithm(), "ES384");
         Assert.assertTrue(params.getValidationCredentials().size() == 1);
@@ -217,11 +249,9 @@ public class OIDCClientInformationSignatureSigningParametersResolverTest {
                 ((java.security.interfaces.ECKey) params.getValidationCredentials().get(0).getPublicKey()).getParams()),
                 Curve.P_384);
     }
-
-    @Test
-    public void testRequestObjectParametersES512() throws ResolverException {
-        metaData.setRequestObjectJWSAlg(JWSAlgorithm.ES512);
-        resolver.setParameterType(ParameterType.REQUEST_OBJECT_VALIDATION);
+    
+    protected void testSigningValidationES512(ParameterType parameterType) throws ResolverException {
+        resolver.setParameterType(parameterType);
         OIDCSignatureValidationParameters params = (OIDCSignatureValidationParameters) resolver.resolveSingle(criteria);
         Assert.assertEquals(params.getSignatureAlgorithm(), "ES512");
         Assert.assertTrue(params.getValidationCredentials().size() == 2);

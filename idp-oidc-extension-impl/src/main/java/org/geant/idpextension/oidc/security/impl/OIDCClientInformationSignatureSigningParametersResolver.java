@@ -84,7 +84,7 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
      * signing.
      */
     public enum ParameterType {
-        REQUEST_OBJECT_VALIDATION, IDTOKEN_SIGNING, USERINFO_SIGNING
+        REQUEST_OBJECT_VALIDATION, IDTOKEN_SIGNING, USERINFO_SIGNING, TOKEN_ENDPOINT_JWT_VALIDATION
     }
 
     private ParameterType target = ParameterType.IDTOKEN_SIGNING;
@@ -112,7 +112,8 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
 
         // For signature validation we need to list all the located keys and need the extended
         // SignatureSigningParameters
-        final SignatureSigningParameters params = (target == ParameterType.REQUEST_OBJECT_VALIDATION)
+        final SignatureSigningParameters params = (target == ParameterType.REQUEST_OBJECT_VALIDATION || 
+                target == ParameterType.TOKEN_ENDPOINT_JWT_VALIDATION)
                 ? new OIDCSignatureValidationParameters() : new SignatureSigningParameters();
 
         resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
@@ -154,6 +155,8 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
 
         log.debug("Resolving SignatureSigningParameters, purpose {}",
                 target.equals(ParameterType.REQUEST_OBJECT_VALIDATION) ? "request object signature verification"
+                        : target.equals(ParameterType.TOKEN_ENDPOINT_JWT_VALIDATION) ? 
+                                "token endpoint jwt signature verification"
                         : target.equals(ParameterType.IDTOKEN_SIGNING) ? "id token signing"
                                 : "userinfo response signing");
 
@@ -181,7 +184,11 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
             case USERINFO_SIGNING:
                 algorithm = clientInformation.getOIDCMetadata().getUserInfoJWSAlg();
                 break;
-
+                
+            case TOKEN_ENDPOINT_JWT_VALIDATION:
+                algorithm = clientInformation.getOIDCMetadata().getTokenEndpointAuthJWSAlg();
+                break;
+                
             default:
                 algorithm = clientInformation.getOIDCMetadata().getIDTokenJWSAlg();
         }
@@ -213,7 +220,8 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
             params.setSignatureAlgorithm(algorithm.getName());
             return;
         }
-        if (target != ParameterType.REQUEST_OBJECT_VALIDATION) {
+        if (target != ParameterType.REQUEST_OBJECT_VALIDATION && 
+                target != ParameterType.TOKEN_ENDPOINT_JWT_VALIDATION) {
             // For EC&RSA family signing we locate the first credential of correct type
             for (Credential credential : credentials) {
                 if ((JWSAlgorithm.Family.RSA.contains(algorithm)
