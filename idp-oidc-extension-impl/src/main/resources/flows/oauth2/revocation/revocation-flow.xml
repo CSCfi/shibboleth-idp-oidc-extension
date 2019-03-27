@@ -31,15 +31,9 @@
     <action-state id="RevokeToken">
         <evaluate expression="RevokeToken" />
         <evaluate expression="'proceed'" />
-        <transition on="proceed" to="BuildResponse" />
+        <transition on="proceed" to="BuildResponseMessage" />
     </action-state>
     
-    <action-state id="BuildResponse">
-        <evaluate expression="FormOutboundMessage" />
-        <evaluate expression="'proceed'" />
-        <transition on="proceed" to="CommitResponse" />
-    </action-state>
-
     <bean-import resource="revocation-beans.xml" />
 
 </flow>
