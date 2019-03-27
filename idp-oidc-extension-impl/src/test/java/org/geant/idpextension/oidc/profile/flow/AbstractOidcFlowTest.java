@@ -50,11 +50,13 @@ import org.springframework.webflow.test.MockExternalContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.oauth2.sdk.ErrorResponse;
 import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.Response;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
@@ -155,6 +157,13 @@ public abstract class AbstractOidcFlowTest extends AbstractFlowTest {
     
     protected void storeMetadata(StorageService storageService, String clientId, String secret, String... redirectUri)
             throws IOException {
+        storeMetadata(storageService, clientId, secret, null, ClientAuthenticationMethod.CLIENT_SECRET_BASIC,
+                redirectUri);
+    }
+    
+    protected void storeMetadata(StorageService storageService, String clientId, String secret, 
+            JWSAlgorithm tokenEndpointSigAlg, ClientAuthenticationMethod tokenEndpointMethod, String... redirectUri)
+            throws IOException {
         OIDCClientMetadata metadata = new OIDCClientMetadata();
         metadata.setGrantTypes(new HashSet<GrantType>(Arrays.asList(GrantType.AUTHORIZATION_CODE)));
         HashSet<URI> uris = new HashSet<>();
@@ -170,10 +179,13 @@ public abstract class AbstractOidcFlowTest extends AbstractFlowTest {
         metadata.setResponseTypes(responseTypes);
         metadata.setRedirectionURIs(uris);
         metadata.setScope(Scope.parse("openid profile email"));
+        metadata.setTokenEndpointAuthJWSAlg(tokenEndpointSigAlg);
+        metadata.setTokenEndpointAuthMethod(tokenEndpointMethod);
         OIDCClientInformation information = new OIDCClientInformation(new ClientID(clientId), new Date(), metadata, 
                 new Secret(secret));
         storageService.create(BaseStorageServiceClientInformationComponent.CONTEXT_NAME, clientId, 
-                information.toJSONObject().toJSONString(), System.currentTimeMillis() + 60000);
+                information.toJSONObject().toJSONString(), System.currentTimeMillis() + 60000);        
+        
     }
     
     protected void removeMetadata(StorageService storageService, String clientId) throws IOException {
