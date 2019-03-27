@@ -16,6 +16,6 @@
         <transition on="proceed" to="CommitResponse" />
     </action-state>
 
-    <bean-import resource="../abstract-api/oidc-abstract-api-beans.xml" />
+    <bean-import resource="../../oidc/abstract-api/oidc-abstract-api-beans.xml" />
 
 </flow>

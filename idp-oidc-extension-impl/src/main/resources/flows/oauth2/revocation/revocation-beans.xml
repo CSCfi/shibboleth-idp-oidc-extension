@@ -7,15 +7,7 @@
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
     default-init-method="initialize" default-destroy-method="destroy">
 
-    <!-- Declares audit field extractor functions injected into beans that populate the audit context. -->
-    <import resource="../../../system/conf/audit-system.xml" />
-
-    <!-- Import core common beans. -->
-    <import resource="../../oidc/oidc-core-common-beans.xml" />
-
-    <bean id="InitializeProfileRequestContext"
-        class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext" scope="prototype"
-        p:profileId="http://csc.fi/ns/profiles/oauth2/revocation" p:loggingId="%{idp.service.logging.saml2sso:SSO}" />
+    <bean id="shibboleth.oidc.profileId" class="java.lang.String" c:_0="http://csc.fi/ns/profiles/oauth2/revocation" />
 
     <bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage" scope="prototype">
         <constructor-arg>
