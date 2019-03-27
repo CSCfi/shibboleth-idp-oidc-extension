@@ -80,7 +80,7 @@ public class RequestObjectSignatureValidationConfigurationLookupFunction
             final ProfileConfiguration pc = rpc.getProfileConfig();
             if (pc != null && pc.getSecurityConfiguration() instanceof OIDCSecurityConfiguration
                     && ((OIDCSecurityConfiguration) pc.getSecurityConfiguration())
-                            .getRequestObjectDecryptionConfiguration() != null) {
+                            .getRequestObjectSignatureValidationConfiguration() != null) {
                 configs.add(((OIDCSecurityConfiguration) pc.getSecurityConfiguration())
                         .getRequestObjectSignatureValidationConfiguration());
             }
@@ -91,7 +91,8 @@ public class RequestObjectSignatureValidationConfigurationLookupFunction
             final SecurityConfiguration defaultConfig =
                     rpResolver.getDefaultSecurityConfiguration(input.getProfileId());
             if (defaultConfig instanceof OIDCSecurityConfiguration
-                    && ((OIDCSecurityConfiguration) defaultConfig).getRequestObjectDecryptionConfiguration() != null) {
+                    && ((OIDCSecurityConfiguration) defaultConfig)
+                    .getRequestObjectSignatureValidationConfiguration() != null) {
                 configs.add(
                         ((OIDCSecurityConfiguration) defaultConfig).getRequestObjectSignatureValidationConfiguration());
             }
