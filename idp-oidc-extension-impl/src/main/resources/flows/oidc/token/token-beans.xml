@@ -43,7 +43,12 @@
 
     <bean id="ValidateEndpointAuthentication"
         class="org.geant.idpextension.oidc.profile.impl.ValidateEndpointAuthentication" scope="prototype"
-        p:httpServletRequest-ref="shibboleth.HttpServletRequest" p:replayCache-ref="shibboleth.ReplayCache" />
+        p:httpServletRequest-ref="shibboleth.HttpServletRequest" p:replayCache-ref="shibboleth.ReplayCache">
+        <property name="securityParametersLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters" c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+    </bean>
 
     <bean id="ValidateGrantType" class="org.geant.idpextension.oidc.profile.impl.ValidateGrantType"
         scope="prototype" />
