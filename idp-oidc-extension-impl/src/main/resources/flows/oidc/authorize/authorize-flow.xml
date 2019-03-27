@@ -145,7 +145,7 @@
         </on-entry>
         <if
             test="opensamlProfileRequestContext.getOutboundMessageContext() != null &amp;&amp; opensamlProfileRequestContext.getOutboundMessageContext().getMessage() != null"
-            then="CommitResponse" else="DisplayError" />
+            then="CommitResponse" else="ErrorView" />
         <exception-handler bean="RethrowingFlowExecutionExceptionHandler" />
     </decision-state>
 
@@ -184,20 +184,6 @@
         </on-entry>
         <exception-handler bean="RethrowingFlowExecutionExceptionHandler" />
     </end-state>
-
-    <view-state id="DisplayError" view="#{flowRequestContext.activeFlow.id}-error">
-        <on-render>
-            <evaluate expression="environment" result="viewScope.environment" />
-            <evaluate expression="opensamlProfileRequestContext" result="viewScope.profileRequestContext" />
-            <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)"
-                result="viewScope.encoder" />
-            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()"
-                result="viewScope.request" />
-            <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()"
-                result="viewScope.response" />
-        </on-render>
-        <exception-handler bean="RethrowingFlowExecutionExceptionHandler" />
-    </view-state>
 
     <bean-import resource="authorize-beans.xml" />
 
