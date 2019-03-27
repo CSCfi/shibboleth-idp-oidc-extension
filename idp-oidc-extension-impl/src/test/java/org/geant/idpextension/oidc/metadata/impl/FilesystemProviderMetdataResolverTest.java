@@ -28,10 +28,8 @@
 
 package org.geant.idpextension.oidc.metadata.impl;
 
-import java.io.File;
-
-import org.geant.idpextension.oidc.criterion.IssuerCriterion;
 import org.geant.idpextension.oidc.metadata.resolver.ProviderMetadataResolver;
+import org.mockito.Mockito;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -39,8 +37,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
+
+import net.shibboleth.idp.profile.context.RelyingPartyContext;
+import net.shibboleth.idp.relyingparty.RelyingPartyConfiguration;
 
 /**
  * Unit tests for {@link FilesystemProviderMetadataResolver}.
@@ -61,16 +61,26 @@ public class FilesystemProviderMetdataResolverTest {
     
     @Test
     public void testNotFound() throws Exception {
-        //final IssuerCriterion criterion = new IssuerCriterion(new Issuer("not_found"));
-        final OIDCProviderMetadata metadata = resolver.resolveSingle(new ProfileRequestContext());
-        //TODO: fix Assert.assertNull(metadata);
+        final OIDCProviderMetadata metadata = resolver.resolveSingle(initMockWithRpId("not_found"));
+        Assert.assertNull(metadata);
     }
     
     @Test
     public void testSuccess() throws Exception {
-        //final IssuerCriterion criterion = new IssuerCriterion(new Issuer(issuer));
-        final OIDCProviderMetadata metadata = resolver.resolveSingle(new ProfileRequestContext());
+        final String issuer = "http://idp.example.org";
+        final OIDCProviderMetadata metadata = resolver.resolveSingle(initMockWithRpId(issuer));
         Assert.assertNotNull(metadata);
-        //TODO: fix Assert.assertEquals(metadata.getIssuer().getValue(), issuer);
-    }    
+        Assert.assertEquals(metadata.getIssuer().getValue(), issuer);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    protected ProfileRequestContext initMockWithRpId(final String id) {
+        final ProfileRequestContext profileRequestContext = new ProfileRequestContext();
+        final RelyingPartyContext rpCtx = profileRequestContext.getSubcontext(RelyingPartyContext.class, true);
+        RelyingPartyConfiguration configuration = Mockito.mock(RelyingPartyConfiguration.class);
+        Mockito.when(configuration.getResponderId()).thenReturn(id);
+        rpCtx.setConfiguration(configuration);
+        return profileRequestContext;
+    }
+    
 }
