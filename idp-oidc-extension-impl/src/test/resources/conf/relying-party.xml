@@ -47,6 +47,7 @@
                 <ref bean="SAML2.ArtifactResolution.MDDriven" />
                 <bean parent="OIDC.SSO"/>
                 <bean parent="OIDC.UserInfo"/>
+                <bean parent="OAUTH2.Revocation"/>
             </list>
         </property>
     </bean>
