@@ -243,7 +243,7 @@
         p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
 
     <bean id="shibboleth.oidc.TokenEndpointJwtSignatureValidationParametersResolver"
-        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver"
-        p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver.ParameterType).TOKEN_ENDPOINT_JWT_VALIDATION}" />
+        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureValidationParametersResolver"
+        p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureValidationParametersResolver.ParameterType).TOKEN_ENDPOINT_JWT_VALIDATION}" />
 
 </beans>

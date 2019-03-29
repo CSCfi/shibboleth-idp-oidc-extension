@@ -106,10 +106,12 @@ public class ValidateRequestObjectTest {
         kpg.initialize(2048);
         kp = kpg.generateKeyPair();
         BasicJWKCredential credentialRSA = new BasicJWKCredential();
+        credentialRSA.setAlgorithm(JWSAlgorithm.parse("RS256"));
         credentialRSA.setPublicKey(kp.getPublic());
         params.getValidationCredentials().add(credentialRSA);
         kp = kpg.generateKeyPair();
         BasicJWKCredential credentialRSA2 = new BasicJWKCredential();
+        credentialRSA2.setAlgorithm(JWSAlgorithm.parse("RS256"));
         credentialRSA2.setPublicKey(kp.getPublic());
         params.getValidationCredentials().add(credentialRSA2);
         params.setSignatureAlgorithm("RS256");

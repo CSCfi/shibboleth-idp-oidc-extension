@@ -57,6 +57,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Function;
+import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -128,6 +129,7 @@ public class ValidateEndpointAuthenticationTest {
             if (storedMethod.equals(ClientAuthenticationMethod.PRIVATE_KEY_JWT)) {
                 params.setSignatureAlgorithm("RS256");
                 credential = new BasicJWKCredential();
+                credential.setAlgorithm(JWSAlgorithm.parse("RS256"));
                 RSAKey rsaKey;
                 if (sameSecret) {
                     rsaKey = new RSAKey.Builder(rsaPublicKey).build();
@@ -140,6 +142,7 @@ public class ValidateEndpointAuthenticationTest {
             } else if (storedMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_JWT)) {
                 params.setSignatureAlgorithm("HS256");
                 credential = new BasicJWKCredential();
+                credential.setAlgorithm(JWSAlgorithm.parse("HS256"));
                 credential.setSecretKey(new SecretKeySpec(secret.getValueBytes(), "NONE"));
             }
             

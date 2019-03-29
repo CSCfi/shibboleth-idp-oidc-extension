@@ -31,7 +31,9 @@ package org.geant.idpextension.oidc.security.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opensaml.security.credential.Credential;
+import javax.annotation.Nonnull;
+
+import org.geant.security.jwk.JWKCredential;
 import org.opensaml.xmlsec.SignatureSigningParameters;
 
 /**
@@ -41,14 +43,16 @@ import org.opensaml.xmlsec.SignatureSigningParameters;
 public class OIDCSignatureValidationParameters extends SignatureSigningParameters {
 
     /** The list of validation credentials. */
-    private List<Credential> validationCredentials = new ArrayList<Credential>();
+    @Nonnull
+    final private List<JWKCredential> validationCredentials = new ArrayList<JWKCredential>();
 
     /**
      * Get the list of validation credentials.
      * 
      * @return the list of validation credentials
      */
-    public List<Credential> getValidationCredentials() {
+    @Nonnull
+    public List<JWKCredential> getValidationCredentials() {
         return validationCredentials;
     }
 }

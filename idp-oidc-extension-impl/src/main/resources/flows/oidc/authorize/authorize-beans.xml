@@ -95,8 +95,8 @@
         p:relyingPartyConfigurationResolver-ref="shibboleth.RelyingPartyConfigurationResolver" />
 
     <bean id="shibboleth.oidc.RequestObjectSignatureValidationParametersResolver"
-        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver"
-        p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureSigningParametersResolver.ParameterType).REQUEST_OBJECT_VALIDATION}" />
+        class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureValidationParametersResolver"
+        p:parameterType="#{T(org.geant.idpextension.oidc.security.impl.OIDCClientInformationSignatureValidationParametersResolver.ParameterType).REQUEST_OBJECT_VALIDATION}" />
 
     <bean id="SetRequestObjectToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetRequestObjectToResponseContext" scope="prototype"

@@ -26,7 +26,6 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 package org.geant.idpextension.oidc.security.impl;
 
 import java.security.interfaces.ECPublicKey;
@@ -35,8 +34,8 @@ import java.util.Iterator;
 
 import javax.annotation.Nonnull;
 
+import org.geant.security.jwk.JWKCredential;
 import org.opensaml.profile.action.EventIds;
-import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.context.SecurityParametersContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,18 +53,18 @@ import com.nimbusds.jwt.SignedJWT;
  * Generic utility class for helping JWT signature validation.
  */
 public class JWTSignatureValidationUtil {
-    
+
     /** Class logger. */
     @Nonnull
     private static Logger log = LoggerFactory.getLogger(JWTSignatureValidationUtil.class);
-    
+
     private JWTSignatureValidationUtil() {
-        
+
     }
-    
+
     /**
-     * Validates the signature of the given JWT using the given security parameters context. If the validation fails
-     * for any reason, including insufficient prequisities in the context, an event identifier is returned. Successful
+     * Validates the signature of the given JWT using the given security parameters context. If the validation fails for
+     * any reason, including insufficient prequisities in the context, an event identifier is returned. Successful
      * validation produces null result.
      * 
      * @param secParamCtx The {@link SecurityParametersContext} to use for signature validation.
@@ -73,8 +72,8 @@ public class JWTSignatureValidationUtil {
      * @param invalidJwtEventId The event identifier describing the invalid JWT.
      * @return
      */
-    public static String validateSignature(final SecurityParametersContext secParamCtx,
-            final SignedJWT signedJwt, final String invalidJwtEventId) {
+    public static String validateSignature(final SecurityParametersContext secParamCtx, final SignedJWT signedJwt,
+            final String invalidJwtEventId) {
         if (secParamCtx == null) {
             log.error("No security parameters context is available");
             return EventIds.INVALID_SEC_CFG;
@@ -87,18 +86,21 @@ public class JWTSignatureValidationUtil {
         final OIDCSignatureValidationParameters signatureValidationParameters =
                 (OIDCSignatureValidationParameters) secParamCtx.getSignatureSigningParameters();
         final Algorithm algorithm = signedJwt.getHeader().getAlgorithm();
-        if (!signatureValidationParameters.getSignatureAlgorithm().equals(algorithm.getName())) {
-            log.error("Given JWT signed with algorithm {} but the registered algorithm is {}",
-                    algorithm.getName(),
-                    signatureValidationParameters.getSignatureAlgorithm());
-            return invalidJwtEventId;
-        }
-
-        
         final Iterator<?> it = signatureValidationParameters.getValidationCredentials().iterator();
         boolean verified = false;
         while (it.hasNext()) {
-            final Credential credential = (Credential) it.next();
+            final JWKCredential credential = (JWKCredential) it.next();
+            if (!algorithm.equals(credential.getAlgorithm())) {
+                log.debug("Credential alg {} not matching jwt header alg {}", credential.getAlgorithm().getName(),
+                        algorithm.getName());
+                if (it.hasNext()) {
+                    log.debug("Unable to validate given JWT with credential, picking next key");
+                    continue;
+                } else {
+                    log.error("Unable to validate given JWT with any of the credentials");
+                    return invalidJwtEventId;
+                }
+            }
             JWSVerifier verifier = null;
             try {
                 if (JWSAlgorithm.Family.HMAC_SHA.contains(algorithm)) {
@@ -124,14 +126,14 @@ public class JWTSignatureValidationUtil {
                     }
                 }
                 verified = true;
+                log.debug("JWT {} verified using algorithm {} and key {}", signedJwt.serialize(), algorithm.getName(),
+                        credential.getKid());
                 break;
             } catch (JOSEException e) {
                 if (it.hasNext()) {
-                    log.debug("Unable to validate given JWT with credential, {}, picking next key", 
-                            e.getMessage());
+                    log.debug("Unable to validate given JWT with credential, {}, picking next key", e.getMessage());
                 } else {
-                    log.error("Unable to validate given JWT with any of the credentials, {}",
-                            e.getMessage());
+                    log.error("Unable to validate given JWT with any of the credentials, {}", e.getMessage());
                     return invalidJwtEventId;
                 }
             }

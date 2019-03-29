@@ -28,8 +28,8 @@
 
 package org.geant.idpextension.oidc.security.impl;
 
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.RSAPrivateKey;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -42,21 +42,27 @@ import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 import org.geant.idpextension.oidc.criterion.ClientInformationCriterion;
 import org.geant.security.jwk.BasicJWKCredential;
-import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.opensaml.xmlsec.criterion.SignatureSigningConfigurationCriterion;
 import org.opensaml.xmlsec.impl.BasicSignatureSigningParametersResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Predicate;
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import com.nimbusds.jose.jwk.AsymmetricJWK;
 
 /**
- * A specialization of {@link BasicSignatureSigningParametersResolver} which supports selecting signing credentials
- * based on client registration data and instantiating HS credentials when needed. If the resolver fails to resolve
- * credentials it leaves the job to the hands of the super class method.
+ * A specialization of {@link BasicSignatureSigningParametersResolver} which supports selecting signature validation
+ * credentials based on client registration data. If the resolver fails to resolve credentials it leaves the job to the
+ * hands of the super class method.
  * 
  * <p>
  * In addition to the {@link net.shibboleth.utilities.java.support.resolver.Criterion} inputs documented in
@@ -66,23 +72,24 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
  * </ul>
  * </p>
  */
-public class OIDCClientInformationSignatureSigningParametersResolver extends BasicSignatureSigningParametersResolver {
+public class OIDCClientInformationSignatureValidationParametersResolver
+        extends BasicSignatureSigningParametersResolver {
 
     /** Logger. */
     @Nonnull
-    private Logger log = LoggerFactory.getLogger(OIDCClientInformationSignatureSigningParametersResolver.class);
+    private Logger log = LoggerFactory.getLogger(OIDCClientInformationSignatureValidationParametersResolver.class);
 
     /**
-     * Whether to create parameters for id token signing or userinfo response signing.
+     * Whether to create parameters for request object signature validation or token endpoint jwt validation.
      */
     public enum ParameterType {
-        IDTOKEN_SIGNING, USERINFO_SIGNING
+        REQUEST_OBJECT_VALIDATION, TOKEN_ENDPOINT_JWT_VALIDATION;
     }
 
-    private ParameterType target = ParameterType.IDTOKEN_SIGNING;
+    private ParameterType target = ParameterType.REQUEST_OBJECT_VALIDATION;
 
     /**
-     * Whether to create parameters for id token signing or userinfo response signing.
+     * Whether to create parameters for request object signature validation or token endpoint jwt validation.
      * 
      * @param target Whether to create parameters for request object signature validation, id token signing or userinfo
      *            response signing.
@@ -100,11 +107,21 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
                 "Resolver requires an instance of SignatureSigningConfigurationCriterion");
 
         final Predicate<String> whitelistBlacklistPredicate = getWhitelistBlacklistPredicate(criteria);
-        final SignatureSigningParameters params = new SignatureSigningParameters();
+
+        // For signature validation we need to list all the located keys and need the extended
+        // SignatureSigningParameters
+        final SignatureSigningParameters params = new OIDCSignatureValidationParameters();
 
         resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
 
         if (validate(params)) {
+            if (((OIDCSignatureValidationParameters) params).getValidationCredentials().size() == 0) {
+                // Super class has resolved single credential, try resorting to that
+                BasicJWKCredential jwkCredential = new BasicJWKCredential();
+                jwkCredential.setAlgorithm(JWSAlgorithm.parse(params.getSignatureAlgorithm()));
+                jwkCredential.setPublicKey(params.getSigningCredential().getPublicKey());
+                ((OIDCSignatureValidationParameters) params).getValidationCredentials().add(jwkCredential);
+            }
             logResult(params);
             return params;
         } else {
@@ -119,7 +136,8 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
      * @param algorithm algorithm to match.
      * @return true if key curve matches algorithm, otherwise false.
      */
-    // TODO: Move to helper
+
+    // TODO: move to helper
     private boolean curveMatchesESAlgorithm(Curve curve, JWSAlgorithm algorithm) {
         if (algorithm.equals(JWSAlgorithm.ES256)) {
             return curve.equals(Curve.P_256);
@@ -140,7 +158,8 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
             @Nonnull final CriteriaSet criteria, @Nonnull final Predicate<String> whitelistBlacklistPredicate) {
 
         log.debug("Resolving SignatureSigningParameters, purpose {}",
-                target.equals(ParameterType.IDTOKEN_SIGNING) ? "id token signing" : "userinfo response signing");
+                target.equals(ParameterType.REQUEST_OBJECT_VALIDATION) ? "request object signature validation"
+                        : "token endpoint jwt signature validation");
 
         if (!criteria.contains(ClientInformationCriterion.class)) {
             log.debug("No client criterion, nothing to do");
@@ -154,73 +173,100 @@ public class OIDCClientInformationSignatureSigningParametersResolver extends Bas
             super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
             return;
         }
-        final List<Credential> credentials = getEffectiveSigningCredentials(criteria);
         final List<String> algorithms = getEffectiveSignatureAlgorithms(criteria, whitelistBlacklistPredicate);
         log.trace("Resolved effective signature algorithms: {}", algorithms);
-        JWSAlgorithm algorithm =
-                target == ParameterType.IDTOKEN_SIGNING ? clientInformation.getOIDCMetadata().getIDTokenJWSAlg()
-                        : clientInformation.getOIDCMetadata().getUserInfoJWSAlg();
-        if (algorithm == null) {
-            if (target == ParameterType.USERINFO_SIGNING) {
-                log.debug("No alg defined in client information, nothing to do");
-                super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
-                return;
-            }
-            if (target == ParameterType.IDTOKEN_SIGNING) {
-                algorithm = JWSAlgorithm.RS256;
-            }
-        }
+        JWSAlgorithm algorithm = (target == ParameterType.REQUEST_OBJECT_VALIDATION)
+                ? clientInformation.getOIDCMetadata().getRequestObjectJWSAlg()
+                : clientInformation.getOIDCMetadata().getTokenEndpointAuthJWSAlg();
         if (algorithm != null && !algorithms.contains(algorithm.getName())) {
             log.warn("Client requests algorithm {} that is not available", algorithm.getName());
             super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
             return;
         }
-        // If HS family is requested we create the credential from client secret
-        if (JWSAlgorithm.Family.HMAC_SHA.contains(algorithm)) {
-            if (clientInformation.getSecret() == null) {
-                log.warn("No client secret to use as a key");
-                super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
-                return;
-            }
-            BasicJWKCredential jwkCredential = new BasicJWKCredential();
-            jwkCredential.setSecretKey(new SecretKeySpec(clientInformation.getSecret().getValueBytes(), "NONE"));
-            jwkCredential.setAlgorithm(algorithm);
-            log.trace("HS Credential initialized from client secret for algorithm {}", algorithm.getName());
-            params.setSigningCredential(jwkCredential);
-            params.setSignatureAlgorithm(algorithm.getName());
-            return;
-        }
-        // Lets pick first matching credential for the algorithm
-        for (Credential credential : credentials) {
-            if ((JWSAlgorithm.Family.RSA.contains(algorithm) && (credential.getPrivateKey() instanceof RSAPrivateKey))
-                    || (JWSAlgorithm.Family.EC.contains(algorithm)
-                            && (credential.getPrivateKey() instanceof ECPrivateKey)
-                            && curveMatchesESAlgorithm(
-                                    Curve.forECParameterSpec(
-                                            ((java.security.interfaces.ECKey) credential.getPrivateKey()).getParams()),
-                                    algorithm))) {
-                log.trace("Credential picked for algorithm {}", algorithm.getName());
-                params.setSigningCredential(credential);
-                params.setSignatureAlgorithm(algorithm.getName());
-                return;
-            }
-        }
 
+        List<JWSAlgorithm> supportedAlgos =
+                algorithm == null ? convertToJWSAlgorithmList(algorithms) : Arrays.asList(algorithm);
+        // Initialize HS family credentials
+        for (JWSAlgorithm alg : supportedAlgos) {
+            if (JWSAlgorithm.Family.HMAC_SHA.contains(alg)) {
+                if (clientInformation.getSecret() == null) {
+                    log.debug("No client secret to use as a key");
+                    break;
+                }
+                BasicJWKCredential jwkCredential = new BasicJWKCredential();
+                jwkCredential.setSecretKey(new SecretKeySpec(clientInformation.getSecret().getValueBytes(), "NONE"));
+                jwkCredential.setAlgorithm(alg);
+                log.trace("HS Credential initialized from client secret for algorithm {}", alg.getName());
+                params.setSigningCredential(jwkCredential);
+                params.setSignatureAlgorithm(alg.getName());
+                ((OIDCSignatureValidationParameters) params).getValidationCredentials().add(jwkCredential);
+            }
+        }
+        // For EC&RSA family signature validation we pick all suitable keys from client's registration data
+        JWKSet keySet = clientInformation.getOIDCMetadata().getJWKSet();
+        if (keySet == null) {
+            log.debug("No keyset available");
+        } else {
+            for (JWK key : keySet.getKeys()) {
+                if (KeyUse.ENCRYPTION.equals(key.getKeyUse())) {
+                    continue;
+                }
+                for (JWSAlgorithm alg : supportedAlgos) {
+                    if ((JWSAlgorithm.Family.RSA.contains(alg) && key instanceof RSAKey)
+                            || (JWSAlgorithm.Family.EC.contains(alg) && key instanceof ECKey
+                                    && curveMatchesESAlgorithm(((ECKey) key).getCurve(), alg))) {
+                        BasicJWKCredential jwkCredential = new BasicJWKCredential();
+                        jwkCredential.setAlgorithm(alg);
+                        jwkCredential.setKid(key.getKeyID());
+                        try {
+                            jwkCredential.setPublicKey(((AsymmetricJWK) key).toPublicKey());
+                        } catch (JOSEException e) {
+                            log.warn("Unable to parse key from keyset");
+                            continue;
+                        }
+                        log.debug("Selected key {} for alg {}", key.getKeyID(), alg.getName());
+                        params.setSigningCredential(jwkCredential);
+                        params.setSignatureAlgorithm(alg.getName());
+                        if (params instanceof OIDCSignatureValidationParameters) {
+                            ((OIDCSignatureValidationParameters) params).getValidationCredentials().add(jwkCredential);
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
         if (params.getSigningCredential() == null) {
-            log.debug("Not able to resolve signing credential based on provided client information");
+            log.debug("Not able to resolve signature validation credential based on provided client information");
             super.resolveAndPopulateCredentialAndSignatureAlgorithm(params, criteria, whitelistBlacklistPredicate);
         }
+    }
+
+    /**
+     * Convert algorithm string list to JWSAlgorithm list.
+     * 
+     * @param algorithms algorithm string list
+     * @return JWSAlgorithm list
+     */
+    private List<JWSAlgorithm> convertToJWSAlgorithmList(List<String> algorithms) {
+        List<JWSAlgorithm> jwsList = new ArrayList<JWSAlgorithm>();
+        if (algorithms == null) {
+            return jwsList;
+        }
+        for (String algorithm : algorithms) {
+            jwsList.add(JWSAlgorithm.parse(algorithm));
+        }
+        return jwsList;
     }
 
     /** {@inheritDoc} */
     @Override
     protected boolean validate(@Nonnull final SignatureSigningParameters params) {
         if (params.getSigningCredential() == null) {
-            log.debug("Validation failure: Unable to resolve signing credential");
+            log.debug("Validation failure: Unable to resolve signature validation credential");
             return false;
         }
         if (params.getSignatureAlgorithm() == null) {
-            log.debug("Validation failure: Unable to resolve signing algorithm URI");
+            log.debug("Validation failure: Unable to resolve signature validation algorithm URI");
             return false;
         }
         return true;
