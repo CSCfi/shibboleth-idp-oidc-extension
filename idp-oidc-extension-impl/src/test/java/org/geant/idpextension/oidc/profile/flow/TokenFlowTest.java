@@ -139,15 +139,17 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
     @Test
     public void testValidSecretJWT() throws ParseException, IOException, NoSuchAlgorithmException, URISyntaxException,
         DataSealerException, ComponentInitializationException, JOSEException {
-        String code = ValidateGrantTest.buildAuthorizationCode(clientId, "https://op.example.org", "jdoe", "mock",
-                redirectUri).toString();
-        storeMetadata(storageService, clientId, clientSecret, JWSAlgorithm.HS256,
-                ClientAuthenticationMethod.CLIENT_SECRET_JWT);
         ClientSecretJWT clientAuth = buildSecretJwtAuth(clientSecret);
-        Map<String, String> requestParameters = createRequestParameters(redirectUri, "authorization_code", code, clientId);
-        populateClientAssertionParams(requestParameters, clientAuth);
-        setHttpFormRequest("POST", requestParameters);
-        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        final FlowExecutionResult result = launchWithJwtAuthentication(clientAuth, JWSAlgorithm.HS256);
+        OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
+        Assert.assertNotNull(response.getTokens().getAccessToken());
+    }
+
+    @Test
+    public void testValidSecretJWTNoAlg() throws ParseException, IOException, NoSuchAlgorithmException, URISyntaxException,
+        DataSealerException, ComponentInitializationException, JOSEException {
+        ClientSecretJWT clientAuth = buildSecretJwtAuth(clientSecret);
+        final FlowExecutionResult result = launchWithJwtAuthentication(clientAuth, null);
         OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
         Assert.assertNotNull(response.getTokens().getAccessToken());
     }
@@ -155,17 +157,23 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
     @Test
     public void testInvalidSecretJWT() throws ParseException, IOException, NoSuchAlgorithmException, URISyntaxException,
         DataSealerException, ComponentInitializationException, JOSEException {
+        ClientSecretJWT clientAuth = buildSecretJwtAuth(clientSecret + "invalid");
+        final FlowExecutionResult result = launchWithJwtAuthentication(clientAuth, JWSAlgorithm.HS256);
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "AccessDenied");
+    }
+    
+    protected FlowExecutionResult launchWithJwtAuthentication(final JWTAuthentication authnMethod, final JWSAlgorithm algorithm)
+            throws NoSuchAlgorithmException, URISyntaxException, DataSealerException, ComponentInitializationException,
+            IOException {
         String code = ValidateGrantTest.buildAuthorizationCode(clientId, "https://op.example.org", "jdoe", "mock",
                 redirectUri).toString();
         storeMetadata(storageService, clientId, clientSecret, JWSAlgorithm.HS256,
                 ClientAuthenticationMethod.CLIENT_SECRET_JWT);
-        ClientSecretJWT clientAuth = buildSecretJwtAuth(clientSecret + "invalid");
         Map<String, String> requestParameters = createRequestParameters(redirectUri, "authorization_code", code, clientId);
-        populateClientAssertionParams(requestParameters, clientAuth);
+        populateClientAssertionParams(requestParameters, authnMethod);
         setHttpFormRequest("POST", requestParameters);
-        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
-        assertErrorCode(result, "invalid_request");
-        assertErrorDescriptionContains(result, "AccessDenied");
+        return flowExecutor.launchExecution(FLOW_ID, null, externalContext);
     }
     
     protected ClientSecretJWT buildSecretJwtAuth(String secret) throws JOSEException, URISyntaxException {
