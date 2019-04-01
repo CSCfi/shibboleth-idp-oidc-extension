@@ -121,7 +121,7 @@
                 expression="T(org.slf4j.LoggerFactory).getLogger('net.shibboleth.idp.saml.profile').error('Uncaught runtime exception', flowExecutionException.getCause())" />
         </on-entry>
         <evaluate expression="'RuntimeException'" />
-        <transition to="DisplayError" />
+        <transition to="HandleError" />
     </action-state>
 
     <!-- First we check if error is mapped as local audited error -->
