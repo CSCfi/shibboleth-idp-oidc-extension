@@ -27,6 +27,9 @@
                 <include>gson-*.jar</include>
                 <include>idp-oidc-extension-api-*.jar</include>
             </includes>
+            <excludes>
+                <exclude>*test*.jar</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>../idp-oidc-extension-impl/target</directory>
