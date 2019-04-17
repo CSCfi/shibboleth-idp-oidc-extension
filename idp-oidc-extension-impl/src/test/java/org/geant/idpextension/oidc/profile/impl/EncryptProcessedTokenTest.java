@@ -119,6 +119,7 @@ public class EncryptProcessedTokenTest {
         kp = kpg.generateKeyPair();
         BasicJWKCredential credentialRSA = new BasicJWKCredential();
         credentialRSA.setPublicKey(kp.getPublic());
+        credentialRSA.setKid("myKid");
         params.setKeyTransportEncryptionCredential(credentialRSA);
         params.setKeyTransportEncryptionAlgorithm("RSA-OAEP-256");
         params.setDataEncryptionAlgorithm("A128CBC-HS256");
@@ -140,6 +141,9 @@ public class EncryptProcessedTokenTest {
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertProceedEvent(event);
         Assert.assertTrue(oidcRespCtx.getProcessedToken() instanceof EncryptedJWT);
+        EncryptedJWT jwe = (EncryptedJWT) oidcRespCtx.getProcessedToken();
+        Assert.assertEquals("myKid", jwe.getHeader().getKeyID());
+
     }
 
     /**

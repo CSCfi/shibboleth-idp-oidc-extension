@@ -33,12 +33,13 @@ import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import javax.annotation.Nonnull;
 
-import org.geant.security.jwk.JWKCredential;
+import org.geant.idpextension.oidc.security.impl.CredentialKidUtil;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.saml.saml2.profile.context.EncryptionContext;
+import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.EncryptionParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,11 +141,15 @@ public class EncryptProcessedToken extends AbstractOIDCResponseAction {
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
 
         JWEAlgorithm encAlg = JWEAlgorithm.parse(params.getKeyTransportEncryptionAlgorithm());
-        JWKCredential credential = (JWKCredential) params.getKeyTransportEncryptionCredential();
+        Credential credential = params.getKeyTransportEncryptionCredential();
         EncryptionMethod encEnc = EncryptionMethod.parse(params.getDataEncryptionAlgorithm());
-        log.debug("{} encrypting with key {} and params alg: {} enc: {}", getLogPrefix(), credential.getKid(),
-                encAlg.getName(), encEnc.getName());
-        JWEObject jweObject = new JWEObject(new JWEHeader.Builder(encAlg, encEnc).contentType("JWT").build(), payload);
+        String kid = CredentialKidUtil.resolveKid(credential);
+
+        log.debug("{} encrypting with key {} and params alg: {} enc: {}", getLogPrefix(), kid, encAlg.getName(),
+                encEnc.getName());
+
+        JWEObject jweObject =
+                new JWEObject(new JWEHeader.Builder(encAlg, encEnc).contentType("JWT").keyID(kid).build(), payload);
         try {
             if (JWEAlgorithm.Family.RSA.contains(encAlg)) {
                 jweObject.encrypt(new RSAEncrypter((RSAPublicKey) credential.getPublicKey()));
