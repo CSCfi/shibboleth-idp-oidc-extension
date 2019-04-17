@@ -35,6 +35,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import org.geant.idpextension.oidc.messaging.JSONSuccessResponse;
 import org.geant.idpextension.oidc.profile.api.OIDCSecurityConfiguration;
+import org.geant.idpextension.oidc.security.impl.CredentialKidUtil;
 import org.geant.security.jwk.JWKCredential;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
@@ -131,23 +132,6 @@ public class FormOutboundKeySetResponseMessage extends AbstractProfileAction {
     }
 
     /**
-     * Resolves kid from key name. If there is no key name and the credential is JWK, the kid is read from JWK.
-     * 
-     * @return key names or null if not found.
-     */
-    private String resolveKid(Credential credential) {
-        if (credential.getKeyNames() != null) {
-            for (String keyName : credential.getKeyNames()) {
-                return keyName;
-            }
-        }
-        if (credential instanceof JWKCredential) {
-            return ((JWKCredential) credential).getKid();
-        }
-        return null;
-    }
-
-    /**
      * Resolved KeyUse parameter from credential.
      * 
      * @param credential credential to resolve KeyUse of
@@ -174,13 +158,13 @@ public class FormOutboundKeySetResponseMessage extends AbstractProfileAction {
         switch (credential.getPublicKey().getAlgorithm()) {
             case "RSA":
                 key = new RSAKey.Builder((RSAPublicKey) credential.getPublicKey()).keyUse(resolveKeyUse(credential))
-                        .keyID(resolveKid(credential)).build();
+                        .keyID(CredentialKidUtil.resolveKid(credential)).build();
                 break;
 
             case "EC":
                 key = new ECKey.Builder(Curve.forECParameterSpec(((ECPublicKey) credential.getPublicKey()).getParams()),
                         (ECPublicKey) credential.getPublicKey()).keyUse(resolveKeyUse(credential))
-                                .keyID(resolveKid(credential)).build();
+                                .keyID(CredentialKidUtil.resolveKid(credential)).build();
             default:
                 break;
         }

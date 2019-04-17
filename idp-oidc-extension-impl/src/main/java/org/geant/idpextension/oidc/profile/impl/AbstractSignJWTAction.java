@@ -31,6 +31,8 @@ package org.geant.idpextension.oidc.profile.impl;
 import java.security.interfaces.ECPrivateKey;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.geant.idpextension.oidc.security.impl.CredentialKidUtil;
 import org.geant.security.jwk.JWKCredential;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -96,23 +98,6 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCSigningResponseA
     }
 
     /**
-     * Resolves kid from key name. If there is no key name and the credential is JWK, the kid is read from JWK.
-     * 
-     * @return key names or null if not found.
-     */
-    private String resolveKid() {
-        if (credential.getKeyNames() != null) {
-            for (String keyName : credential.getKeyNames()) {
-                return keyName;
-            }
-        }
-        if (credential instanceof JWKCredential) {
-            return ((JWKCredential) credential).getKid();
-        }
-        return null;
-    }
-
-    /**
      * Resolves JWS algorithm from signature signing parameters.
      * 
      * @return JWS algorithm
@@ -157,9 +142,8 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCSigningResponseA
         try {
             Algorithm jwsAlgorithm = resolveAlgorithm();
             JWSSigner signer = getSigner(jwsAlgorithm);
-            jwt = new SignedJWT(
-                    new JWSHeader.Builder(new JWSAlgorithm(jwsAlgorithm.getName())).keyID(resolveKid()).build(),
-                    jwtClaimSet);
+            jwt = new SignedJWT(new JWSHeader.Builder(new JWSAlgorithm(jwsAlgorithm.getName()))
+                    .keyID(CredentialKidUtil.resolveKid(credential)).build(), jwtClaimSet);
             jwt.sign(signer);
         } catch (JOSEException e) {
             log.error("{} Error signing claim set: {}", getLogPrefix(), e.getMessage());

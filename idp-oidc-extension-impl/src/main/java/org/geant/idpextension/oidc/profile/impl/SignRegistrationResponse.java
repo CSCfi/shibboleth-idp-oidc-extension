@@ -37,6 +37,7 @@ import javax.annotation.Nullable;
 
 import org.geant.idpextension.oidc.messaging.context.navigate.OIDCClientRegistrationResponseMetadataLookupFunction;
 import org.geant.idpextension.oidc.profile.context.navigate.MetadataStatementsLookupFunction;
+import org.geant.idpextension.oidc.security.impl.CredentialKidUtil;
 import org.geant.security.jwk.JWKCredential;
 import org.joda.time.DateTime;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
@@ -210,24 +211,6 @@ public class SignRegistrationResponse extends AbstractProfileAction {
     }
 
     /**
-     * Resolves kid from key name. If there is no key name and the credential is
-     * JWK, the kid is read from JWK.
-     * 
-     * @return key names or null if not found.
-     */
-    private String resolveKid() {
-        if (credential.getKeyNames() != null) {
-            for (String keyName : credential.getKeyNames()) {
-                return keyName;
-            }
-        }
-        if (credential instanceof JWKCredential) {
-            return ((JWKCredential) credential).getKid();
-        }
-        return null;
-    }
-
-    /**
      * Resolves JWS algorithm from signature signing parameters.
      * 
      * @return JWS algorithm
@@ -261,7 +244,7 @@ public class SignRegistrationResponse extends AbstractProfileAction {
 
         SignedJWT jwt = null;
         final Algorithm jwsAlgorithm = resolveAlgorithm();
-        final String kid = resolveKid();
+        final String kid = CredentialKidUtil.resolveKid(credential);
 
         try {
             final JWSSigner signer = getSigner(jwsAlgorithm);
