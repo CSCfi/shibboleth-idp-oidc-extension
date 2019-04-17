@@ -6,7 +6,7 @@
     <parent>
         <artifactId>idp-oidc-extension-parent</artifactId>
         <groupId>org.geant</groupId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
     <artifactId>idp-oidc-extension-impl</artifactId>
     <packaging>jar</packaging>
@@ -52,10 +52,6 @@
             <artifactId>idp-ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.geant.fedoidc</groupId>
-            <artifactId>oidcfederatedmetadatastatement</artifactId>
-        </dependency>
-        <dependency>
             <groupId>${slf4j.groupId}</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
             <scope>provided</scope>
@@ -69,6 +65,11 @@
             <artifactId>idp-attribute-filter-api</artifactId>
         </dependency>
         <!-- Test Dependencies -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>

@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.geant</groupId>
     <artifactId>idp-oidc-extension-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -76,12 +76,13 @@
                 <artifactId>gson</artifactId>
                 <version>2.8.0</version>
             </dependency>
-            <dependency>
-                <groupId>org.geant.fedoidc</groupId>
-                <artifactId>oidcfederatedmetadatastatement</artifactId>
-                <version>1.1-SNAPSHOT</version>
-            </dependency>
             <!-- Test Dependencies -->
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.6</version>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>org.opensaml</groupId>
                 <artifactId>opensaml-core</artifactId>
