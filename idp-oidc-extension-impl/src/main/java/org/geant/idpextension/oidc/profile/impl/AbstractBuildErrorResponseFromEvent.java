@@ -56,6 +56,12 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorResponse> extends AbstractProfileAction {
+    
+    /** Default value for the error code in the error response messages. */
+    public static final String DEFAULT_ERROR_CODE = "invalid_request";
+    
+    /** Default value for the HTTP response status code in the HTTP responses. */
+    public static final int DEFAULT_HTTP_STATUS_CODE = HTTPResponse.SC_BAD_REQUEST;
 
     /** Class logger. */
     @Nonnull
@@ -78,8 +84,8 @@ public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorRespons
     public AbstractBuildErrorResponseFromEvent() {
         eventContextLookupStrategy = new CurrentOrPreviousEventLookup();
         mappedErrors = new HashMap<>();
-        defaultStatusCode = HTTPResponse.SC_BAD_REQUEST;
-        defaultCode = "invalid_request";
+        defaultStatusCode = DEFAULT_HTTP_STATUS_CODE;
+        defaultCode = DEFAULT_ERROR_CODE;
     }
 
     /**
@@ -130,6 +136,17 @@ public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorRespons
      * @return ErrorResponse
      */
     protected abstract T buildErrorResponse(ErrorObject error, ProfileRequestContext profileRequestContext);
+    
+    /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected boolean doPreExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
+        if (profileRequestContext.getOutboundMessageContext() == null) {
+            log.error("{} No outbound message context initialized, nothing to do", getLogPrefix());
+            return false;
+        }
+        return super.doPreExecute(profileRequestContext);
+    }
 
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
@@ -149,7 +166,7 @@ public abstract class AbstractBuildErrorResponseFromEvent<T extends ErrorRespons
             log.debug("{} No mapped event found for {}, creating general {}", getLogPrefix(), event, defaultCode);
             error = new ErrorObject(defaultCode, eventCtx.getEvent().toString(), defaultStatusCode);
         }
-        ErrorResponse errorResponse = buildErrorResponse(error, profileRequestContext);
+        final ErrorResponse errorResponse = buildErrorResponse(error, profileRequestContext);
         if (errorResponse != null) {
             profileRequestContext.getOutboundMessageContext()
                     .setMessage(buildErrorResponse(error, profileRequestContext));

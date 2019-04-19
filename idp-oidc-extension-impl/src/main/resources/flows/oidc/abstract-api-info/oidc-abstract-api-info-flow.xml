@@ -6,15 +6,10 @@
 
     <action-state id="InitializeMandatoryContexts">
         <evaluate expression="InitializeProfileRequestContext" />
+        <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="InitializeRelyingPartyContext" />
         <evaluate expression="SelectRelyingPartyConfiguration" />
         <evaluate expression="SelectProfileConfiguration" />
-        <evaluate expression="'proceed'" />
-        <transition on="proceed" to="OutboundContexts" />
-    </action-state>
-
-    <action-state id="OutboundContexts">
-        <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="'proceed'" />
         <transition on="proceed" to="BuildResponseMessage" />
     </action-state>
