@@ -49,7 +49,6 @@
         class="org.geant.idpextension.oidc.metadata.impl.FilesystemClientInformationResolver" 
         p:id="ExampleFileResolver1"
         p:remoteJwkSetCache-ref="shibboleth.oidc.RemoteJwkSetCache" c:metadata="/opt/shibboleth-idp/metadata/oidc-client.json" />
-    </bean>
 -->
 
     <bean id="ExampleStorageClientInformationResolver"
