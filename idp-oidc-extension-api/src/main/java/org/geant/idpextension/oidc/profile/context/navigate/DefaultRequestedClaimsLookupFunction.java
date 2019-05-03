@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 
+import net.minidev.json.JSONObject;
+
 /**
  * A function that returns copy of requested claims via a lookup function. This default lookup locates requested claims
  * from oidc authentication request if available. If information is not available, null is returned. If there is claims
@@ -52,8 +54,8 @@ public class DefaultRequestedClaimsLookupFunction extends AbstractAuthentication
         try {
             if (requestObject != null && requestObject.getJWTClaimsSet().getClaim("claims") != null) {
                 Object claims = requestObject.getJWTClaimsSet().getClaim("claims");
-                if (claims instanceof ClaimsRequest) {
-                    return (ClaimsRequest) claims;
+                if (claims instanceof JSONObject) {
+                    return ClaimsRequest.parse((JSONObject) claims);
                 } else {
                     log.error("claims claim is not of expected type");
                     return null;
