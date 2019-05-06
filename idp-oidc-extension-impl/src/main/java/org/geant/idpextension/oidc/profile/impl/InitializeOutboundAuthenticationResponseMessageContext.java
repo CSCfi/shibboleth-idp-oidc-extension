@@ -85,7 +85,7 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
  * based on the identity of a relying party accessed via a lookup strategy, by default an immediate child of the profile
  * request context.
  * 
- * This action also initializes the {@link SAMLMetadataContext} and populates it with service and {@link UIInfo} 
+ * This action also initializes the {@link SAMLMetadataContext} and populates it with service and {@link UIInfo}
  * -related data.
  * 
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
@@ -94,42 +94,45 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
  */
 public class InitializeOutboundAuthenticationResponseMessageContext
         extends AbstractInitializeOutboundResponseMessageContextForRP<AuthenticationResponse> {
-    
+
     /** Class logger. */
     @Nonnull
     private final Logger log = LoggerFactory.getLogger(InitializeOutboundAuthenticationResponseMessageContext.class);
 
     /** Strategy function to create the {@link SAMLMetadataContext}. */
-    @Nonnull private Function<ProfileRequestContext, SAMLMetadataContext> samlMetadataCtxCreateStrategy;  
+    @Nonnull
+    private Function<ProfileRequestContext, SAMLMetadataContext> samlMetadataCtxCreateStrategy;
 
     /** Strategy function to lookup the {@link OIDCMetadataContext}. */
-    @Nonnull private Function<ProfileRequestContext, OIDCMetadataContext> oidcMetadataCtxLookupStrategy;
-    
+    @Nonnull
+    private Function<ProfileRequestContext, OIDCMetadataContext> oidcMetadataCtxLookupStrategy;
+
     /** The OIDC metadata context used as a source for the SAML metadata context. */
     private OIDCMetadataContext oidcMetadataCtx;
-    
+
     /** The default language when it has not been defined in the metadata. */
     private String defaultLanguage;
-    
+
     /**
      * Constructor.
      */
     public InitializeOutboundAuthenticationResponseMessageContext() {
         super();
-        samlMetadataCtxCreateStrategy = Functions.compose(new ChildContextLookup<>(SAMLMetadataContext.class, true), 
-                Functions.compose(new ChildContextLookup<>(SAMLPeerEntityContext.class, true), 
+        samlMetadataCtxCreateStrategy = Functions.compose(new ChildContextLookup<>(SAMLMetadataContext.class, true),
+                Functions.compose(new ChildContextLookup<>(SAMLPeerEntityContext.class, true),
                         new OutboundMessageContextLookup()));
         oidcMetadataCtxLookupStrategy = Functions.compose(new ChildContextLookup<>(OIDCMetadataContext.class, false),
                 new InboundMessageContextLookup());
         defaultLanguage = "en";
     }
-    
+
     /**
      * Get the mechanism to create the {@link SAMLMetadataContext} to the {@link ProfileRequestContext}.
      * 
      * @return The mechanism to create the {@link SAMLMetadataContext} to the {@link ProfileRequestContext}.
      */
-    @Nonnull public Function<ProfileRequestContext, SAMLMetadataContext> getSAMLMetadataContextCreateStrategy() {
+    @Nonnull
+    public Function<ProfileRequestContext, SAMLMetadataContext> getSAMLMetadataContextCreateStrategy() {
         return samlMetadataCtxCreateStrategy;
     }
 
@@ -141,7 +144,7 @@ public class InitializeOutboundAuthenticationResponseMessageContext
     public void setSAMLMetadataContextCreateStrategy(
             @Nonnull final Function<ProfileRequestContext, SAMLMetadataContext> strgy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        
+
         samlMetadataCtxCreateStrategy = Constraint.isNotNull(strgy, "Injected Metadata Strategy cannot be null");
     }
 
@@ -150,7 +153,8 @@ public class InitializeOutboundAuthenticationResponseMessageContext
      * 
      * @return The mechanism to lookup the {@link OIDCMetadataContext} from the {@link ProfileRequestContext}.
      */
-    @Nonnull public Function<ProfileRequestContext, OIDCMetadataContext> getOIDCMetadataContextLookupStrategy() {
+    @Nonnull
+    public Function<ProfileRequestContext, OIDCMetadataContext> getOIDCMetadataContextLookupStrategy() {
         return oidcMetadataCtxLookupStrategy;
     }
 
@@ -162,10 +166,10 @@ public class InitializeOutboundAuthenticationResponseMessageContext
     public void setOIDCMetadataContextLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, OIDCMetadataContext> strgy) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        
+
         oidcMetadataCtxLookupStrategy = Constraint.isNotNull(strgy, "Injected Metadata Strategy cannot be null");
     }
-    
+
     /**
      * Set the default language when it has not been defined in the metadata.
      * 
@@ -188,7 +192,7 @@ public class InitializeOutboundAuthenticationResponseMessageContext
         }
         return super.doPreExecute(profileRequestContext);
     }
-    
+
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
@@ -205,10 +209,12 @@ public class InitializeOutboundAuthenticationResponseMessageContext
             final URI logoUri = oidcMetadata.getLogoURI(tag);
             try {
                 final BufferedImage image = ImageIO.read(oidcMetadata.getLogoURI(tag).toURL());
-                logo.setURL(logoUri.toString());
-                logo.setWidth(image.getWidth());
-                logo.setHeight(image.getHeight());
-                uiInfo.getLogos().add(logo);
+                if (image != null) {
+                    logo.setURL(logoUri.toString());
+                    logo.setWidth(image.getWidth());
+                    logo.setHeight(image.getHeight());
+                    uiInfo.getLogos().add(logo);
+                }
             } catch (IOException e) {
                 log.warn("{} Could not load the image from the URI {}", getLogPrefix(), logoUri);
             }
@@ -219,23 +225,23 @@ public class InitializeOutboundAuthenticationResponseMessageContext
             url.setValue(oidcMetadata.getPolicyURI(tag).toString());
             uiInfo.getPrivacyStatementURLs().add(url);
         }
-        for (final LangTag tag: oidcMetadata.getTermsOfServiceURIEntries().keySet()) {
+        for (final LangTag tag : oidcMetadata.getTermsOfServiceURIEntries().keySet()) {
             final InformationURL url = new InformationURLBuilder().buildObject();
             url.setXMLLang(tag == null ? defaultLanguage : tag.getLanguage());
             url.setValue(oidcMetadata.getTermsOfServiceURI(tag).toString());
-            uiInfo.getInformationURLs().add(url); 
+            uiInfo.getInformationURLs().add(url);
         }
         final List<String> emails = oidcMetadata.getEmailContacts();
         if (emails != null) {
-            final ContactPerson contactPerson = new ContactPersonBuilder().buildObject();
-            //TODO: should it be configurable?
-            contactPerson.setType(ContactPersonTypeEnumeration.SUPPORT);
             for (final String email : emails) {
+                final ContactPerson contactPerson = new ContactPersonBuilder().buildObject();
+                // TODO: should it be configurable?
+                contactPerson.setType(ContactPersonTypeEnumeration.SUPPORT);
                 final EmailAddress address = new EmailAddressBuilder().buildObject();
                 address.setAddress(email.startsWith("mailto:") ? email : "mailto:" + email);
                 contactPerson.getEmailAddresses().add(address);
+                entityDescriptor.getContactPersons().add(contactPerson);
             }
-            entityDescriptor.getContactPersons().add(contactPerson);
         }
         for (final LangTag tag : oidcMetadata.getNameEntries().keySet()) {
             final DisplayName displayName = new DisplayNameBuilder().buildObject();
