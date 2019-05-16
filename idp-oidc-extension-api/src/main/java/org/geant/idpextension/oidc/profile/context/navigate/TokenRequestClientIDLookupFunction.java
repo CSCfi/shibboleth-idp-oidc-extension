@@ -32,14 +32,17 @@ import javax.annotation.Nullable;
 
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.navigate.ContextDataLookupFunction;
+
+import com.nimbusds.oauth2.sdk.AbstractOptionallyAuthenticatedRequest;
 import com.nimbusds.oauth2.sdk.AbstractOptionallyIdentifiedRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 
 /**
  * For Token, Revocation and other end points supporting client authentication.
  * 
- * A function that returns client id of the request via a lookup function. This lookup locates client id for optionally
- * identified requests if available. If information is not available, null is returned.
+ * A function that returns client id of the request via a lookup function. This lookup locates client id primarily from
+ * client authentication if available. If client authentication information is not available, client id is looked from
+ * client_id parameter. Null is returned if information is not available.
  */
 @SuppressWarnings("rawtypes")
 public class TokenRequestClientIDLookupFunction implements ContextDataLookupFunction<MessageContext, ClientID> {
@@ -51,13 +54,16 @@ public class TokenRequestClientIDLookupFunction implements ContextDataLookupFunc
             return null;
         }
         Object message = input.getMessage();
-        if (!(message instanceof AbstractOptionallyIdentifiedRequest)) {
+        if (!(message instanceof AbstractOptionallyAuthenticatedRequest)) {
             return null;
         }
-        AbstractOptionallyIdentifiedRequest req = (AbstractOptionallyIdentifiedRequest) message;
+        AbstractOptionallyAuthenticatedRequest req = (AbstractOptionallyAuthenticatedRequest) message;
         if (req.getClientAuthentication() != null && req.getClientAuthentication().getClientID() != null) {
             return req.getClientAuthentication().getClientID();
         }
-        return req.getClientID();
+        if (!(message instanceof AbstractOptionallyIdentifiedRequest)) {
+            return null;
+        }
+        return ((AbstractOptionallyIdentifiedRequest) req).getClientID();
     }
 }

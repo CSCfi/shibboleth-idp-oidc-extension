@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+    default-init-method="initialize" default-destroy-method="destroy">
+
+    <bean id="shibboleth.oidc.profileId" class="java.lang.String"
+        c:_0="http://csc.fi/ns/profiles/oauth2/introspection" />
+
+    <bean id="DecodeMessage" class="org.opensaml.profile.action.impl.DecodeMessage" scope="prototype">
+        <constructor-arg>
+            <bean class="org.geant.idpextension.oauth2.decoding.impl.OAuth2IntrospectionRequestDecoder"
+                scope="prototype" p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
+        </constructor-arg>
+    </bean>
+
+    <bean id="OIDCMetadataLookup" class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor"
+        scope="prototype" c:executionDirection="INBOUND">
+        <constructor-arg name="messageHandler">
+            <bean class="org.geant.idpextension.oidc.profile.impl.OIDCMetadataLookupHandler" scope="prototype">
+                <property name="clientInformationResolver">
+                    <ref bean="shibboleth.ClientInformationResolver" />
+                </property>
+                <property name="clientIDLookupStrategy">
+                    <ref bean="shibboleth.TokenRequestClientIDLookupStrategy" />
+                </property>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="shibboleth.TokenRequestClientIDLookupStrategy"
+        class="org.geant.idpextension.oidc.profile.context.navigate.TokenRequestClientIDLookupFunction"
+        scope="prototype" />
+
+    <bean id="InitializeRelyingPartyContext"
+        class="org.geant.idpextension.oidc.profile.impl.InitializeRelyingPartyContext" scope="prototype"
+        p:clientIDLookupStrategy-ref="shibboleth.TokenRequestClientIDLookupStrategy" />
+
+    <bean id="InitializeOutboundMessageContext"
+        class="org.geant.idpextension.oauth2.profile.impl.InitializeOutboundTokenIntrospectionResponseMessageContext"
+        scope="prototype" />
+
+    <bean id="ValidateEndpointAuthentication"
+        class="org.geant.idpextension.oidc.profile.impl.ValidateEndpointAuthentication" scope="prototype"
+        p:httpServletRequest-ref="shibboleth.HttpServletRequest" p:replayCache-ref="shibboleth.ReplayCache" />
+
+    <bean id="FormOutboundMessage"
+        class="org.geant.idpextension.oauth2.profile.impl.FormOutboundIntrospectionResponseMessage" scope="prototype"
+        c:sealer-ref="tokenSealer" p:revocationCache-ref="shibboleth.RevocationCache" />
+
+    <bean id="BuildErrorResponseFromEvent"
+        class="org.geant.idpextension.oauth2.profile.impl.BuildIntrospectionErrorResponseFromEvent" scope="prototype"
+        p:httpServletResponse-ref="shibboleth.HttpServletResponse">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>
+        <property name="mappedErrors">
+            <map value-type="com.nimbusds.oauth2.sdk.ErrorObject">
+                <entry key="#{T(org.opensaml.profile.action.EventIds).ACCESS_DENIED}"
+                    value="#{T(com.nimbusds.oauth2.sdk.OAuth2Error).INVALID_CLIENT}" />
+            </map>
+        </property>
+    </bean>
+
+</beans>

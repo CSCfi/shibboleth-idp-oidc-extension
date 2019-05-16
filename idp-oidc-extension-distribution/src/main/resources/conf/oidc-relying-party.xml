@@ -51,6 +51,10 @@
     <bean id="OIDC.Keyset" class="org.geant.idpextension.oidc.config.OIDCPublishKeySetConfiguration"
         p:securityConfiguration-ref="shibboleth.oidc.PublishKeySetSecurityConfiguration"
         p:servletRequest-ref="shibboleth.HttpServletRequest" />
+    <bean id="OAUTH2.Introspection" class="org.geant.idpextension.oauth2.config.OAuth2TokenIntrospectionConfiguration"
+        p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
+        p:tokenEndpointAuthMethods="%{idp.oidc.dynreg.tokenEndpointAuthMethods:client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt}"
+        p:servletRequest-ref="shibboleth.HttpServletRequest" />
 
     <!-- Security Configuration Defaults. These settings establish the default security configurations for signatures and 
         loads the default credentials used. -->

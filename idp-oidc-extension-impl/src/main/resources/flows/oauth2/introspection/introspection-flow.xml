@@ -1,0 +1,33 @@
+<flow xmlns="http://www.springframework.org/schema/webflow"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+    parent="oidc/abstract-api">
+
+    <action-state id="InitializeMandatoryContexts">
+        <evaluate expression="InitializeProfileRequestContext" />
+        <evaluate expression="InitializeOutboundMessageContext" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="DecodeMessage" />
+    </action-state>
+
+    <action-state id="DecodeMessage">
+        <evaluate expression="DecodeMessage" />
+        <evaluate expression="PostDecodePopulateAuditContext" />
+        <evaluate expression="OIDCMetadataLookup" />
+        <evaluate expression="InitializeRelyingPartyContext" />
+        <evaluate expression="SelectRelyingPartyConfiguration" />
+        <evaluate expression="SelectProfileConfiguration" />
+        <evaluate expression="PostLookupPopulateAuditContext" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="OutboundContextsAndSecurityParameters" />
+    </action-state>
+
+    <action-state id="OutboundContextsAndSecurityParameters">
+        <evaluate expression="ValidateEndpointAuthentication" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="BuildResponseMessage" />
+    </action-state>
+    
+    <bean-import resource="introspection-beans.xml" />
+
+</flow>

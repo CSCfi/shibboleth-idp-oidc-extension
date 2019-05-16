@@ -48,6 +48,7 @@
                 <bean parent="OIDC.SSO"/>
                 <bean parent="OIDC.UserInfo"/>
                 <bean parent="OAUTH2.Revocation"/>
+                <bean parent="OAUTH2.Introspection"/>
             </list>
         </property>
     </bean>
