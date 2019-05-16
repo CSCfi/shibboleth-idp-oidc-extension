@@ -86,7 +86,7 @@ public class RevokeToken extends AbstractOIDCRequestAction<TokenRevocationReques
      */
     public void setRevocationCache(@Nonnull final RevocationCache cache) {
         ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
-        revocationCache = Constraint.isNotNull(cache, "ReplayCache cannot be null");
+        revocationCache = Constraint.isNotNull(cache, "RevocationCache cannot be null");
     }
 
     /** {@inheritDoc} */

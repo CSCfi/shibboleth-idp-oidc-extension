@@ -105,20 +105,20 @@ public class FormOutboundIntrospectionResponseMessage extends AbstractOIDCReques
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         TokenClaimsSet tokenClaimsSet = null;
         AccessTokenType tokenType = null;
-        log.debug("{} token to revoke {}", getLogPrefix(), getRequest().getToken().getValue());
+        log.debug("{} token to introspect {}", getLogPrefix(), getRequest().getToken().getValue());
         try {
             tokenClaimsSet = AccessTokenClaimsSet.parse(getRequest().getToken().getValue(), dataSealer);
             tokenType = AccessTokenType.BEARER;
             log.debug("{} access token unwrapped {}", getLogPrefix(), tokenClaimsSet.serialize());
         } catch (DataSealerException | ParseException e) {
-            log.debug("{} token to revoke is not valid access token", getLogPrefix());
+            log.debug("{} token to introspect is not valid access token", getLogPrefix());
         }
         if (tokenClaimsSet == null) {
             try {
                 tokenClaimsSet = RefreshTokenClaimsSet.parse(getRequest().getToken().getValue(), dataSealer);
                 log.debug("{} refresh token unwrapped {}", getLogPrefix(), tokenClaimsSet.serialize());
             } catch (DataSealerException | ParseException e) {
-                log.debug("{} token to revoke is not valid refresh token", getLogPrefix());
+                log.debug("{} token to introspect is not valid refresh token", getLogPrefix());
             }
         }
         if (tokenClaimsSet == null) {
@@ -128,7 +128,7 @@ public class FormOutboundIntrospectionResponseMessage extends AbstractOIDCReques
             return;
         }
         if (revocationCache.isRevoked(RevocationCacheContexts.AUTHORIZATION_CODE, tokenClaimsSet.getID())) {
-            log.debug("{} tokens derived from  authorization code  {} are all revoked", getLogPrefix(),
+            log.debug("{} tokens derived from authorization code {} are all revoked", getLogPrefix(),
                     tokenClaimsSet.getID());
             profileRequestContext.getOutboundMessageContext()
                     .setMessage(new TokenIntrospectionSuccessResponse.Builder(false).build());
