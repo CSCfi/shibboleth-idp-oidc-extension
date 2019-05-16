@@ -30,7 +30,6 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 
-import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -88,6 +87,6 @@ public class FormOutboundTokenResponseMessage extends AbstractOIDCTokenResponseA
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
         TokenResponse resp =
                 new OIDCTokenResponse(new OIDCTokens(idToken, accessToken, getOidcResponseContext().getRefreshToken()));
-        ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
+        profileRequestContext.getOutboundMessageContext().setMessage(resp);
     }
 }

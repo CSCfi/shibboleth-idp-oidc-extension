@@ -32,7 +32,6 @@ import javax.annotation.Nonnull;
 
 import org.geant.idpextension.oauth2.messaging.impl.OAuth2RevocationSuccessResponse;
 import org.geant.idpextension.oidc.profile.impl.AbstractOIDCResponseAction;
-import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +51,6 @@ public class FormOutboundRevokeTokenResponseMessage extends AbstractOIDCResponse
     @SuppressWarnings("unchecked")
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        ((MessageContext) getOidcResponseContext().getParent()).setMessage(new OAuth2RevocationSuccessResponse());
+        profileRequestContext.getOutboundMessageContext().setMessage(new OAuth2RevocationSuccessResponse());
     }
 }

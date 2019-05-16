@@ -32,7 +32,6 @@ import javax.annotation.Nonnull;
 
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestResponseModeLookupFunction;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestStateLookupFunction;
-import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -67,6 +66,6 @@ public class FormOutboundAuthenticationResponseMessage extends AbstractOIDCAuthe
                 getOidcResponseContext().getAccessToken(),
                 new DefaultRequestStateLookupFunction().apply(profileRequestContext), null,
                 new DefaultRequestResponseModeLookupFunction().apply(profileRequestContext));
-        ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
+        profileRequestContext.getOutboundMessageContext().setMessage(resp);
     }
 }

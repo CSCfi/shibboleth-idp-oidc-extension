@@ -30,7 +30,6 @@ package org.geant.idpextension.oidc.profile.impl;
 
 import javax.annotation.Nonnull;
 
-import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
@@ -67,7 +66,7 @@ public class FormOutboundUserInfoResponseMessage extends AbstractOIDCTokenRespon
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return;
         }
-        ((MessageContext) getOidcResponseContext().getParent()).setMessage(resp);
+        profileRequestContext.getOutboundMessageContext().setMessage(resp);
 
     }
 }
