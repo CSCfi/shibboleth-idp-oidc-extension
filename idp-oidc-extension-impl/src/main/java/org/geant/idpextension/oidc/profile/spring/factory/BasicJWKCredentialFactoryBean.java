@@ -73,10 +73,10 @@ public class BasicJWKCredentialFactoryBean extends AbstractCredentialFactoryBean
      * @return usage type.
      */
     private UsageType getUsageType(JWK jwk) {
-        if (jwk.getKeyUse().equals(KeyUse.ENCRYPTION)) {
+        if (KeyUse.ENCRYPTION.equals(jwk.getKeyUse())) {
             return UsageType.ENCRYPTION;
         }
-        if (jwk.getKeyUse().equals(KeyUse.SIGNATURE)) {
+        if (KeyUse.SIGNATURE.equals(jwk.getKeyUse())) {
             return UsageType.SIGNING;
         }
         return UsageType.UNSPECIFIED;
