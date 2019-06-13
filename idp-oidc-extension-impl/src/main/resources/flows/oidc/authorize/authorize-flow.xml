@@ -37,8 +37,20 @@
         <evaluate expression="PopulateIDTokenSignatureSigningParameters" />
         <evaluate expression="PopulateIDTokenEncryptionParameters" />
         <evaluate expression="'proceed'" />
-        <transition on="proceed" to="PostInitialSetup" />
+        <transition on="proceed" to="PopulateClientStorageLoadContext" />
     </action-state>
+
+    <action-state id="PopulateClientStorageLoadContext">
+        <evaluate expression="PopulateClientStorageLoadContext" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="ClientStorageLoad" />
+        <transition on="NoLoadNeeded" to="PostInitialSetup" />
+    </action-state>
+
+    <subflow-state id="ClientStorageLoad" subflow="client-storage/read">
+        <input name="calledAsSubflow" value="true" />
+        <transition on="proceed" to="PostInitialSetup" />
+    </subflow-state>
 
     <action-state id="PostInitialSetup">
         <evaluate expression="InitializeAuthenticationContext" />

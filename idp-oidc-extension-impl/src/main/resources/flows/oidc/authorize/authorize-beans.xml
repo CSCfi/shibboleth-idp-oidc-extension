@@ -152,6 +152,10 @@
     <bean id="shibboleth.oidc.EncryptionParametersResolver"
         class="org.geant.idpextension.oidc.security.impl.OIDCClientInformationEncryptionParametersResolver" />
 
+    <bean id="PopulateClientStorageLoadContext"
+        class="org.opensaml.storage.impl.client.PopulateClientStorageLoadContext" scope="prototype"
+        p:storageServices="#{ getObject('shibboleth.ClientStorageServices') ?: getObject('shibboleth.DefaultClientStorageServices') }" />
+
     <bean id="SetTokenDeliveryAttributesToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetTokenDeliveryAttributesToResponseContext" scope="prototype">
         <property name="activationCondition">
