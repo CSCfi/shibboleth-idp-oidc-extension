@@ -45,7 +45,7 @@ public class TokenClaimsSetTest extends BaseTokenClaimsSetTest {
     protected void init() {
         tokenClaimsSet = new TokenClaimsSet(tokenType, tokenID, clientID, issuer, userPrincipal, subject, acr, iat, exp,
                 nonce, authTime, redirectURI, scope, claims, dlClaims, dlClaimsID, dlClaimsUI, consentableClaims,
-                consentedClaims);
+                consentedClaims, codeChallenge);
     }
 
     @Test
@@ -68,12 +68,13 @@ public class TokenClaimsSetTest extends BaseTokenClaimsSetTest {
         Assert.assertEquals(tokenClaimsSet.getNonce(), nonce);
         Assert.assertEquals(tokenClaimsSet.getRedirectURI(), redirectURI);
         Assert.assertEquals(tokenClaimsSet.getScope(), scope);
+        Assert.assertEquals(tokenClaimsSet.getCodeChallenge(), codeChallenge);
     }
 
     @Test
     public void testNullGetters() {
         tokenClaimsSet = new TokenClaimsSet(tokenType, tokenID, clientID, issuer, userPrincipal, subject, null, iat,
-                exp, null, authTime, redirectURI, scope, null, null, null, null, null, null);
+                exp, null, authTime, redirectURI, scope, null, null, null, null, null, null, null);
         Assert.assertNull(tokenClaimsSet.getACR());
         Assert.assertNull(tokenClaimsSet.getClaimsRequest());
         Assert.assertNull(tokenClaimsSet.getDeliveryClaims());

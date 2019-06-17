@@ -116,6 +116,9 @@ public class TokenClaimsSet {
     /** Claims/Attributes having consent. */
     public static final String KEY_CONSENTED_CLAIMS = "cnsntd_claims";
 
+    /** Code Challenge. */
+    public static final String KEY_CODE_CHALLENGE = "cc";
+
     /** Claims set for the claim. */
     protected JWTClaimsSet tokenClaimsSet;
 
@@ -152,6 +155,7 @@ public class TokenClaimsSet {
      * @param dlClaimsUI token delivery claims delivered for userinfo response. May be NULL.
      * @param consentableClaims consentable claims. May be NULL.
      * @param consentedClaims consented claims. May be NULL.
+     * @param codeChallenge Code Challenge. May be NULL.
      * @throws RuntimeException if called with not allowed null parameters
      */
     // Checkstyle: CyclomaticComplexity OFF
@@ -160,7 +164,8 @@ public class TokenClaimsSet {
             @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
             @Nonnull URI redirectURI, @Nonnull Scope scope, @Nullable ClaimsRequest claims,
             @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI,
-            @Nullable JSONArray consentableClaims, @Nullable JSONArray consentedClaims) {
+            @Nullable JSONArray consentableClaims, @Nullable JSONArray consentedClaims,
+            @Nullable String codeChallenge) {
         if (tokenType == null || tokenID == null || clientID == null || issuer == null || userPrincipal == null
                 || iat == null || exp == null || authTime == null || redirectURI == null || scope == null
                 || subject == null) {
@@ -175,7 +180,8 @@ public class TokenClaimsSet {
                 .claim(KEY_DELIVERY_CLAIMS, dlClaims == null ? null : dlClaims.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS_IDTOKEN, dlClaimsID == null ? null : dlClaimsID.toJSONObject())
                 .claim(KEY_DELIVERY_CLAIMS_USERINFO, dlClaimsUI == null ? null : dlClaimsUI.toJSONObject())
-                .claim(KEY_CONSENTABLE_CLAIMS, consentableClaims).claim(KEY_CONSENTED_CLAIMS, consentedClaims).build();
+                .claim(KEY_CONSENTABLE_CLAIMS, consentableClaims).claim(KEY_CONSENTED_CLAIMS, consentedClaims)
+                .claim(KEY_CODE_CHALLENGE, codeChallenge).build();
 
     }
 
@@ -251,6 +257,9 @@ public class TokenClaimsSet {
         }
         if (tokenClaimsSet.getClaims().containsKey(KEY_NONCE)) {
             tokenClaimsSet.getStringClaim(KEY_NONCE);
+        }
+        if (tokenClaimsSet.getClaims().containsKey(KEY_CODE_CHALLENGE)) {
+            tokenClaimsSet.getStringClaim(KEY_CODE_CHALLENGE);
         }
 
     }
@@ -330,6 +339,16 @@ public class TokenClaimsSet {
     @Nonnull
     public String getACR() {
         return (String) tokenClaimsSet.getClaim(KEY_ACR);
+    }
+    
+    /**
+     * Get type of the claims set.
+     * 
+     * @return Type of the claims set.
+     */
+    @Nonnull
+    public String getType() {
+        return (String) tokenClaimsSet.getClaim(KEY_TYPE);
     }
 
     /**
@@ -486,6 +505,19 @@ public class TokenClaimsSet {
     }
 
     /**
+     * Get code challenge of the authentication request.
+     * 
+     * @return code challenge of the authentication request.
+     */
+    @Nonnull
+    public String getCodeChallenge() {
+        if (tokenClaimsSet.getClaim(KEY_CODE_CHALLENGE) == null) {
+            return null;
+        }
+        return (String) tokenClaimsSet.getClaim(KEY_CODE_CHALLENGE);
+    }
+
+    /**
      * Get the id of the token.
      * 
      * @return id of the token
@@ -579,6 +611,10 @@ public class TokenClaimsSet {
         /** consented claims. */
         @Nullable
         protected JSONArray cnsntdClaims;
+
+        /** Code challenge. */
+        @Nullable
+        protected String codeChallenge;
 
         /**
          * Constructor for authorize code builder.
@@ -689,6 +725,16 @@ public class TokenClaimsSet {
          */
         public Builder<T> setConsentedClaims(@Nullable JSONArray consentedClaims) {
             cnsntdClaims = consentedClaims;
+            return this;
+        }
+
+        /**
+         * Set code challenge.
+         * 
+         * @param challenge code challenge
+         */
+        public Builder<T> setCodeChallenge(@Nullable String challenge) {
+            codeChallenge = challenge;
             return this;
         }
 

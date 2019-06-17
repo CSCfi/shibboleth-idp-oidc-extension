@@ -55,7 +55,7 @@ import java.text.ParseException;
 public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
 
     /** Value of authorize code claims set type. */
-    private static final String VALUE_TYPE_AC = "ac";
+    public static final String VALUE_TYPE_AC = "ac";
 
     /** Class logger. */
     @Nonnull
@@ -68,7 +68,7 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
      * @param clientID Client Id of the rp. Must not be NULL.
      * @param issuer OP issuer value. Must not be NULL.
      * @param userPrincipal User Principal of the authenticated user. Must not be NULL.
-     * @param subject subject of the authenticated user. Must not be NULL
+     * @param subject Subject of the authenticated user. Must not be NULL
      * @param acr Authentication context class reference value of the authentication. May be NULL.
      * @param iat Issue time of the authorize code. Must not be NULL.
      * @param exp Expiration time of the authorize code. Must not be NULL.
@@ -77,11 +77,12 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
      * @param redirectURI Validated redirect URI of the authentication request. Must not be NULL.
      * @param scope Scope of the authentication request. Must not be NULL.
      * @param claims Claims request of the authentication request. May be NULL.
-     * @param dlClaims token delivery claims delivered both for id token and userinfo response. May be NULL.
-     * @param dlClaimsID token delivery claims delivered for id token. May be NULL.
-     * @param dlClaimsUI token delivery claims delivered for userinfo response. May be NULL.
+     * @param dlClaims Token delivery claims delivered both for id token and userinfo response. May be NULL.
+     * @param dlClaimsID Token delivery claims delivered for id token. May be NULL.
+     * @param dlClaimsUI Token delivery claims delivered for userinfo response. May be NULL.
      * @param consentableClaims consentable claims. May be NULL.
      * @param consentedClaims consented claims. May be NULL.
+     * @param codeChallenge Code Challenge. May be NULL.
      * @throws RuntimeException if called with nonallowed null parameters
      */
     private AuthorizeCodeClaimsSet(@Nonnull IdentifierGenerationStrategy idGenerator, @Nonnull ClientID clientID,
@@ -89,10 +90,10 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
             @Nonnull Date iat, @Nonnull Date exp, @Nullable Nonce nonce, @Nonnull Date authTime,
             @Nonnull URI redirectURI, @Nonnull Scope scope, @Nullable ClaimsRequest claims,
             @Nullable ClaimsSet dlClaims, @Nullable ClaimsSet dlClaimsID, @Nullable ClaimsSet dlClaimsUI,
-            @Nullable JSONArray consentableClaims, @Nullable JSONArray consentedClaims) {
+            @Nullable JSONArray consentableClaims, @Nullable JSONArray consentedClaims, @Nullable String codeChallenge) {
         super(VALUE_TYPE_AC, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, subject, acr, iat, exp,
                 nonce, authTime, redirectURI, scope, claims, dlClaims, dlClaimsID, dlClaimsUI, consentableClaims,
-                consentedClaims);
+                consentedClaims, codeChallenge);
     }
 
     /**
@@ -164,7 +165,7 @@ public final class AuthorizeCodeClaimsSet extends TokenClaimsSet {
          */
         public AuthorizeCodeClaimsSet build() {
             return new AuthorizeCodeClaimsSet(idGen, rpId, iss, usrPrincipal, sub, acr, iat, exp, nonce, authTime,
-                    redirect, reqScope, claims, dlClaims, dlClaimsID, dlClaimsUI, cnsntlClaims, cnsntdClaims);
+                    redirect, reqScope, claims, dlClaims, dlClaimsID, dlClaimsUI, cnsntlClaims, cnsntdClaims, codeChallenge);
         }
 
     }

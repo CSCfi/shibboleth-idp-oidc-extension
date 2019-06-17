@@ -48,6 +48,8 @@ import net.shibboleth.idp.profile.context.navigate.ResponderIdLookupFunction;
 import org.geant.idpextension.oidc.config.OIDCCoreProtocolConfiguration;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseConsentContext;
 import org.geant.idpextension.oidc.messaging.context.OIDCAuthenticationResponseTokenClaimsContext;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestCodeChallengeLookupFunction;
+import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestCodeChallengeMethodLookupFunction;
 import org.geant.idpextension.oidc.profile.context.navigate.DefaultRequestNonceLookupFunction;
 import org.geant.idpextension.oidc.profile.context.navigate.OIDCAuthenticationResponseContextLookupFunction;
 import org.geant.idpextension.oidc.token.support.AuthorizeCodeClaimsSet;
@@ -110,12 +112,26 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
     @Nonnull
     private Function<ProfileRequestContext, OIDCAuthenticationResponseConsentContext> consentContextLookupStrategy;
 
+    /** Strategy used to locate the code challenge. */
+    @Nonnull
+    private Function<ProfileRequestContext, String> codeChallengeLookupStrategy;
+    
+    /** Strategy used to locate the code challenge method. */
+    @Nonnull
+    private Function<ProfileRequestContext, String> codeChallengeMethodLookupStrategy;
+    
+    /** Code challenge and the code challenge method stored to authz code.*/
+    @Nullable
+    private String codeChallenge;
+
     /**
      * Constructor.
      * 
      * @param sealer sealer to encrypt/hmac authz code.
      */
     public SetAuthorizationCodeToResponseContext(@Nonnull @ParameterName(name = "sealer") final DataSealer sealer) {
+        codeChallengeLookupStrategy = new DefaultRequestCodeChallengeLookupFunction();
+        codeChallengeMethodLookupStrategy = new DefaultRequestCodeChallengeMethodLookupFunction();
         tokenClaimsContextLookupStrategy =
                 Functions.compose(new ChildContextLookup<>(OIDCAuthenticationResponseTokenClaimsContext.class),
                         new OIDCAuthenticationResponseContextLookupFunction());
@@ -130,6 +146,28 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
                 return new SecureRandomIdentifierGenerationStrategy();
             }
         };
+    }
+
+    /**
+     * Set the strategy used to locate the Code Challenge of the request.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setCodeChallengeLookupStrategy(@Nonnull final Function<ProfileRequestContext, String> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        codeChallengeLookupStrategy =
+                Constraint.isNotNull(strategy, "CodeChallengeLookupStrategy lookup strategy cannot be null");
+    }
+    
+    /**
+     * Set the strategy used to locate the Code Challenge Method of the request.
+     * 
+     * @param strategy lookup strategy
+     */
+    public void setCodeChallengeMethodLookupStrategy(@Nonnull final Function<ProfileRequestContext, String> strategy) {
+        ComponentSupport.ifInitializedThrowUnmodifiabledComponentException(this);
+        codeChallengeMethodLookupStrategy =
+                Constraint.isNotNull(strategy, "CodeChallengeMethodLookupStrategy lookup strategy cannot be null");
     }
 
     /**
@@ -226,6 +264,14 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
             ActionSupport.buildEvent(profileRequestContext, IdPEventIds.INVALID_RELYING_PARTY_CTX);
             return false;
         }
+        codeChallenge = codeChallengeLookupStrategy.apply(profileRequestContext);
+        if (codeChallenge != null && !codeChallenge.isEmpty()) {
+            // Preappend the PKCE challenge with method as we need to store both method and challenge. Options for method are
+            // "plain" and "S256"
+            String codeChallengeMethod = codeChallengeMethodLookupStrategy.apply(profileRequestContext);
+            // Default method is "plain"
+            codeChallenge = (codeChallengeMethod != null ? codeChallengeMethod : "plain") + codeChallenge;
+        }
         return super.doPreExecute(profileRequestContext);
     }
 
@@ -259,7 +305,8 @@ public class SetAuthorizationCodeToResponseContext extends AbstractOIDCAuthentic
                         .setNonce(new DefaultRequestNonceLookupFunction().apply(profileRequestContext))
                         .setClaims(getOidcResponseContext().getRequestedClaims()).setDlClaims(claims)
                         .setDlClaimsID(claimsID).setDlClaimsUI(claimsUI).setConsentableClaims(consentable)
-                        .setConsentedClaims(consented).build();
+                        .setConsentedClaims(consented)
+                        .setCodeChallenge(codeChallenge).build();
         // We set token claims set to response context for possible access token generation.
         getOidcResponseContext().setTokenClaimsSet(claimsSet);
         try {

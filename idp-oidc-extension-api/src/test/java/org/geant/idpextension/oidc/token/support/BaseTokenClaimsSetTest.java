@@ -90,6 +90,8 @@ public class BaseTokenClaimsSetTest {
 
     protected ClaimsRequest claims;
 
+    protected String codeChallenge = "code_challenge_123456";
+
     @BeforeMethod
     protected void setupSealer() throws ComponentInitializationException, NoSuchAlgorithmException {
         sealer = new DataSealer();

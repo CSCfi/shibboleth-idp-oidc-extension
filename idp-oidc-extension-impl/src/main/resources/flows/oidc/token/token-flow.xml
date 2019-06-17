@@ -26,6 +26,7 @@
         <evaluate expression="ValidateEndpointAuthentication" />
         <evaluate expression="ValidateGrantType" />
         <evaluate expression="ValidateGrant" />
+        <evaluate expression="ValidatePKCE" />
         <evaluate expression="ValidateRedirectURI" />
         <evaluate expression="ValidateScope" />
         <evaluate expression="SetRequestedClaimsToResponseContext" />

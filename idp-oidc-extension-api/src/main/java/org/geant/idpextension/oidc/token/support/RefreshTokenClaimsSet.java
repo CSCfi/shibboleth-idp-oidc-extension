@@ -66,7 +66,7 @@ public final class RefreshTokenClaimsSet extends TokenClaimsSet {
                 tokenClaimsSet.getNonce(), tokenClaimsSet.getAuthenticationTime(), tokenClaimsSet.getRedirectURI(),
                 tokenClaimsSet.getScope(), tokenClaimsSet.getClaimsRequest(), tokenClaimsSet.getDeliveryClaims(), null,
                 tokenClaimsSet.getUserinfoDeliveryClaims(), tokenClaimsSet.getConsentableClaims(),
-                tokenClaimsSet.getConsentedClaims());
+                tokenClaimsSet.getConsentedClaims(), null);
     }
 
     /**

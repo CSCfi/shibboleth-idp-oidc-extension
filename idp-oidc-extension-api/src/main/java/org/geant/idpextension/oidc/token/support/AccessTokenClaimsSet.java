@@ -80,7 +80,7 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
                 tokenClaimSet.getACR() == null ? null : new ACR(tokenClaimSet.getACR()), iat, exp,
                 tokenClaimSet.getNonce(), tokenClaimSet.getAuthenticationTime(), tokenClaimSet.getRedirectURI(), scope,
                 tokenClaimSet.getClaimsRequest(), dlClaims, null, dlClaimsUI, tokenClaimSet.getConsentableClaims(),
-                tokenClaimSet.getConsentedClaims());
+                tokenClaimSet.getConsentedClaims(), null);
     }
 
     /**
@@ -113,7 +113,7 @@ public final class AccessTokenClaimsSet extends TokenClaimsSet {
             @Nullable JSONArray consentedClaims) {
         super(VALUE_TYPE_AT, idGenerator.generateIdentifier(), clientID, issuer, userPrincipal, subject, acr, iat, exp,
                 nonce, authTime, redirectURI, scope, claims, dlClaims, null, dlClaimsUI, consentableClaims,
-                consentedClaims);
+                consentedClaims, null);
     }
 
     /**

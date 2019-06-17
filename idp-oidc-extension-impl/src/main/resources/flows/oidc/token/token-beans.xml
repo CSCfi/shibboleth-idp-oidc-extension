@@ -56,6 +56,9 @@
     <bean id="ValidateGrant" class="org.geant.idpextension.oidc.profile.impl.ValidateGrant" scope="prototype"
         c:sealer-ref="tokenSealer" p:replayCache-ref="shibboleth.ReplayCache"
         p:revocationCache-ref="shibboleth.RevocationCache" />
+        
+    <bean id="ValidatePKCE" class="org.geant.idpextension.oidc.profile.impl.ValidatePKCE"
+        scope="prototype" />
 
     <bean id="ValidateRedirectURI" class="org.geant.idpextension.oidc.profile.impl.ValidateRedirectURI"
         scope="prototype" p:redirectURILookupStrategy-ref="shibboleth.TokenRequestRedirectURILookupStrategy"

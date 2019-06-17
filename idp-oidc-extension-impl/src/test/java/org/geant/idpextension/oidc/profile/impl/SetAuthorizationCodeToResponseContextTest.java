@@ -46,6 +46,7 @@ import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 /** {@link SetAuthorizationCodeToResponseContext} unit test. */
 public class SetAuthorizationCodeToResponseContextTest extends BaseOIDCResponseActionTest {
@@ -122,6 +123,44 @@ public class SetAuthorizationCodeToResponseContextTest extends BaseOIDCResponseA
         Assert.assertNotNull(ac.getDeliveryClaims().getClaim("1"));
         Assert.assertNotNull(ac.getIDTokenDeliveryClaims().getClaim("2"));
         Assert.assertNotNull(ac.getUserinfoDeliveryClaims().getClaim("3"));
+    }
+
+    /**
+     * Test PKCE with default challenge method.
+     */
+    @Test
+    public void testSuccessPKCE() throws ComponentInitializationException, NoSuchAlgorithmException, URISyntaxException,
+            ParseException, DataSealerException, com.nimbusds.oauth2.sdk.ParseException {
+        init();
+        request = AuthenticationRequest.parse(
+                "code_challenge=123456&code_challenge_method=S256&response_type=id_token+token&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20email%20profile%20offline_access&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
+        setAuthenticationRequest(request);
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertNotNull(respCtx.getAuthorizationCode());
+        AuthorizeCodeClaimsSet ac =
+                AuthorizeCodeClaimsSet.parse(respCtx.getAuthorizationCode().getValue(), getDataSealer());
+        Assert.assertNotNull(ac);
+        Assert.assertEquals(ac.getCodeChallenge(), "S256123456");
+    }
+
+    /**
+     * Test PKCE with default challenge method.
+     */
+    @Test
+    public void testSuccessPKCEDefault() throws ComponentInitializationException, NoSuchAlgorithmException,
+            URISyntaxException, ParseException, DataSealerException, com.nimbusds.oauth2.sdk.ParseException {
+        init();
+        request = AuthenticationRequest.parse(
+                "code_challenge=123456&response_type=id_token+token&client_id=s6BhdRkqt3&login_hint=foo&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb&scope=openid%20email%20profile%20offline_access&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj");
+        setAuthenticationRequest(request);
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertProceedEvent(event);
+        Assert.assertNotNull(respCtx.getAuthorizationCode());
+        AuthorizeCodeClaimsSet ac =
+                AuthorizeCodeClaimsSet.parse(respCtx.getAuthorizationCode().getValue(), getDataSealer());
+        Assert.assertNotNull(ac);
+        Assert.assertEquals(ac.getCodeChallenge(), "plain123456");
     }
 
     /**
