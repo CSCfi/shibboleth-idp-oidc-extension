@@ -225,7 +225,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
                 return ImmutableSet.copyOf(attribute.getValues());
             } else {
                 log.debug("{} none of the values matched as not silent mode", getLogPrefix());
-                return null;
+                return Collections.emptySet();
             }
         }
         // Are we able to release the values based on claim being requested for id token?
@@ -250,7 +250,7 @@ public class AttributeInOIDCRequestedClaimsMatcher extends AbstractIdentifiableI
         }
         log.debug("{} attribute {} was not a requested claim, none of the values matched", getLogPrefix(),
                 attribute.getId());
-        return null;
+        return Collections.emptySet();
     }
     // Checkstyle: CyclomaticComplexity ON
 

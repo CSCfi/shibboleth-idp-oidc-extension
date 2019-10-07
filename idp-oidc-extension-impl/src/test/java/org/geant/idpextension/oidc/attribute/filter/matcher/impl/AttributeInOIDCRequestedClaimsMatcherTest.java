@@ -32,9 +32,11 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 import net.shibboleth.idp.attribute.AttributeEncoder;
 import net.shibboleth.idp.attribute.IdPAttribute;
+import net.shibboleth.idp.attribute.IdPAttributeValue;
 import net.shibboleth.idp.attribute.filter.context.AttributeFilterContext;
 import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
@@ -135,16 +137,15 @@ public class AttributeInOIDCRequestedClaimsMatcherTest {
     public void testFailNoMsgCtx() throws Exception {
         setUp(false, false);
         matcher.initialize();
-        prc.setInboundMessageContext(null);
+        prc.setOutboundMessageContext(null);
         Assert.assertNull(matcher.getMatchingValues(attribute, filtercontext));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    public void testFailNoMsg() throws Exception {
+    public void testFailNoOidcMsgCtx() throws Exception {
         setUp(false, false);
         matcher.initialize();
-        prc.getInboundMessageContext().setMessage(null);
+        prc.getOutboundMessageContext().removeSubcontext(OIDCAuthenticationResponseContext.class);
         Assert.assertNull(matcher.getMatchingValues(attribute, filtercontext));
     }
 
@@ -152,7 +153,9 @@ public class AttributeInOIDCRequestedClaimsMatcherTest {
     public void testNoClaims() throws Exception {
         setUp(false, false);
         matcher.initialize();
-        Assert.assertNull(matcher.getMatchingValues(attribute, filtercontext));
+        Set<IdPAttributeValue<?>> result = matcher.getMatchingValues(attribute, filtercontext);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.size(), 0);
     }
 
     @Test
@@ -160,7 +163,9 @@ public class AttributeInOIDCRequestedClaimsMatcherTest {
         setUp(false, false);
         matcher.setMatchIfRequestedClaimsSilent(true);
         matcher.initialize();
-        Assert.assertNotNull(matcher.getMatchingValues(attribute, filtercontext));
+        Set<IdPAttributeValue<?>> result = matcher.getMatchingValues(attribute, filtercontext);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.size(), 0);
     }
 
     @Test
@@ -182,7 +187,9 @@ public class AttributeInOIDCRequestedClaimsMatcherTest {
         setUp(false, true);
         matcher.setMatchOnlyIDToken(true);
         matcher.initialize();
-        Assert.assertNull(matcher.getMatchingValues(attribute, filtercontext));
+        Set<IdPAttributeValue<?>> result = matcher.getMatchingValues(attribute, filtercontext);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.size(), 0);
     }
 
     @Test
@@ -190,7 +197,9 @@ public class AttributeInOIDCRequestedClaimsMatcherTest {
         setUp(true, false);
         matcher.setMatchOnlyUserInfo(true);
         matcher.initialize();
-        Assert.assertNull(matcher.getMatchingValues(attribute, filtercontext));
+        Set<IdPAttributeValue<?>> result = matcher.getMatchingValues(attribute, filtercontext);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.size(), 0);
     }
 
     @Test
