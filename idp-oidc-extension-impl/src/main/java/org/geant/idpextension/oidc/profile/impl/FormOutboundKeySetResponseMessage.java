@@ -28,30 +28,24 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.geant.idpextension.oidc.messaging.JSONSuccessResponse;
 import org.geant.idpextension.oidc.profile.api.OIDCSecurityConfiguration;
-import org.geant.idpextension.oidc.security.impl.CredentialKidUtil;
-import org.geant.security.jwk.JWKCredential;
+import org.geant.idpextension.oidc.security.impl.CredentialConversionUtil;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.opensaml.security.credential.Credential;
-import org.opensaml.security.credential.UsageType;
+import org.opensaml.xmlsec.EncryptionConfiguration;
+import org.opensaml.xmlsec.SignatureSigningConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
-import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.KeyUse;
-import com.nimbusds.jose.jwk.RSAKey;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
+import com.nimbusds.jose.jwk.JWKSet;
+
 import net.shibboleth.idp.profile.AbstractProfileAction;
 import net.shibboleth.idp.profile.IdPEventIds;
 import net.shibboleth.idp.profile.context.RelyingPartyContext;
@@ -131,77 +125,38 @@ public class FormOutboundKeySetResponseMessage extends AbstractProfileAction {
         return true;
     }
 
-    /**
-     * Resolved KeyUse parameter from credential.
-     * 
-     * @param credential credential to resolve KeyUse of
-     * @return KeyUse of credential
-     */
-    private KeyUse resolveKeyUse(Credential credential) {
-        if (credential.getUsageType().equals(UsageType.SIGNING)) {
-            return KeyUse.SIGNATURE;
-        }
-        if (credential.getUsageType().equals(UsageType.ENCRYPTION)) {
-            return KeyUse.ENCRYPTION;
-        }
-        return null;
-    }
-
-    /**
-     * Convert credential to JWK. Only RSA and EC keys supported.
-     * 
-     * @param credential to convert.
-     * @return credential as JWK.
-     */
-    private JWK credentialToKey(Credential credential) {
-        JWK key = null;
-        switch (credential.getPublicKey().getAlgorithm()) {
-            case "RSA":
-                key = new RSAKey.Builder((RSAPublicKey) credential.getPublicKey()).keyUse(resolveKeyUse(credential))
-                        .keyID(CredentialKidUtil.resolveKid(credential)).build();
-                break;
-
-            case "EC":
-                key = new ECKey.Builder(Curve.forECParameterSpec(((ECPublicKey) credential.getPublicKey()).getParams()),
-                        (ECPublicKey) credential.getPublicKey()).keyUse(resolveKeyUse(credential))
-                                .keyID(CredentialKidUtil.resolveKid(credential)).build();
-            default:
-                break;
-        }
-        return key;
-    }
-
     /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext) {
-        List<JWK> publishList = new ArrayList<JWK>();
-        if (secConfiguration.getSignatureSigningConfiguration() != null
-                && secConfiguration.getSignatureSigningConfiguration().getSigningCredentials() != null) {
-            for (Credential credential : secConfiguration.getSignatureSigningConfiguration().getSigningCredentials()) {
-                JWK jwk = credentialToKey(credential);
+        final List<JWK> publishList = new ArrayList<JWK>();
+        final SignatureSigningConfiguration signingConfig = secConfiguration.getSignatureSigningConfiguration();
+        if (signingConfig != null) {
+            convertAndPublishToList(signingConfig.getSigningCredentials(), publishList);
+        }
+        final EncryptionConfiguration encryptionConfig = secConfiguration.getRequestObjectDecryptionConfiguration();
+        if (encryptionConfig != null) {
+            convertAndPublishToList(encryptionConfig.getKeyTransportEncryptionCredentials(), publishList);
+        }
+        final JWKSet keySet = new JWKSet(publishList);
+        profileRequestContext.getOutboundMessageContext().setMessage(new JSONSuccessResponse(keySet.toJSONObject()));
+    }
+    
+    /**
+     * Converts the given credentials into JWK and adds all the successfully converted JWKs to the given list.
+     * 
+     * @param credentials The list of credentials to be converted to JWKs.
+     * @param publishList The list where the successfully converted JWKs are put.
+     */
+    protected void convertAndPublishToList(final List<Credential> credentials, final List<JWK> publishList) {
+        if (credentials != null) {
+            for (final Credential credential : credentials) {
+                final JWK jwk = CredentialConversionUtil.credentialToKey(credential);
                 if (jwk != null) {
                     publishList.add(jwk);
                 }
             }
         }
-        if (secConfiguration.getRequestObjectDecryptionConfiguration() != null && secConfiguration
-                .getRequestObjectDecryptionConfiguration().getKeyTransportEncryptionCredentials() != null) {
-            for (Credential credential : secConfiguration.getRequestObjectDecryptionConfiguration()
-                    .getKeyTransportEncryptionCredentials()) {
-                JWK jwk = credentialToKey(credential);
-                if (jwk != null) {
-                    publishList.add(jwk);
-                }
-            }
-        }
-        JSONObject keySet = new JSONObject();
-        JSONArray keys = new JSONArray();
-        for (JWK jwk : publishList) {
-            keys.add(jwk.toJSONObject());
-        }
-        keySet.put("keys", keys);
-        profileRequestContext.getOutboundMessageContext().setMessage(new JSONSuccessResponse(keySet));
     }
 
 }

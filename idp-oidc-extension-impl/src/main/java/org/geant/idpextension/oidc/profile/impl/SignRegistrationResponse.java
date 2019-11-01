@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
 
 import org.geant.idpextension.oidc.messaging.context.navigate.OIDCClientRegistrationResponseMetadataLookupFunction;
 import org.geant.idpextension.oidc.profile.context.navigate.MetadataStatementsLookupFunction;
-import org.geant.idpextension.oidc.security.impl.CredentialKidUtil;
+import org.geant.idpextension.oidc.security.impl.CredentialConversionUtil;
 import org.geant.security.jwk.JWKCredential;
 import org.joda.time.DateTime;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
@@ -244,7 +244,7 @@ public class SignRegistrationResponse extends AbstractProfileAction {
 
         SignedJWT jwt = null;
         final Algorithm jwsAlgorithm = resolveAlgorithm();
-        final String kid = CredentialKidUtil.resolveKid(credential);
+        final String kid = CredentialConversionUtil.resolveKid(credential);
 
         try {
             final JWSSigner signer = getSigner(jwsAlgorithm);

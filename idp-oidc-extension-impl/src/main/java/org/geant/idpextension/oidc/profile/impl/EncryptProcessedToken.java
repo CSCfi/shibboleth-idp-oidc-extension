@@ -33,7 +33,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import javax.annotation.Nonnull;
 
-import org.geant.idpextension.oidc.security.impl.CredentialKidUtil;
+import org.geant.idpextension.oidc.security.impl.CredentialConversionUtil;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -143,7 +143,7 @@ public class EncryptProcessedToken extends AbstractOIDCResponseAction {
         JWEAlgorithm encAlg = JWEAlgorithm.parse(params.getKeyTransportEncryptionAlgorithm());
         Credential credential = params.getKeyTransportEncryptionCredential();
         EncryptionMethod encEnc = EncryptionMethod.parse(params.getDataEncryptionAlgorithm());
-        String kid = CredentialKidUtil.resolveKid(credential);
+        String kid = CredentialConversionUtil.resolveKid(credential);
 
         log.debug("{} encrypting with key {} and params alg: {} enc: {}", getLogPrefix(), kid, encAlg.getName(),
                 encEnc.getName());

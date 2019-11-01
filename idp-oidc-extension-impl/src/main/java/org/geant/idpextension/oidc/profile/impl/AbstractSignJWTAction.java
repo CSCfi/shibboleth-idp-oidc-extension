@@ -32,7 +32,7 @@ import java.security.interfaces.ECPrivateKey;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.geant.idpextension.oidc.security.impl.CredentialKidUtil;
+import org.geant.idpextension.oidc.security.impl.CredentialConversionUtil;
 import org.geant.security.jwk.JWKCredential;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -143,7 +143,7 @@ public abstract class AbstractSignJWTAction extends AbstractOIDCSigningResponseA
             Algorithm jwsAlgorithm = resolveAlgorithm();
             JWSSigner signer = getSigner(jwsAlgorithm);
             jwt = new SignedJWT(new JWSHeader.Builder(new JWSAlgorithm(jwsAlgorithm.getName()))
-                    .keyID(CredentialKidUtil.resolveKid(credential)).build(), jwtClaimSet);
+                    .keyID(CredentialConversionUtil.resolveKid(credential)).build(), jwtClaimSet);
             jwt.sign(signer);
         } catch (JOSEException e) {
             log.error("{} Error signing claim set: {}", getLogPrefix(), e.getMessage());
