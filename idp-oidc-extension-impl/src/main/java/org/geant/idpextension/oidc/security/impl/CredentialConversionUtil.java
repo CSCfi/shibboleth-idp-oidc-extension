@@ -107,4 +107,21 @@ public final class CredentialConversionUtil {
         return null;
     }
     
+
+    /**
+     * Converts JWK key usage type to OpenSAML usage type.
+     * 
+     * @param jwk containing usage type. Must not be null.
+     * @return usage type.
+     */
+    public static UsageType getUsageType(@Nonnull final JWK jwk) {
+        if (KeyUse.ENCRYPTION.equals(jwk.getKeyUse())) {
+            return UsageType.ENCRYPTION;
+        }
+        if (KeyUse.SIGNATURE.equals(jwk.getKeyUse())) {
+            return UsageType.SIGNING;
+        }
+        return UsageType.UNSPECIFIED;
+    }
+    
 }

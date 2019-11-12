@@ -31,7 +31,6 @@ package org.geant.idpextension.oidc.profile.spring.factory;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.Nonnull;
-import org.opensaml.security.credential.UsageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.FatalBeanException;
@@ -40,12 +39,13 @@ import org.springframework.core.io.Resource;
 import java.text.ParseException;
 import java.util.List;
 import net.shibboleth.idp.profile.spring.factory.AbstractCredentialFactoryBean;
+
+import org.geant.idpextension.oidc.security.impl.CredentialConversionUtil;
 import org.geant.security.jwk.BasicJWKCredential;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.KeyType;
-import com.nimbusds.jose.jwk.KeyUse;
 import com.google.common.io.ByteStreams;
 
 /** factory bean for Basic JSON Web Keys (JWK). */
@@ -64,22 +64,6 @@ public class BasicJWKCredentialFactoryBean extends AbstractCredentialFactoryBean
      */
     public void setJWKResource(@Nonnull final Resource res) {
         jwkResource = res;
-    }
-
-    /**
-     * Convert jwk key usage type to shibboleth usage type.
-     * 
-     * @param jwk containing usage type.
-     * @return usage type.
-     */
-    private UsageType getUsageType(JWK jwk) {
-        if (KeyUse.ENCRYPTION.equals(jwk.getKeyUse())) {
-            return UsageType.ENCRYPTION;
-        }
-        if (KeyUse.SIGNATURE.equals(jwk.getKeyUse())) {
-            return UsageType.SIGNING;
-        }
-        return UsageType.UNSPECIFIED;
     }
 
     /** {@inheritDoc} */
@@ -110,7 +94,7 @@ public class BasicJWKCredentialFactoryBean extends AbstractCredentialFactoryBean
                     e);
             throw new FatalBeanException("Could not decode provided KeyFile " + jwkResource.getDescription(), e);
         }
-        jwkCredential.setUsageType(getUsageType(jwk));
+        jwkCredential.setUsageType(CredentialConversionUtil.getUsageType(jwk));
         jwkCredential.setEntityId(getEntityID());
         jwkCredential.setAlgorithm(jwk.getAlgorithm());
         jwkCredential.setKid(jwk.getKeyID());
