@@ -52,7 +52,7 @@ public class AbstractOidcApiFlowTest extends AbstractOidcFlowTest {
             throws URISyntaxException, NoSuchAlgorithmException, DataSealerException, ComponentInitializationException {
         TokenClaimsSet claims = new AccessTokenClaimsSet.Builder(idGenerator, new ClientID(clientId),
                 "https://op.example.org",
-                "jdoe", subject, new Date(), new Date(System.currentTimeMillis() + 1000), new Date(),
+                "jdoe", subject, new Date(), new Date(System.currentTimeMillis() + 30000), new Date(),
                 new URI("http://example.com"), scope).setDlClaimsUI(userInfoDeliverySet).build();
         return new BearerAccessToken(claims.serialize(BaseOIDCResponseActionTest.initializeDataSealer()));
     }
