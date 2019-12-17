@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -128,6 +129,17 @@ public class CheckRedirectUrisTest extends BaseOIDCRegistrationRequestTest {
         metadata.setSectorIDURI(new URI("https://invalid.scheme.org/cb"));
         initializeActionWithClient(buildMockHttpClient("[ \"" + redirectUri1 + "\", \"" + redirectUri2 + "\" ]"));
         assertEvent(null, metadata, redirectUri1);
+    }
+    
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Test
+    public void testCheckForbiddenHostname() throws Exception {
+        Assert.assertFalse(action.checkForbiddenHostname(new HashSet(Arrays.asList(new URI("custom.test:/testing"))),
+                "testing"));
+        Assert.assertTrue(action.checkForbiddenHostname(new HashSet(Arrays.asList(new URI("custom.test://testing"))),
+                "testing"));
+        Assert.assertTrue(action.checkForbiddenHostname(new HashSet(Arrays.asList(new URI("http://localhost"))),
+                "localhost"));
     }
 
     protected void initializeActionWithClient(HttpClient httpClient) throws ComponentInitializationException {

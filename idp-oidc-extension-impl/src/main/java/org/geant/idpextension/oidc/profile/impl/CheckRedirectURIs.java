@@ -312,7 +312,7 @@ public class CheckRedirectURIs extends AbstractProfileAction {
      */
     protected boolean checkForbiddenHostname(final Set<URI> redirectURIs, final String hostname) {
         for (final URI redirectUri : redirectURIs) {
-            if (redirectUri.getHost().equalsIgnoreCase(hostname)) {
+            if (hostname.equalsIgnoreCase(redirectUri.getHost())) {
                 log.trace("{} Found forbidden {} as the hostname in the redirect URIs", getLogPrefix(), hostname);
                 return true;
             }
