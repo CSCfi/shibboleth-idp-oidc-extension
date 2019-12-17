@@ -50,7 +50,7 @@ public class OIDCClientRegistrationRequestDecoder
         final MessageContext<OIDCClientRegistrationRequest> messageContext = new MessageContext<>();
         try {
             final HTTPRequest httpRequest = ServletUtils.createHTTPRequest(getHttpServletRequest());
-            log.trace("Raw query: {}", httpRequest.getQuery());
+            log.debug("Inbound request {}", RequestUtil.toString(httpRequest));
             final JSONObject requestJson = httpRequest.getQueryAsJSONObject();
             //TODO: Nimbus seems to be interpreting scope in different way as many RPs, currently the scope
             //is removed in this phase, better solution TODO.
