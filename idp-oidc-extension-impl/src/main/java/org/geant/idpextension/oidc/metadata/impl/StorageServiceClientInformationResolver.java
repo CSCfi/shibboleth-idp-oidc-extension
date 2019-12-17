@@ -117,7 +117,7 @@ public class StorageServiceClientInformationResolver extends BaseStorageServiceC
         try {
             final StorageRecord record = getStorageService().read(CONTEXT_NAME, clientId);
             if (record == null) {
-                log.error("Could not find any records with clientId {}", clientId);
+                log.debug("Could not find any records with clientId {}", clientId);
             } else {
                 final OIDCClientInformation clientInformation =
                         OIDCClientInformation.parse(JSONObjectUtils.parse(record.getValue()));
