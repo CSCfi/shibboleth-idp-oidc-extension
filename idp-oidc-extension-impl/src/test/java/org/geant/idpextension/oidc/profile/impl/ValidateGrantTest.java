@@ -88,14 +88,25 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
     public static AuthorizationCode buildAuthorizationCode(String clientId, String issuer, String userPrincipal,
             String sub, String callbackUrl)
             throws URISyntaxException, NoSuchAlgorithmException, DataSealerException, ComponentInitializationException {
-        Date now = new Date();
-        ValidateGrantTest test = new ValidateGrantTest();
-        TokenClaimsSet acClaims = new AuthorizeCodeClaimsSet.Builder(new SecureRandomIdentifierGenerationStrategy(),
-                new ClientID(clientId), issuer, userPrincipal, sub, now, new Date(now.getTime() + 100000), now,
-                new URI(callbackUrl), new Scope()).build();
-        return new AuthorizationCode(acClaims.serialize(test.getDataSealer()));
+        return buildAuthorizationCode(clientId, issuer, userPrincipal, sub, callbackUrl, null);
     }
 
+    public static AuthorizationCode buildAuthorizationCode(String clientId, String issuer, String userPrincipal,
+            String sub, String callbackUrl, String codeChallenge)
+            throws URISyntaxException, NoSuchAlgorithmException, DataSealerException, ComponentInitializationException {
+        Date now = new Date();
+        ValidateGrantTest test = new ValidateGrantTest();
+        AuthorizeCodeClaimsSet.Builder builder = new AuthorizeCodeClaimsSet.Builder(
+                new SecureRandomIdentifierGenerationStrategy(), new ClientID(clientId), issuer, userPrincipal, sub,
+                now, new Date(now.getTime() + 100000), now, new URI(callbackUrl), new Scope());
+        if (codeChallenge != null) {
+            builder.setCodeChallenge(codeChallenge);
+        }
+        TokenClaimsSet acClaims = builder.build();
+        return new AuthorizationCode(acClaims.serialize(test.getDataSealer()));
+    }
+    
+    
     @Test
     public void testAuthorizeCodeSuccess()
             throws NoSuchAlgorithmException, ComponentInitializationException, URISyntaxException, DataSealerException {
