@@ -40,6 +40,9 @@ import com.nimbusds.oauth2.sdk.auth.ClientSecretJWT;
 import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
@@ -54,7 +57,12 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
     
     String redirectUri = "https://example.org/cb";
     String clientId = "mockClientId";
+    String clientIdPkcePlain = "mockClientIdPKCEPlain";
+    String clientIdPkcePlainUnforced = "mockClientIdPKCEPlainUnforced";
+    String clientIdPkceS256 = "mockClientIdPKCES256";
     String clientSecret = "mockClientSecretmockClientSecretmockClientSecret";
+    String codeVerifier = "9234567812345678123456781234567812345678123456781234567812345678";
+
     
     @Autowired
     @Qualifier("shibboleth.StorageService")
@@ -67,6 +75,8 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
     @BeforeMethod
     public void setup() throws IOException {
         removeMetadata(storageService, clientId);
+        removeMetadata(storageService, clientIdPkcePlain);
+        removeMetadata(storageService, clientIdPkceS256);
     }
     
     @Test
@@ -110,18 +120,34 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
         final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
         assertErrorCode(result, "invalid_grant");
     }
+    
+    protected void initializeGrantAndRequest(String clientId, Map<String, String> requestParameters) 
+            throws NoSuchAlgorithmException, URISyntaxException, DataSealerException, ComponentInitializationException,
+            IOException {
+        setHttpFormRequest("POST", requestParameters);
+        storeMetadata(storageService, clientId, clientSecret);
+        setBasicAuth(clientId, clientSecret);
+    }
 
     @Test
     public void testValidGrant() throws ParseException, IOException, NoSuchAlgorithmException, URISyntaxException,
         DataSealerException, ComponentInitializationException {
-        String code = ValidateGrantTest.buildAuthorizationCode(clientId, "https://op.example.org", "jdoe", "mock",
-                redirectUri).toString();
-        setHttpFormRequest("POST", createRequestParameters(redirectUri, "authorization_code", code, clientId));
-        storeMetadata(storageService, clientId, clientSecret);
-        setBasicAuth(clientId, clientSecret);
+        initializeGrantAndRequest(clientId, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientId), clientId));
         final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
         OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
         Assert.assertNotNull(response.getTokens().getAccessToken());
+    }
+    
+    protected String buildAuthorizationCode(String clientId) throws NoSuchAlgorithmException, URISyntaxException,
+        DataSealerException, ComponentInitializationException {
+        return buildAuthorizationCode(clientId, null);
+    }
+    
+    protected String buildAuthorizationCode(String clientId, String verifier) throws NoSuchAlgorithmException,
+        URISyntaxException, DataSealerException, ComponentInitializationException {
+        return ValidateGrantTest.buildAuthorizationCode(clientId, "https://op.example.org", "jdoe", "mock",
+                redirectUri, verifier).toString();
     }
 
     @Test
@@ -134,14 +160,121 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
     }
 
     @Test
-    public void testValidSecretJWTNoAlg() throws ParseException, IOException, NoSuchAlgorithmException, URISyntaxException,
-        DataSealerException, ComponentInitializationException, JOSEException {
+    public void testValidSecretJWTNoAlg() throws ParseException, IOException, NoSuchAlgorithmException,
+        URISyntaxException, DataSealerException, ComponentInitializationException, JOSEException {
         ClientSecretJWT clientAuth = buildSecretJwtAuth(clientSecret);
         final FlowExecutionResult result = launchWithJwtAuthentication(clientAuth, null);
         OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
         Assert.assertNotNull(response.getTokens().getAccessToken());
     }
+    
+    @Test
+    public void testValidGrantValidRequestMissingPlainPKCE() throws ParseException, IOException,
+        NoSuchAlgorithmException, URISyntaxException, DataSealerException, ComponentInitializationException {
+        initializeGrantAndRequest(clientIdPkcePlain, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientIdPkcePlain, plainVerifier()), clientIdPkcePlain));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "InvalidMessage");
+    }
+    
+    @Test
+    public void testValidGrantInvalidUnforcedPlainPKCE() throws ParseException, IOException, NoSuchAlgorithmException,
+        URISyntaxException, DataSealerException, ComponentInitializationException {
+        initializeGrantAndRequest(clientIdPkcePlainUnforced, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientIdPkcePlainUnforced, plainVerifier()), clientIdPkcePlainUnforced, null,
+                null, codeVerifier + "invalid"));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "MessageAuthenticationError");
+    }
 
+    @Test
+    public void testValidGrantInvalidPlainPKCE() throws ParseException, IOException, NoSuchAlgorithmException,
+        URISyntaxException, DataSealerException, ComponentInitializationException {
+        initializeGrantAndRequest(clientIdPkcePlain, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientIdPkcePlain, plainVerifier()), clientIdPkcePlain, null, null, 
+                codeVerifier + "invalid"));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "MessageAuthenticationError");
+    }
+
+    @Test
+    public void testValidGrantValidPlainPKCE() throws ParseException, IOException, NoSuchAlgorithmException,
+        URISyntaxException, DataSealerException, ComponentInitializationException {
+        initializeGrantAndRequest(clientIdPkcePlain, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientIdPkcePlain, plainVerifier()), clientIdPkcePlain, null, null,
+                codeVerifier));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
+        Assert.assertNotNull(response.getTokens().getAccessToken());
+    }
+
+    @Test
+    public void testValidGrantValidUnforcedPlainPKCE() throws ParseException, IOException, NoSuchAlgorithmException,
+        URISyntaxException, DataSealerException, ComponentInitializationException {
+        initializeGrantAndRequest(clientIdPkcePlainUnforced, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientIdPkcePlainUnforced, plainVerifier()), clientIdPkcePlainUnforced, null,
+                null, codeVerifier));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
+        Assert.assertNotNull(response.getTokens().getAccessToken());
+    }
+
+    @Test
+    public void testValidGrantValidRequestMissingS256PKCE() throws ParseException, IOException,
+        NoSuchAlgorithmException, URISyntaxException, DataSealerException, ComponentInitializationException {
+        initializeGrantAndRequest(clientIdPkceS256, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientIdPkceS256, s256Verifier()), clientIdPkceS256));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "InvalidMessage");
+    }
+    
+    @Test
+    public void testValidGrantInvalidUnforcedS256PKCE() throws ParseException, IOException, NoSuchAlgorithmException,
+        URISyntaxException, DataSealerException, ComponentInitializationException {
+        initializeGrantAndRequest(clientIdPkcePlainUnforced, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientIdPkcePlainUnforced, s256Verifier()), clientIdPkcePlainUnforced, null, 
+                "S256", codeVerifier + "invalid"));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "MessageAuthenticationError");
+    }
+
+    @Test
+    public void testValidGrantInvalidS256PKCE() throws ParseException, IOException, NoSuchAlgorithmException,
+        URISyntaxException, DataSealerException, ComponentInitializationException {
+        initializeGrantAndRequest(clientIdPkceS256, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientIdPkceS256, s256Verifier()), clientIdPkceS256, null, "S256", 
+                codeVerifier + "invalid"));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        assertErrorCode(result, "invalid_request");
+        assertErrorDescriptionContains(result, "MessageAuthenticationError");
+    }
+
+    @Test
+    public void testValidGrantValidS256PKCE() throws ParseException, IOException, NoSuchAlgorithmException,
+        URISyntaxException, DataSealerException, ComponentInitializationException {
+        initializeGrantAndRequest(clientIdPkceS256, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientIdPkceS256, s256Verifier()), clientIdPkceS256, null, "S256",
+                codeVerifier));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
+        Assert.assertNotNull(response.getTokens().getAccessToken());
+    }
+
+    @Test
+    public void testValidGrantValidUnforcedS256PKCE() throws ParseException, IOException, NoSuchAlgorithmException,
+        URISyntaxException, DataSealerException, ComponentInitializationException {
+        initializeGrantAndRequest(clientId, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientId, s256Verifier()), clientId, null, "S256", codeVerifier));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
+        Assert.assertNotNull(response.getTokens().getAccessToken());
+    }
+    
     @Test
     public void testInvalidSecretJWT() throws ParseException, IOException, NoSuchAlgorithmException, URISyntaxException,
         DataSealerException, ComponentInitializationException, JOSEException {
@@ -149,6 +282,14 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
         final FlowExecutionResult result = launchWithJwtAuthentication(clientAuth, JWSAlgorithm.HS256);
         assertErrorCode(result, "invalid_request");
         assertErrorDescriptionContains(result, "AccessDenied");
+    }
+    
+    private String plainVerifier() {
+        return "plain" + CodeChallenge.compute(CodeChallengeMethod.PLAIN, new CodeVerifier(codeVerifier)).getValue();        
+    }
+    
+    private String s256Verifier() {
+        return "S256" + CodeChallenge.compute(CodeChallengeMethod.S256, new CodeVerifier(codeVerifier)).getValue();
     }
     
     protected FlowExecutionResult launchWithJwtAuthentication(final JWTAuthentication authnMethod, final JWSAlgorithm algorithm)
@@ -182,6 +323,15 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
         addNonNullValue(parameters, "grant_type", grantType);
         addNonNullValue(parameters, "code", code);
         addNonNullValue(parameters, "client_id", clientId);
+        return parameters;
+    }
+    
+    protected Map<String, String> createRequestParameters(String redirectUri, String grantType, String code, 
+            String clientId, String codeChallenge, String codeChallengeMethod, String codeVerifier) {
+        Map<String, String> parameters = createRequestParameters(redirectUri, grantType, code, clientId);
+        addNonNullValue(parameters, "code_challenge", codeChallenge);
+        addNonNullValue(parameters, "code_challenge_method", codeChallengeMethod);
+        addNonNullValue(parameters, "code_verifier", codeVerifier);
         return parameters;
     }
     

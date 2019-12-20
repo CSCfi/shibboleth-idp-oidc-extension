@@ -54,7 +54,27 @@
     </bean>
 
     <util:list id="shibboleth.RelyingPartyOverrides">
-
+        <bean parent="RelyingPartyByName" c:relyingPartyIds="mockClientIdPKCEPlainUnforced">
+            <property name="profileConfigurations">
+                 <list>
+                     <bean parent="OIDC.SSO" p:forcePKCE="false" p:allowPKCEPlain="true"/>
+                 </list>
+            </property>
+        </bean>
+        <bean parent="RelyingPartyByName" c:relyingPartyIds="mockClientIdPKCEPlain">
+            <property name="profileConfigurations">
+                 <list>
+                     <bean parent="OIDC.SSO" p:forcePKCE="true" p:allowPKCEPlain="true"/>
+                 </list>
+            </property>
+        </bean>
+        <bean parent="RelyingPartyByName" c:relyingPartyIds="mockClientIdPKCES256">
+            <property name="profileConfigurations">
+                 <list>
+                     <bean parent="OIDC.SSO" p:forcePKCE="true" p:allowPKCEPlain="false"/>
+                 </list>
+            </property>
+        </bean>
     </util:list>
 
 </beans>
