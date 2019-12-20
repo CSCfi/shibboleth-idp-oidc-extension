@@ -178,12 +178,14 @@ public class ValidatePKCE extends AbstractOIDCResponseAction {
             if (!plainPKCE) {
                 log.error("{} Plain PKCE code challenge method not allowed", getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+                return;
             }
             String codeChallengeValue = codeChallenge.substring("plain".length());
             if (!codeVerifier.equals(codeChallengeValue)) {
                 log.error("{} PKCE code challenge {} not matching code verifier {}", getLogPrefix(), codeChallengeValue,
                         codeVerifier);
                 ActionSupport.buildEvent(profileRequestContext, EventIds.MESSAGE_AUTHN_ERROR);
+                return;
             }
         } else if (codeChallenge.startsWith("S256")) {
             String codeChallengeValue = codeChallenge.substring("S256".length());
@@ -194,6 +196,7 @@ public class ValidatePKCE extends AbstractOIDCResponseAction {
                 log.error("{} PKCE S256 code challenge verification requires SHA-256", getLogPrefix(),
                         codeChallengeValue, codeVerifier);
                 ActionSupport.buildEvent(profileRequestContext, EventIds.MESSAGE_AUTHN_ERROR);
+                return;
             }
             byte[] hash = md.digest(codeVerifier.getBytes(Charset.forName("utf-8")));
             String codeChallengeComparisonValue = Base64URL.encode(hash).toString();
@@ -201,10 +204,12 @@ public class ValidatePKCE extends AbstractOIDCResponseAction {
                 log.error("{} PKCE code challenge {} not matching code verifier {}({})", getLogPrefix(),
                         codeChallengeValue, codeVerifier, codeChallengeComparisonValue);
                 ActionSupport.buildEvent(profileRequestContext, EventIds.MESSAGE_AUTHN_ERROR);
+                return;
             }
         } else {
             log.error("{} Unknown code challenge method", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_MESSAGE);
+            return;
         }
     }
 
