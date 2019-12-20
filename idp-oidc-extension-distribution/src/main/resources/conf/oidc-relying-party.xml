@@ -33,7 +33,9 @@
         p:authorizeCodeLifetime="%{idp.oidc.authorizeCode.defaultLifetime:PT5M}"
         p:refreshTokenLifetime="%{idp.oidc.refreshToken.defaultLifetime:PT2H}"
         p:servletRequest-ref="shibboleth.HttpServletRequest"
-        p:tokenEndpointAuthMethods="%{idp.oidc.tokenEndpointAuthMethods:client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt}" />
+        p:tokenEndpointAuthMethods="%{idp.oidc.tokenEndpointAuthMethods:client_secret_basic,client_secret_post,client_secret_jwt,private_key_jwt}"
+        p:forcePKCE="%{idp.oidc.forcePKCE:false}"
+        p:allowPKCEPlain="%{idp.oidc.allowPKCEPlain:false}"/>
     <bean id="OIDC.UserInfo" class="org.geant.idpextension.oidc.config.OIDCUserInfoConfiguration"
         p:securityConfiguration-ref="%{idp.security.oidc.config:shibboleth.oidc.DefaultSecurityConfiguration}"
         p:servletRequest-ref="shibboleth.HttpServletRequest" />
