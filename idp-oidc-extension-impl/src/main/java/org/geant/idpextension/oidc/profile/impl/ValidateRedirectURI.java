@@ -85,11 +85,13 @@ public class ValidateRedirectURI extends AbstractOIDCAuthenticationResponseActio
         if (requestRedirectURI == null) {
             log.error("{} Redirection URI of the request not located for verification", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REDIRECT_URI);
+            return;
         }
         final Set<URI> redirectionURIs = validRedirectURIsLookupStrategy.apply(profileRequestContext);
         if (redirectionURIs == null || redirectionURIs.isEmpty()) {
             log.error("{} Client has not registered Redirection URIs. Redirection URI cannot be validated.", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, OidcEventIds.INVALID_REDIRECT_URI);
+            return;
         }
         if (redirectionURIs.contains(requestRedirectURI)) {
             getOidcResponseContext().setRedirectURI(requestRedirectURI);

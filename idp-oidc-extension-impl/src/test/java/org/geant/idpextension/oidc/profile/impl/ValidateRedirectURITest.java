@@ -22,10 +22,14 @@ import net.shibboleth.utilities.java.support.component.ComponentInitializationEx
 
 import org.geant.idpextension.oidc.messaging.context.OIDCMetadataContext;
 import org.geant.idpextension.oidc.profile.OidcEventIds;
+import org.mockito.Mockito;
 import org.opensaml.profile.action.EventIds;
+import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import com.google.common.base.Function;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
@@ -36,8 +40,17 @@ public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
     private ValidateRedirectURI action;
 
     private void init() throws ComponentInitializationException {
+        init(null);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private void init(Function<ProfileRequestContext, URI> redirectURILookupStrategy)
+            throws ComponentInitializationException {
         action = new ValidateRedirectURI();
-        action.initialize();
+        if (redirectURILookupStrategy != null) {
+            action.setRedirectURILookupStrategy(redirectURILookupStrategy);
+        }
+        action.initialize();        
     }
 
     /**
@@ -51,6 +64,46 @@ public class ValidateRedirectURITest extends BaseOIDCResponseActionTest {
         profileRequestCtx.getInboundMessageContext().removeSubcontext(OIDCMetadataContext.class);
         final Event event = action.execute(requestCtx);
         ActionTestingSupport.assertEvent(event, EventIds.INVALID_MSG_CTX);
+    }
+
+    /**
+     * Test case of context not having requested redirect URI.
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
+     */
+    @Test
+    public void testNoRedirectionUriInMetadata() throws ComponentInitializationException, URISyntaxException {
+        init();
+        OIDCMetadataContext oidcCtx = profileRequestCtx.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, true);
+        OIDCClientMetadata metaData = new OIDCClientMetadata();
+        metaData.setRedirectionURI(null);
+        OIDCClientInformation information = new OIDCClientInformation(new ClientID("test"), null, metaData, null, null, null);
+        oidcCtx.setClientInformation(information);
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REDIRECT_URI);
+        Assert.assertNull(respCtx.getRedirectURI());
+    }
+
+    /**
+     * Test case of context not having requested redirect URI.
+     * 
+     * @throws ComponentInitializationException
+     * @throws URISyntaxException
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void testNoRequestedRedirectionUri() throws ComponentInitializationException, URISyntaxException {
+        Function<ProfileRequestContext, URI> redirectURILookupStrategy = Mockito.mock(Function.class);
+        init(redirectURILookupStrategy);
+        OIDCMetadataContext oidcCtx = profileRequestCtx.getInboundMessageContext().getSubcontext(OIDCMetadataContext.class, true);
+        OIDCClientMetadata metaData = new OIDCClientMetadata();
+        metaData.setRedirectionURI(null);
+        OIDCClientInformation information = new OIDCClientInformation(new ClientID("test"), null, metaData, null, null, null);
+        oidcCtx.setClientInformation(information);
+        final Event event = action.execute(requestCtx);
+        ActionTestingSupport.assertEvent(event, OidcEventIds.INVALID_REDIRECT_URI);
+        Assert.assertNull(respCtx.getRedirectURI());
     }
 
     /**
