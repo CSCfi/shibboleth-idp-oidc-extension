@@ -98,9 +98,6 @@
     <bean id="SetTokenDeliveryAttributesToResponseContext"
         class="org.geant.idpextension.oidc.profile.impl.SetTokenDeliveryAttributesFromTokenToResponseContext"
         scope="prototype">
-        <property name="userinfoDeliveryClaimsLookupStrategy">
-            <null />
-        </property>
     </bean>
 
     <bean id="SetConsentToResponseContext"

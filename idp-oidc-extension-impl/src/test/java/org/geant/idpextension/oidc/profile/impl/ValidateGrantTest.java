@@ -16,6 +16,7 @@
 
 package org.geant.idpextension.oidc.profile.impl;
 
+import net.minidev.json.JSONObject;
 import net.shibboleth.idp.profile.ActionTestingSupport;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
@@ -42,6 +43,7 @@ import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
 /** {@link ValidateGrant} unit test. */
 public class ValidateGrantTest extends BaseOIDCResponseActionTest {
@@ -94,6 +96,13 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
     public static AuthorizationCode buildAuthorizationCode(String clientId, String issuer, String userPrincipal,
             String sub, String callbackUrl, String codeChallenge)
             throws URISyntaxException, NoSuchAlgorithmException, DataSealerException, ComponentInitializationException {
+        return buildAuthorizationCode(clientId, issuer, userPrincipal, sub, callbackUrl, codeChallenge, null, null, null);
+    }
+    
+    public static AuthorizationCode buildAuthorizationCode(String clientId, String issuer, String userPrincipal,
+            String sub, String callbackUrl, String codeChallenge, JSONObject deliveryClaims,
+            JSONObject deliveryClaimsIDToken, JSONObject deliveryClaimsUserInfo)
+            throws URISyntaxException, NoSuchAlgorithmException, DataSealerException, ComponentInitializationException {
         Date now = new Date();
         ValidateGrantTest test = new ValidateGrantTest();
         AuthorizeCodeClaimsSet.Builder builder = new AuthorizeCodeClaimsSet.Builder(
@@ -102,10 +111,19 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
         if (codeChallenge != null) {
             builder.setCodeChallenge(codeChallenge);
         }
+        if (deliveryClaims != null) {
+            builder.setDlClaims(new DeliveryClaimsSet(deliveryClaims));
+        }
+        if (deliveryClaimsIDToken != null) {
+            builder.setDlClaimsID(new DeliveryClaimsSet(deliveryClaimsIDToken));
+        }
+        if (deliveryClaimsUserInfo != null) {
+            builder.setDlClaimsUI(new DeliveryClaimsSet(deliveryClaimsUserInfo));
+        }
         TokenClaimsSet acClaims = builder.build();
         return new AuthorizationCode(acClaims.serialize(test.getDataSealer()));
     }
-    
+
     
     @Test
     public void testAuthorizeCodeSuccess()
@@ -202,6 +220,13 @@ public class ValidateGrantTest extends BaseOIDCResponseActionTest {
     @Test(expectedExceptions = ConstraintViolationException.class)
     public void testNoDataSealer() throws NoSuchAlgorithmException, ComponentInitializationException {
         action = new ValidateGrant(null);
+    }
+    
+    private static class DeliveryClaimsSet extends ClaimsSet {
+        
+        public DeliveryClaimsSet(final JSONObject claims) {
+            super(claims);
+        }
     }
 
 }

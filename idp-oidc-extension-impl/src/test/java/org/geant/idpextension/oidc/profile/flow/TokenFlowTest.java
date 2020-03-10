@@ -23,7 +23,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.geant.idpextension.oidc.profile.impl.BaseOIDCResponseActionTest;
 import org.geant.idpextension.oidc.profile.impl.ValidateGrantTest;
+import org.geant.idpextension.oidc.token.support.AccessTokenClaimsSet;
 import org.opensaml.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,8 +45,11 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 
+import net.minidev.json.JSONObject;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.security.DataSealerException;
 
@@ -146,8 +151,14 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
     
     protected String buildAuthorizationCode(String clientId, String verifier) throws NoSuchAlgorithmException,
         URISyntaxException, DataSealerException, ComponentInitializationException {
+        return buildAuthorizationCode(clientId, verifier, null, null, null);
+    }
+    
+    protected String buildAuthorizationCode(String clientId, String verifier, JSONObject deliveryClaims,
+            JSONObject deliveryClaimsIDToken, JSONObject deliveryClaimsUserInfo) throws NoSuchAlgorithmException,
+            URISyntaxException, DataSealerException, ComponentInitializationException {
         return ValidateGrantTest.buildAuthorizationCode(clientId, "https://op.example.org", "jdoe", "mock",
-                redirectUri, verifier).toString();
+            redirectUri, verifier, deliveryClaims, deliveryClaimsIDToken, deliveryClaimsUserInfo).toString();
     }
 
     @Test
@@ -282,6 +293,58 @@ public class TokenFlowTest extends AbstractOidcFlowTest {
         final FlowExecutionResult result = launchWithJwtAuthentication(clientAuth, JWSAlgorithm.HS256);
         assertErrorCode(result, "invalid_request");
         assertErrorDescriptionContains(result, "AccessDenied");
+    }
+    
+    @Test
+    public void testValidGrantWrappedClaimsUI() throws NoSuchAlgorithmException, URISyntaxException,
+        DataSealerException, ComponentInitializationException, IOException {
+        final String claimName = "name";
+        final String claimValue = "John Doe";
+        final JSONObject claimsUI = new JSONObject();
+        claimsUI.put(claimName, claimValue);
+        initializeGrantAndRequest(clientId, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientId, null, null, null, claimsUI), clientId));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
+        final AccessTokenClaimsSet claimsSet = unwrapAccessToken(response);
+        Assert.assertNotNull(claimsSet);
+        final ClaimsSet dlClaimsSet = claimsSet.getUserinfoDeliveryClaims();
+        Assert.assertNotNull(dlClaimsSet);
+        Assert.assertEquals(dlClaimsSet.getClaim(claimName), claimValue);
+        Assert.assertNull(claimsSet.getDeliveryClaims().getClaim(claimName));
+        Assert.assertNull(claimsSet.getIDTokenDeliveryClaims());
+    }
+
+    @Test
+    public void testValidGrantWrappedClaims() throws NoSuchAlgorithmException, URISyntaxException, DataSealerException,
+        ComponentInitializationException, IOException {
+        final String claimName = "name";
+        final String claimValue = "John Doe";
+        final JSONObject claims = new JSONObject();
+        claims.put(claimName, claimValue);
+        initializeGrantAndRequest(clientId, createRequestParameters(redirectUri, "authorization_code",
+                buildAuthorizationCode(clientId, null, claims, null, null), clientId));
+        final FlowExecutionResult result = flowExecutor.launchExecution(FLOW_ID, null, externalContext);
+        OIDCTokenResponse response = parseSuccessResponse(result, OIDCTokenResponse.class);
+        final AccessTokenClaimsSet claimsSet = unwrapAccessToken(response);
+        Assert.assertNotNull(claimsSet);
+        final ClaimsSet dlClaimsSet = claimsSet.getDeliveryClaims();
+        Assert.assertNotNull(dlClaimsSet);
+        Assert.assertEquals(dlClaimsSet.getClaim(claimName), claimValue);
+        Assert.assertNull(claimsSet.getUserinfoDeliveryClaims().getClaim(claimName));
+        Assert.assertNull(claimsSet.getIDTokenDeliveryClaims());
+    }
+
+    private AccessTokenClaimsSet unwrapAccessToken(final OIDCTokenResponse tokenResponse) {
+        final AccessToken accessToken = tokenResponse.getTokens().getAccessToken();
+        Assert.assertNotNull(accessToken);
+        try {
+            return AccessTokenClaimsSet.parse(accessToken.getValue(), 
+                    BaseOIDCResponseActionTest.initializeDataSealer());
+        } catch (NoSuchAlgorithmException | java.text.ParseException | DataSealerException
+                | ComponentInitializationException e) {
+            return null;
+        }
     }
     
     private String plainVerifier() {
