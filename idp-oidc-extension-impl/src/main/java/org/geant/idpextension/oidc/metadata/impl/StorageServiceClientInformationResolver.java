@@ -124,7 +124,8 @@ public class StorageServiceClientInformationResolver extends BaseStorageServiceC
                 log.debug("Found a record with clientId {}", clientId);
                 if (clientInformation.getOIDCMetadata().getJWKSetURI() != null && remoteJwkSetCache != null) {
                     clientInformation.getOIDCMetadata().setJWKSet(remoteJwkSetCache
-                            .fetch(clientInformation.getOIDCMetadata().getJWKSetURI(), keyFetchInterval));
+                            .fetch(clientInformation.getOIDCMetadata().getJWKSetURI(), 
+                                    System.currentTimeMillis() + keyFetchInterval));
                 }
                 result.add(clientInformation);
             }

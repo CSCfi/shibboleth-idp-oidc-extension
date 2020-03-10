@@ -153,7 +153,8 @@ public class FilesystemClientInformationResolver extends AbstractFileOIDCEntityR
         for (final OIDCClientInformation clientInformation : clientInformations) {
             if (clientInformation.getOIDCMetadata().getJWKSetURI() != null && remoteJwkSetCache != null) {
                 clientInformation.getOIDCMetadata().setJWKSet(
-                        remoteJwkSetCache.fetch(clientInformation.getOIDCMetadata().getJWKSetURI(), keyFetchInterval));
+                        remoteJwkSetCache.fetch(clientInformation.getOIDCMetadata().getJWKSetURI(),
+                                System.currentTimeMillis() + keyFetchInterval));
             }
             result.add(clientInformation);
         }
