@@ -1,6 +1,6 @@
 # OpenID Connect Plugin for Shibboleth Identity Provider
 
-[[!OpenID Certified](http://openid.net/wordpress-content/uploads/2016/04/oid-l-certification-mark-l-rgb-150dpi-90mm-300x157.png]
+[[!OpenID Certified](http://openid.net/wordpress-content/uploads/2016/04/oid-l-certification-mark-l-rgb-150dpi-90mm-300x157.png)
 
 This software implements an [OpenID Connect](http://openid.net/connect/) OP extension for [Shibboleth Identity Provider V3](https://wiki.shibboleth.net/confluence/display/IDP30/Home) and [Shibboleth Identity Provider V4](https://wiki.shibboleth.net/confluence/display/IDP4/Home). The plugin is distributed in versions for both Shibboleth IdP3 and IdP4. 
 
