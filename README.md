@@ -1,56 +1,27 @@
-# shibboleth-idp-oidc-extension
+# OpenID Connect Plugin for Shibboleth Identity Provider
 
-[![Build Status](https://travis-ci.org/CSCfi/shibboleth-idp-oidc-extension.svg?branch=master)](https://travis-ci.org/CSCfi/shibboleth-idp-oidc-extension)
+[[!OpenID Certified](http://openid.net/wordpress-content/uploads/2016/04/oid-l-certification-mark-l-rgb-150dpi-90mm-300x157.png]
 
-The goal of the project is to provide a [OpenID Connect](http://openid.net/connect/) OP extension to [Shibboleth IdP V3](https://wiki.shibboleth.net/confluence/display/IDP30/Home). The work is done as part of task T3.1A OpenID Connect Federation in GN4-2 JRA3 project.
+This software implements an [OpenID Connect](http://openid.net/connect/) OP extension for [Shibboleth Identity Provider V3](https://wiki.shibboleth.net/confluence/display/IDP30/Home) and [Shibboleth Identity Provider V4](https://wiki.shibboleth.net/confluence/display/IDP4/Home). The plugin is distributed in versions for both Shibboleth IdP3 and IdP4. 
 
+The initial development work was done as part of GÉANT 4-2 and 4-3 projects and the product was handed over to the Shibboleth consortium in December 2019.
 
-The Shibboleth IdP 3.4 installed by this project is extended to act as a [OpenID Connect](http://openid.net/connect/) provider.  
+The plugin has been certified in [OpenID Foundation's certification program](https://openid.net/certification/)
 
+## Downloading
 
-## Prerequisites
-- Java 7+
-- [Apache Maven 3](https://maven.apache.org/)
-- [Vagrant](https://www.vagrantup.com/)
+The plugin is distributed as an extension that you can download and add to your Shibboleth Identity Provider installation.
 
-## Deployment
-The maven project needs to be built first. The ansible scipts will then perform first installation of Shibboleth Idp V3, after which the extensions are installed. 
+Version 1.x for Shibboleth IdP3 is available from [Github releases](https://github.com/CSCfi/shibboleth-idp-oidc-extension/releases)
 
-```
-git clone https://github.com/CSCfi/shibboleth-idp-oidc-extension
-cd shibboleth-idp-oidc-extension/
-mvn package
-vagrant up
-```
+Version 2.x for Shibboleth IdP4 is available from [Shibboleth download site](https://shibboleth.net/downloads/identity-provider/extensions/java-idp-oidc/)
 
-## Playing around
+## Installation and Documentation
 
-### Login
-You need to be root to access all the necessary files. 
-```
-vagrant ssh
-sudo su -
-```
+Installation and configuration instructions for both versions are available in the [Github wiki](https://github.com/CSCfi/shibboleth-idp-oidc-extension/wiki)
 
-### View logs
-By following log entries it should be possible to get an idea of the execution.
-```
-tail -f /opt/shibboleth-idp/logs/idp-process.log
-``` 
+## Support and Help
 
-### Self Test Page
-Fastest way to test installation is to use preconfigured mod_auth_openidc client for authentication sequence that may be triggered on self test page [https://192.168.0.150](https://192.168.0.150)
+The OIDC plugin is supported under the [Shibboleth consortium support](https://www.shibboleth.net/community/) 
 
-By modifying both the authentication request - /etc/httpd/conf.d/auth_openidc.conf - and the Shib OIDC OP extension configuration as described in Wiki you should be able to try different response types and claim sets just to name few.   
-
-### LDAP User to authenticate with
-The LDAP user is Ted Tester, in Finnish:
-
-```
-user:teppo
-password:testaaja
-```
-
-### Configuration
-See Wiki
-
+Version 1.x will receive only maintenance updates and all future development is for the version 2.x. Version 2.x development is done on [Shibboleth Git](https://wiki.shibboleth.net/confluence/display/DEV/Git+Repository+Access) under [java-idp-oidc repository](http://git.shibboleth.net/view/?p=java-idp-oidc.git;a=summary).
