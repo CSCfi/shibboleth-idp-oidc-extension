@@ -7,7 +7,7 @@
     <parent>
         <artifactId>idp-oidc-extension-parent</artifactId>
         <groupId>org.geant</groupId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>1.1.1</version>
     </parent>
     <artifactId>idp-oidc-extension-api</artifactId>
     <packaging>jar</packaging>
