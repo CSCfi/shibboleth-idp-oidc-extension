@@ -1,4 +1,0 @@
----
-dirsrv_fqdn: "{{ ansible_fqdn }}"
-dirsrv_hostname: "{{ dirsrv_fqdn.split('.')[0] }}"
-dirsrv_suffix: "dc={{ dirsrv_fqdn.split('.')[-2] | default(389) }},dc={{ dirsrv_fqdn.split('.')[-1] }}"

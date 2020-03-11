@@ -1,7 +1,0 @@
----
-- src: cmprescott.xml
-- src: CSCfi.mariadb
-- src: CSCfi.jetty
-- src: CSCfi.shibboleth-idp
-- src: CSCfi.apache
-- src: CSCfi.389-ds
