@@ -25,10 +25,11 @@ import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.geant.idpextension.oidc.metadata.resolver.ClientInformationResolver;
+import org.geant.idpextension.oidc.metadata.resolver.RefreshableClientInformationResolver;
 import org.geant.idpextension.oidc.metadata.resolver.RemoteJwkSetCache;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import javax.annotation.Nonnull;
@@ -36,18 +37,20 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Based on {@link org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver}.
  */
-public class FilesystemClientInformationDirectoryResolver extends AbstractIdentifiableInitializableComponent implements ClientInformationResolver {
+public class DynamicFilesystemClientInformationResolver extends AbstractIdentifiableInitializableComponent implements RefreshableClientInformationResolver {
 
 	/**
 	 * Class logger.
 	 */
-	private final Logger log = LoggerFactory.getLogger(FilesystemClientInformationDirectoryResolver.class);
-
+	@Nonnull
+	private final Logger log = LoggerFactory.getLogger(DynamicFilesystemClientInformationResolver.class);
 	/**
 	 * The cache for remote JWK key sets.
 	 */
@@ -60,11 +63,14 @@ public class FilesystemClientInformationDirectoryResolver extends AbstractIdenti
 	@Positive
 	private long keyFetchInterval = 1800000;
 
+	private final Map<String, FilesystemClientInformationResolver> map = new ConcurrentHashMap<>();
+
 	private final Timer backgroundTaskTimer;
 	private final Resource metadata;
-	private File metadataDirectory;
 
-	private List<FilesystemClientInformationResolver> filesystemClientInformationResolvers = new ArrayList<>();
+	private File metadataDirectory;
+	private DirectoryWatcher directoryWatcher;
+	private DirectoryWatcherEventListener<Path> directoryWatcherEventListener;
 
 	/**
 	 * Constructor.
@@ -72,7 +78,7 @@ public class FilesystemClientInformationDirectoryResolver extends AbstractIdenti
 	 * @param metadata the metadata directory
 	 * @throws IOException If the metedata cannot be loaded.
 	 */
-	public FilesystemClientInformationDirectoryResolver(@Nonnull final Resource metadata) {
+	public DynamicFilesystemClientInformationResolver(@Nonnull final Resource metadata) {
 		this(null, metadata);
 	}
 
@@ -83,14 +89,17 @@ public class FilesystemClientInformationDirectoryResolver extends AbstractIdenti
 	 * @param backgroundTaskTimer timer used to refresh metadata in the background
 	 * @throws IOException If the metedata cannot be loaded.
 	 */
-	public FilesystemClientInformationDirectoryResolver(@Nullable final Timer backgroundTaskTimer,
-	                                                    @Nonnull final Resource metadata) {
+	public DynamicFilesystemClientInformationResolver(@Nullable final Timer backgroundTaskTimer,
+	                                                  @Nonnull final Resource metadata) {
 		this.backgroundTaskTimer = backgroundTaskTimer;
 		this.metadata = metadata;
 	}
 
-	/** {@inheritDoc} */
-	@Override protected void doInitialize() throws ComponentInitializationException {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void doInitialize() throws ComponentInitializationException {
 		log.info("Initializing FilesystemClientInformationDirectoryResolver for metadata directory '" + metadata + "'");
 		super.doInitialize();
 
@@ -114,6 +123,9 @@ public class FilesystemClientInformationDirectoryResolver extends AbstractIdenti
 			throw new ComponentInitializationException("Metadata directory '" + metadataDirectory.getAbsolutePath() + "' is not readable");
 		}
 
+		this.metadataDirectory = metadataDirectory;
+		directoryWatcherEventListener = new DirectoryWatcherPathEventListener(map, remoteJwkSetCache, backgroundTaskTimer, keyFetchInterval);
+
 		final FilenameFilter filenameFilter = new FilenameFilter() {
 			@Override
 			public boolean accept(File directory, String filename) {
@@ -123,23 +135,31 @@ public class FilesystemClientInformationDirectoryResolver extends AbstractIdenti
 
 		if (metadataDirectory.listFiles() != null) {
 			for (final File file : metadataDirectory.listFiles(filenameFilter)) {
-				final FilesystemClientInformationResolver resolver;
-				try {
-					log.debug("Adding FilesystemClientInformationResolver for metadata file '" + file.getAbsolutePath() + "'");
-					resolver = new FilesystemClientInformationResolver(backgroundTaskTimer, new FileSystemResource(file));
-					resolver.setRemoteJwkSetCache(remoteJwkSetCache);
-					resolver.setKeyFetchInterval(keyFetchInterval);
-					resolver.setId(file.getAbsolutePath());
-					resolver.initialize();
-					filesystemClientInformationResolvers.add(resolver);
-					log.info("Added FilesystemClientInformationResolver for metadata file '" + file.getAbsolutePath() + "'");
-				} catch (final Exception e) {
-					log.warn("Metadata file '" + file.getAbsolutePath() + "' could not be initialized: " + e.getMessage());
-				}
+				directoryWatcherEventListener.onCreate(file.toPath());
 			}
 		}
 
-		this.metadataDirectory = metadataDirectory;
+		try {
+			directoryWatcher = new DirectoryWatcher(metadataDirectory.toPath().toAbsolutePath(), directoryWatcherEventListener);
+			directoryWatcher.start();
+		} catch (final IOException e) {
+			log.error("Failed to register metadata directory watcher for '" + metadataDirectory.getAbsolutePath() + "': " + e.getMessage());
+		}
+	}
+
+	@Override
+	protected void doDestroy() {
+		super.doDestroy();
+
+		for (final FilesystemClientInformationResolver resolver : map.values()) {
+			resolver.destroy();
+		}
+
+		directoryWatcher.stop();
+
+		for (final String id : map.keySet()) {
+			directoryWatcherEventListener.onDelete(Paths.get(id));
+		}
 	}
 
 	/**
@@ -169,10 +189,9 @@ public class FilesystemClientInformationDirectoryResolver extends AbstractIdenti
 	@Override
 	public Iterable<OIDCClientInformation> resolve(CriteriaSet criteria) throws ResolverException {
 		final List<OIDCClientInformation> oidcClientInformations = new LinkedList<>();
-		for (final FilesystemClientInformationResolver resolver : filesystemClientInformationResolvers) {
-			final Iterator<OIDCClientInformation> iterator = resolver.resolve(criteria).iterator();
-			while (iterator.hasNext()) {
-				oidcClientInformations.add(iterator.next());
+		for (final FilesystemClientInformationResolver resolver : map.values()) {
+			for (OIDCClientInformation oidcClientInformation : resolver.resolve(criteria)) {
+				oidcClientInformations.add(oidcClientInformation);
 			}
 		}
 
@@ -191,7 +210,47 @@ public class FilesystemClientInformationDirectoryResolver extends AbstractIdenti
 				return iterator.next();
 			}
 		}
+
 		log.warn("Could not find any clients with the given criteria");
 		return null;
+	}
+
+	@Override
+	public void refresh() throws ResolverException {
+		for (final FilesystemClientInformationResolver resolver : map.values()) {
+			resolver.refresh();
+		}
+	}
+
+	@Nullable
+	@Override
+	public DateTime getLastRefresh() {
+		DateTime ret = null;
+		for (final ClientInformationResolver resolver : map.values()) {
+			if (resolver instanceof RefreshableClientInformationResolver) {
+				final DateTime lastUpdate = ((RefreshableClientInformationResolver) resolver).getLastUpdate();
+				if (ret == null || ret.isBefore(lastUpdate)) {
+					ret = lastUpdate;
+				}
+			}
+		}
+
+		return ret;
+	}
+
+	@Nullable
+	@Override
+	public DateTime getLastUpdate() {
+		DateTime ret = null;
+		for (final ClientInformationResolver resolver : map.values()) {
+			if (resolver instanceof RefreshableClientInformationResolver) {
+				final DateTime lastRefresh = ((RefreshableClientInformationResolver) resolver).getLastRefresh();
+				if (ret == null || ret.isBefore(lastRefresh)) {
+					ret = lastRefresh;
+				}
+			}
+		}
+
+		return ret;
 	}
 }
