@@ -132,7 +132,7 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 	 */
 	@Override
 	protected void doInitialize() throws ComponentInitializationException {
-		log.info("Initializing FilesystemClientInformationDirectoryResolver for metadata directory '" + metadata + "'");
+		log.info("Initializing DynamicFilesystemClientInformationResolver for metadata directory '" + metadata + "'");
 		super.doInitialize();
 
 		File metadataDirectory;

@@ -115,11 +115,23 @@ public class DirectoryWatcher implements Runnable {
 					continue;
 				}
 
+				// let the WatchKey collect multiple occurrences of the same event within an extremely short time
+				// which may happen while editing/deleting files, can be seen with event.count(),
+				// also solves another problem (1)
+				try {
+					Thread.sleep(10L);
+				} catch (final InterruptedException e) {
+					// ignored
+				}
+
 				for (final WatchEvent<?> _event : key.pollEvents()) {
 					@SuppressWarnings("unchecked")
 					final WatchEvent<Path> event = (WatchEvent<Path>) _event;
 
-					log.debug("Event occurred: Event{context=" + event.context() + ", kind=" + event.kind().name() + "}");
+					log.debug("Event occurred: Event{"
+							+ "context=" + event.context() + ", "
+							+ "kind=" + event.kind().name() + ", "
+							+ "count=" + event.count() + "}");
 
 					final WatchEvent.Kind<?> kind = event.kind();
 					final Path path = directory.resolve(event.context());
@@ -130,7 +142,12 @@ public class DirectoryWatcher implements Runnable {
 						} else if (kind == ENTRY_CREATE) {
 							eventHandler.onCreate(path);
 						} else if (kind == ENTRY_MODIFY) {
-							eventHandler.onModify(path);
+							// (1) handle buggy events on Windows, see https://stackoverflow.com/q/28201283/11840557
+							// does not resolve the problem in all situations
+							// sometimes the file still "exists" and will be non-existent in the next nanosecond ...
+							if (Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+								eventHandler.onModify(path);
+							}
 						} else if (kind == ENTRY_DELETE) {
 							eventHandler.onDelete(path);
 						} else {

@@ -89,7 +89,9 @@ public class DirectoryWatcherEventHandlerImpl implements DirectoryWatcherEventHa
 					new FilesystemClientInformationResolver(
 							backgroundTaskTimer,
 							new FileSystemResource(new File(path.toAbsolutePath().toString())));
-			resolver.setRemoteJwkSetCache(remoteJwkSetCache);
+			if (remoteJwkSetCache != null) {
+				resolver.setRemoteJwkSetCache(remoteJwkSetCache);
+			}
 			resolver.setKeyFetchInterval(keyFetchInterval);
 			resolver.setId(path.toAbsolutePath().toString());
 			resolver.initialize();
@@ -127,8 +129,12 @@ public class DirectoryWatcherEventHandlerImpl implements DirectoryWatcherEventHa
 	public void onDelete(final Path path) {
 		try {
 			final FilesystemClientInformationResolver resolver = map.remove(path);
-			resolver.destroy();
-			log.info("Removed FilesystemClientInformationResolver for metadata file '" + path + "'");
+			if (resolver != null) {
+				resolver.destroy();
+				log.info("Removed FilesystemClientInformationResolver for metadata file '" + path + "'");
+			} else {
+				log.warn("Tried to remove FilesystemClientInformationResolver for metadata file '" + path + "' but no FilesystemClientInformationResolver was found");
+			}
 		} catch (final Exception e) {
 			log.error("Destroying the FilesystemClientInformationResolver for metadata file '" + path + "' threw an Exception: " + e.getMessage());
 		}
