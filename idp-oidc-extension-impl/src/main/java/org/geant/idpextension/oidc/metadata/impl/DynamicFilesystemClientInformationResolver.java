@@ -56,6 +56,8 @@ import java.util.concurrent.*;
  */
 public class DynamicFilesystemClientInformationResolver extends AbstractIdentifiableInitializableComponent implements RefreshableClientInformationResolver {
 
+	public static final String METADATA_FILE_EXTENSION = ".json";
+
 	/**
 	 * Class logger.
 	 */
@@ -88,7 +90,7 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 	/**
 	 * The internal map which holds the most recent version of the metadata files ("absolutePath" = {@link FilesystemClientInformationResolver}).
 	 */
-	private final Map<String, FilesystemClientInformationResolver> map = new ConcurrentHashMap<>();
+	private final Map<Path, FilesystemClientInformationResolver> map = new ConcurrentHashMap<>();
 
 	/**
 	 * The {@link DirectoryWatcher} for the {@link DynamicFilesystemClientInformationResolver#metadata} directory.
@@ -153,23 +155,27 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 			throw new ComponentInitializationException("Metadata directory '" + metadataDirectory.getAbsolutePath() + "' is not readable");
 		}
 
-		directoryWatcherEventHandler = new DirectoryWatcherPathEventHandler(map, remoteJwkSetCache, backgroundTaskTimer, keyFetchInterval);
+		directoryWatcherEventHandler = new DirectoryWatcherEventHandlerImpl(map, remoteJwkSetCache, backgroundTaskTimer, keyFetchInterval);
 
 		final FilenameFilter filenameFilter = new FilenameFilter() {
 			@Override
 			public boolean accept(File directory, String filename) {
-				return filename.toLowerCase().endsWith(".json");
+				return filename.toLowerCase().endsWith(METADATA_FILE_EXTENSION);
 			}
 		};
 
-		if (metadataDirectory.listFiles() != null) {
-			for (final File file : metadataDirectory.listFiles(filenameFilter)) {
-				directoryWatcherEventHandler.onCreate(file.toPath());
+		final File[] metadataFiles = metadataDirectory.listFiles(filenameFilter);
+		if (metadataFiles != null) {
+			for (final File file : metadataFiles) {
+				directoryWatcherEventHandler.onCreate(file.toPath().toAbsolutePath());
 			}
 		}
 
 		try {
-			directoryWatcher = new DirectoryWatcher(metadataDirectory.toPath().toAbsolutePath(), directoryWatcherEventHandler);
+			directoryWatcher = new DirectoryWatcher(
+					metadataDirectory.toPath().toAbsolutePath(),
+					directoryWatcherEventHandler,
+					METADATA_FILE_EXTENSION);
 			directoryWatcher.start();
 		} catch (final IOException e) {
 			log.error("Failed to register metadata directory watcher for '" + metadataDirectory.getAbsolutePath() + "': " + e.getMessage());
@@ -186,9 +192,8 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 
 		directoryWatcher.stop();
 
-		for (final String id : map.keySet()) {
-			final FilesystemClientInformationResolver resolver = map.remove(id);
-			resolver.destroy();
+		for (final Path path : map.keySet()) {
+			directoryWatcherEventHandler.onDelete(path);
 		}
 	}
 

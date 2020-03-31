@@ -29,17 +29,17 @@ import java.util.Timer;
 /**
  * {@inheritDoc}.
  */
-public class DirectoryWatcherPathEventHandler implements DirectoryWatcherEventHandler {
+public class DirectoryWatcherEventHandlerImpl implements DirectoryWatcherEventHandler {
 
 	/**
 	 * Class logger.
 	 */
-	private final Logger log = LoggerFactory.getLogger(DirectoryWatcherPathEventHandler.class);
+	private final Logger log = LoggerFactory.getLogger(DirectoryWatcherEventHandlerImpl.class);
 
 	/**
 	 * Shared map to update on file changes.
 	 */
-	private final Map<String, FilesystemClientInformationResolver> map;
+	private final Map<Path, FilesystemClientInformationResolver> map;
 
 	/**
 	 * RemoteJwkSetCache for new {@link FilesystemClientInformationResolver}s.
@@ -64,7 +64,7 @@ public class DirectoryWatcherPathEventHandler implements DirectoryWatcherEventHa
 	 * @param backgroundTaskTimer the {@link Timer} for new {@link FilesystemClientInformationResolver}.
 	 * @param keyFetchInterval    the keyFetchInterval for new {@link FilesystemClientInformationResolver}.
 	 */
-	public DirectoryWatcherPathEventHandler(final Map<String, FilesystemClientInformationResolver> map,
+	public DirectoryWatcherEventHandlerImpl(final Map<Path, FilesystemClientInformationResolver> map,
 	                                        final RemoteJwkSetCache remoteJwkSetCache,
 	                                        final Timer backgroundTaskTimer,
 	                                        final long keyFetchInterval) {
@@ -78,21 +78,23 @@ public class DirectoryWatcherPathEventHandler implements DirectoryWatcherEventHa
 	 * {@inheritDoc}
 	 * <p>
 	 * Initializes a new {@link FilesystemClientInformationResolver} for the newly created metadata file
-	 * and adds them to the shared {@link DirectoryWatcherPathEventHandler#map}.
+	 * and adds them to the shared {@link DirectoryWatcherEventHandlerImpl#map}.
 	 *
 	 * @param path the absolute Path of the created metadata file.
 	 */
 	@Override
 	public void onCreate(final Path path) {
 		try {
-			final String id = path.toString();
-			final FilesystemClientInformationResolver resolver = new FilesystemClientInformationResolver(backgroundTaskTimer, new FileSystemResource(new File(id)));
+			final FilesystemClientInformationResolver resolver =
+					new FilesystemClientInformationResolver(
+							backgroundTaskTimer,
+							new FileSystemResource(new File(path.toAbsolutePath().toString())));
 			resolver.setRemoteJwkSetCache(remoteJwkSetCache);
 			resolver.setKeyFetchInterval(keyFetchInterval);
-			resolver.setId(id);
+			resolver.setId(path.toAbsolutePath().toString());
 			resolver.initialize();
-			map.put(id, resolver);
-			log.debug("Added ned FilesystemClientInformationResolver for metadata file '" + path + "'");
+			map.put(path, resolver);
+			log.info("Added ned FilesystemClientInformationResolver for metadata file '" + path + "'");
 		} catch (final Exception e) {
 			log.error("Initializing a new FilesystemClientInformationResolver for metadata file '" + path + "' threw an Exception: " + e.getMessage());
 		}
@@ -107,26 +109,26 @@ public class DirectoryWatcherPathEventHandler implements DirectoryWatcherEventHa
 	 */
 	@Override
 	public void onModify(final Path path) {
+		log.info("Updating FilesystemClientInformationResolver for metadata file '" + path + "' (by removing/destroying the old one and adding/initializing a new one)");
 		onDelete(path);
 		onCreate(path);
-		log.debug("Updated FilesystemClientInformationResolver for metadata file '" + path + "'");
+		log.info("Updated FilesystemClientInformationResolver for metadata file '" + path + "'");
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * <p>
 	 * Destroys the existing {@link FilesystemClientInformationResolver} of the deleted metadata file
-	 * and removes them from the shared {@link DirectoryWatcherPathEventHandler#map}.
+	 * and removes them from the shared {@link DirectoryWatcherEventHandlerImpl#map}.
 	 *
 	 * @param path the absolute Path of the deleted metadata file.
 	 */
 	@Override
 	public void onDelete(final Path path) {
 		try {
-			final String id = path.toString();
-			final FilesystemClientInformationResolver resolver = map.remove(id);
+			final FilesystemClientInformationResolver resolver = map.remove(path);
 			resolver.destroy();
-			log.debug("Removed FilesystemClientInformationResolver for metadata file '" + path + "'");
+			log.info("Removed FilesystemClientInformationResolver for metadata file '" + path + "'");
 		} catch (final Exception e) {
 			log.error("Destroying the FilesystemClientInformationResolver for metadata file '" + path + "' threw an Exception: " + e.getMessage());
 		}

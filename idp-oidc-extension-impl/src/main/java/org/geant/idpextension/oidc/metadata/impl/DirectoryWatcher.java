@@ -51,7 +51,7 @@ public class DirectoryWatcher implements Runnable {
 	/**
 	 * The path of the directory to watch.
 	 */
-	private final Path dir;
+	private final Path directory;
 
 	/**
 	 * The {@link WatchService}.
@@ -68,23 +68,40 @@ public class DirectoryWatcher implements Runnable {
 	 */
 	private final DirectoryWatcherEventHandler eventHandler;
 
+	private final String fileExtension;
+
 	/**
-	 * Creates a WatchService and registers the given directory.
-	 *
-	 * @param dir The path of the directory to watch.
-	 * @param eventHandler The Event Handler for file changes.
-	 * @throws IOException on IO Errors.
+	 * {@link DirectoryWatcher#DirectoryWatcher(Path, DirectoryWatcherEventHandler, String)}
 	 */
-	public DirectoryWatcher(final Path dir, final DirectoryWatcherEventHandler eventHandler)
+	public DirectoryWatcher(
+			final Path directory,
+			final DirectoryWatcherEventHandler eventHandler)
 			throws IOException {
-		this.dir = dir;
-		this.watchService = FileSystems.getDefault().newWatchService();
-		this.key = dir.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
-		this.eventHandler = eventHandler;
+		this(directory, eventHandler, null);
 	}
 
 	/**
-	 * Loop to take {@link WatchEvent}s and give them to the {@link DirectoryWatcher#eventHandler}.
+	 * Creates a WatchService and registers the given directory.
+	 *
+	 * @param directory The path of the directory to watch.
+	 * @param eventHandler The Event Handler for file changes.
+	 * @param fileExtension the file extension to filter for.
+	 * @throws IOException on IO Errors.
+	 */
+	public DirectoryWatcher(
+			final Path directory,
+			final DirectoryWatcherEventHandler eventHandler,
+			final String fileExtension)
+			throws IOException {
+		this.directory = directory;
+		this.watchService = FileSystems.getDefault().newWatchService();
+		this.key = directory.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
+		this.eventHandler = eventHandler;
+		this.fileExtension = fileExtension;
+	}
+
+	/**
+	 * Loop to take {@link WatchEvent}s and pass them to the {@link DirectoryWatcher#eventHandler}.
 	 * This uses the resource-friendly {@link WatchService#take()} method which simply
 	 * waits for an event instead of polling for events in a loop.
 	 */
@@ -94,7 +111,7 @@ public class DirectoryWatcher implements Runnable {
 			WatchKey key;
 			while ((key = watchService.take()) != null) {
 				if (this.key != key) {
-					log.error("Unrecognized WatchKey for directory '" + dir.toAbsolutePath().toString() + "': " + key);
+					log.error("Unrecognized WatchKey for directory '" + directory.toAbsolutePath().toString() + "': " + key);
 					continue;
 				}
 
@@ -105,9 +122,9 @@ public class DirectoryWatcher implements Runnable {
 					log.debug("Event occurred: Event{context=" + event.context() + ", kind=" + event.kind().name() + "}");
 
 					final WatchEvent.Kind<?> kind = event.kind();
-					final Path path = dir.resolve(event.context());
+					final Path path = directory.resolve(event.context());
 
-					if (path.toString().toLowerCase().endsWith(".json")) {
+					if (fileExtension == null || path.toString().toLowerCase().endsWith(fileExtension)) {
 						if (kind == OVERFLOW) {
 							continue;
 						} else if (kind == ENTRY_CREATE) {
@@ -120,17 +137,17 @@ public class DirectoryWatcher implements Runnable {
 							log.warn("Unrecognized event kind occurred: " + event.kind().name());
 						}
 					} else {
-						log.debug("Skipping file: '" + path + "' (not a .json metadata file)");
+						log.debug("Skipping file: '" + path + "' (not a metadata file, extension filter: '" + fileExtension + "')");
 					}
 				}
 
 				if (!key.reset()) {
-					log.error("WatchKey is no longer valid, DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "' will stop");
+					log.error("WatchKey is no longer valid, DirectoryWatcher for directory '" + directory.toAbsolutePath().toString() + "' will stop");
 					break;
 				}
 			}
 		} catch (final InterruptedException e) {
-			log.warn("DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "' threw an InterruptedException and will stop: " + e.getMessage());
+			log.warn("DirectoryWatcher for directory '" + directory.toAbsolutePath().toString() + "' threw an InterruptedException and will stop: " + e.getMessage());
 		}
 	}
 
@@ -138,24 +155,24 @@ public class DirectoryWatcher implements Runnable {
 	 * Start this {@link DirectoryWatcher} in a new Thread.
 	 */
 	public void start() {
-		log.debug("Starting DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "'");
+		log.debug("Starting DirectoryWatcher for directory '" + directory.toAbsolutePath().toString() + "' with extension filter: '" + fileExtension + "'");
 		this.directoryWatcherFuture = executorService.submit(this);
 		executorService.shutdown();
-		log.debug("Started DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "'");
+		log.debug("Started DirectoryWatcher for directory '" + directory.toAbsolutePath().toString() + "'");
 	}
 
 	/**
 	 * Stop this {@link DirectoryWatcher} and it's thread.
 	 */
 	public void stop() {
-		log.debug("Stopping DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "'");
+		log.debug("Stopping DirectoryWatcher for directory '" + directory.toAbsolutePath().toString() + "'");
 		if (this.key != null) {
 			key.cancel();
 		}
 		try {
 			watchService.close();
 		} catch (final IOException e) {
-			log.warn("DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "' threw an IOException while stopping: " + e.getMessage());
+			log.warn("DirectoryWatcher for directory '" + directory.toAbsolutePath().toString() + "' threw an IOException while stopping: " + e.getMessage());
 		}
 
 		if (directoryWatcherFuture != null) {
@@ -166,6 +183,6 @@ public class DirectoryWatcher implements Runnable {
 			}
 			executorService.shutdownNow();
 		}
-		log.debug("Stopped DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "'");
+		log.debug("Stopped DirectoryWatcher for directory '" + directory.toAbsolutePath().toString() + "'");
 	}
 }
