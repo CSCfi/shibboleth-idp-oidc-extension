@@ -21,6 +21,7 @@ import net.shibboleth.utilities.java.support.annotation.Duration;
 import net.shibboleth.utilities.java.support.annotation.constraint.Positive;
 import net.shibboleth.utilities.java.support.component.AbstractIdentifiableInitializableComponent;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.component.DestructableComponent;
 import net.shibboleth.utilities.java.support.logic.Constraint;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
@@ -42,7 +43,16 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * Based on {@link org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver}.
+ * A metadata provider that pulls metadata files from a directory on the local filesystem, simply talking a wrapper class
+ * which internally holds a collection of {@link FilesystemClientInformationResolver} which gets updated live according to file changes.
+ * This is the OIDC-equivalent of Shibboleth's <a href="https://wiki.shibboleth.net/confluence/display/SP3/LocalDynamicMetadataProvider">LocalDynamicMetadataProvider</a>.
+ *
+ * This special implementation takes a metadata directory, loads all .json metadata files inside this directory
+ * and starts a {@link WatchService} to listen on metadata file changes.
+ *
+ * Adding a new metadata file will add the corresponding {@link ClientInformationResolver}.
+ * Updating an existing metadata file will remove the old {@link ClientInformationResolver} and add a new {@link ClientInformationResolver}.
+ * Deleting a metadata file will remove the corresponding {@link ClientInformationResolver}.
  */
 public class DynamicFilesystemClientInformationResolver extends AbstractIdentifiableInitializableComponent implements RefreshableClientInformationResolver {
 
@@ -51,32 +61,50 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 	 */
 	@Nonnull
 	private final Logger log = LoggerFactory.getLogger(DynamicFilesystemClientInformationResolver.class);
+
 	/**
 	 * The cache for remote JWK key sets.
 	 */
 	private RemoteJwkSetCache remoteJwkSetCache;
 
 	/**
-	 * The remote key refresh interval in milliseconds. Default value: 1800000ms
+	 * The remote key refresh interval in milliseconds. Default value: 1800000ms (30 minutes)
 	 */
 	@Duration
 	@Positive
 	private long keyFetchInterval = 1800000;
 
-	private final Map<String, FilesystemClientInformationResolver> map = new ConcurrentHashMap<>();
-
-	private final Timer backgroundTaskTimer;
+	/**
+	 * The metadata resource configured by the spring bean XML.
+	 */
 	private final Resource metadata;
 
-	private File metadataDirectory;
-	private DirectoryWatcher directoryWatcher;
-	private DirectoryWatcherEventListener<Path> directoryWatcherEventListener;
 
 	/**
-	 * Constructor.
+	 * Timer used to schedule background metadata update tasks.
+	 */
+	private final Timer backgroundTaskTimer;
+
+	/**
+	 * The internal map which holds the most recent version of the metadata files ("absolutePath" = {@link FilesystemClientInformationResolver}).
+	 */
+	private final Map<String, FilesystemClientInformationResolver> map = new ConcurrentHashMap<>();
+
+	/**
+	 * The {@link DirectoryWatcher} for the {@link DynamicFilesystemClientInformationResolver#metadata} directory.
+	 */
+	private DirectoryWatcher directoryWatcher;
+
+	/**
+	 * The Event Handler to update the shared {@link DynamicFilesystemClientInformationResolver#map}
+	 * according to metadata file changes signaled by the {@link DynamicFilesystemClientInformationResolver#directoryWatcher}.
+	 */
+	private DirectoryWatcherEventHandler directoryWatcherEventHandler;
+
+	/**
+	 * Default Constructor.
 	 *
 	 * @param metadata the metadata directory
-	 * @throws IOException If the metedata cannot be loaded.
 	 */
 	public DynamicFilesystemClientInformationResolver(@Nonnull final Resource metadata) {
 		this(null, metadata);
@@ -87,7 +115,6 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 	 *
 	 * @param metadata            the metadata file
 	 * @param backgroundTaskTimer timer used to refresh metadata in the background
-	 * @throws IOException If the metedata cannot be loaded.
 	 */
 	public DynamicFilesystemClientInformationResolver(@Nullable final Timer backgroundTaskTimer,
 	                                                  @Nonnull final Resource metadata) {
@@ -96,7 +123,10 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Checks if the configured {@link DynamicFilesystemClientInformationResolver#metadata} is a valid directory,
+	 * initializes all .json files as {@link FilesystemClientInformationResolver}s, adds them the shared {@link DynamicFilesystemClientInformationResolver#map}
+	 * and starts the {@link DynamicFilesystemClientInformationResolver#directoryWatcher} for
+	 * the given {@link DynamicFilesystemClientInformationResolver#metadata} directory.
 	 */
 	@Override
 	protected void doInitialize() throws ComponentInitializationException {
@@ -123,8 +153,7 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 			throw new ComponentInitializationException("Metadata directory '" + metadataDirectory.getAbsolutePath() + "' is not readable");
 		}
 
-		this.metadataDirectory = metadataDirectory;
-		directoryWatcherEventListener = new DirectoryWatcherPathEventListener(map, remoteJwkSetCache, backgroundTaskTimer, keyFetchInterval);
+		directoryWatcherEventHandler = new DirectoryWatcherPathEventHandler(map, remoteJwkSetCache, backgroundTaskTimer, keyFetchInterval);
 
 		final FilenameFilter filenameFilter = new FilenameFilter() {
 			@Override
@@ -135,30 +164,31 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 
 		if (metadataDirectory.listFiles() != null) {
 			for (final File file : metadataDirectory.listFiles(filenameFilter)) {
-				directoryWatcherEventListener.onCreate(file.toPath());
+				directoryWatcherEventHandler.onCreate(file.toPath());
 			}
 		}
 
 		try {
-			directoryWatcher = new DirectoryWatcher(metadataDirectory.toPath().toAbsolutePath(), directoryWatcherEventListener);
+			directoryWatcher = new DirectoryWatcher(metadataDirectory.toPath().toAbsolutePath(), directoryWatcherEventHandler);
 			directoryWatcher.start();
 		} catch (final IOException e) {
 			log.error("Failed to register metadata directory watcher for '" + metadataDirectory.getAbsolutePath() + "': " + e.getMessage());
 		}
 	}
 
+	/**
+	 * Calls the {@link DestructableComponent#destroy()} method an all {@link FilesystemClientInformationResolver}s
+	 * in the shared {@link DynamicFilesystemClientInformationResolver#map} and removes them from the map.
+	 */
 	@Override
 	protected void doDestroy() {
 		super.doDestroy();
 
-		for (final FilesystemClientInformationResolver resolver : map.values()) {
-			resolver.destroy();
-		}
-
 		directoryWatcher.stop();
 
 		for (final String id : map.keySet()) {
-			directoryWatcherEventListener.onDelete(Paths.get(id));
+			final FilesystemClientInformationResolver resolver = map.remove(id);
+			resolver.destroy();
 		}
 	}
 
@@ -185,9 +215,17 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * Propagates the {@link #resolve(CriteriaSet)} call to all {@link FilesystemClientInformationResolver}s in the
+	 * shared {@link DynamicFilesystemClientInformationResolver#map}.
+	 *
+	 * @param criteria the resolve criteria.
+	 * @return a collection of all results from the {@link DynamicFilesystemClientInformationResolver#map}.
+	 * @throws ResolverException on Errors.
 	 */
 	@Override
-	public Iterable<OIDCClientInformation> resolve(CriteriaSet criteria) throws ResolverException {
+	@Nonnull
+	public Iterable<OIDCClientInformation> resolve(final CriteriaSet criteria) throws ResolverException {
 		final List<OIDCClientInformation> oidcClientInformations = new LinkedList<>();
 		for (final FilesystemClientInformationResolver resolver : map.values()) {
 			for (OIDCClientInformation oidcClientInformation : resolver.resolve(criteria)) {
@@ -200,9 +238,14 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param criteria the resolve criteria.
+	 * @return the first match for the criteria in the {@link DynamicFilesystemClientInformationResolver#map} or null if no match was found.
+	 * @throws ResolverException on Errors.
 	 */
 	@Override
-	public OIDCClientInformation resolveSingle(CriteriaSet criteria) throws ResolverException {
+	@Nullable
+	public OIDCClientInformation resolveSingle(final CriteriaSet criteria) throws ResolverException {
 		final Iterable<OIDCClientInformation> iterable = resolve(criteria);
 		if (iterable != null) {
 			final Iterator<OIDCClientInformation> iterator = iterable.iterator();
@@ -215,6 +258,12 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 		return null;
 	}
 
+	/**
+	 * Propagates the {@link #refresh()} call to all {@link FilesystemClientInformationResolver}s in the
+	 * shared {@link DynamicFilesystemClientInformationResolver#map}.
+	 *
+	 * @throws ResolverException on Errors.
+	 */
 	@Override
 	public void refresh() throws ResolverException {
 		for (final FilesystemClientInformationResolver resolver : map.values()) {
@@ -222,8 +271,14 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 		}
 	}
 
-	@Nullable
+	/**
+	 * Propagates the {@link #getLastRefresh()} call to all {@link FilesystemClientInformationResolver}s in the
+	 * shared {@link DynamicFilesystemClientInformationResolver#map}.
+	 *
+	 * @return the last refresh time found in the whole {@link DynamicFilesystemClientInformationResolver#map}.
+	 */
 	@Override
+	@Nullable
 	public DateTime getLastRefresh() {
 		DateTime ret = null;
 		for (final ClientInformationResolver resolver : map.values()) {
@@ -238,8 +293,14 @@ public class DynamicFilesystemClientInformationResolver extends AbstractIdentifi
 		return ret;
 	}
 
-	@Nullable
+	/**
+	 * Propagates the {@link #getLastUpdate()} call to all {@link FilesystemClientInformationResolver}s in the
+	 * shared {@link DynamicFilesystemClientInformationResolver#map}.
+	 *
+	 * @return the last update time found in the whole {@link DynamicFilesystemClientInformationResolver#map}.
+	 */
 	@Override
+	@Nullable
 	public DateTime getLastUpdate() {
 		DateTime ret = null;
 		for (final ClientInformationResolver resolver : map.values()) {

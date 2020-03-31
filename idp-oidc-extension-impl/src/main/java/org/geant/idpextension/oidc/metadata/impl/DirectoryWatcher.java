@@ -28,37 +28,71 @@ import java.util.concurrent.TimeUnit;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
+/**
+ * A {@link WatchService} to listen on file changes of a given directory.
+ */
 public class DirectoryWatcher implements Runnable {
-
-	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-	private Future<?> directoryWatcherFuture;
 
 	/**
 	 * Class logger.
 	 */
 	private final Logger log = LoggerFactory.getLogger(DirectoryWatcher.class);
 
-	private final Path dir;
-	private final WatchService watcher;
-	private final WatchKey key;
-	private final DirectoryWatcherEventListener<Path> eventListener;
+	/**
+	 * Single-Threaded {@link ExecutorService} for running in the background.
+	 */
+	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 	/**
-	 * Creates a WatchService and registers the given directory
+	 * {@link Future} of the started Thread, used to stop this {@link DirectoryWatcher} on shutdown.
 	 */
-	public DirectoryWatcher(final Path dir, final DirectoryWatcherEventListener<Path> eventListener)
+	private Future<?> directoryWatcherFuture;
+
+	/**
+	 * The path of the directory to watch.
+	 */
+	private final Path dir;
+
+	/**
+	 * The {@link WatchService}.
+	 */
+	private final WatchService watchService;
+
+	/**
+	 * The {@link WatchKey} of this {@link DirectoryWatcher#watchService}
+	 */
+	private final WatchKey key;
+
+	/**
+	 * The Event Handler for file changes.
+	 */
+	private final DirectoryWatcherEventHandler eventHandler;
+
+	/**
+	 * Creates a WatchService and registers the given directory.
+	 *
+	 * @param dir The path of the directory to watch.
+	 * @param eventHandler The Event Handler for file changes.
+	 * @throws IOException on IO Errors.
+	 */
+	public DirectoryWatcher(final Path dir, final DirectoryWatcherEventHandler eventHandler)
 			throws IOException {
 		this.dir = dir;
-		this.watcher = FileSystems.getDefault().newWatchService();
-		this.key = dir.register(watcher, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
-		this.eventListener = eventListener;
+		this.watchService = FileSystems.getDefault().newWatchService();
+		this.key = dir.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
+		this.eventHandler = eventHandler;
 	}
 
+	/**
+	 * Loop to take {@link WatchEvent}s and give them to the {@link DirectoryWatcher#eventHandler}.
+	 * This uses the resource-friendly {@link WatchService#take()} method which simply
+	 * waits for an event instead of polling for events in a loop.
+	 */
 	@Override
 	public void run() {
 		try {
 			WatchKey key;
-			while ((key = watcher.take()) != null) {
+			while ((key = watchService.take()) != null) {
 				if (this.key != key) {
 					log.error("Unrecognized WatchKey for directory '" + dir.toAbsolutePath().toString() + "': " + key);
 					continue;
@@ -66,7 +100,7 @@ public class DirectoryWatcher implements Runnable {
 
 				for (final WatchEvent<?> _event : key.pollEvents()) {
 					@SuppressWarnings("unchecked")
-					WatchEvent<Path> event = (WatchEvent<Path>) _event;
+					final WatchEvent<Path> event = (WatchEvent<Path>) _event;
 
 					log.debug("Event occurred: Event{context=" + event.context() + ", kind=" + event.kind().name() + "}");
 
@@ -77,11 +111,11 @@ public class DirectoryWatcher implements Runnable {
 						if (kind == OVERFLOW) {
 							continue;
 						} else if (kind == ENTRY_CREATE) {
-							eventListener.onCreate(path);
+							eventHandler.onCreate(path);
 						} else if (kind == ENTRY_MODIFY) {
-							eventListener.onModify(path);
+							eventHandler.onModify(path);
 						} else if (kind == ENTRY_DELETE) {
-							eventListener.onDelete(path);
+							eventHandler.onDelete(path);
 						} else {
 							log.warn("Unrecognized event kind occurred: " + event.kind().name());
 						}
@@ -100,6 +134,9 @@ public class DirectoryWatcher implements Runnable {
 		}
 	}
 
+	/**
+	 * Start this {@link DirectoryWatcher} in a new Thread.
+	 */
 	public void start() {
 		log.debug("Starting DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "'");
 		this.directoryWatcherFuture = executorService.submit(this);
@@ -107,23 +144,26 @@ public class DirectoryWatcher implements Runnable {
 		log.debug("Started DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "'");
 	}
 
+	/**
+	 * Stop this {@link DirectoryWatcher} and it's thread.
+	 */
 	public void stop() {
 		log.debug("Stopping DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "'");
 		if (this.key != null) {
 			key.cancel();
 		}
 		try {
-			watcher.close();
+			watchService.close();
 		} catch (final IOException e) {
 			log.warn("DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "' threw an IOException while stopping: " + e.getMessage());
 		}
 
 		if (directoryWatcherFuture != null) {
 			try {
-				executorService.awaitTermination(100, TimeUnit.MILLISECONDS);
+				directoryWatcherFuture.cancel(true);
+				executorService.awaitTermination(10, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
 			}
-			directoryWatcherFuture.cancel(true);
 			executorService.shutdownNow();
 		}
 		log.debug("Stopped DirectoryWatcher for directory '" + dir.toAbsolutePath().toString() + "'");
